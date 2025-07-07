@@ -137,7 +137,7 @@ export default function Dashboard() {
         </div>
         
         {/* Program Overview */}
-        <div className="overflow-hidden">
+        <div>
           <h2 className="text-xs font-semibold mb-2">Program Overview</h2>
           <Carousel
             opts={{
@@ -146,11 +146,11 @@ export default function Dashboard() {
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-4">
+            <CarouselContent className="gap-4">
               {programs.map((program) => {
                 const remainingLimit = program.totalLimit - program.usedLimit;
                 return (
-                  <CarouselItem key={program.id} className="pl-4 basis-4/5 sm:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={program.id} className="basis-4/5 sm:basis-1/2 lg:basis-1/3">
                     <Card className="flex flex-col h-full border">
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
