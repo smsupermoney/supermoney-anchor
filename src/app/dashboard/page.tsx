@@ -195,7 +195,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Invoices */}
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
             <Card className="h-full flex flex-col">
                 <CardHeader>
                     <CardTitle className="text-xs font-semibold">Recent Invoices</CardTitle>
