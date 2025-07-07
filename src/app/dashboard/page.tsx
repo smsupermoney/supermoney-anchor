@@ -1,10 +1,7 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { invoices } from "@/lib/data";
-import { ArrowUp, IndianRupee, FileText, AlertTriangle } from "lucide-react";
-import StatusBadge from "@/components/status-badge";
-import { ProgramPerformanceChart } from "@/components/charts";
+import { IndianRupee, FileText, AlertTriangle, Clock } from "lucide-react";
 import CreditUtilizationChart from "@/components/credit-utilization-chart";
 
 export default function Dashboard() {
@@ -27,7 +24,6 @@ export default function Dashboard() {
     i => i.status === 'Initiated' || i.status === 'Approved'
   );
   const pendingApprovalCount = pendingApprovalInvoices.length;
-  const pendingApprovalAmount = pendingApprovalInvoices.reduce((sum, inv) => sum + inv.amount, 0);
 
   const disbursedAmount = invoices
     .filter(i => i.status === 'Disbursed')
@@ -37,7 +33,7 @@ export default function Dashboard() {
     <>
       <PageHeader title="Dashboard" />
       <div className="grid gap-6">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Credit Limit Utilization</CardTitle>
@@ -53,15 +49,20 @@ export default function Dashboard() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{invoices.length} Total</div>
-              {overdueInvoicesCount > 0 ? (
-                <p className="text-xs text-destructive flex items-center gap-1 mt-1 font-medium">
-                  <AlertTriangle className="h-3 w-3" />
-                  {overdueInvoicesCount} invoice{overdueInvoicesCount > 1 ? 's' : ''} overdue
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground mt-1">All invoices on track</p>
-              )}
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between">
+                    <span className="text-muted-foreground">Total Invoices</span>
+                    <span className="text-xl font-bold">{invoices.length}</span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                    <span className="text-muted-foreground flex items-center gap-2"><Clock className="h-3 w-3" /> Pending</span>
+                    <span className="text-xl font-bold">{pendingApprovalCount}</span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                    <span className="text-destructive flex items-center gap-2 font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
+                    <span className="text-xl font-bold text-destructive">{overdueInvoicesCount}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -70,49 +71,28 @@ export default function Dashboard() {
               <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(disbursedAmount)}</div>
+              <div className="text-xl font-bold">{formatCurrency(disbursedAmount)}</div>
               <p className="text-xs text-muted-foreground">+10% from last month</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
-               <ArrowUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(pendingApprovalAmount)}</div>
-               <p className="text-xs text-muted-foreground">{pendingApprovalCount} invoices awaiting approval</p>
             </CardContent>
           </Card>
         </div>
         
         <div className="grid lg:grid-cols-2 gap-6">
-            <ProgramPerformanceChart />
             <Card>
                 <CardHeader>
                     <CardTitle>Recent Invoices</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Invoice #</TableHead>
-                                <TableHead>Retailer</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {invoices.slice(0, 5).map((invoice) => (
-                                <TableRow key={invoice.id}>
-                                    <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                                    <TableCell>{invoice.retailerName}</TableCell>
-                                    <TableCell>{formatCurrency(invoice.amount)}</TableCell>
-                                    <TableCell><StatusBadge status={invoice.status} /></TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    {/* This would be a real chart in a real app */}
+                    <img data-ai-hint="invoice data bar chart" src="https://placehold.co/600x400.png" alt="Program Performance Chart" className="w-full h-auto rounded-md" />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Recent Invoices</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">No invoices to display.</p>
                 </CardContent>
             </Card>
         </div>

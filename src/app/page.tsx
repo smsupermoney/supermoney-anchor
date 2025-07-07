@@ -21,7 +21,7 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold tracking-tight text-primary">Anchor Dashboard</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight text-primary">Anchor Dashboard</CardTitle>
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <CardContent>

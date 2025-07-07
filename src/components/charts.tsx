@@ -27,6 +27,7 @@ export function ProgramPerformanceChart() {
                             background: "hsl(var(--background))",
                             borderColor: "hsl(var(--border))",
                             borderRadius: "var(--radius)",
+                            fontSize: "12px",
                         }}
                     />
                     <Bar dataKey="used" stackId="a" fill="hsl(var(--primary))" name="Used Limit" radius={[4, 4, 0, 0]} />

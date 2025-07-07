@@ -7,7 +7,6 @@ type CreditUtilizationChartProps = {
   totalCreditLimit: number;
 };
 
-// Use a compact notation and remove .0 from whole numbers
 const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact', maximumFractionDigits: 1 }).format(amount).replace(/\.0(?=\D)/, '');
 
 export default function CreditUtilizationChart({ utilizedCredit, totalCreditLimit }: CreditUtilizationChartProps) {
@@ -22,7 +21,7 @@ export default function CreditUtilizationChart({ utilizedCredit, totalCreditLimi
   ];
 
   return (
-    <div className="relative w-full h-28">
+    <div className="relative w-full h-24">
       <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart
           innerRadius="70%"
@@ -30,8 +29,8 @@ export default function CreditUtilizationChart({ utilizedCredit, totalCreditLimi
           data={data}
           startAngle={180}
           endAngle={0}
-          barSize={12}
-          cy="100%"
+          barSize={10}
+          cy="90%"
         >
           <PolarAngleAxis
             type="number"
@@ -42,15 +41,15 @@ export default function CreditUtilizationChart({ utilizedCredit, totalCreditLimi
           <RadialBar
             background={{ fill: 'hsl(var(--secondary))' }}
             dataKey="value"
-            cornerRadius={6}
+            cornerRadius={5}
           />
         </RadialBarChart>
       </ResponsiveContainer>
-      <div className="absolute inset-x-0 bottom-6 flex flex-col items-center justify-end text-center">
-        <p className="text-2xl font-bold text-primary">{formatCurrency(availableLimit)}</p>
+      <div className="absolute inset-x-0 bottom-8 flex flex-col items-center justify-end text-center">
+        <p className="text-xl font-bold text-primary">{formatCurrency(availableLimit)}</p>
         <p className="text-xs text-muted-foreground">Available Limit</p>
       </div>
-      <div className="absolute -bottom-1 left-1 right-1 flex justify-between">
+      <div className="absolute bottom-0 left-1 right-1 flex justify-between">
         <p className="text-xs font-medium text-muted-foreground">₹0</p>
         <p className="text-xs font-medium text-muted-foreground">{formatCurrency(totalCreditLimit)}</p>
       </div>
