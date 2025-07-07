@@ -2,7 +2,7 @@ import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { invoices } from "@/lib/data";
-import { ArrowUp, IndianRupee, FileText } from "lucide-react";
+import { ArrowUp, IndianRupee, FileText, AlertTriangle } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { ProgramPerformanceChart } from "@/components/charts";
 import CreditUtilizationChart from "@/components/credit-utilization-chart";
@@ -12,6 +12,26 @@ export default function Dashboard() {
   const utilizedCredit = 1400000;
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const overdueInvoicesCount = invoices.filter(
+    (i) =>
+    new Date(i.dueDate) < today &&
+    i.status !== "Disbursed" &&
+    i.status !== "Rejected"
+  ).length;
+
+  const pendingApprovalInvoices = invoices.filter(
+    i => i.status === 'Initiated' || i.status === 'Approved'
+  );
+  const pendingApprovalCount = pendingApprovalInvoices.length;
+  const pendingApprovalAmount = pendingApprovalInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+
+  const disbursedAmount = invoices
+    .filter(i => i.status === 'Disbursed')
+    .reduce((sum, inv) => sum + inv.amount, 0);
 
   return (
     <>
@@ -29,12 +49,19 @@ export default function Dashboard() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
+              <CardTitle className="text-sm font-medium">Invoice Summary</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{invoices.length}</div>
-              <p className="text-xs text-muted-foreground">+2 from last month</p>
+              <div className="text-2xl font-bold">{invoices.length} Total</div>
+              {overdueInvoicesCount > 0 ? (
+                <p className="text-xs text-destructive flex items-center gap-1 mt-1 font-medium">
+                  <AlertTriangle className="h-3 w-3" />
+                  {overdueInvoicesCount} invoice{overdueInvoicesCount > 1 ? 's' : ''} overdue
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">All invoices on track</p>
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -43,7 +70,7 @@ export default function Dashboard() {
               <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(1250000)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(disbursedAmount)}</div>
               <p className="text-xs text-muted-foreground">+10% from last month</p>
             </CardContent>
           </Card>
@@ -53,8 +80,8 @@ export default function Dashboard() {
                <ArrowUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(40000)}</div>
-               <p className="text-xs text-muted-foreground">3 invoices awaiting approval</p>
+              <div className="text-2xl font-bold">{formatCurrency(pendingApprovalAmount)}</div>
+               <p className="text-xs text-muted-foreground">{pendingApprovalCount} invoices awaiting approval</p>
             </CardContent>
           </Card>
         </div>

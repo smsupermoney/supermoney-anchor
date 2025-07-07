@@ -22,7 +22,7 @@ export default function CreditUtilizationChart({ utilizedCredit, totalCreditLimi
   ];
 
   return (
-    <div className="relative w-full h-32">
+    <div className="relative w-full h-28">
       <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart
           innerRadius="70%"
@@ -30,8 +30,8 @@ export default function CreditUtilizationChart({ utilizedCredit, totalCreditLimi
           data={data}
           startAngle={180}
           endAngle={0}
-          barSize={16}
-          cy="90%"
+          barSize={12}
+          cy="100%"
         >
           <PolarAngleAxis
             type="number"
@@ -42,15 +42,15 @@ export default function CreditUtilizationChart({ utilizedCredit, totalCreditLimi
           <RadialBar
             background={{ fill: 'hsl(var(--secondary))' }}
             dataKey="value"
-            cornerRadius={8}
+            cornerRadius={6}
           />
         </RadialBarChart>
       </ResponsiveContainer>
-      <div className="absolute inset-x-0 bottom-5 flex flex-col items-center justify-end text-center">
-        <p className="text-3xl font-bold text-primary">{formatCurrency(availableLimit)}</p>
+      <div className="absolute inset-x-0 bottom-6 flex flex-col items-center justify-end text-center">
+        <p className="text-2xl font-bold text-primary">{formatCurrency(availableLimit)}</p>
         <p className="text-xs text-muted-foreground">Available Limit</p>
       </div>
-      <div className="absolute -bottom-2 left-1 right-1 flex justify-between">
+      <div className="absolute -bottom-1 left-1 right-1 flex justify-between">
         <p className="text-xs font-medium text-muted-foreground">₹0</p>
         <p className="text-xs font-medium text-muted-foreground">{formatCurrency(totalCreditLimit)}</p>
       </div>

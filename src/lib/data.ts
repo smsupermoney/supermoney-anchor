@@ -12,7 +12,7 @@ export const invoiceStatuses: InvoiceStatus[] = ['Initiated', 'Approved', 'Sent 
 
 export const invoices: Invoice[] = [
   { id: 'INV001', invoiceNumber: '2024-001', retailerName: 'Global Mart', amount: 25000, date: '2024-07-01', dueDate: '2024-08-01', eWayBillNumber: 'EWB12345', status: 'Disbursed' },
-  { id: 'INV002', invoiceNumber: '2024-002', retailerName: 'Quick Stop', amount: 15000, date: '2024-07-05', dueDate: '2024-08-05', eWayBillNumber: 'EWB12346', status: 'Sent to Lender' },
+  { id: 'INV002', invoiceNumber: '2024-002', retailerName: 'Quick Stop', amount: 15000, date: '2024-07-05', dueDate: '2024-07-20', eWayBillNumber: 'EWB12346', status: 'Sent to Lender' },
   { id: 'INV003', invoiceNumber: '2024-003', retailerName: 'Global Mart', amount: 30000, date: '2024-07-10', dueDate: '2024-08-10', eWayBillNumber: 'EWB12347', status: 'Approved' },
   { id: 'INV004', invoiceNumber: '2024-004', retailerName: 'City Grocers', amount: 10000, date: '2024-07-12', dueDate: '2024-08-12', eWayBillNumber: 'EWB12348', status: 'Initiated' },
   { id: 'INV005', invoiceNumber: '2024-005', retailerName: 'Fresh Foods Inc.', amount: 50000, date: '2024-07-15', dueDate: '2024-08-15', eWayBillNumber: 'EWB12349', status: 'Disbursed' },
