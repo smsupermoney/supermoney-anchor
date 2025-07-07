@@ -150,7 +150,7 @@ export default function Dashboard() {
               {programs.map((program) => {
                 const remainingLimit = program.totalLimit - program.usedLimit;
                 return (
-                  <CarouselItem key={program.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={program.id} className="pl-4 basis-4/5 sm:basis-2/3 md:basis-1/2 lg:basis-1/3">
                     <Card className="flex flex-col h-full border">
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
