@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { InvoiceStatus, LeadStatus, Retailer['status'] } from "@/types";
+import type { InvoiceStatus, LeadStatus, Retailer } from "@/types";
 
 type Status = Retailer['status'] | InvoiceStatus | LeadStatus;
 
