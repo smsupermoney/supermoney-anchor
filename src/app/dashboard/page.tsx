@@ -168,7 +168,7 @@ export default function Dashboard() {
                         <Progress value={utilizationPercentage} className="h-2" />
                       </div>
                       <Separator />
-                      <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs">
+                      <div className="grid grid-cols-4 gap-x-2 text-xs">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground">Invoices</p>
                             <p className="font-semibold text-sm">{program.invoicesCount}</p>
