@@ -46,7 +46,7 @@ export default function Dashboard() {
       <PageHeader title="Dashboard" />
       
         {/* Top Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-semibold">Credit Overview</CardTitle>
@@ -150,7 +150,7 @@ export default function Dashboard() {
               {programs.map((program) => {
                 const remainingLimit = program.totalLimit - program.usedLimit;
                 return (
-                  <CarouselItem key={program.id} className="pl-4 basis-4/5 sm:basis-2/3 md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={program.id} className="pl-4 basis-4/5 sm:basis-1/2 lg:basis-1/3">
                     <Card className="flex flex-col h-full border">
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
