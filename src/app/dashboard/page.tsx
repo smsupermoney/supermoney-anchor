@@ -1,21 +1,28 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock, Activity } from "lucide-react";
+import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight } from "lucide-react";
+import StatusBadge from "@/components/status-badge";
+import Link from "next/link";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Dashboard() {
   const totalCreditLimit = 2000000;
   const utilizedCredit = 1400000;
   const availableCredit = totalCreditLimit - utilizedCredit;
   
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact', maximumFractionDigits: 1 }).format(amount).replace(/\.0(?=\D)/, '');
+  const formatCurrencyCompact = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact', maximumFractionDigits: 1 }).format(amount).replace(/\.0(?=\D)/, '');
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const overdueInvoicesCount = invoices.filter(
     (i) =>
-    new Date(i.dueDate) < today &&
+    new Date(i.dueDate).getTime() < today.getTime() &&
     i.status !== "Disbursed" &&
     i.status !== "Rejected"
   ).length;
@@ -29,95 +36,106 @@ export default function Dashboard() {
     i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender'
   ).length;
 
-  const disbursedAmount = invoices
-    .filter(i => i.status === 'Disbursed')
-    .reduce((sum, inv) => sum + inv.amount, 0);
-
   return (
-    <>
+    <div className="flex flex-col h-full">
       <PageHeader title="Dashboard" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4 flex-1">
+        {/* Left Column */}
+        <div className="lg:col-span-1 flex flex-col gap-4">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-medium">Credit Overview</CardTitle>
+              <CardTitle className="text-xs font-semibold">Credit Overview</CardTitle>
               <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                    <span className="text-xs text-muted-foreground">Total Limit</span>
-                    <span className="text-sm font-semibold">{formatCurrency(totalCreditLimit)}</span>
+                    <span className="text-[10px] text-muted-foreground">Total Limit</span>
+                    <span className="text-xs font-semibold">{formatCurrencyCompact(totalCreditLimit)}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                    <span className="text-xs text-muted-foreground">Utilized</span>
-                    <span className="text-sm font-semibold">{formatCurrency(utilizedCredit)}</span>
+                    <span className="text-[10px] text-muted-foreground">Utilized</span>
+                    <span className="text-xs font-semibold">{formatCurrencyCompact(utilizedCredit)}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                    <span className="text-xs text-muted-foreground">Available</span>
-                    <span className="text-sm font-semibold text-primary">{formatCurrency(availableCredit)}</span>
+                    <span className="text-[10px] text-muted-foreground">Available</span>
+                    <span className="text-xs font-semibold text-primary">{formatCurrencyCompact(availableCredit)}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="lg:col-span-2">
+          
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-medium">Invoice Summary</CardTitle>
+              <CardTitle className="text-xs font-semibold">Invoice Summary</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-y-2">
+              <div className="grid grid-cols-2 gap-y-2">
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-bold">{invoices.length}</span>
-                    <span className="text-xs text-muted-foreground">Total</span>
+                    <span className="text-xs font-bold">{invoices.length}</span>
+                    <span className="text-[10px] text-muted-foreground">Total</span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-bold">{activeInvoicesCount}</span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Active</span>
+                    <span className="text-xs font-bold">{activeInvoicesCount}</span>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Active</span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-bold">{pendingApprovalCount}</span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Pending</span>
+                    <span className="text-xs font-bold">{pendingApprovalCount}</span>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Pending</span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-sm font-bold text-destructive">{overdueInvoicesCount}</span>
-                    <span className="text-destructive flex items-center gap-1 text-xs font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
+                    <span className="text-xs font-bold text-destructive">{overdueInvoicesCount}</span>
+                    <span className="text-destructive flex items-center gap-1 text-[10px] font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-medium">Total Disbursed</CardTitle>
-              <IndianRupee className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm font-bold">{formatCurrency(disbursedAmount)}</div>
-              <p className="text-xs text-muted-foreground">+10% from last month</p>
-            </CardContent>
-          </Card>
-        
-        <div className="lg:col-span-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-sm">Program Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {/* This would be a real chart in a real app */}
-                    <img data-ai-hint="invoice data bar chart" src="https://placehold.co/600x400.png" alt="Program Performance Chart" className="w-full h-auto rounded-md" />
-                </CardContent>
-            </Card>
         </div>
+
+        {/* Right Column */}
         <div className="lg:col-span-2">
-            <Card>
+            <Card className="h-full flex flex-col">
                 <CardHeader>
-                    <CardTitle className="text-sm">Recent Invoices</CardTitle>
+                    <CardTitle className="text-xs font-semibold">Recent Invoices</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">No invoices to display.</p>
+                <CardContent className="p-0 flex-1">
+                  <ScrollArea className="h-full">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Invoice #</TableHead>
+                          <TableHead>Retailer</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead className="text-right">Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="w-[50px]"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {invoices.map((invoice) => (
+                          <TableRow key={invoice.id}>
+                            <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+                            <TableCell>{invoice.retailerName}</TableCell>
+                            <TableCell>{invoice.date}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(invoice.amount)}</TableCell>
+                            <TableCell><StatusBadge status={invoice.status} /></TableCell>
+                            <TableCell>
+                              <Button asChild variant="ghost" size="icon">
+                                  <Link href={`/invoices/${invoice.id}`}>
+                                      <ArrowRight className="h-4 w-4" />
+                                  </Link>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
                 </CardContent>
             </Card>
         </div>
       </div>
-    </>
+    </div>
   );
 }
