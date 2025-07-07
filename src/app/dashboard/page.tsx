@@ -144,17 +144,18 @@ export default function Dashboard() {
         <Carousel
           opts={{
             align: "start",
+            dragFree: true,
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-0">
+          <CarouselContent className="gap-4">
             {programs.map((program) => {
               const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <CarouselItem key={program.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <Card>
+                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 p-0">
+                  <Card className="h-full">
                     <CardHeader className="p-4">
                       <CardTitle className="text-sm">{program.lenderName}</CardTitle>
                       <CardDescription>Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
@@ -168,7 +169,7 @@ export default function Dashboard() {
                         <Progress value={utilizationPercentage} className="h-2" />
                       </div>
                       <Separator />
-                      <div className="grid grid-cols-4 gap-x-2 text-xs">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground">Invoices</p>
                             <p className="font-semibold text-sm">{program.invoicesCount}</p>
