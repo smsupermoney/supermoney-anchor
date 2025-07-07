@@ -1,7 +1,7 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { invoices } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight } from "lucide-react";
+import { invoices, programs, retailers } from "@/lib/data";
+import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -36,12 +36,17 @@ export default function Dashboard() {
     i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender'
   ).length;
 
+  const totalPrograms = programs.length;
+  const totalProgramLimit = programs.reduce((sum, p) => sum + p.totalLimit, 0);
+  const totalRetailers = retailers.length;
+  const activeRetailers = retailers.filter(r => r.status === 'Active').length;
+
   return (
     <div className="flex flex-col h-full">
       <PageHeader title="Dashboard" />
-      <div className="flex-1 flex flex-col gap-4 pt-4">
+      <div className="flex-1 flex flex-col gap-4">
         {/* Top Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-semibold">Credit Overview</CardTitle>
@@ -91,9 +96,47 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold">Programs Summary</CardTitle>
+              <Library className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between">
+                    <span className="text-[10px] text-muted-foreground">Total Programs</span>
+                    <span className="text-xs font-semibold">{totalPrograms}</span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                    <span className="text-[10px] text-muted-foreground">Total Limit</span>
+                    <span className="text-xs font-semibold">{formatCurrencyCompact(totalProgramLimit)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-semibold">Retailers Summary</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between">
+                    <span className="text-[10px] text-muted-foreground">Total Retailers</span>
+                    <span className="text-xs font-semibold">{totalRetailers}</span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                    <span className="text-[10px] text-muted-foreground">Active</span>
+                    <span className="text-xs font-semibold">{activeRetailers}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Bottom Row */}
+        {/* Recent Invoices */}
         <div className="flex-1">
             <Card className="h-full flex flex-col">
                 <CardHeader>
