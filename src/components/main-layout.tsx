@@ -22,7 +22,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <SidebarHeader>
           <h2 className="text-2xl font-bold text-primary pl-2 group-data-[collapsible=icon]:hidden">Anchor Dashboard</h2>
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="p-2">
           <SidebarMenu>
             {navigationLinks.map((link) => (
               <SidebarMenuItem key={link.href}>
