@@ -103,11 +103,11 @@ export default function RiskAssessmentClient({ retailers }: RiskAssessmentClient
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
-                        <h3 className="font-semibold mb-1">Key Risk Factors</h3>
+                        <h3 className="font-semibold mb-1 text-sm">Key Risk Factors</h3>
                         <p className="text-sm text-muted-foreground">{state.data.riskFactors}</p>
                     </div>
                      <div>
-                        <h3 className="font-semibold mb-1">Recommendations</h3>
+                        <h3 className="font-semibold mb-1 text-sm">Recommendations</h3>
                         <p className="text-sm text-muted-foreground">{state.data.recommendations}</p>
                     </div>
                 </CardContent>

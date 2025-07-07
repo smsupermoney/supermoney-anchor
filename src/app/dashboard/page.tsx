@@ -1,7 +1,7 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock } from "lucide-react";
+import { IndianRupee, FileText, AlertTriangle, Clock, Activity } from "lucide-react";
 import CreditUtilizationChart from "@/components/credit-utilization-chart";
 
 export default function Dashboard() {
@@ -25,6 +25,10 @@ export default function Dashboard() {
   );
   const pendingApprovalCount = pendingApprovalInvoices.length;
 
+  const activeInvoicesCount = invoices.filter(
+    i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender'
+  ).length;
+
   const disbursedAmount = invoices
     .filter(i => i.status === 'Disbursed')
     .reduce((sum, inv) => sum + inv.amount, 0);
@@ -36,8 +40,8 @@ export default function Dashboard() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Credit Limit Utilization</CardTitle>
-              <CardDescription>Utilized: {formatCurrency(utilizedCredit)}</CardDescription>
+              <CardTitle className="text-base">Credit Limit Utilization</CardTitle>
+              <CardDescription className="text-sm">Utilized: {formatCurrency(utilizedCredit)}</CardDescription>
             </CardHeader>
             <CardContent>
               <CreditUtilizationChart utilizedCredit={utilizedCredit} totalCreditLimit={totalCreditLimit} />
@@ -51,16 +55,20 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                    <span className="text-muted-foreground">Total Invoices</span>
-                    <span className="text-xl font-bold">{invoices.length}</span>
+                    <span className="text-sm text-muted-foreground">Total Invoices</span>
+                    <span className="text-lg font-bold">{invoices.length}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                    <span className="text-muted-foreground flex items-center gap-2"><Clock className="h-3 w-3" /> Pending</span>
-                    <span className="text-xl font-bold">{pendingApprovalCount}</span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-2"><Activity className="h-3 w-3" /> Active</span>
+                    <span className="text-lg font-bold">{activeInvoicesCount}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                    <span className="text-destructive flex items-center gap-2 font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
-                    <span className="text-xl font-bold text-destructive">{overdueInvoicesCount}</span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-2"><Clock className="h-3 w-3" /> Pending</span>
+                    <span className="text-lg font-bold">{pendingApprovalCount}</span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                    <span className="text-destructive flex items-center gap-2 text-sm font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
+                    <span className="text-lg font-bold text-destructive">{overdueInvoicesCount}</span>
                 </div>
               </div>
             </CardContent>
@@ -71,8 +79,8 @@ export default function Dashboard() {
               <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold">{formatCurrency(disbursedAmount)}</div>
-              <p className="text-xs text-muted-foreground">+10% from last month</p>
+              <div className="text-lg font-bold">{formatCurrency(disbursedAmount)}</div>
+              <p className="text-sm text-muted-foreground">+10% from last month</p>
             </CardContent>
           </Card>
         </div>
@@ -80,7 +88,7 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-2 gap-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Recent Invoices</CardTitle>
+                    <CardTitle className="text-base">Recent Invoices</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {/* This would be a real chart in a real app */}
@@ -89,7 +97,7 @@ export default function Dashboard() {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Recent Invoices</CardTitle>
+                    <CardTitle className="text-base">Recent Invoices</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">No invoices to display.</p>
