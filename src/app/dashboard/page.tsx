@@ -1,14 +1,12 @@
 import PageHeader from "@/components/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs, retailers } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, PlusCircle } from "lucide-react";
+import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const totalCreditLimit = 2000000;
@@ -134,61 +132,6 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        {/* Program Overview */}
-        <div>
-          <h2 className="text-xs font-semibold mb-2">Program Overview</h2>
-          <Carousel
-            opts={{
-              align: "start",
-              dragFree: true,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="gap-4">
-              {programs.map((program) => {
-                const remainingLimit = program.totalLimit - program.usedLimit;
-                return (
-                  <CarouselItem key={program.id} className="basis-4/5 sm:basis-1/2 lg:basis-1/3">
-                    <Card className="flex flex-col h-full border">
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-sm font-bold text-primary truncate w-4/5">{program.lenderName}</CardTitle>
-                          <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">Active</Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-0 flex-grow">
-                        <div className="grid grid-cols-2 text-xs border-t">
-                          <div className="p-3 border-r">
-                            <p className="text-base font-bold">{program.activeDealers}</p>
-                            <p className="text-muted-foreground underline cursor-pointer">Active Dealer Limits</p>
-                          </div>
-                          <div className="p-3 text-right">
-                            <p className="text-muted-foreground">Available Program Limits</p>
-                            <p className="text-base font-bold">{formatCurrency(program.totalLimit)}</p>
-                          </div>
-                          <div className="p-3 border-t border-r">
-                            <p className="text-base font-bold">{formatCurrency(remainingLimit)}</p>
-                            <p className="text-muted-foreground">Available</p>
-                          </div>
-                          <div className="p-3 border-t">
-                            {/* This cell is empty in the design */}
-                          </div>
-                        </div>
-                      </CardContent>
-                      <div className="border-t mt-auto">
-                        <Button variant="ghost" className="w-full justify-center text-primary font-semibold hover:bg-primary/5">
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          Raise Invoice(s)
-                        </Button>
-                      </div>
-                    </Card>
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-          </Carousel>
         </div>
 
         {/* Recent Invoices */}
