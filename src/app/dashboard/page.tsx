@@ -39,9 +39,9 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full">
       <PageHeader title="Dashboard" />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4 flex-1">
-        {/* Left Column */}
-        <div className="lg:col-span-1 flex flex-col gap-4">
+      <div className="flex-1 flex flex-col gap-4 pt-4">
+        {/* Top Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-semibold">Credit Overview</CardTitle>
@@ -93,8 +93,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Right Column */}
-        <div className="lg:col-span-2">
+        {/* Bottom Row */}
+        <div className="flex-1">
             <Card className="h-full flex flex-col">
                 <CardHeader>
                     <CardTitle className="text-xs font-semibold">Recent Invoices</CardTitle>
