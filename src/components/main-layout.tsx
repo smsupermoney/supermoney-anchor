@@ -5,11 +5,12 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, S
 import Header from './header';
 import { navigationLinks } from './nav';
 import Link from 'next/link';
-import { Button } from './ui/button';
 import { LogOut } from 'lucide-react';
+import { useMounted } from '@/hooks/use-mounted';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isMounted = useMounted();
 
   if (pathname === '/') {
     return <>{children}</>;
@@ -27,7 +28,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <SidebarMenuItem key={link.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith(link.href)}
+                  isActive={isMounted ? pathname.startsWith(link.href) : false}
                   tooltip={{ children: link.label }}
                 >
                   <Link href={link.href}>
