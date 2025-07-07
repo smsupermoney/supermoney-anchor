@@ -2,15 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .sidebar-menu-button-active {
+    background: linear-gradient(270deg, hsl(var(--sidebar-primary) / 0.7), hsl(var(--sidebar-primary)));
+    box-shadow: 0 2px 6px hsl(var(--sidebar-primary) / 0.3);
+    color: hsl(var(--sidebar-primary-foreground));
+  }
+}
+
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 210 17% 94%;
     --foreground: 224 71% 4%;
     --card: 0 0% 100%;
     --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
-    --primary: 246 84% 67%;
+    --primary: 204 70% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 215 28% 94%;
     --secondary-foreground: 224 71% 4%;
@@ -22,8 +30,8 @@
     --destructive-foreground: 0 0% 100%;
     --border: 215 20% 90%;
     --input: 215 20% 90%;
-    --ring: 246 84% 67%;
-    --chart-1: 246 84% 67%;
+    --ring: 204 70% 53%;
+    --chart-1: 204 70% 53%;
     --chart-2: 145 63% 49%;
     --chart-3: 27 87% 67%;
     --chart-4: 173 58% 39%;
@@ -31,12 +39,12 @@
     --radius: 0.5rem;
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 224 71% 15%;
-    --sidebar-primary: 246 84% 67%;
+    --sidebar-primary: 204 70% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 28% 94%;
     --sidebar-accent-foreground: 224 71% 4%;
     --sidebar-border: 215 20% 90%;
-    --sidebar-ring: 246 84% 67%;
+    --sidebar-ring: 204 70% 53%;
   }
   .dark {
     --background: 224 71% 4%;
@@ -45,7 +53,7 @@
     --card-foreground: 215 20% 90%;
     --popover: 224 71% 4%;
     --popover-foreground: 215 20% 90%;
-    --primary: 246 84% 67%;
+    --primary: 204 70% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 215 28% 15%;
     --secondary-foreground: 215 20% 90%;
@@ -57,20 +65,20 @@
     --destructive-foreground: 0 0% 100%;
     --border: 215 28% 15%;
     --input: 215 28% 15%;
-    --ring: 246 84% 67%;
-    --chart-1: 246 84% 67%;
+    --ring: 204 70% 53%;
+    --chart-1: 204 70% 53%;
     --chart-2: 145 63% 49%;
     --chart-3: 27 87% 67%;
     --chart-4: 173 58% 39%;
     --chart-5: 43 74% 66%;
     --sidebar-background: 224 71% 6%;
     --sidebar-foreground: 215 20% 90%;
-    --sidebar-primary: 246 84% 67%;
+    --sidebar-primary: 204 70% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 28% 15%;
     --sidebar-accent-foreground: 215 20% 90%;
     --sidebar-border: 215 28% 15%;
-    --sidebar-ring: 246 84% 67%;
+    --sidebar-ring: 204 70% 53%;
   }
 }
 
