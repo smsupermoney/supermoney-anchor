@@ -59,7 +59,7 @@ export default function Dashboard() {
   const pendingRetailers = retailers.filter(r => r.status === 'Pending').length;
 
   return (
-    <div className="flex flex-col h-full gap-4">
+    <div className="flex flex-col h-full gap-8">
       <PageHeader title="Dashboard">
         <Button>
           <UploadCloud className="mr-2 h-4 w-4" />
@@ -80,22 +80,22 @@ export default function Dashboard() {
             <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                 <Card className="h-full">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-semibold">Credit Overview</CardTitle>
+                        <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
                         <IndianRupee className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">
                             <div className="flex items-baseline justify-between">
-                                <span className="text-[10px] text-muted-foreground">Total Limit</span>
-                                <span className="text-xs font-semibold">{formatCurrency(totalCreditLimit)}</span>
+                                <span className="text-xs text-muted-foreground">Total Limit</span>
+                                <span className="text-sm font-semibold">{formatCurrency(totalCreditLimit)}</span>
                             </div>
                             <div className="flex items-baseline justify-between">
-                                <span className="text-[10px] text-muted-foreground">Utilized</span>
-                                <span className="text-xs font-semibold">{formatCurrency(utilizedCredit)}</span>
+                                <span className="text-xs text-muted-foreground">Utilized</span>
+                                <span className="text-sm font-semibold">{formatCurrency(utilizedCredit)}</span>
                             </div>
                             <div className="flex items-baseline justify-between">
-                                <span className="text-[10px] text-muted-foreground">Available</span>
-                                <span className="text-xs font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
+                                <span className="text-xs text-muted-foreground">Available</span>
+                                <span className="text-sm font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
                             </div>
                         </div>
                     </CardContent>
@@ -105,26 +105,26 @@ export default function Dashboard() {
             <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                 <Card className="h-full">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-semibold">Invoice Summary</CardTitle>
+                        <CardTitle className="text-sm font-semibold">Invoice Summary</CardTitle>
                         <FileText className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-y-2">
                             <div className="flex flex-col items-center">
-                                <span className="text-xs font-bold">{invoices.length}</span>
-                                <span className="text-[10px] text-muted-foreground">Total</span>
+                                <span className="text-lg font-bold">{invoices.length}</span>
+                                <span className="text-xs text-muted-foreground">Total</span>
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-xs font-bold">{activeInvoicesCount}</span>
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Active</span>
+                                <span className="text-lg font-bold">{activeInvoicesCount}</span>
+                                <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Active</span>
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-xs font-bold">{pendingApprovalCount}</span>
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                                <span className="text-lg font-bold">{pendingApprovalCount}</span>
+                                <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-xs font-bold text-destructive">{overdueInvoicesCount}</span>
-                                <span className="text-destructive flex items-center gap-1 text-[10px] font-medium"><AlertTriangle className="w-3 h-3" /> Overdue</span>
+                                <span className="text-lg font-bold text-destructive">{overdueInvoicesCount}</span>
+                                <span className="text-destructive flex items-center gap-1 text-xs font-medium"><AlertTriangle className="w-3 h-3" /> Overdue</span>
                             </div>
                         </div>
                     </CardContent>
@@ -134,11 +134,11 @@ export default function Dashboard() {
             <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                 <Card className="h-full">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-semibold">Upcoming Payments</CardTitle>
+                        <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
                         <CalendarClock className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <p className="text-xl font-bold">{formatCurrency(upcomingPaymentsAmount)}</p>
+                        <p className="text-2xl font-bold">{formatCurrency(upcomingPaymentsAmount)}</p>
                         <p className="text-xs text-muted-foreground">Across {upcomingPaymentsCount} invoices in next 30 days</p>
                     </CardContent>
                 </Card>
@@ -147,11 +147,11 @@ export default function Dashboard() {
             <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                  <Card className="h-full">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-semibold">Disbursal Summary</CardTitle>
+                        <CardTitle className="text-sm font-semibold">Disbursal Summary</CardTitle>
                         <CheckCircle className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <p className="text-xl font-bold">{formatCurrency(disbursedAmount)}</p>
+                        <p className="text-2xl font-bold">{formatCurrency(disbursedAmount)}</p>
                         <p className="text-xs text-muted-foreground">Total across {disbursedCount} invoices</p>
                     </CardContent>
                 </Card>
@@ -160,22 +160,22 @@ export default function Dashboard() {
              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                 <Card className="h-full">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xs font-semibold">Retailers Summary</CardTitle>
+                        <CardTitle className="text-sm font-semibold">Retailers Summary</CardTitle>
                         <Users className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-y-2">
                             <div className="flex flex-col items-center">
-                                <span className="text-xs font-bold">{totalRetailers}</span>
-                                <span className="text-[10px] text-muted-foreground">Total</span>
+                                <span className="text-lg font-bold">{totalRetailers}</span>
+                                <span className="text-xs text-muted-foreground">Total</span>
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-xs font-bold">{activeRetailers}</span>
-                                <span className="text-[10px] text-muted-foreground">Active</span>
+                                <span className="text-lg font-bold">{activeRetailers}</span>
+                                <span className="text-xs text-muted-foreground">Active</span>
                             </div>
                              <div className="flex flex-col items-center col-span-2">
-                                <span className="text-xs font-bold">{pendingRetailers}</span>
-                                <span className="text-[10px] text-muted-foreground">Pending</span>
+                                <span className="text-lg font-bold">{pendingRetailers}</span>
+                                <span className="text-xs text-muted-foreground">Pending</span>
                             </div>
                         </div>
                     </CardContent>
@@ -186,7 +186,7 @@ export default function Dashboard() {
       
       {/* Program Overview Carousel */}
       <div className="w-full">
-        <h2 className="text-base font-bold tracking-tight mb-2">Program Overview</h2>
+        <h2 className="text-2xl font-bold tracking-tight mb-4">Program Overview</h2>
         <Carousel
           opts={{
             align: "start",
@@ -194,13 +194,13 @@ export default function Dashboard() {
           }}
           className="w-full"
         >
-          <CarouselContent className="gap-4">
+          <CarouselContent className="gap-4 -ml-0">
             {programs.map((program) => {
               const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                   <Card className="h-full">
                     <CardHeader className="p-4">
                       <CardTitle className="text-sm">{program.lenderName}</CardTitle>
@@ -208,7 +208,7 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent className="p-4 pt-0 flex flex-col gap-3">
                       <div>
-                        <div className="flex justify-between text-[10px] mb-1">
+                        <div className="flex justify-between text-xs mb-1">
                           <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
                           <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
                         </div>
@@ -251,7 +251,7 @@ export default function Dashboard() {
       <div className="flex-1 min-h-0">
           <Card className="h-full flex flex-col">
               <CardHeader>
-                  <CardTitle className="text-base font-semibold">Recent Invoices</CardTitle>
+                  <CardTitle className="text-xl font-semibold">Recent Invoices</CardTitle>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ScrollArea className="h-full">
