@@ -92,7 +92,7 @@ export default function RiskAssessmentClient({ retailers }: RiskAssessmentClient
                         <p className={`text-7xl font-bold ${riskScoreColor(state.data.riskScore)}`}>
                             {state.data.riskScore}
                         </p>
-                        <p className="text-sm text-muted-foreground">out of 100</p>
+                        <p className="text-xs text-muted-foreground">out of 100</p>
                     </div>
                     <Progress value={state.data.riskScore} className="mt-4 h-3" />
                 </CardContent>
@@ -103,12 +103,12 @@ export default function RiskAssessmentClient({ retailers }: RiskAssessmentClient
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
-                        <h3 className="font-semibold mb-1 text-sm">Key Risk Factors</h3>
-                        <p className="text-sm text-muted-foreground">{state.data.riskFactors}</p>
+                        <h3 className="font-semibold mb-1 text-xs">Key Risk Factors</h3>
+                        <p className="text-xs text-muted-foreground">{state.data.riskFactors}</p>
                     </div>
                      <div>
-                        <h3 className="font-semibold mb-1 text-sm">Recommendations</h3>
-                        <p className="text-sm text-muted-foreground">{state.data.recommendations}</p>
+                        <h3 className="font-semibold mb-1 text-xs">Recommendations</h3>
+                        <p className="text-xs text-muted-foreground">{state.data.recommendations}</p>
                     </div>
                 </CardContent>
             </Card>

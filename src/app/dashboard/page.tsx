@@ -39,67 +39,67 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Credit Overview</CardTitle>
+              <CardTitle className="text-xs font-medium">Credit Overview</CardTitle>
               <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted-foreground">Total Limit</span>
-                    <span className="text-base font-semibold">{formatCurrency(totalCreditLimit)}</span>
+                    <span className="text-xs text-muted-foreground">Total Limit</span>
+                    <span className="text-sm font-semibold">{formatCurrency(totalCreditLimit)}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted-foreground">Utilized</span>
-                    <span className="text-base font-semibold">{formatCurrency(utilizedCredit)}</span>
+                    <span className="text-xs text-muted-foreground">Utilized</span>
+                    <span className="text-sm font-semibold">{formatCurrency(utilizedCredit)}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted-foreground">Available</span>
-                    <span className="text-base font-semibold text-primary">{formatCurrency(availableCredit)}</span>
+                    <span className="text-xs text-muted-foreground">Available</span>
+                    <span className="text-sm font-semibold text-primary">{formatCurrency(availableCredit)}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Invoice Summary</CardTitle>
+              <CardTitle className="text-xs font-medium">Invoice Summary</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-y-2">
                 <div className="flex flex-col items-center">
-                    <span className="text-base font-bold">{invoices.length}</span>
-                    <span className="text-sm text-muted-foreground">Total</span>
+                    <span className="text-sm font-bold">{invoices.length}</span>
+                    <span className="text-xs text-muted-foreground">Total</span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-base font-bold">{activeInvoicesCount}</span>
-                    <span className="text-sm text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Active</span>
+                    <span className="text-sm font-bold">{activeInvoicesCount}</span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Active</span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-base font-bold">{pendingApprovalCount}</span>
-                    <span className="text-sm text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Pending</span>
+                    <span className="text-sm font-bold">{pendingApprovalCount}</span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Pending</span>
                 </div>
                 <div className="flex flex-col items-center">
-                    <span className="text-base font-bold text-destructive">{overdueInvoicesCount}</span>
-                    <span className="text-destructive flex items-center gap-1 text-sm font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
+                    <span className="text-sm font-bold text-destructive">{overdueInvoicesCount}</span>
+                    <span className="text-destructive flex items-center gap-1 text-xs font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Disbursed</CardTitle>
+              <CardTitle className="text-xs font-medium">Total Disbursed</CardTitle>
               <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-base font-bold">{formatCurrency(disbursedAmount)}</div>
-              <p className="text-sm text-muted-foreground">+10% from last month</p>
+              <div className="text-sm font-bold">{formatCurrency(disbursedAmount)}</div>
+              <p className="text-xs text-muted-foreground">+10% from last month</p>
             </CardContent>
           </Card>
         
         <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-base">Program Performance</CardTitle>
+                    <CardTitle className="text-sm">Program Performance</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {/* This would be a real chart in a real app */}
@@ -110,10 +110,10 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-base">Recent Invoices</CardTitle>
+                    <CardTitle className="text-sm">Recent Invoices</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">No invoices to display.</p>
+                  <p className="text-xs text-muted-foreground">No invoices to display.</p>
                 </CardContent>
             </Card>
         </div>

@@ -24,21 +24,21 @@ export default function ProgramsPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-xs mb-1">
                       <span className="font-medium">Used: {formatCurrency(program.usedLimit)}</span>
                       <span className="text-muted-foreground">Available: {formatCurrency(remainingLimit)}</span>
                     </div>
                     <Progress value={utilizationPercentage} className="h-2" />
                   </div>
                   <Separator />
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
                     <div className="space-y-1">
                         <p className="text-muted-foreground">Invoices</p>
-                        <p className="font-semibold text-lg">{program.invoicesCount}</p>
+                        <p className="font-semibold text-base">{program.invoicesCount}</p>
                     </div>
                      <div className="space-y-1">
                         <p className="text-muted-foreground">Disbursed</p>
-                        <p className="font-semibold text-lg">{formatCurrency(program.disbursedAmount)}</p>
+                        <p className="font-semibold text-base">{formatCurrency(program.disbursedAmount)}</p>
                     </div>
                   </div>
                 </div>

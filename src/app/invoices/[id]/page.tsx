@@ -62,10 +62,10 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 <CardContent className="space-y-4">
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Amount</span>
-                        <span className="font-bold text-xl text-primary">{formatCurrency(invoice.amount)}</span>
+                        <span className="font-bold text-lg text-primary">{formatCurrency(invoice.amount)}</span>
                     </div>
                     <Separator />
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Invoice Date</span>
                             <span className="font-medium">{invoice.date}</span>

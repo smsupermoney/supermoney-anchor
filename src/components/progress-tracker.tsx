@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -31,14 +31,14 @@ export default function ProgressTracker({ steps, currentStep, className }: Progr
                 {isCompleted ? (
                   <CheckCircle2 className="w-5 h-5" />
                 ) : (
-                  <span className={cn('text-sm font-bold', isCurrent ? 'text-primary' : 'text-muted-foreground')}>
+                  <span className={cn('text-xs font-bold', isCurrent ? 'text-primary' : 'text-muted-foreground')}>
                     {index + 1}
                   </span>
                 )}
               </div>
               <p
                 className={cn(
-                  'text-xs mt-2 text-center w-20',
+                  'text-[10px] mt-2 text-center w-20',
                   isCompleted || isCurrent ? 'font-semibold text-foreground' : 'text-muted-foreground'
                 )}
               >
