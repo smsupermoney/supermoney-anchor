@@ -139,7 +139,7 @@ export default function Dashboard() {
       </div>
       
       {/* Program Overview Carousel */}
-      <div className="w-full min-w-0">
+      <div className="min-w-0">
         <h2 className="text-sm font-bold tracking-tight mb-2">Program Overview</h2>
         <Carousel
           opts={{
@@ -147,13 +147,13 @@ export default function Dashboard() {
           }}
           className="w-full"
         >
-          <CarouselContent>
+          <CarouselContent className="-ml-0">
             {programs.map((program) => {
               const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                <CarouselItem key={program.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                   <Card>
                     <CardHeader className="p-4">
                       <CardTitle className="text-sm">{program.lenderName}</CardTitle>
@@ -187,7 +187,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <Separator />
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="hover:bg-primary hover:text-primary-foreground">
                         <UploadCloud className="mr-2 h-4 w-4" />
                         Upload Invoice
                       </Button>
