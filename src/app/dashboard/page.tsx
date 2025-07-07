@@ -1,16 +1,15 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { invoices } from "@/lib/data";
-import { ArrowDown, ArrowUp, IndianRupee, FileText } from "lucide-react";
+import { ArrowUp, IndianRupee, FileText } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { ProgramPerformanceChart } from "@/components/charts";
+import CreditUtilizationChart from "@/components/credit-utilization-chart";
 
 export default function Dashboard() {
   const totalCreditLimit = 2000000;
   const utilizedCredit = 1400000;
-  const utilizationPercentage = (utilizedCredit / totalCreditLimit) * 100;
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
 
@@ -22,13 +21,10 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Credit Limit Utilization</CardTitle>
-              <CardDescription>Available vs. Utilized Credit</CardDescription>
+              <CardDescription>Utilized: {formatCurrency(utilizedCredit)}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Progress value={utilizationPercentage} className="h-3 mb-2" />
-              <div className="text-sm text-muted-foreground">
-                <span className="font-bold text-foreground">{formatCurrency(utilizedCredit)}</span> of {formatCurrency(totalCreditLimit)} utilized
-              </div>
+              <CreditUtilizationChart utilizedCredit={utilizedCredit} totalCreditLimit={totalCreditLimit} />
             </CardContent>
           </Card>
           <Card>
