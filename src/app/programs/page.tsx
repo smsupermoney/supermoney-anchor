@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { programs } from "@/lib/data";
 
 export default function ProgramsPage() {
-    const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(amount);
+    const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
 
   return (
     <>

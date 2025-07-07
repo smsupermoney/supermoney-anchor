@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { invoices } from "@/lib/data";
-import { ArrowDown, ArrowUp, DollarSign, FileText } from "lucide-react";
+import { ArrowDown, ArrowUp, IndianRupee, FileText } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { ProgramPerformanceChart } from "@/components/charts";
 
@@ -12,7 +12,7 @@ export default function Dashboard() {
   const utilizedCredit = 1400000;
   const utilizationPercentage = (utilizedCredit / totalCreditLimit) * 100;
   
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
 
   return (
     <>
@@ -44,7 +44,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Total Disbursed</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <IndianRupee className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(1250000)}</div>
