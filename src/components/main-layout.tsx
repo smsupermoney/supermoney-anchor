@@ -50,7 +50,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </Sidebar>
       <SidebarInset>
         <Header />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+        <main className="flex-1 p-4 min-w-0">
             {children}
         </main>
       </SidebarInset>

@@ -59,7 +59,7 @@ export default function Dashboard() {
   const pendingRetailers = retailers.filter(r => r.status === 'Pending').length;
 
   return (
-    <div className="flex flex-col h-full gap-8">
+    <div className="flex flex-col h-full gap-4">
       <PageHeader title="Dashboard">
         <Button>
           <UploadCloud className="mr-2 h-4 w-4" />
@@ -186,7 +186,7 @@ export default function Dashboard() {
       
       {/* Program Overview Carousel */}
       <div className="w-full">
-        <h2 className="text-2xl font-bold tracking-tight mb-4">Program Overview</h2>
+        <h2 className="text-xl font-bold tracking-tight mb-2">Program Overview</h2>
         <Carousel
           opts={{
             align: "start",
@@ -202,11 +202,11 @@ export default function Dashboard() {
               return (
                 <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                   <Card className="h-full">
-                    <CardHeader className="p-4">
+                    <CardHeader>
                       <CardTitle className="text-sm">{program.lenderName}</CardTitle>
                       <CardDescription>Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
                     </CardHeader>
-                    <CardContent className="p-4 pt-0 flex flex-col gap-3">
+                    <CardContent className="pt-0 flex flex-col gap-2">
                       <div>
                         <div className="flex justify-between text-xs mb-1">
                           <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
@@ -215,7 +215,7 @@ export default function Dashboard() {
                         <Progress value={utilizationPercentage} className="h-2" />
                       </div>
                       <Separator />
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground">Invoices</p>
                             <p className="font-semibold text-xs">{program.invoicesCount}</p>
@@ -251,7 +251,7 @@ export default function Dashboard() {
       <div className="flex-1 min-h-0">
           <Card className="h-full flex flex-col">
               <CardHeader>
-                  <CardTitle className="text-2xl font-semibold">Recent Invoices</CardTitle>
+                  <CardTitle className="text-xl font-semibold">Recent Invoices</CardTitle>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ScrollArea className="h-full">
