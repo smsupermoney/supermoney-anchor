@@ -137,7 +137,7 @@ export default function Dashboard() {
         </div>
         
         {/* Program Overview */}
-        <div>
+        <div className="overflow-hidden">
           <h2 className="text-xs font-semibold mb-2">Program Overview</h2>
           <Carousel
             opts={{
