@@ -68,7 +68,7 @@ export default function Dashboard() {
       </PageHeader>
       
       {/* Top Row Carousel */}
-      <div className="relative px-12">
+      <div className="relative">
         <Carousel
           opts={{
             align: "start",
@@ -190,7 +190,7 @@ export default function Dashboard() {
       {/* Program Overview Carousel */}
       <div className="w-full">
         <h2 className="text-xl font-bold tracking-tight mb-2">Program Overview</h2>
-        <div className="relative px-12">
+        <div className="relative">
           <Carousel
             opts={{
               align: "start",
