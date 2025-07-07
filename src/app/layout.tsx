@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import MainLayout from '@/components/main-layout';
 
 export const metadata: Metadata = {
-  title: 'AnchorLink',
+  title: 'Anchor Dashboard',
   description: 'A supply chain financing platform.',
 };
 
