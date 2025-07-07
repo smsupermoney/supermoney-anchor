@@ -68,16 +68,16 @@ export default function Dashboard() {
       </PageHeader>
       
       {/* Top Row Carousel */}
-      <div className="mx-12">
+      <div className="relative px-12">
         <Carousel
           opts={{
             align: "start",
           }}
           className="w-full"
         >
-          <CarouselContent className="gap-4 -ml-0">
+          <CarouselContent className="-ml-4">
               {/* Card 1: Credit Overview */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
+              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
@@ -102,7 +102,7 @@ export default function Dashboard() {
                   </Card>
               </CarouselItem>
               {/* Card 2: Invoice Summary */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
+              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-sm font-semibold">Invoice Summary</CardTitle>
@@ -131,7 +131,7 @@ export default function Dashboard() {
                   </Card>
               </CarouselItem>
               {/* Card 3: Upcoming Payments */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
+              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
@@ -144,7 +144,7 @@ export default function Dashboard() {
                   </Card>
               </CarouselItem>
               {/* Card 4: Disbursal Summary */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
+              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                    <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-sm font-semibold">Disbursal Summary</CardTitle>
@@ -157,7 +157,7 @@ export default function Dashboard() {
                   </Card>
               </CarouselItem>
               {/* Card 5: Retailer Summary */}
-               <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
+               <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-sm font-semibold">Retailers Summary</CardTitle>
@@ -182,28 +182,28 @@ export default function Dashboard() {
                   </Card>
               </CarouselItem>
           </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
+          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex" />
+          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex" />
         </Carousel>
       </div>
       
       {/* Program Overview Carousel */}
       <div className="w-full">
         <h2 className="text-xl font-bold tracking-tight mb-2">Program Overview</h2>
-        <div className="mx-12">
+        <div className="relative px-12">
           <Carousel
             opts={{
               align: "start",
             }}
             className="w-full"
           >
-            <CarouselContent className="gap-4 -ml-0">
+            <CarouselContent className="-ml-4">
               {programs.map((program) => {
                 const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
                 const remainingLimit = program.totalLimit - program.usedLimit;
 
                 return (
-                  <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
+                  <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                     <Card className="h-full">
                       <CardHeader>
                         <CardTitle className="text-sm">{program.lenderName}</CardTitle>
@@ -247,8 +247,8 @@ export default function Dashboard() {
                 );
               })}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
+            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex" />
+            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex" />
           </Carousel>
         </div>
       </div>
