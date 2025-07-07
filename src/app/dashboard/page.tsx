@@ -144,8 +144,8 @@ export default function Dashboard() {
       </div>
       
       {/* Program Overview Carousel */}
-      <div className="min-w-0">
-        <h2 className="text-sm font-bold tracking-tight mb-2">Program Overview</h2>
+      <div className="w-full">
+        <h2 className="text-base font-bold tracking-tight mb-2">Program Overview</h2>
         <Carousel
           opts={{
             align: "start",
@@ -153,13 +153,13 @@ export default function Dashboard() {
           }}
           className="w-full"
         >
-          <CarouselContent className="gap-4">
+          <CarouselContent className="gap-4 -ml-0">
             {programs.map((program) => {
               const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-0">
                   <Card className="h-full">
                     <CardHeader className="p-4">
                       <CardTitle className="text-sm">{program.lenderName}</CardTitle>
@@ -195,7 +195,7 @@ export default function Dashboard() {
                       <Separator />
                       <Button variant="outline" size="sm" className="hover:bg-primary hover:text-primary-foreground">
                         <UploadCloud className="mr-2 h-4 w-4" />
-                        Upload Invoice
+                        Raise Invoice
                       </Button>
                     </CardContent>
                   </Card>
@@ -210,7 +210,7 @@ export default function Dashboard() {
       <div className="flex-1 min-h-0">
           <Card className="h-full flex flex-col">
               <CardHeader>
-                  <CardTitle className="text-xs font-semibold">Recent Invoices</CardTitle>
+                  <CardTitle className="text-base font-semibold">Recent Invoices</CardTitle>
               </CardHeader>
               <CardContent className="p-0 flex-1">
                 <ScrollArea className="h-full">
