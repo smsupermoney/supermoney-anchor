@@ -36,9 +36,8 @@ export default function Dashboard() {
   return (
     <>
       <PageHeader title="Dashboard" />
-      <div className="grid gap-6">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Credit Overview</CardTitle>
               <IndianRupee className="h-4 w-4 text-muted-foreground" />
@@ -60,28 +59,28 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Invoice Summary</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted-foreground">Total Invoices</span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-y-2">
+                <div className="flex flex-col items-center">
                     <span className="text-base font-bold">{invoices.length}</span>
+                    <span className="text-sm text-muted-foreground">Total</span>
                 </div>
-                <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted-foreground flex items-center gap-2"><Activity className="h-3 w-3" /> Active</span>
+                <div className="flex flex-col items-center">
                     <span className="text-base font-bold">{activeInvoicesCount}</span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Active</span>
                 </div>
-                <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted-foreground flex items-center gap-2"><Clock className="h-3 w-3" /> Pending</span>
+                <div className="flex flex-col items-center">
                     <span className="text-base font-bold">{pendingApprovalCount}</span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Pending</span>
                 </div>
-                <div className="flex items-baseline justify-between">
-                    <span className="text-destructive flex items-center gap-2 text-sm font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
+                <div className="flex flex-col items-center">
                     <span className="text-base font-bold text-destructive">{overdueInvoicesCount}</span>
+                    <span className="text-destructive flex items-center gap-1 text-sm font-medium"><AlertTriangle className="h-3 w-3" /> Overdue</span>
                 </div>
               </div>
             </CardContent>
@@ -96,9 +95,8 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground">+10% from last month</p>
             </CardContent>
           </Card>
-        </div>
         
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-base">Program Performance</CardTitle>
@@ -108,6 +106,8 @@ export default function Dashboard() {
                     <img data-ai-hint="invoice data bar chart" src="https://placehold.co/600x400.png" alt="Program Performance Chart" className="w-full h-auto rounded-md" />
                 </CardContent>
             </Card>
+        </div>
+        <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-base">Recent Invoices</CardTitle>
