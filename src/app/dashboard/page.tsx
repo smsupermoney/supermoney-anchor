@@ -61,14 +61,14 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full gap-4">
       <PageHeader title="Dashboard">
-        <Button>
+        <Button size="sm">
           <UploadCloud className="mr-2 h-4 w-4" />
           Raise Invoice
         </Button>
       </PageHeader>
       
       {/* Top Row Carousel */}
-      <div className="relative">
+      <div className="relative group">
         <Carousel
           opts={{
             align: "start",
@@ -182,15 +182,15 @@ export default function Dashboard() {
                   </Card>
               </CarouselItem>
           </CarouselContent>
-          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground" />
-          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground" />
+          <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 -translate-x-8 group-hover:translate-x-0 transition-all duration-300" />
+          <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 translate-x-8 group-hover:translate-x-0 transition-all duration-300" />
         </Carousel>
       </div>
       
       {/* Program Overview Carousel */}
       <div className="w-full">
         <h2 className="text-xl font-bold tracking-tight mb-2">Program Overview</h2>
-        <div className="relative">
+        <div className="relative group">
           <Carousel
             opts={{
               align: "start",
@@ -247,8 +247,8 @@ export default function Dashboard() {
                 );
               })}
             </CarouselContent>
-            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground" />
-            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground" />
+            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 -translate-x-8 group-hover:translate-x-0 transition-all duration-300" />
+            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 translate-x-8 group-hover:translate-x-0 transition-all duration-300" />
           </Carousel>
         </div>
       </div>
