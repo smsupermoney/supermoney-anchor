@@ -25,26 +25,27 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarMenu>
             {navigationLinks.map((link) => (
               <SidebarMenuItem key={link.href}>
-                <Link href={link.href} legacyBehavior passHref>
-                  <SidebarMenuButton
-                    isActive={pathname.startsWith(link.href)}
-                    tooltip={{ children: link.label }}
-                  >
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(link.href)}
+                  tooltip={{ children: link.label }}
+                >
+                  <Link href={link.href}>
                     <link.icon />
                     <span>{link.label}</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-          <Link href="/" legacyBehavior passHref>
-            <SidebarMenuButton tooltip={{ children: 'Logout' }}>
+          <SidebarMenuButton asChild tooltip={{ children: 'Logout' }}>
+            <Link href="/">
               <LogOut />
               <span>Logout</span>
-            </SidebarMenuButton>
-          </Link>
+            </Link>
+          </SidebarMenuButton>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
