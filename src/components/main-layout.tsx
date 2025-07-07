@@ -1,12 +1,13 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset } from '@/components/ui/sidebar';
-import Header from './header';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { navigationLinks } from './nav';
 import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,8 +22,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <Sidebar>
         <SidebarHeader>
           <h2 className="text-2xl font-bold text-primary pl-2 group-data-[collapsible=icon]:hidden">Anchor Dashboard</h2>
+            <Separator className="my-2" />
+            <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
+              <Avatar className="h-9 w-9">
+                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
+                  <AvatarFallback>S</AvatarFallback>
+              </Avatar>
+              <div className="group-data-[collapsible=icon]:hidden">
+                  <p className="text-sm font-medium leading-none text-sidebar-foreground">Supplier User</p>
+                  <p className="text-xs leading-none text-sidebar-foreground/70">
+                  supplier@example.com
+                  </p>
+              </div>
+          </div>
         </SidebarHeader>
-        <SidebarContent className="p-2">
+        <SidebarContent className="p-4">
           <SidebarMenu>
             {navigationLinks.map((link) => (
               <SidebarMenuItem key={link.href}>
@@ -50,8 +64,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <Header />
-        <main className="flex-1 p-4 min-w-0">
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-start gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:hidden">
+          <SidebarTrigger />
+        </header>
+        <main className="flex-1 p-2 min-w-0">
             {children}
         </main>
       </SidebarInset>
