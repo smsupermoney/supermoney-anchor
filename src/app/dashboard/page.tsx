@@ -1,12 +1,13 @@
 import PageHeader from "@/components/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs, retailers } from "@/lib/data";
 import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 
 export default function Dashboard() {
   const totalCreditLimit = 2000000;
@@ -44,7 +45,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full">
       <PageHeader title="Dashboard" />
-      <div className="flex-1 flex flex-col gap-4">
+      <div className="flex-1 flex flex-col gap-4 pt-4">
         {/* Top Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
@@ -134,6 +135,35 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+        
+        {/* Programs Overview */}
+        <div>
+            <h2 className="text-xs font-semibold mb-2">Program Overview</h2>
+            <ScrollArea className="w-full">
+                <div className="flex space-x-4 pb-4">
+                {programs.map((program) => {
+                    const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
+                    const remainingLimit = program.totalLimit - program.usedLimit;
+                    return (
+                        <Card key={program.id} className="min-w-[300px] max-w-[300px]">
+                            <CardHeader>
+                                <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                <CardDescription>Total Limit: {formatCurrencyCompact(program.totalLimit)}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Progress value={utilizationPercentage} className="h-2" />
+                                <div className="flex justify-between text-[10px] mt-2 text-muted-foreground">
+                                    <span>Used: {formatCurrencyCompact(program.usedLimit)}</span>
+                                    <span>Available: {formatCurrencyCompact(remainingLimit)}</span>
+                                 </div>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
+                </div>
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
         </div>
 
         {/* Recent Invoices */}
