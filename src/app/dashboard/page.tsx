@@ -1,7 +1,7 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { invoices, programs, retailers } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users } from "lucide-react";
+import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, UploadCloud } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -139,7 +139,7 @@ export default function Dashboard() {
       </div>
       
       {/* Program Overview Carousel */}
-      <div>
+      <div className="w-full min-w-0">
         <h2 className="text-sm font-bold tracking-tight mb-2">Program Overview</h2>
         <Carousel
           opts={{
@@ -147,39 +147,50 @@ export default function Dashboard() {
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-4">
+          <CarouselContent>
             {programs.map((program) => {
               const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <CarouselItem key={program.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                   <Card>
                     <CardHeader className="p-4">
                       <CardTitle className="text-sm">{program.lenderName}</CardTitle>
                       <CardDescription>Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
                     </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                      <div className="space-y-3">
-                        <div>
-                          <div className="flex justify-between text-[10px] mb-1">
-                            <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
-                            <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
-                          </div>
-                          <Progress value={utilizationPercentage} className="h-2" />
+                    <CardContent className="p-4 pt-0 flex flex-col gap-3">
+                      <div>
+                        <div className="flex justify-between text-[10px] mb-1">
+                          <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
+                          <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
                         </div>
-                        <Separator />
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="space-y-1">
-                              <p className="text-[10px] text-muted-foreground">Invoices</p>
-                              <p className="font-semibold text-sm">{program.invoicesCount}</p>
-                          </div>
-                           <div className="space-y-1">
-                              <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                              <p className="font-semibold text-sm">{formatCompactCurrency(program.disbursedAmount)}</p>
-                          </div>
+                        <Progress value={utilizationPercentage} className="h-2" />
+                      </div>
+                      <Separator />
+                      <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs">
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground">Invoices</p>
+                            <p className="font-semibold text-sm">{program.invoicesCount}</p>
+                        </div>
+                         <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground">Disbursed</p>
+                            <p className="font-semibold text-sm">{formatCompactCurrency(program.disbursedAmount)}</p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground">Total Retailers</p>
+                            <p className="font-semibold text-sm">{program.totalRetailers}</p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                            <p className="font-semibold text-sm">{program.overdueCount}</p>
                         </div>
                       </div>
+                      <Separator />
+                      <Button variant="outline" size="sm">
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        Upload Invoice
+                      </Button>
                     </CardContent>
                   </Card>
                 </CarouselItem>
@@ -211,7 +222,7 @@ export default function Dashboard() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {invoices.map((invoice) => (
+                      {invoices.slice(0, 10).map((invoice) => (
                         <TableRow key={invoice.id}>
                           <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
                           <TableCell>{invoice.retailerName}</TableCell>

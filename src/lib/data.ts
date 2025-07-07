@@ -21,10 +21,10 @@ export const invoices: Invoice[] = [
 ];
 
 export const programs: Program[] = [
-  { id: 'PROG01', lenderName: 'CHOLAMANDALAM INVEST...', totalLimit: 1000000, usedLimit: 700000, invoicesCount: 40, disbursedAmount: 650000, activeDealers: 12 },
-  { id: 'PROG02', lenderName: 'ADITYA BIRLA CAPITAL LTD', totalLimit: 800000, usedLimit: 300000, invoicesCount: 20, disbursedAmount: 250000, activeDealers: 26 },
-  { id: 'PROG03', lenderName: 'Supply Chain Finance Co.', totalLimit: 1200000, usedLimit: 900000, invoicesCount: 60, disbursedAmount: 850000, activeDealers: 18 },
-  { id: 'PROG04', lenderName: 'Flexi Loans', totalLimit: 500000, usedLimit: 100000, invoicesCount: 15, disbursedAmount: 100000, activeDealers: 8 },
+  { id: 'PROG01', lenderName: 'CHOLAMANDALAM INVEST...', totalLimit: 1000000, usedLimit: 700000, invoicesCount: 40, disbursedAmount: 650000, totalRetailers: 12, overdueCount: 3 },
+  { id: 'PROG02', lenderName: 'ADITYA BIRLA CAPITAL LTD', totalLimit: 800000, usedLimit: 300000, invoicesCount: 20, disbursedAmount: 250000, totalRetailers: 26, overdueCount: 1 },
+  { id: 'PROG03', lenderName: 'Supply Chain Finance Co.', totalLimit: 1200000, usedLimit: 900000, invoicesCount: 60, disbursedAmount: 850000, totalRetailers: 18, overdueCount: 5 },
+  { id: 'PROG04', lenderName: 'Flexi Loans', totalLimit: 500000, usedLimit: 100000, invoicesCount: 15, disbursedAmount: 100000, totalRetailers: 8, overdueCount: 0 },
 ];
 
 export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];
