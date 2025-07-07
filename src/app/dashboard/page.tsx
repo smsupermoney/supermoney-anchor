@@ -154,7 +154,7 @@ export default function Dashboard() {
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 p-0">
+                <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                   <Card className="h-full">
                     <CardHeader className="p-4">
                       <CardTitle className="text-sm">{program.lenderName}</CardTitle>
@@ -169,7 +169,7 @@ export default function Dashboard() {
                         <Progress value={utilizationPercentage} className="h-2" />
                       </div>
                       <Separator />
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="space-y-1">
                             <p className="text-[10px] text-muted-foreground">Invoices</p>
                             <p className="font-semibold text-sm">{program.invoicesCount}</p>
