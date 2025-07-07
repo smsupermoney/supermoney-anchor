@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import {
   Select,
   SelectContent,
@@ -14,7 +14,7 @@ import { generateRiskAssessment } from "@/app/risk-assessment/actions";
 import { AlertCircle, Bot, Zap } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import type { Invoice, Retailer } from "@/types";
 
 function SubmitButton() {
@@ -34,7 +34,7 @@ type RiskAssessmentClientProps = {
 
 export default function RiskAssessmentClient({ retailers }: RiskAssessmentClientProps) {
   const initialState = { message: "", error: false };
-  const [state, formAction] = useFormState(generateRiskAssessment, initialState);
+  const [state, formAction] = useActionState(generateRiskAssessment, initialState);
   const [selectedRetailerId, setSelectedRetailerId] = useState<string>("");
 
   const riskScoreColor = (score: number) => {
