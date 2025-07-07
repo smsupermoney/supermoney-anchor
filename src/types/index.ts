@@ -28,6 +28,7 @@ export type Program = {
   usedLimit: number;
   invoicesCount: number;
   disbursedAmount: number;
+  activeDealers: number;
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';

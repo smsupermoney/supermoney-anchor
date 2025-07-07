@@ -1,21 +1,21 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs, retailers } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users } from "lucide-react";
+import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, PlusCircle } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const totalCreditLimit = 2000000;
   const utilizedCredit = 1400000;
   const availableCredit = totalCreditLimit - utilizedCredit;
   
-  const formatCurrencyCompact = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact', maximumFractionDigits: 1 }).format(amount).replace(/\.0(?=\D)/, '');
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount).replace('₹', '₹ ');
 
 
   const today = new Date();
@@ -45,7 +45,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full">
       <PageHeader title="Dashboard" />
-      <div className="flex-1 flex flex-col gap-4 pt-4">
+      <div className="flex-1 flex flex-col gap-4">
         {/* Top Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
@@ -57,15 +57,15 @@ export default function Dashboard() {
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
                     <span className="text-[10px] text-muted-foreground">Total Limit</span>
-                    <span className="text-xs font-semibold">{formatCurrencyCompact(totalCreditLimit)}</span>
+                    <span className="text-xs font-semibold">{formatCurrency(totalCreditLimit)}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
                     <span className="text-[10px] text-muted-foreground">Utilized</span>
-                    <span className="text-xs font-semibold">{formatCurrencyCompact(utilizedCredit)}</span>
+                    <span className="text-xs font-semibold">{formatCurrency(utilizedCredit)}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
                     <span className="text-[10px] text-muted-foreground">Available</span>
-                    <span className="text-xs font-semibold text-primary">{formatCurrencyCompact(availableCredit)}</span>
+                    <span className="text-xs font-semibold text-primary">{formatCurrency(availableCredit)}</span>
                 </div>
               </div>
             </CardContent>
@@ -111,7 +111,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-baseline justify-between">
                     <span className="text-[10px] text-muted-foreground">Total Limit</span>
-                    <span className="text-xs font-semibold">{formatCurrencyCompact(totalProgramLimit)}</span>
+                    <span className="text-xs font-semibold">{formatCurrency(totalProgramLimit)}</span>
                 </div>
               </div>
             </CardContent>
@@ -137,33 +137,61 @@ export default function Dashboard() {
           </Card>
         </div>
         
-        {/* Programs Overview */}
+        {/* Program Overview */}
         <div>
-            <h2 className="text-xs font-semibold mb-2">Program Overview</h2>
-            <ScrollArea className="w-full">
-                <div className="flex space-x-4 pb-4">
-                {programs.map((program) => {
-                    const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
-                    const remainingLimit = program.totalLimit - program.usedLimit;
-                    return (
-                        <Card key={program.id} className="min-w-[300px] max-w-[300px]">
-                            <CardHeader>
-                                <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                                <CardDescription>Total Limit: {formatCurrencyCompact(program.totalLimit)}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Progress value={utilizationPercentage} className="h-2" />
-                                <div className="flex justify-between text-[10px] mt-2 text-muted-foreground">
-                                    <span>Used: {formatCurrencyCompact(program.usedLimit)}</span>
-                                    <span>Available: {formatCurrencyCompact(remainingLimit)}</span>
-                                 </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-                </div>
-                <ScrollBar orientation="horizontal" />
-            </ScrollArea>
+          <h2 className="text-xs font-semibold mb-2">Program Overview</h2>
+          <Carousel
+            opts={{
+              align: "start",
+              dragFree: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {programs.map((program) => {
+                const remainingLimit = program.totalLimit - program.usedLimit;
+                return (
+                  <CarouselItem key={program.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                    <Card className="flex flex-col h-full border">
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-sm font-bold text-primary truncate w-4/5">{program.lenderName}</CardTitle>
+                          <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">Active</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-0 flex-grow">
+                        <div className="grid grid-cols-2 text-xs border-t">
+                          <div className="p-3 border-r">
+                            <p className="text-base font-bold">{program.activeDealers}</p>
+                            <p className="text-muted-foreground underline cursor-pointer">Active Dealer Limits</p>
+                          </div>
+                          <div className="p-3 text-right">
+                            <p className="text-muted-foreground">Available Program Limits</p>
+                            <p className="text-base font-bold">{formatCurrency(program.totalLimit)}</p>
+                          </div>
+                          <div className="p-3 border-t border-r">
+                            <p className="text-base font-bold">{formatCurrency(remainingLimit)}</p>
+                            <p className="text-muted-foreground">Available</p>
+                          </div>
+                          <div className="p-3 border-t">
+                            {/* This cell is empty in the design */}
+                          </div>
+                        </div>
+                      </CardContent>
+                      <div className="border-t mt-auto">
+                        <Button variant="ghost" className="w-full justify-center text-primary font-semibold hover:bg-primary/5">
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Raise Invoice(s)
+                        </Button>
+                      </div>
+                    </Card>
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
+          </Carousel>
         </div>
 
         {/* Recent Invoices */}
