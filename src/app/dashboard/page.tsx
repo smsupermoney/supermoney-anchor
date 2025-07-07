@@ -45,7 +45,12 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full gap-4">
-      <PageHeader title="Dashboard" />
+      <PageHeader title="Dashboard">
+        <Button>
+          <UploadCloud className="mr-2 h-4 w-4" />
+          Raise Invoice
+        </Button>
+      </PageHeader>
       
       {/* Top Row */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
