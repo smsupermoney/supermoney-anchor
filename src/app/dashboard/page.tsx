@@ -7,13 +7,12 @@ import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const totalCreditLimit = 2000000;
   const utilizedCredit = 1400000;
-  const availableCredit = totalCreditLimit - utilizedCredit;
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount).replace('₹', '₹ ');
 
@@ -43,9 +42,9 @@ export default function Dashboard() {
   const activeRetailers = retailers.filter(r => r.status === 'Active').length;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full gap-4">
       <PageHeader title="Dashboard" />
-      <div className="flex-1 flex flex-col gap-4">
+      
         {/* Top Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
@@ -65,7 +64,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-baseline justify-between">
                     <span className="text-[10px] text-muted-foreground">Available</span>
-                    <span className="text-xs font-semibold text-primary">{formatCurrency(availableCredit)}</span>
+                    <span className="text-xs font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
                 </div>
               </div>
             </CardContent>
@@ -189,8 +188,6 @@ export default function Dashboard() {
                 );
               })}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
           </Carousel>
         </div>
 
@@ -236,7 +233,6 @@ export default function Dashboard() {
                 </CardContent>
             </Card>
         </div>
-      </div>
     </div>
   );
 }
