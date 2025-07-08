@@ -88,6 +88,6 @@ export default function CfoDashboardPage() {
           </Card>
         </div>
       </div>
-    </>
+    </div>
   );
 }
