@@ -1,4 +1,5 @@
 
+
 export type VendorKycStatus = 'approved' | 'pending' | 'rejected';
 
 export type Vendor = {
@@ -84,4 +85,12 @@ export type OnboardingPartner = {
   assignedRM: string;
   salespersonRemarks?: string;
   status: OnboardingStatus;
+};
+
+export type UserRole = 'manager' | 'cfo' | 'supply_chain_head';
+
+export type User = {
+  name: string;
+  email: string;
+  role: UserRole;
 };

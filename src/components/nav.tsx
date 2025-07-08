@@ -1,14 +1,21 @@
 
 import { LayoutDashboard, Users, FileText, Library, GitBranchPlus, AreaChart, UserCog, Bot } from 'lucide-react';
+import type { UserRole } from '@/types';
 
-export const navigationLinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/vendors', label: 'Vendors', icon: Users },
-  // { href: '/dealers', label: 'Dealers', icon: Users }, // Add this back if needed
-  { href: '/invoices', label: 'Invoices', icon: FileText },
-  { href: '/programs', label: 'Programs', icon: Library },
-  { href: '/partner-onboarding', label: 'Partner Management', icon: GitBranchPlus },
-  { href: '/analytics', label: 'Analytics', icon: AreaChart },
-  { href: '/cfo-dashboard', label: 'CFO Dashboard', icon: Bot },
-  { href: '/settings', label: 'Settings', icon: UserCog },
+type NavLink = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  roles: UserRole[];
+};
+
+export const navigationLinks: NavLink[] = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['manager', 'supply_chain_head'] },
+  { href: '/cfo-dashboard', label: 'CFO Dashboard', icon: Bot, roles: ['cfo'] },
+  { href: '/vendors', label: 'Vendors', icon: Users, roles: ['manager', 'supply_chain_head'] },
+  { href: '/invoices', label: 'Invoices', icon: FileText, roles: ['manager'] },
+  { href: '/programs', label: 'Programs', icon: Library, roles: ['manager'] },
+  { href: '/partner-onboarding', label: 'Partner Management', icon: GitBranchPlus, roles: ['manager', 'supply_chain_head'] },
+  { href: '/analytics', label: 'Analytics', icon: AreaChart, roles: ['manager', 'cfo'] },
+  { href: '/settings', label: 'Settings', icon: UserCog, roles: ['manager'] },
 ];

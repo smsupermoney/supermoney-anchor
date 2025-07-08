@@ -9,10 +9,12 @@ import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import SupermoneyLogo from './supermoney-logo';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMounted = useMounted();
+  const { user, logout } = useAuth();
 
   if (!isMounted) {
     return (
@@ -23,9 +25,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     )
   }
 
-  if (pathname === '/') {
+  if (!user || pathname === '/') {
     return <>{children}</>;
   }
+  
+  const handleLogout = () => {
+    logout();
+  }
+
+  const availableLinks = navigationLinks.filter(link => link.roles.includes(user.role));
 
   return (
     <SidebarProvider>
@@ -38,20 +46,20 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <Separator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
               <Avatar className="h-9 w-9">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
-                  <AvatarFallback>S</AvatarFallback>
+                  <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} alt="User Avatar" />
+                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="group-data-[collapsible=icon]:hidden">
-                  <p className="text-sm font-medium leading-none text-sidebar-foreground">Supplier User</p>
+                  <p className="text-sm font-medium leading-none text-sidebar-foreground">{user.name}</p>
                   <p className="text-xs leading-none text-sidebar-foreground/70">
-                  supplier@example.com
+                  {user.email}
                   </p>
               </div>
           </div>
         </SidebarHeader>
         <SidebarContent className="p-4">
           <SidebarMenu>
-            {navigationLinks.map((link) => (
+            {availableLinks.map((link) => (
               <SidebarMenuItem key={link.href}>
                 <SidebarMenuButton
                   asChild
@@ -68,7 +76,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-          <SidebarMenuButton asChild tooltip={{ children: 'Logout' }}>
+          <SidebarMenuButton asChild tooltip={{ children: 'Logout' }} onClick={handleLogout}>
             <Link href="/">
               <LogOut />
               <span>Logout</span>
