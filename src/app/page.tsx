@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -15,6 +16,9 @@ const userEmails: Record<UserRole, string> = {
   manager: "sunita.sharma@example.com",
   cfo: "prakash.rao@example.com",
   supply_chain_head: "ankit.desai@example.com",
+  salesperson: "rajesh.kumar@example.com",
+  regional_manager: "priya.singh@example.com",
+  hq_finance_manager: "vijay.sharma@example.com",
 };
 
 export default function LoginPage() {
@@ -25,7 +29,12 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     login(role);
-    const landingPage = role === 'cfo' ? '/cfo-dashboard' : '/dashboard';
+    let landingPage = '/dashboard';
+    if (role === 'cfo') {
+      landingPage = '/cfo-dashboard';
+    } else if (['salesperson', 'regional_manager', 'hq_finance_manager'].includes(role)) {
+      landingPage = '/partner-onboarding';
+    }
     router.push(landingPage);
   };
 
@@ -51,6 +60,9 @@ export default function LoginPage() {
                   <SelectItem value="manager">AP/AR Manager (Sunita)</SelectItem>
                   <SelectItem value="cfo">CFO (Prakash)</SelectItem>
                   <SelectItem value="supply_chain_head">Supply Chain Head (Ankit)</SelectItem>
+                  <SelectItem value="salesperson">Salesperson (Rajesh)</SelectItem>
+                  <SelectItem value="regional_manager">Regional Manager (Priya)</SelectItem>
+                  <SelectItem value="hq_finance_manager">HQ Finance Manager (Vijay)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -15,7 +15,7 @@ export const navigationLinks: NavLink[] = [
   { href: '/vendors', label: 'Vendors', icon: Users, roles: ['manager', 'supply_chain_head'] },
   { href: '/invoices', label: 'Invoices', icon: FileText, roles: ['manager'] },
   { href: '/programs', label: 'Programs', icon: Library, roles: ['manager'] },
-  { href: '/partner-onboarding', label: 'Partner Management', icon: GitBranchPlus, roles: ['manager', 'supply_chain_head'] },
+  { href: '/partner-onboarding', label: 'Partner Management', icon: GitBranchPlus, roles: ['manager', 'supply_chain_head', 'salesperson', 'regional_manager', 'hq_finance_manager'] },
   { href: '/analytics', label: 'Analytics', icon: AreaChart, roles: ['manager', 'cfo'] },
   { href: '/settings', label: 'Settings', icon: UserCog, roles: ['manager'] },
 ];

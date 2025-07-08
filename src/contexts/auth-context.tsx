@@ -18,6 +18,18 @@ const USER_DATA: Record<UserRole, Omit<User, 'role'>> = {
     name: "Ankit Desai",
     email: "ankit.desai@example.com",
   },
+  salesperson: {
+    name: "Rajesh Kumar",
+    email: "rajesh.kumar@example.com",
+  },
+  regional_manager: {
+    name: "Priya Singh",
+    email: "priya.singh@example.com",
+  },
+  hq_finance_manager: {
+    name: "Vijay Sharma",
+    email: "vijay.sharma@example.com",
+  },
 };
 
 interface AuthContextType {
