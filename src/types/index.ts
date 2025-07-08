@@ -19,6 +19,7 @@ export type Invoice = {
   eWayBillNumber: string;
   documentUrl?: string;
   status: InvoiceStatus;
+  programId: string;
 };
 
 export type Program = {
