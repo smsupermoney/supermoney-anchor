@@ -1,7 +1,7 @@
 
 "use client"
 
-import { notFound, useRouter } from "next/navigation";
+import { notFound, useRouter, useParams } from "next/navigation";
 import PageHeader from "@/components/page-header";
 import ProgressTracker from "@/components/progress-tracker";
 import { onboardingPartners, onboardingStatuses } from "@/lib/data";
@@ -11,8 +11,9 @@ import PartnerDetailsCard from "./_components/partner-details-card";
 import OnboardingActions from "./_components/onboarding-actions";
 import { useAuth } from "@/contexts/auth-context";
 
-export default function PartnerDetailPage({ params }: { params: { id: string } }) {
+export default function PartnerDetailPage() {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
   const { user } = useAuth();
   const { id } = params;
   const partner = onboardingPartners.find(p => p.id === id);
