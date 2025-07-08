@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { programs } from "@/lib/data";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProgramsPage() {
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
@@ -18,8 +19,13 @@ export default function ProgramsPage() {
           return (
             <Card key={program.id}>
               <CardHeader>
-                <CardTitle>{program.lenderName}</CardTitle>
-                <CardDescription>Total Limit: {formatCurrency(program.totalLimit)}</CardDescription>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle>{program.lenderName}</CardTitle>
+                        <CardDescription>Total Limit: {formatCurrency(program.totalLimit)}</CardDescription>
+                    </div>
+                    <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">

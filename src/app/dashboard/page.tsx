@@ -10,10 +10,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
-  const totalCreditLimit = 2000000;
-  const utilizedCredit = 1400000;
+  const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
+  const externalPrograms = programs.filter(p => p.lenderType === 'External');
+
+  const supermoneyTotalLimit = supermoneyPrograms.reduce((sum, p) => sum + p.totalLimit, 0);
+  const supermoneyUtilizedCredit = supermoneyPrograms.reduce((sum, p) => sum + p.usedLimit, 0);
+
+  const externalTotalLimit = externalPrograms.reduce((sum, p) => sum + p.totalLimit, 0);
+  const externalUtilizedCredit = externalPrograms.reduce((sum, p) => sum + p.usedLimit, 0);
+  
+  const totalCreditLimit = supermoneyTotalLimit + externalTotalLimit;
+  const utilizedCredit = supermoneyUtilizedCredit + externalUtilizedCredit;
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount).replace('₹', '₹ ');
   const formatCompactCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
@@ -83,19 +93,52 @@ export default function Dashboard() {
                           <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
                           <IndianRupee className="w-4 h-4 text-muted-foreground" />
                       </CardHeader>
-                      <CardContent className="p-3 pt-0">
-                          <div className="space-y-2">
-                              <div className="flex items-baseline justify-between">
-                                  <span className="text-xs text-muted-foreground">Total Limit</span>
-                                  <span className="text-sm font-semibold">{formatCurrency(totalCreditLimit)}</span>
+                      <CardContent className="p-3 pt-0 text-xs">
+                          <div className="space-y-3">
+                              <div>
+                                  <h4 className="font-semibold mb-1 text-primary">Supermoney</h4>
+                                  <div className="space-y-1">
+                                      <div className="flex justify-between items-center">
+                                          <span className="text-muted-foreground">Total Limit</span>
+                                          <span className="font-medium">{formatCurrency(supermoneyTotalLimit)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="text-muted-foreground">Utilized</span>
+                                          <span className="font-medium">{formatCurrency(supermoneyUtilizedCredit)}</span>
+                                      </div>
+                                  </div>
                               </div>
-                              <div className="flex items-baseline justify-between">
-                                  <span className="text-xs text-muted-foreground">Utilized</span>
-                                  <span className="text-sm font-semibold">{formatCurrency(utilizedCredit)}</span>
+                              <Separator />
+                              <div>
+                                  <h4 className="font-semibold mb-1">External Lenders</h4>
+                                  <div className="space-y-1">
+                                      <div className="flex justify-between items-center">
+                                          <span className="text-muted-foreground">Total Limit</span>
+                                          <span className="font-medium">{formatCurrency(externalTotalLimit)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="text-muted-foreground">Utilized</span>
+                                          <span className="font-medium">{formatCurrency(externalUtilizedCredit)}</span>
+                                      </div>
+                                  </div>
                               </div>
-                              <div className="flex items-baseline justify-between">
-                                  <span className="text-xs text-muted-foreground">Available</span>
-                                  <span className="text-sm font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
+                              <Separator />
+                              <div>
+                                  <h4 className="font-bold mb-1">Total</h4>
+                                  <div className="space-y-1">
+                                      <div className="flex justify-between items-center">
+                                          <span className="text-muted-foreground">Total Limit</span>
+                                          <span className="font-semibold">{formatCurrency(totalCreditLimit)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="text-muted-foreground">Utilized</span>
+                                          <span className="font-semibold">{formatCurrency(utilizedCredit)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="text-muted-foreground">Available</span>
+                                          <span className="font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
+                                      </div>
+                                  </div>
                               </div>
                           </div>
                       </CardContent>
@@ -206,8 +249,13 @@ export default function Dashboard() {
                   <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                     <Card className="h-full">
                       <CardHeader className="p-3">
-                        <CardTitle className="text-sm">{program.lenderName}</CardTitle>
-                        <CardDescription>Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <CardTitle className="text-sm">{program.lenderName}</CardTitle>
+                                <CardDescription>Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                            </div>
+                            <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
+                        </div>
                       </CardHeader>
                       <CardContent className="pt-0 flex flex-col gap-2 p-3">
                         <div>

@@ -24,6 +24,7 @@ export type Invoice = {
 export type Program = {
   id: string;
   lenderName: string;
+  lenderType: 'Supermoney' | 'External';
   totalLimit: number;
   usedLimit: number;
   invoicesCount: number;
