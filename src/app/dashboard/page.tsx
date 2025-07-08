@@ -11,15 +11,10 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import type { Invoice } from "@/types";
 
 export default function Dashboard() {
   const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
   const externalPrograms = programs.filter(p => p.lenderType === 'External');
-  
-  const supermoneyProgramIds = new Set(supermoneyPrograms.map(p => p.id));
-  const supermoneyInvoices = invoices.filter(i => supermoneyProgramIds.has(i.programId));
-  const externalInvoices = invoices.filter(i => !supermoneyProgramIds.has(i.programId));
 
   const supermoneyTotalLimit = supermoneyPrograms.reduce((sum, p) => sum + p.totalLimit, 0);
   const supermoneyUtilizedCredit = supermoneyPrograms.reduce((sum, p) => sum + p.usedLimit, 0);
@@ -36,58 +31,38 @@ export default function Dashboard() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
   const thirtyDaysFromNow = new Date();
   thirtyDaysFromNow.setDate(today.getDate() + 30);
 
-  const getInvoiceStats = (invoiceList: Invoice[]) => {
-    const overdue = invoiceList.filter(
-      (i) =>
-      new Date(i.dueDate).getTime() < today.getTime() &&
-      i.status !== "Disbursed" &&
-      i.status !== "Rejected"
-    ).length;
+  const overdueInvoicesCount = invoices.filter(
+    (i) =>
+    new Date(i.dueDate).getTime() < today.getTime() &&
+    i.status !== "Disbursed" &&
+    i.status !== "Rejected"
+  ).length;
 
-    const pendingApproval = invoiceList.filter(
-      i => i.status === 'Initiated' || i.status === 'Approved'
-    ).length;
+  const pendingApprovalCount = invoices.filter(
+    i => i.status === 'Initiated' || i.status === 'Approved'
+  ).length;
 
-    const active = invoiceList.filter(
-      i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender'
-    ).length;
+  const activeInvoicesCount = invoices.filter(
+    i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender'
+  ).length;
 
-    return { total: invoiceList.length, active, pendingApproval, overdue };
-  }
+  const upcomingPayments = invoices.filter(
+    (i) =>
+      i.status === "Disbursed" &&
+      new Date(i.dueDate) >= today &&
+      new Date(i.dueDate) <= thirtyDaysFromNow
+  );
+  const upcomingPaymentsCount = upcomingPayments.length;
+  const upcomingPaymentsAmount = upcomingPayments.reduce((sum, i) => sum + i.amount, 0);
   
-  const getUpcomingPayments = (invoiceList: Invoice[]) => {
-      const upcoming = invoiceList.filter(
-        (i) =>
-          i.status === "Disbursed" &&
-          new Date(i.dueDate) >= today &&
-          new Date(i.dueDate) <= thirtyDaysFromNow
-      );
-      const count = upcoming.length;
-      const amount = upcoming.reduce((sum, i) => sum + i.amount, 0);
-      return { count, amount };
-  }
+  const disbursedInvoices = invoices.filter(i => i.status === 'Disbursed');
+  const disbursedCount = disbursedInvoices.length;
+  const disbursedAmount = disbursedInvoices.reduce((sum, inv) => sum + inv.amount, 0);
 
-  const getDisbursalSummary = (invoiceList: Invoice[]) => {
-      const disbursed = invoiceList.filter(i => i.status === 'Disbursed');
-      const count = disbursed.length;
-      const amount = disbursed.reduce((sum, inv) => sum + inv.amount, 0);
-      return { count, amount };
-  }
-
-  const supermoneyInvoiceStats = getInvoiceStats(supermoneyInvoices);
-  const externalInvoiceStats = getInvoiceStats(externalInvoices);
-  const totalInvoiceStats = getInvoiceStats(invoices);
-
-  const supermoneyUpcomingPayments = getUpcomingPayments(supermoneyInvoices);
-  const externalUpcomingPayments = getUpcomingPayments(externalInvoices);
-  const totalUpcomingPayments = getUpcomingPayments(invoices);
-  
-  const supermoneyDisbursalSummary = getDisbursalSummary(supermoneyInvoices);
-  const externalDisbursalSummary = getDisbursalSummary(externalInvoices);
-  const totalDisbursalSummary = getDisbursalSummary(invoices);
 
   const totalDealers = dealers.length;
   const activeDealers = dealers.filter(r => r.status === 'Active').length;
@@ -102,6 +77,7 @@ export default function Dashboard() {
         </Button>
       </PageHeader>
       
+      {/* Top Row Carousel */}
       <div className="relative group overflow-hidden">
         <Carousel
           opts={{
@@ -110,6 +86,7 @@ export default function Dashboard() {
           className="w-full"
         >
           <CarouselContent className="-ml-4">
+              {/* Card 1: Credit Overview */}
               <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
@@ -167,70 +144,49 @@ export default function Dashboard() {
                       </CardContent>
                   </Card>
               </CarouselItem>
+              {/* Card 2: Invoice Summary */}
               <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
                           <CardTitle className="text-sm font-semibold">Invoice Summary</CardTitle>
                           <FileText className="w-4 h-4 text-muted-foreground" />
                       </CardHeader>
-                      <CardContent className="p-3 pt-0 text-xs">
-                         <div className="space-y-2">
-                              <div>
-                                  <h4 className="font-semibold mb-1 text-primary">Supermoney</h4>
-                                  <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                                      <div className="text-muted-foreground">Total</div><div className="font-medium text-right">{supermoneyInvoiceStats.total}</div>
-                                      <div className="text-muted-foreground">Active</div><div className="font-medium text-right">{supermoneyInvoiceStats.active}</div>
-                                      <div className="text-muted-foreground">Pending</div><div className="font-medium text-right">{supermoneyInvoiceStats.pendingApproval}</div>
-                                      <div className="text-destructive">Overdue</div><div className="font-medium text-destructive text-right">{supermoneyInvoiceStats.overdue}</div>
-                                  </div>
+                      <CardContent className="p-3 pt-0">
+                          <div className="grid grid-cols-2 gap-y-2">
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold">{invoices.length}</span>
+                                  <span className="text-xs text-muted-foreground">Total</span>
                               </div>
-                              <Separator />
-                              <div>
-                                  <h4 className="font-semibold mb-1">External Lenders</h4>
-                                  <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                                      <div className="text-muted-foreground">Total</div><div className="font-medium text-right">{externalInvoiceStats.total}</div>
-                                      <div className="text-muted-foreground">Active</div><div className="font-medium text-right">{externalInvoiceStats.active}</div>
-                                      <div className="text-muted-foreground">Pending</div><div className="font-medium text-right">{externalInvoiceStats.pendingApproval}</div>
-                                      <div className="text-destructive">Overdue</div><div className="font-medium text-destructive text-right">{externalInvoiceStats.overdue}</div>
-                                  </div>
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold">{activeInvoicesCount}</span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Active</span>
                               </div>
-                              <Separator />
-                              <div>
-                                  <h4 className="font-bold mb-1">Total</h4>
-                                  <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                                      <div className="text-muted-foreground">Total</div><div className="font-semibold text-right">{totalInvoiceStats.total}</div>
-                                      <div className="text-muted-foreground">Active</div><div className="font-semibold text-right">{totalInvoiceStats.active}</div>
-                                      <div className="text-muted-foreground">Pending</div><div className="font-semibold text-right">{totalInvoiceStats.pendingApproval}</div>
-                                      <div className="text-destructive">Overdue</div><div className="font-semibold text-destructive text-right">{totalInvoiceStats.overdue}</div>
-                                  </div>
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold">{pendingApprovalCount}</span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold text-destructive">{overdueInvoicesCount}</span>
+                                  <span className="text-destructive flex items-center gap-1 text-xs font-medium"><AlertTriangle className="w-3 h-3" /> Overdue</span>
                               </div>
                           </div>
                       </CardContent>
                   </Card>
               </CarouselItem>
+              {/* Card 3: Upcoming Payments */}
               <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
-                          <CardTitle className="text-sm font-semibold">Upcoming Payments (Next 30d)</CardTitle>
+                          <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
                           <CalendarClock className="w-4 h-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent className="p-3 pt-0">
-                          <p className="text-2xl font-bold">{formatCurrency(totalUpcomingPayments.amount)}</p>
-                          <p className="text-xs text-muted-foreground">Across {totalUpcomingPayments.count} invoices</p>
-                          <Separator className="my-2" />
-                          <div className="text-xs space-y-1">
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground text-primary">Supermoney</span>
-                                  <span className="font-medium">{formatCurrency(supermoneyUpcomingPayments.amount)} ({supermoneyUpcomingPayments.count})</span>
-                              </div>
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground">External</span>
-                                  <span className="font-medium">{formatCurrency(externalUpcomingPayments.amount)} ({externalUpcomingPayments.count})</span>
-                              </div>
-                          </div>
+                          <p className="text-2xl font-bold">{formatCurrency(upcomingPaymentsAmount)}</p>
+                          <p className="text-xs text-muted-foreground">Across {upcomingPaymentsCount} invoices in next 30 days</p>
                       </CardContent>
                   </Card>
               </CarouselItem>
+              {/* Card 4: Disbursal Summary */}
               <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                    <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
@@ -238,22 +194,12 @@ export default function Dashboard() {
                           <CheckCircle className="w-4 h-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent className="p-3 pt-0">
-                          <p className="text-2xl font-bold">{formatCurrency(totalDisbursalSummary.amount)}</p>
-                          <p className="text-xs text-muted-foreground">Total across {totalDisbursalSummary.count} invoices</p>
-                          <Separator className="my-2" />
-                           <div className="text-xs space-y-1">
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground text-primary">Supermoney</span>
-                                  <span className="font-medium">{formatCurrency(supermoneyDisbursalSummary.amount)} ({supermoneyDisbursalSummary.count})</span>
-                              </div>
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground">External</span>
-                                  <span className="font-medium">{formatCurrency(externalDisbursalSummary.amount)} ({externalDisbursalSummary.count})</span>
-                              </div>
-                          </div>
+                          <p className="text-2xl font-bold">{formatCurrency(disbursedAmount)}</p>
+                          <p className="text-xs text-muted-foreground">Total across {disbursedCount} invoices</p>
                       </CardContent>
                   </Card>
               </CarouselItem>
+              {/* Card 5: Dealers Summary */}
                <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
