@@ -22,8 +22,7 @@ export default function DocumentManager({ partner, onUpdateStatus, isValidator =
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+  const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     setIsProcessing(true);
@@ -52,9 +51,23 @@ export default function DocumentManager({ partner, onUpdateStatus, isValidator =
     }
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(event.target.files);
+  };
+
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    handleFiles(event.dataTransfer.files);
+  };
+
 
   // The validator view can be built out later if needed. For now, it shows a placeholder.
   if (isValidator) {
@@ -98,6 +111,8 @@ export default function DocumentManager({ partner, onUpdateStatus, isValidator =
           <div
             className="flex flex-col items-center justify-center w-full p-8 border-2 border-dashed rounded-lg cursor-pointer hover:bg-secondary transition-colors"
             onClick={handleUploadClick}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           >
             <UploadCloud className="w-12 h-12 text-muted-foreground" />
             <p className="mt-4 font-semibold">Click to upload or drag & drop</p>
