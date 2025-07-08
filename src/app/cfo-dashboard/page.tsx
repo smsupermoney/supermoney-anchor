@@ -14,6 +14,7 @@ import { invoices, lenders } from "@/lib/data";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { CostOfCapitalChart } from "@/components/cfo-charts";
 
 const initialMessages = [
   { from: "ai", text: "Hello! I'm your financial assistant. How can I help you today? You can ask me things like 'What's our total utilized limit?' or 'Show me the top 5 overdue invoices'." },
@@ -130,69 +131,71 @@ export default function CfoDashboardPage() {
         </Card>
       </div>
 
+       {/* Lender-wise Limit Management Module */}
+        <Card>
+            <CardHeader>
+                <CardTitle>Lender-wise Limit Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                    {lenders.map(lender => {
+                        const lenderUtilized = invoices.filter(i => lender.programs.some(p => p.id === i.programId)).reduce((sum, i) => sum + i.amount, 0);
+                        const lenderAvailable = lender.totalLimit - lenderUtilized;
+                        const isNearingLimit = (lenderUtilized / lender.totalLimit) * 100 > 80;
+
+                        return (
+                            <AccordionItem value={lender.id} key={lender.id}>
+                                <AccordionTrigger className="hover:no-underline">
+                                    <div className="w-full grid grid-cols-5 items-center text-sm gap-4">
+                                        <div className="font-bold col-span-2 flex items-center gap-2">
+                                            <Library className="h-4 w-4 text-muted-foreground" />
+                                            {lender.name}
+                                            {isNearingLimit && <Badge variant="destructive" className="text-xs">Limit Reached</Badge>}
+                                        </div>
+                                        <div className="text-right">{formatCurrency(lender.totalLimit)}</div>
+                                        <div className="text-right">{formatCurrency(lenderUtilized)}</div>
+                                        <div className="text-right">{formatCurrency(lenderAvailable)}</div>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="px-4 py-2 bg-secondary/50 rounded-md">
+                                        <div className="grid grid-cols-6 gap-4 font-semibold text-xs text-muted-foreground mb-2">
+                                            <div className="col-span-2">Program Name</div>
+                                            <div>Limit</div>
+                                            <div>Utilized</div>
+                                            <div>Available</div>
+                                            <div className="text-center">APR%</div>
+                                        </div>
+                                        {lender.programs.map(program => {
+                                            const programInvoices = invoices.filter(i => i.programId === program.id);
+                                            const programUtilized = programInvoices.reduce((sum, i) => sum + i.amount, 0);
+                                            const programLimit = lender.limitType === 'Fungible' ? lender.totalLimit : program.limit || 0;
+                                            const programAvailable = programLimit - programUtilized;
+
+                                            return (
+                                                <div key={program.id} className="grid grid-cols-6 gap-4 items-center text-xs py-1">
+                                                    <div className="col-span-2 font-medium">{program.name}</div>
+                                                    <div>{lender.limitType === 'Fungible' ? <Badge variant="secondary">Interchangeable</Badge> : formatCurrency(program.limit || 0)}</div>
+                                                    <div>{formatCurrency(programUtilized)}</div>
+                                                    <div>{formatCurrency(programAvailable)}</div>
+                                                    <div className="text-center">{program.interestRate.toFixed(2)}%</div>
+                                                    <Button size="sm" variant="ghost" asChild><Link href="/invoices">View Txns</Link></Button>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        )
+                    })}
+                </Accordion>
+            </CardContent>
+        </Card>
+
       <div className="flex-1 grid md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
-            {/* Lender-wise Limit Management Module */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Lender-wise Limit Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Accordion type="single" collapsible className="w-full">
-                        {lenders.map(lender => {
-                            const lenderUtilized = invoices.filter(i => lender.programs.some(p => p.id === i.programId)).reduce((sum, i) => sum + i.amount, 0);
-                            const lenderAvailable = lender.totalLimit - lenderUtilized;
-                            const isNearingLimit = (lenderUtilized / lender.totalLimit) * 100 > 80;
-
-                            return (
-                                <AccordionItem value={lender.id} key={lender.id}>
-                                    <AccordionTrigger className="hover:no-underline">
-                                        <div className="w-full grid grid-cols-5 items-center text-sm gap-4">
-                                            <div className="font-bold col-span-2 flex items-center gap-2">
-                                                <Library className="h-4 w-4 text-muted-foreground" />
-                                                {lender.name}
-                                                {isNearingLimit && <Badge variant="destructive" className="text-xs">Limit Reached</Badge>}
-                                            </div>
-                                            <div className="text-right">{formatCurrency(lender.totalLimit)}</div>
-                                            <div className="text-right">{formatCurrency(lenderUtilized)}</div>
-                                            <div className="text-right">{formatCurrency(lenderAvailable)}</div>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="px-4 py-2 bg-secondary/50 rounded-md">
-                                            <div className="grid grid-cols-6 gap-4 font-semibold text-xs text-muted-foreground mb-2">
-                                                <div className="col-span-2">Program Name</div>
-                                                <div>Limit</div>
-                                                <div>Utilized</div>
-                                                <div>Available</div>
-                                                <div className="text-center">APR%</div>
-                                            </div>
-                                            {lender.programs.map(program => {
-                                                const programInvoices = invoices.filter(i => i.programId === program.id);
-                                                const programUtilized = programInvoices.reduce((sum, i) => sum + i.amount, 0);
-                                                const programLimit = lender.limitType === 'Fungible' ? lender.totalLimit : program.limit || 0;
-                                                const programAvailable = programLimit - programUtilized;
-
-                                                return (
-                                                    <div key={program.id} className="grid grid-cols-6 gap-4 items-center text-xs py-1">
-                                                        <div className="col-span-2 font-medium">{program.name}</div>
-                                                        <div>{lender.limitType === 'Fungible' ? <Badge variant="secondary">Interchangeable</Badge> : formatCurrency(program.limit || 0)}</div>
-                                                        <div>{formatCurrency(programUtilized)}</div>
-                                                        <div>{formatCurrency(programAvailable)}</div>
-                                                        <div className="text-center">{program.interestRate.toFixed(2)}%</div>
-                                                        <Button size="sm" variant="ghost" asChild><Link href="/invoices">View Txns</Link></Button>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            )
-                        })}
-                    </Accordion>
-                </CardContent>
-            </Card>
             <ProgramPerformanceChart />
+            <CostOfCapitalChart />
         </div>
         <div className="md:col-span-1 flex flex-col">
           <Card className="flex-1 flex flex-col">
