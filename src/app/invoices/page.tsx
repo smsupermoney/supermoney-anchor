@@ -22,7 +22,7 @@ export default function InvoicesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice #</TableHead>
-                <TableHead>Retailer</TableHead>
+                <TableHead>Dealer</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Due Date</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
@@ -34,7 +34,7 @@ export default function InvoicesPage() {
               {invoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                  <TableCell>{invoice.retailerName}</TableCell>
+                  <TableCell>{invoice.dealerName}</TableCell>
                   <TableCell>{invoice.date}</TableCell>
                   <TableCell>{invoice.dueDate}</TableCell>
                   <TableCell className="text-right">{formatCurrency(invoice.amount)}</TableCell>

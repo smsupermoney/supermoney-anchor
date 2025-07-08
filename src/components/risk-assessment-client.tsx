@@ -10,12 +10,12 @@ import {
 } from "@/components/ui/select";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { generateRiskAssessment } from "@/app/risk-assessment/actions";
+import { generateDealerRiskAssessment } from "@/app/risk-assessment/actions";
 import { AlertCircle, Bot, Zap } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useActionState, useState } from "react";
-import type { Invoice, Retailer } from "@/types";
+import type { Invoice, Dealer } from "@/types";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -28,14 +28,14 @@ function SubmitButton() {
 }
 
 type RiskAssessmentClientProps = {
-    retailers: Retailer[];
+    dealers: Dealer[];
     allInvoices: Invoice[];
 };
 
-export default function RiskAssessmentClient({ retailers }: RiskAssessmentClientProps) {
+export default function RiskAssessmentClient({ dealers }: RiskAssessmentClientProps) {
   const initialState = { message: "", error: false };
-  const [state, formAction] = useActionState(generateRiskAssessment, initialState);
-  const [selectedRetailerId, setSelectedRetailerId] = useState<string>("");
+  const [state, formAction] = useActionState(generateDealerRiskAssessment, initialState);
+  const [selectedDealerId, setSelectedDealerId] = useState<string>("");
 
   const riskScoreColor = (score: number) => {
     if (score <= 33) return "text-accent"; // Green
@@ -47,22 +47,22 @@ export default function RiskAssessmentClient({ retailers }: RiskAssessmentClient
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Select Retailer</CardTitle>
+          <CardTitle>Select Dealer</CardTitle>
           <CardDescription>
-            Choose a retailer to generate an AI-powered risk assessment based on their invoice history.
+            Choose a dealer to generate an AI-powered risk assessment based on their invoice history.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={formAction} className="flex flex-col md:flex-row gap-4 items-end">
             <div className="w-full md:w-1/3">
-              <Select name="retailerId" required value={selectedRetailerId} onValueChange={setSelectedRetailerId}>
+              <Select name="dealerId" required value={selectedDealerId} onValueChange={setSelectedDealerId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a retailer..." />
+                  <SelectValue placeholder="Select a dealer..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {retailers.map((retailer) => (
-                    <SelectItem key={retailer.id} value={retailer.id}>
-                      {retailer.name}
+                  {dealers.map((dealer) => (
+                    <SelectItem key={dealer.id} value={dealer.id}>
+                      {dealer.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

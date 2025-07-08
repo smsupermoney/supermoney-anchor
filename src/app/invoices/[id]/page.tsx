@@ -54,7 +54,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     <div className="flex justify-between items-start">
                         <div>
                             <CardTitle>Invoice Details</CardTitle>
-                            <CardDescription>for {invoice.retailerName}</CardDescription>
+                            <CardDescription>for {invoice.dealerName}</CardDescription>
                         </div>
                         <StatusBadge status={invoice.status} />
                     </div>

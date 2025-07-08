@@ -2,7 +2,7 @@ import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck } fr
 
 export const navigationLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/retailers', label: 'Retailers', icon: Users },
+  { href: '/retailers', label: 'Dealers', icon: Users },
   { href: '/invoices', label: 'Invoices', icon: FileText },
   { href: '/leads', label: 'Leads', icon: PlusCircle },
   { href: '/programs', label: 'Programs', icon: Library },

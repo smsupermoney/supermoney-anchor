@@ -24,7 +24,7 @@ export default function LeadsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Retailer Name</TableHead>
+                <TableHead>Dealer Name</TableHead>
                 <TableHead>Contact Person</TableHead>
                 <TableHead>Current Status</TableHead>
                 <TableHead>Onboarding Progress</TableHead>
@@ -33,7 +33,7 @@ export default function LeadsPage() {
             <TableBody>
               {leads.map((lead) => (
                 <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.retailerName}</TableCell>
+                  <TableCell className="font-medium">{lead.dealerName}</TableCell>
                   <TableCell>{lead.contactPerson} <span className="text-muted-foreground">({lead.contactEmail})</span></TableCell>
                   <TableCell><StatusBadge status={lead.status} /></TableCell>
                   <TableCell>

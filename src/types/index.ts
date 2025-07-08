@@ -1,4 +1,4 @@
-export type Retailer = {
+export type Dealer = {
   id: string;
   name: string;
   status: 'Active' | 'Inactive' | 'Pending';
@@ -12,7 +12,7 @@ export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbu
 export type Invoice = {
   id: string;
   invoiceNumber: string;
-  retailerName: string;
+  dealerName: string;
   amount: number;
   date: string;
   dueDate: string;
@@ -28,7 +28,7 @@ export type Program = {
   usedLimit: number;
   invoicesCount: number;
   disbursedAmount: number;
-  totalRetailers: number;
+  totalDealers: number;
   overdueCount: number;
 };
 
@@ -36,7 +36,7 @@ export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Ope
 
 export type Lead = {
   id: string;
-  retailerName: string;
+  dealerName: string;
   contactPerson: string;
   contactEmail: string;
   status: LeadStatus;

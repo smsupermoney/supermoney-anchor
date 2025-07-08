@@ -1,6 +1,6 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { invoices, programs, retailers } from "@/lib/data";
+import { invoices, programs, dealers } from "@/lib/data";
 import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, UploadCloud, CheckCircle, CalendarClock } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
@@ -54,9 +54,9 @@ export default function Dashboard() {
   const disbursedAmount = disbursedInvoices.reduce((sum, inv) => sum + inv.amount, 0);
 
 
-  const totalRetailers = retailers.length;
-  const activeRetailers = retailers.filter(r => r.status === 'Active').length;
-  const pendingRetailers = retailers.filter(r => r.status === 'Pending').length;
+  const totalDealers = dealers.length;
+  const activeDealers = dealers.filter(r => r.status === 'Active').length;
+  const pendingDealers = dealers.filter(r => r.status === 'Pending').length;
 
   return (
     <div className="flex flex-col h-full gap-4 p-2">
@@ -156,25 +156,25 @@ export default function Dashboard() {
                       </CardContent>
                   </Card>
               </CarouselItem>
-              {/* Card 5: Retailer Summary */}
+              {/* Card 5: Dealers Summary */}
                <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <Card className="h-full">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
-                          <CardTitle className="text-sm font-semibold">Retailers Summary</CardTitle>
+                          <CardTitle className="text-sm font-semibold">Dealers Summary</CardTitle>
                           <Users className="w-4 h-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent className="p-3 pt-0">
                           <div className="grid grid-cols-2 gap-y-2">
                               <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold">{totalRetailers}</span>
+                                  <span className="text-lg font-bold">{totalDealers}</span>
                                   <span className="text-xs text-muted-foreground">Total</span>
                               </div>
                               <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold">{activeRetailers}</span>
+                                  <span className="text-lg font-bold">{activeDealers}</span>
                                   <span className="text-xs text-muted-foreground">Active</span>
                               </div>
                                <div className="flex flex-col items-center col-span-2">
-                                  <span className="text-lg font-bold">{pendingRetailers}</span>
+                                  <span className="text-lg font-bold">{pendingDealers}</span>
                                   <span className="text-xs text-muted-foreground">Pending</span>
                               </div>
                           </div>
@@ -228,8 +228,8 @@ export default function Dashboard() {
                               <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
                           </div>
                           <div className="space-y-1">
-                              <p className="text-[10px] text-muted-foreground">Total Retailers</p>
-                              <p className="font-semibold text-xs">{program.totalRetailers}</p>
+                              <p className="text-[10px] text-muted-foreground">Total Dealers</p>
+                              <p className="font-semibold text-xs">{program.totalDealers}</p>
                           </div>
                           <div className="space-y-1">
                               <p className="text-[10px] text-muted-foreground">Total Overdue</p>
@@ -265,7 +265,7 @@ export default function Dashboard() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Invoice #</TableHead>
-                        <TableHead>Retailer</TableHead>
+                        <TableHead>Dealer</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
                         <TableHead>Status</TableHead>
@@ -276,7 +276,7 @@ export default function Dashboard() {
                       {invoices.slice(0, 10).map((invoice) => (
                         <TableRow key={invoice.id} className="h-10">
                           <TableCell className="p-2 font-medium">{invoice.invoiceNumber}</TableCell>
-                          <TableCell className="p-2">{invoice.retailerName}</TableCell>
+                          <TableCell className="p-2">{invoice.dealerName}</TableCell>
                           <TableCell className="p-2">{invoice.date}</TableCell>
                           <TableCell className="p-2 text-right">{formatCurrency(invoice.amount)}</TableCell>
                           <TableCell className="p-2"><StatusBadge status={invoice.status} /></TableCell>

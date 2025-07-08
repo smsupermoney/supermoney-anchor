@@ -1,11 +1,11 @@
 "use server";
 
-import { assessRetailerRisk } from "@/ai/flows/risk-assessment";
+import { assessDealerRisk } from "@/ai/flows/risk-assessment";
 import { invoices } from "@/lib/data";
 import { z } from "zod";
 
 const formSchema = z.object({
-  retailerId: z.string().min(1, "Please select a retailer."),
+  dealerId: z.string().min(1, "Please select a dealer."),
 });
 
 type State = {
@@ -18,12 +18,12 @@ type State = {
   error?: boolean;
 };
 
-export async function generateRiskAssessment(
+export async function generateDealerRiskAssessment(
   prevState: State,
   formData: FormData
 ): Promise<State> {
   const validatedFields = formSchema.safeParse({
-    retailerId: formData.get("retailerId"),
+    dealerId: formData.get("dealerId"),
   });
 
   if (!validatedFields.success) {
@@ -33,29 +33,29 @@ export async function generateRiskAssessment(
     };
   }
 
-  const { retailerId } = validatedFields.data;
-  const retailer = (await import("@/lib/data")).retailers.find(r => r.id === retailerId);
+  const { dealerId } = validatedFields.data;
+  const dealer = (await import("@/lib/data")).dealers.find(d => d.id === dealerId);
 
-  if (!retailer) {
+  if (!dealer) {
     return {
-      message: "Retailer not found.",
+      message: "Dealer not found.",
       error: true,
     };
   }
   
   // Create a summary of invoice data for the AI
-  const retailerInvoices = invoices.filter(i => i.retailerName === retailer.name);
-  const invoiceDataSummary = `Total invoices: ${retailerInvoices.length}. 
-    Statuses: ${JSON.stringify(retailerInvoices.reduce((acc, inv) => {
+  const dealerInvoices = invoices.filter(i => i.dealerName === dealer.name);
+  const invoiceDataSummary = `Total invoices: ${dealerInvoices.length}. 
+    Statuses: ${JSON.stringify(dealerInvoices.reduce((acc, inv) => {
         acc[inv.status] = (acc[inv.status] || 0) + 1;
         return acc;
     }, {} as Record<string, number>))}. 
-    Total amount: ${retailerInvoices.reduce((sum, inv) => sum + inv.amount, 0)}.`;
+    Total amount: ${dealerInvoices.reduce((sum, inv) => sum + inv.amount, 0)}.`;
 
 
   try {
-    const result = await assessRetailerRisk({
-      retailerName: retailer.name,
+    const result = await assessDealerRisk({
+      dealerName: dealer.name,
       invoiceData: invoiceDataSummary,
     });
     return { data: result, message: "Assessment complete." };
