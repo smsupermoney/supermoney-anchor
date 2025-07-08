@@ -8,10 +8,20 @@ import { LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import SupermoneyLogo from './supermoney-logo';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMounted = useMounted();
+
+  if (!isMounted) {
+    return (
+        <div className="flex min-h-screen w-full">
+            <div className="hidden md:block w-[16rem] h-screen" />
+            <div className="flex-1" />
+        </div>
+    )
+  }
 
   if (pathname === '/') {
     return <>{children}</>;
@@ -21,9 +31,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <h2 className="text-2xl font-bold text-primary pl-2 group-data-[collapsible=icon]:hidden">Anchor Dashboard</h2>
-            <Separator className="my-2" />
-            <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
+          <div className="p-2 flex justify-center">
+            <SupermoneyLogo className="group-data-[collapsible=icon]:hidden" />
+            <SupermoneyLogo className="hidden group-data-[collapsible=icon]:block" collapsed />
+          </div>
+          <Separator className="my-2" />
+          <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
               <Avatar className="h-9 w-9">
                   <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
                   <AvatarFallback>S</AvatarFallback>
@@ -42,7 +55,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <SidebarMenuItem key={link.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={isMounted ? pathname.startsWith(link.href) : false}
+                  isActive={pathname.startsWith(link.href)}
                   tooltip={{ children: link.label }}
                 >
                   <Link href={link.href}>
