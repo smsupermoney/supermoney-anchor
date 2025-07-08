@@ -22,7 +22,8 @@ export default function InvoicesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice #</TableHead>
-                <TableHead>Dealer</TableHead>
+                <TableHead>Partner</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Due Date</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
@@ -34,8 +35,9 @@ export default function InvoicesPage() {
               {invoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                  <TableCell>{invoice.dealerName}</TableCell>
-                  <TableCell>{invoice.date}</TableCell>
+                  <TableCell>{invoice.vendorName || invoice.dealerName}</TableCell>
+                  <TableCell>{invoice.programType}</TableCell>
+                  <TableCell>{invoice.invoiceDate}</TableCell>
                   <TableCell>{invoice.dueDate}</TableCell>
                   <TableCell className="text-right">{formatCurrency(invoice.amount)}</TableCell>
                   <TableCell><StatusBadge status={invoice.status} /></TableCell>

@@ -1,39 +1,59 @@
-import type { Dealer, Invoice, Program, Lead, InvoiceStatus, LeadStatus } from '@/types';
+import type { Vendor, Invoice, Lender } from '@/types';
 
-export const dealers: Dealer[] = [
-  { id: 'RET001', name: 'Global Mart', status: 'Active', creditAssigned: 500000, invoicesSubmitted: 25, amountDisbursed: 450000 },
-  { id: 'RET002', name: 'Quick Stop', status: 'Active', creditAssigned: 300000, invoicesSubmitted: 15, amountDisbursed: 250000 },
-  { id: 'RET003', name: 'City Grocers', status: 'Pending', creditAssigned: 200000, invoicesSubmitted: 5, amountDisbursed: 50000 },
-  { id: 'RET004', name: 'Super Bazaar', status: 'Inactive', creditAssigned: 100000, invoicesSubmitted: 2, amountDisbursed: 20000 },
-  { id: 'RET005', name: 'Fresh Foods Inc.', status: 'Active', creditAssigned: 750000, invoicesSubmitted: 40, amountDisbursed: 700000 },
+export const vendors: Vendor[] = [
+  { id: 'VEN001', name: 'Global Mart', kycStatus: 'approved', category: 'Tier 1', outstandingAmount: 450000, creditRating: 'AA' },
+  { id: 'VEN002', name: 'Quick Stop Supplies', kycStatus: 'approved', category: 'Tier 2', outstandingAmount: 250000, creditRating: 'A' },
+  { id: 'VEN003', name: 'City Grocers Ltd', kycStatus: 'pending', category: 'Tier 1', outstandingAmount: 50000, creditRating: 'N/A' },
+  { id: 'VEN004', name: 'Super Bazaar Inc', kycStatus: 'rejected', category: 'Tier 3', outstandingAmount: 20000, creditRating: 'C' },
+  { id: 'VEN005', name: 'Fresh Foods Inc.', kycStatus: 'approved', category: 'Tier 1', outstandingAmount: 700000, creditRating: 'AA+' },
 ];
 
-export const invoiceStatuses: InvoiceStatus[] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];
+export const lenders: Lender[] = [
+    {
+        id: 'LEND001',
+        name: 'Supermoney Finance',
+        limitType: 'Fungible',
+        totalLimit: 2500000,
+        programs: [
+            { id: 'PROG-SM-V', name: 'Vendor Financing', limit: null, interestRate: 12.5 },
+            { id: 'PROG-SM-D', name: 'Dealer Financing', limit: null, interestRate: 13.0 },
+        ]
+    },
+    {
+        id: 'LEND002',
+        name: 'Aditya Birla Capital',
+        limitType: 'Ring-fenced',
+        totalLimit: 2000000,
+        programs: [
+            { id: 'PROG-AB-V', name: 'Vendor Financing', limit: 1200000, interestRate: 11.8 },
+            { id: 'PROG-AB-D', name: 'Dealer Financing', limit: 800000, interestRate: 12.2 },
+        ]
+    },
+    {
+        id: 'LEND003',
+        name: 'Cholamandalam Investment',
+        limitType: 'Ring-fenced',
+        totalLimit: 1000000,
+        programs: [
+            { id: 'PROG-CHOLA-V', name: 'Vendor Financing', limit: 1000000, interestRate: 12.0 },
+        ]
+    }
+];
 
 export const invoices: Invoice[] = [
-  { id: 'INV001', invoiceNumber: '2024-001', dealerName: 'Global Mart', amount: 25000, date: '2024-07-01', dueDate: '2024-08-01', eWayBillNumber: 'EWB12345', status: 'Disbursed' },
-  { id: 'INV002', invoiceNumber: '2024-002', dealerName: 'Quick Stop', amount: 15000, date: '2024-07-05', dueDate: '2024-07-20', eWayBillNumber: 'EWB12346', status: 'Sent to Lender' },
-  { id: 'INV003', invoiceNumber: '2024-003', dealerName: 'Global Mart', amount: 30000, date: '2024-07-10', dueDate: '2024-08-10', eWayBillNumber: 'EWB12347', status: 'Approved' },
-  { id: 'INV004', invoiceNumber: '2024-004', dealerName: 'City Grocers', amount: 10000, date: '2024-07-12', dueDate: '2024-08-12', eWayBillNumber: 'EWB12348', status: 'Initiated' },
-  { id: 'INV005', invoiceNumber: '2024-005', dealerName: 'Fresh Foods Inc.', amount: 50000, date: '2024-07-15', dueDate: '2024-08-15', eWayBillNumber: 'EWB12349', status: 'Disbursed' },
-  { id: 'INV006', invoiceNumber: '2024-006', dealerName: 'Quick Stop', amount: 18000, date: '2024-07-18', dueDate: '2024-08-18', eWayBillNumber: 'EWB12350', status: 'Approved' },
-  { id: 'INV007', invoiceNumber: '2024-007', dealerName: 'Super Bazaar', amount: 5000, date: '2024-07-20', dueDate: '2024-08-20', eWayBillNumber: 'EWB12351', status: 'Rejected' },
-];
+  // Supermoney Invoices
+  { id: 'INV001', invoiceNumber: 'SM-V-001', vendorName: 'Global Mart', programId: 'PROG-SM-V', programType: 'Payables', amount: 250000, invoiceDate: '2024-07-01', dueDate: '2024-08-01', status: 'Paid' },
+  { id: 'INV002', invoiceNumber: 'SM-D-001', dealerName: 'City Distributors', programId: 'PROG-SM-D', programType: 'Receivables', amount: 150000, invoiceDate: '2024-07-05', dueDate: '2024-07-20', status: 'Financed' },
+  
+  // Aditya Birla Invoices
+  { id: 'INV003', invoiceNumber: 'AB-V-001', vendorName: 'Global Mart', programId: 'PROG-AB-V', programType: 'Payables', amount: 300000, invoiceDate: '2024-07-10', dueDate: '2024-08-10', status: 'Approved' },
+  { id: 'INV004', invoiceNumber: 'AB-D-001', dealerName: 'Metro Wholesalers', programId: 'PROG-AB-D', programType: 'Receivables', amount: 100000, invoiceDate: '2024-07-12', dueDate: '2024-08-12', status: 'Submitted' },
+  
+  // Cholamandalam Invoices
+  { id: 'INV005', invoiceNumber: 'CHOLA-V-001', vendorName: 'Fresh Foods Inc.', programId: 'PROG-CHOLA-V', programType: 'Payables', amount: 500000, invoiceDate: '2024-07-15', dueDate: '2024-08-15', status: 'Financed' },
 
-export const programs: Program[] = [
-  { id: 'PROG00', lenderName: 'Supermoney Finance', lenderType: 'Supermoney', totalLimit: 1500000, usedLimit: 1000000, invoicesCount: 50, disbursedAmount: 950000, totalDealers: 15, overdueCount: 2 },
-  { id: 'PROG01', lenderName: 'CHOLAMANDALAM INVEST...', lenderType: 'External', totalLimit: 1000000, usedLimit: 700000, invoicesCount: 40, disbursedAmount: 650000, totalDealers: 12, overdueCount: 3 },
-  { id: 'PROG02', lenderName: 'ADITYA BIRLA CAPITAL LTD', lenderType: 'External', totalLimit: 800000, usedLimit: 300000, invoicesCount: 20, disbursedAmount: 250000, totalDealers: 26, overdueCount: 1 },
-  { id: 'PROG03', lenderName: 'Supply Chain Finance Co.', lenderType: 'External', totalLimit: 1200000, usedLimit: 900000, invoicesCount: 60, disbursedAmount: 850000, totalDealers: 18, overdueCount: 5 },
-  { id: 'PROG04', lenderName: 'Flexi Loans', lenderType: 'External', totalLimit: 500000, usedLimit: 100000, invoicesCount: 15, disbursedAmount: 100000, totalDealers: 8, overdueCount: 0 },
-];
-
-export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];
-
-export const leads: Lead[] = [
-  { id: 'LEAD001', dealerName: 'New Age Retail', contactPerson: 'John Doe', contactEmail: 'john.d@newage.com', status: 'KYC', createdAt: '2024-07-15' },
-  { id: 'LEAD002', dealerName: 'Mega Stores', contactPerson: 'Jane Smith', contactEmail: 'jane.s@megastores.com', status: 'Credit', createdAt: '2024-07-10' },
-  { id: 'LEAD003', dealerName: 'The Corner Shop', contactPerson: 'Peter Jones', contactEmail: 'p.jones@cornershop.com', status: 'Lead Created', createdAt: '2024-07-20' },
-  { id: 'LEAD004', dealerName: 'Daily Needs', contactPerson: 'Mary Johnson', contactEmail: 'mary.j@dailyneeds.com', status: 'PSD Completed', createdAt: '2024-06-25' },
-  { id: 'LEAD005', dealerName: 'Value Mart', contactPerson: 'Chris Lee', contactEmail: 'chris.l@valuemart.com', status: 'Dropped', createdAt: '2024-07-05' },
+  // More invoices for variety
+  { id: 'INV006', invoiceNumber: 'SM-V-002', vendorName: 'Quick Stop Supplies', programId: 'PROG-SM-V', programType: 'Payables', amount: 180000, invoiceDate: '2024-07-18', dueDate: '2024-08-18', status: 'Approved' },
+  { id: 'INV007', invoiceNumber: 'AB-V-002', vendorName: 'Super Bazaar Inc', programId: 'PROG-AB-V', programType: 'Payables', amount: 50000, invoiceDate: '2024-07-20', dueDate: '2024-08-20', status: 'Disputed' },
+  { id: 'INV008', invoiceNumber: 'SM-V-003', vendorName: 'Global Mart', programId: 'PROG-SM-V', programType: 'Payables', amount: 120000, invoiceDate: '2024-06-01', dueDate: '2024-07-01', status: 'Overdue' },
 ];

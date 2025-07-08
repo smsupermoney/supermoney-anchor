@@ -1,3 +1,14 @@
+export type VendorKycStatus = 'approved' | 'pending' | 'rejected';
+
+export type Vendor = {
+  id: string;
+  name: string;
+  kycStatus: VendorKycStatus;
+  category: string;
+  outstandingAmount: number;
+  creditRating: string;
+};
+
 export type Dealer = {
   id: string;
   name: string;
@@ -7,30 +18,36 @@ export type Dealer = {
   amountDisbursed: number;
 };
 
-export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';
+export type InvoiceStatus = 'Draft' | 'Submitted' | 'Approved' | 'Financed' | 'Paid' | 'Disputed' | 'Overdue';
 
 export type Invoice = {
   id: string;
   invoiceNumber: string;
-  dealerName: string;
+  vendorName?: string;
+  dealerName?: string;
+  programId: string;
+  programType: 'Payables' | 'Receivables';
   amount: number;
-  date: string;
+  invoiceDate: string;
   dueDate: string;
-  eWayBillNumber: string;
-  documentUrl?: string;
   status: InvoiceStatus;
 };
 
 export type Program = {
+  id:string;
+  name: 'Vendor Financing' | 'Dealer Financing';
+  limit: number | null; // Null for fungible, number for ring-fenced
+  interestRate: number; // as APR percentage
+};
+
+export type Lender = {
   id: string;
-  lenderName: string;
-  lenderType: 'Supermoney' | 'External';
+  name: string;
+  rmContact?: string;
+  sanctionLetterRef?: string;
+  limitType: 'Fungible' | 'Ring-fenced';
   totalLimit: number;
-  usedLimit: number;
-  invoicesCount: number;
-  disbursedAmount: number;
-  totalDealers: number;
-  overdueCount: number;
+  programs: Program[];
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
