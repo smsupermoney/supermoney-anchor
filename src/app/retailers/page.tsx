@@ -2,7 +2,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { dealers } from "@/lib/data";
+import { vendors } from "@/lib/data";
 import { PlusCircle } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 
@@ -11,35 +11,35 @@ export default function DealersPage() {
 
   return (
     <>
-      <PageHeader title="Dealers">
+      <PageHeader title="Vendors">
         <Button>
           <PlusCircle className="mr-2" />
-          Add Dealer
+          Onboard Vendor
         </Button>
       </PageHeader>
       <Card>
         <CardHeader>
-            <CardTitle>All Dealers</CardTitle>
+            <CardTitle>All Vendors</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Dealer Name</TableHead>
+                <TableHead>Vendor Name</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Credit Assigned</TableHead>
-                <TableHead className="text-right">Invoices</TableHead>
-                <TableHead className="text-right">Amount Disbursed</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead className="text-right">Outstanding Amount</TableHead>
+                <TableHead>Credit Rating</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dealers.map((dealer) => (
-                <TableRow key={dealer.id}>
-                  <TableCell className="font-medium">{dealer.name}</TableCell>
-                  <TableCell><StatusBadge status={dealer.status} /></TableCell>
-                  <TableCell className="text-right">{formatCurrency(dealer.creditAssigned)}</TableCell>
-                  <TableCell className="text-right">{dealer.invoicesSubmitted}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(dealer.amountDisbursed)}</TableCell>
+              {vendors.map((vendor) => (
+                <TableRow key={vendor.id}>
+                  <TableCell className="font-medium">{vendor.name}</TableCell>
+                  <TableCell><StatusBadge status={vendor.kycStatus} /></TableCell>
+                   <TableCell>{vendor.category}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(vendor.outstandingAmount)}</TableCell>
+                  <TableCell>{vendor.creditRating}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
