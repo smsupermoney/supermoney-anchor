@@ -1,4 +1,4 @@
-import type { Vendor, Invoice, Lender } from '@/types';
+import type { Vendor, Invoice, Lender, InvoiceStatus } from '@/types';
 
 export const vendors: Vendor[] = [
   { id: 'VEN001', name: 'Global Mart', kycStatus: 'approved', category: 'Tier 1', outstandingAmount: 450000, creditRating: 'AA' },
@@ -57,3 +57,5 @@ export const invoices: Invoice[] = [
   { id: 'INV007', invoiceNumber: 'AB-V-002', vendorName: 'Super Bazaar Inc', programId: 'PROG-AB-V', programType: 'Payables', amount: 50000, invoiceDate: '2024-07-20', dueDate: '2024-08-20', status: 'Disputed' },
   { id: 'INV008', invoiceNumber: 'SM-V-003', vendorName: 'Global Mart', programId: 'PROG-SM-V', programType: 'Payables', amount: 120000, invoiceDate: '2024-06-01', dueDate: '2024-07-01', status: 'Overdue' },
 ];
+
+export const invoiceStatuses: InvoiceStatus[] = ['Submitted', 'Approved', 'Financed', 'Paid'];

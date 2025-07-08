@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { invoices, invoiceStatuses } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Download, Printer } from "lucide-react";
+import type { InvoiceStatus } from "@/types";
 
 export default function InvoiceDetailPage({ params }: { params: { id: string } }) {
   const invoice = invoices.find(inv => inv.id === params.id);
@@ -33,7 +34,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     <CardTitle>Invoice Lifecycle</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <ProgressTracker steps={invoiceStatuses.filter(s => s !== 'Rejected')} currentStep={invoice.status} />
+                    <ProgressTracker steps={invoiceStatuses} currentStep={invoice.status} />
                 </CardContent>
             </Card>
             <Card>
@@ -42,7 +43,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                 </CardHeader>
                 <CardContent>
                     <div className="flex items-center justify-between p-3 bg-secondary rounded-md">
-                        <p className="font-medium">E-Way Bill</p>
+                        <p className="font-medium">Invoice Document</p>
                         <Button variant="outline" size="sm">View Document</Button>
                     </div>
                 </CardContent>
@@ -54,7 +55,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     <div className="flex justify-between items-start">
                         <div>
                             <CardTitle>Invoice Details</CardTitle>
-                            <CardDescription>for {invoice.dealerName}</CardDescription>
+                            <CardDescription>for {invoice.vendorName || invoice.dealerName}</CardDescription>
                         </div>
                         <StatusBadge status={invoice.status} />
                     </div>
@@ -68,15 +69,11 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Invoice Date</span>
-                            <span className="font-medium">{invoice.date}</span>
+                            <span className="font-medium">{invoice.invoiceDate}</span>
                         </div>
                          <div className="flex justify-between">
                             <span className="text-muted-foreground">Due Date</span>
                             <span className="font-medium">{invoice.dueDate}</span>
-                        </div>
-                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">E-Way Bill #</span>
-                            <span className="font-medium">{invoice.eWayBillNumber}</span>
                         </div>
                     </div>
                 </CardContent>
