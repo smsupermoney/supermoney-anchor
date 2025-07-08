@@ -14,7 +14,8 @@ import { useAuth } from "@/contexts/auth-context";
 export default function PartnerDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { user } = useAuth();
-  const partner = onboardingPartners.find(p => p.id === params.id);
+  const { id } = params;
+  const partner = onboardingPartners.find(p => p.id === id);
 
   if (!partner || !user) {
     notFound();
