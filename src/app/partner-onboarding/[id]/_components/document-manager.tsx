@@ -2,18 +2,22 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, FileUp, Trash2, AlertCircle } from "lucide-react";
+import { CheckCircle, Trash2, AlertCircle, UploadCloud, Eye, CircleDashed } from "lucide-react";
 import type { OnboardingPartner, OnboardingStatus } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 
 const mandatoryDocs = [
-  { id: 'pan', name: 'PAN Card' },
-  { id: 'gst', name: 'GST Certificate' },
-  { id: 'address', name: 'Business Address Proof' },
-  { id: 'cheque', name: 'Cancelled Cheque' },
+  { id: 'pan', name: 'PAN Card', rejectionReason: 'Image is blurry and unreadable.' },
+  { id: 'gst', name: 'GST Certificate', rejectionReason: null },
+  { id: 'address', name: 'Business Address Proof', rejectionReason: 'Document provided is expired.' },
+  { id: 'cheque', name: 'Cancelled Cheque', rejectionReason: null },
 ];
+
+type DocStatus = 'missing' | 'uploaded' | 'rejected';
+type DocState = Record<string, { status: DocStatus }>;
 
 type DocumentManagerProps = {
   partner: OnboardingPartner;
@@ -22,23 +26,39 @@ type DocumentManagerProps = {
 };
 
 export default function DocumentManager({ partner, onUpdateStatus, isValidator = false }: DocumentManagerProps) {
-  // Simulate uploaded documents state. This would come from the partner object in a real app.
-  const [uploaded, setUploaded] = useState({
-      pan: partner.status !== 'Pending Document Collection',
-      gst: partner.status !== 'Pending Document Collection' && partner.status !== 'Awaiting Resubmission',
-      address: false,
-      cheque: false
+
+  const getInitialStatus = (docId: string): DocStatus => {
+    if (partner.status === 'Pending Document Collection') return 'missing';
+
+    if (partner.status === 'Awaiting Resubmission') {
+      // Simulate that PAN and Address proof were rejected
+      if (docId === 'pan' || docId === 'address') return 'rejected';
+      return 'uploaded';
+    }
+
+    // For other statuses, assume all documents are uploaded
+    return 'uploaded';
+  };
+
+  const [documents, setDocuments] = useState<DocState>(() => {
+    const initialState: DocState = {};
+    for (const doc of mandatoryDocs) {
+      initialState[doc.id] = { status: getInitialStatus(doc.id) };
+    }
+    return initialState;
   });
 
-  const allDocsUploaded = Object.values(uploaded).every(Boolean);
+  const uploadedCount = Object.values(documents).filter(d => d.status === 'uploaded').length;
+  const totalDocs = mandatoryDocs.length;
+  const allDocsUploaded = uploadedCount === totalDocs;
 
-  const handleUpload = (docId: keyof typeof uploaded) => {
-    setUploaded(prev => ({...prev, [docId]: true}));
-  }
+  const handleUpload = (docId: string) => {
+    setDocuments(prev => ({...prev, [docId]: { status: 'uploaded' }}));
+  };
 
-  const handleDelete = (docId: keyof typeof uploaded) => {
-    setUploaded(prev => ({...prev, [docId]: false}));
-  }
+  const handleDelete = (docId: string) => {
+    setDocuments(prev => ({...prev, [docId]: { status: 'missing' }}));
+  };
 
   if (isValidator) {
       return (
@@ -68,59 +88,76 @@ export default function DocumentManager({ partner, onUpdateStatus, isValidator =
   }
   
   return (
-    <div className="space-y-6">
-        <Card>
-            <CardContent className="p-4">
-                <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-secondary transition-colors">
-                    <FileUp className="h-10 w-10 text-muted-foreground" />
-                    <p className="mt-2 font-semibold">Click to upload or drag &amp; drop</p>
-                    <p className="text-xs text-muted-foreground">PDF, JPG, PNG (up to 10MB)</p>
+    <Card>
+        <CardHeader>
+            <CardTitle>Document Collection</CardTitle>
+            <CardDescription>
+                {partner.status === 'Awaiting Resubmission' 
+                    ? 'Some documents require re-submission. Please upload the corrected files.'
+                    : 'Upload all mandatory documents to proceed with the validation.'
+                }
+            </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div>
+                <div className="flex justify-between items-center mb-2 text-sm text-muted-foreground">
+                    <span>Progress</span>
+                    <span>{uploadedCount} / {totalDocs} files uploaded</span>
                 </div>
-            </CardContent>
-        </Card>
-        
-        <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Mandatory Document Status</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    {mandatoryDocs.map(doc => (
-                        <div key={doc.id} className="flex items-center justify-between text-sm">
-                            <div className="flex items-center gap-2">
-                                {uploaded[doc.id as keyof typeof uploaded] ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
-                                <span>{doc.name}</span>
+                <Progress value={(uploadedCount / totalDocs) * 100} className="h-2" />
+            </div>
+            
+            <div className="space-y-3">
+                {mandatoryDocs.map(doc => {
+                    const docState = documents[doc.id];
+                    const status = docState.status;
+
+                    return (
+                        <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg transition-colors data-[status=rejected]:border-orange-500/50 data-[status=rejected]:bg-orange-50/20" data-status={status}>
+                            <div className="flex items-start gap-4">
+                                {status === 'uploaded' && <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />}
+                                {status === 'missing' && <CircleDashed className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />}
+                                {status === 'rejected' && <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />}
+                                <div>
+                                    <p className="font-medium">{doc.name}</p>
+                                    {status === 'rejected' && doc.rejectionReason && (
+                                        <p className="text-xs text-orange-600 mt-1">{doc.rejectionReason}</p>
+                                    )}
+                                     {status === 'uploaded' && (
+                                        <p className="text-xs text-muted-foreground mt-1">Uploaded: {new Date().toLocaleDateString()}</p>
+                                    )}
+                                </div>
                             </div>
-                            {uploaded[doc.id as keyof typeof uploaded] ? (
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDelete(doc.id as keyof typeof uploaded)}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            ) : (
-                                <Button variant="outline" size="sm" className="h-6" onClick={() => handleUpload(doc.id as keyof typeof uploaded)}>Upload</Button>
-                            )}
+                            <div className="flex items-center gap-1">
+                                {status === 'missing' && (
+                                    <Button size="sm" onClick={() => handleUpload(doc.id)}>
+                                        <UploadCloud className="mr-2 h-4 w-4" /> Upload
+                                    </Button>
+                                )}
+                                {status === 'rejected' && (
+                                     <Button size="sm" variant="outline" className="border-orange-300 hover:bg-orange-100/50" onClick={() => handleUpload(doc.id)}>
+                                        <UploadCloud className="mr-2 h-4 w-4" /> Re-upload
+                                    </Button>
+                                )}
+                                {status === 'uploaded' && (
+                                    <>
+                                        <Button size="sm" variant="ghost">
+                                            <Eye className="mr-2 h-4 w-4" /> View
+                                        </Button>
+                                         <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(doc.id)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    ))}
-                </CardContent>
-            </Card>
-
-            {partner.status === 'Awaiting Resubmission' && (
-                <Card className="border-orange-500 bg-orange-50/50">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-orange-600"><AlertCircle /> Issues Identified</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ul className="text-sm space-y-2 list-disc pl-5 text-muted-foreground">
-                            <li>PAN Card: Image is blurry and unreadable.</li>
-                            <li>Business Address Proof: Document provided is expired.</li>
-                        </ul>
-                    </CardContent>
-                </Card>
-            )}
-        </div>
-
-        <div className="flex justify-end">
-            <Button size="lg" disabled={!allDocsUploaded} onClick={() => onUpdateStatus('Pending RM Document Validation')}>Submit for Validation</Button>
-        </div>
-    </div>
+                    );
+                })}
+            </div>
+        </CardContent>
+        <CardFooter className="flex justify-end border-t pt-4">
+             <Button size="lg" disabled={!allDocsUploaded} onClick={() => onUpdateStatus('Pending RM Document Validation')}>Submit for Validation</Button>
+        </CardFooter>
+    </Card>
   );
 }
