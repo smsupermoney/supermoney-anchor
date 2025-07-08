@@ -50,9 +50,8 @@ export default function PartnerManagementPage() {
                       <StatusBadge status={partner.status} />
                     </TableCell>
                     <TableCell>
-                      <Button asChild variant="ghost" size="icon" disabled>
-                        {/* In a real app, this would link to /partner-management/{partner.id} */}
-                        <Link href="#">
+                      <Button asChild variant="ghost" size="icon">
+                        <Link href={`/partner-onboarding/${partner.id}`}>
                           <ArrowRight className="h-4 w-4" />
                         </Link>
                       </Button>
