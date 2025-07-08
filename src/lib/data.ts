@@ -1,4 +1,5 @@
-import type { Vendor, Invoice, Lender, InvoiceStatus } from '@/types';
+
+import type { Vendor, Invoice, Lender, InvoiceStatus, OnboardingPartner, OnboardingStatus } from '@/types';
 
 export const vendors: Vendor[] = [
   { id: 'VEN001', name: 'Global Mart', kycStatus: 'approved', category: 'Tier 1', outstandingAmount: 450000, creditRating: 'AA' },
@@ -59,3 +60,75 @@ export const invoices: Invoice[] = [
 ];
 
 export const invoiceStatuses: InvoiceStatus[] = ['Submitted', 'Approved', 'Financed', 'Paid'];
+
+export const onboardingStatuses: OnboardingStatus[] = [
+  'Pending RM Lead Approval',
+  'Pending Document Collection',
+  'Pending RM Document Validation',
+  'Pending HQ Business Review',
+  'Pending HQ Finance Review',
+  'Active'
+];
+
+export const onboardingPartners: OnboardingPartner[] = [
+  {
+    id: 'PNR001',
+    partnerType: 'Vendor',
+    businessName: 'Innovate Tech Solutions',
+    contactPerson: 'Rohan Sharma',
+    mobile: '9876543210',
+    email: 'rohan@innovatetech.com',
+    city: 'Bangalore',
+    state: 'Karnataka',
+    assignedRM: 'Priya Singh',
+    status: 'Pending RM Lead Approval'
+  },
+  {
+    id: 'PNR002',
+    partnerType: 'Dealer',
+    businessName: 'Dynamic Distributors',
+    contactPerson: 'Meera Desai',
+    mobile: '8765432109',
+    email: 'meera@dynamicdist.com',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    assignedRM: 'Amit Patel',
+    status: 'Pending Document Collection'
+  },
+  {
+    id: 'PNR003',
+    partnerType: 'Distributor',
+    businessName: 'Apex Logistics',
+    contactPerson: 'Sanjay Verma',
+    mobile: '7654321098',
+    email: 'sanjay@apexlog.com',
+    city: 'Delhi',
+    state: 'Delhi',
+    assignedRM: 'Priya Singh',
+    status: 'Pending RM Document Validation'
+  },
+  {
+    id: 'PNR004',
+    partnerType: 'Vendor',
+    businessName: 'Reliable Components Ltd.',
+    contactPerson: 'Anjali Mehta',
+    mobile: '6543210987',
+    email: 'anjali@reliable.com',
+    city: 'Pune',
+    state: 'Maharashtra',
+    assignedRM: 'Amit Patel',
+    status: 'Pending HQ Business Review'
+  },
+  {
+    id: 'PNR005',
+    partnerType: 'Dealer',
+    businessName: 'Sunrise Electronics',
+    contactPerson: 'Vikram Rathod',
+    mobile: '9123456789',
+    email: 'vikram@sunrise.com',
+    city: 'Chennai',
+    state: 'Tamil Nadu',
+    assignedRM: 'Priya Singh',
+    status: 'Pending HQ Finance Review'
+  }
+];

@@ -1,3 +1,4 @@
+
 export type VendorKycStatus = 'approved' | 'pending' | 'rejected';
 
 export type Vendor = {
@@ -59,4 +60,28 @@ export type Lead = {
   contactEmail: string;
   status: LeadStatus;
   createdAt: string;
+};
+
+export type OnboardingStatus = 
+  | 'Pending RM Lead Approval' 
+  | 'Pending Document Collection' 
+  | 'Pending RM Document Validation' 
+  | 'Awaiting Resubmission' 
+  | 'Pending HQ Business Review' 
+  | 'Pending HQ Finance Review' 
+  | 'Active' 
+  | 'Rejected';
+
+export type OnboardingPartner = {
+  id: string;
+  partnerType: 'Vendor' | 'Dealer' | 'Distributor';
+  businessName: string;
+  contactPerson: string;
+  mobile: string;
+  email: string;
+  city: string;
+  state: string;
+  assignedRM: string;
+  salespersonRemarks?: string;
+  status: OnboardingStatus;
 };
