@@ -5,6 +5,9 @@ export type Dealer = {
   creditAssigned: number;
   invoicesSubmitted: number;
   amountDisbursed: number;
+  overdueCount: number;
+  overdueAmount: number;
+  lender: string;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';

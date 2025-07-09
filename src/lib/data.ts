@@ -1,11 +1,11 @@
 import type { Dealer, Invoice, Program, Lead, InvoiceStatus, LeadStatus } from '@/types';
 
 export const dealers: Dealer[] = [
-  { id: 'RET001', name: 'Global Mart', status: 'Active', creditAssigned: 500000, invoicesSubmitted: 25, amountDisbursed: 450000 },
-  { id: 'RET002', name: 'Quick Stop', status: 'Active', creditAssigned: 300000, invoicesSubmitted: 15, amountDisbursed: 250000 },
-  { id: 'RET003', name: 'City Grocers', status: 'Pending', creditAssigned: 200000, invoicesSubmitted: 5, amountDisbursed: 50000 },
-  { id: 'RET004', name: 'Super Bazaar', status: 'Inactive', creditAssigned: 100000, invoicesSubmitted: 2, amountDisbursed: 20000 },
-  { id: 'RET005', name: 'Fresh Foods Inc.', status: 'Active', creditAssigned: 750000, invoicesSubmitted: 40, amountDisbursed: 700000 },
+  { id: 'RET001', name: 'Global Mart', status: 'Active', creditAssigned: 500000, invoicesSubmitted: 25, amountDisbursed: 450000, overdueCount: 2, overdueAmount: 50000, lender: 'Supermoney Finance' },
+  { id: 'RET002', name: 'Quick Stop', status: 'Active', creditAssigned: 300000, invoicesSubmitted: 15, amountDisbursed: 250000, overdueCount: 1, overdueAmount: 15000, lender: 'CHOLAMANDALAM' },
+  { id: 'RET003', name: 'City Grocers', status: 'Pending', creditAssigned: 200000, invoicesSubmitted: 5, amountDisbursed: 50000, overdueCount: 0, overdueAmount: 0, lender: 'ADITYA BIRLA' },
+  { id: 'RET004', name: 'Super Bazaar', status: 'Inactive', creditAssigned: 100000, invoicesSubmitted: 2, amountDisbursed: 20000, overdueCount: 0, overdueAmount: 0, lender: 'Supermoney Finance' },
+  { id: 'RET005', name: 'Fresh Foods Inc.', status: 'Active', creditAssigned: 750000, invoicesSubmitted: 40, amountDisbursed: 700000, overdueCount: 5, overdueAmount: 120000, lender: 'Supply Chain Co.' },
 ];
 
 export const invoiceStatuses: InvoiceStatus[] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];
