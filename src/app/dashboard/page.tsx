@@ -320,8 +320,10 @@ export default function Dashboard() {
                       <TableRow>
                         <TableHead>Invoice #</TableHead>
                         <TableHead>Dealer</TableHead>
+                        <TableHead>Lender</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Overdue</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
@@ -331,8 +333,10 @@ export default function Dashboard() {
                         <TableRow key={invoice.id} className="h-10">
                           <TableCell className="p-2 font-medium">{invoice.invoiceNumber}</TableCell>
                           <TableCell className="p-2">{invoice.dealerName}</TableCell>
+                          <TableCell className="p-2">{invoice.lender}</TableCell>
                           <TableCell className="p-2">{invoice.date}</TableCell>
                           <TableCell className="p-2 text-right">{formatCurrency(invoice.amount)}</TableCell>
+                          <TableCell className="p-2 text-right text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
                           <TableCell className="p-2"><StatusBadge status={invoice.status} /></TableCell>
                           <TableCell className="p-2">
                             <Button asChild variant="ghost" size="icon">

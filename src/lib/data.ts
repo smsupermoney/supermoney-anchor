@@ -11,13 +11,13 @@ export const dealers: Dealer[] = [
 export const invoiceStatuses: InvoiceStatus[] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];
 
 export const invoices: Invoice[] = [
-  { id: 'INV001', invoiceNumber: '2024-001', dealerName: 'Global Mart', amount: 25000, date: '2024-07-01', dueDate: '2024-08-01', eWayBillNumber: 'EWB12345', status: 'Disbursed' },
-  { id: 'INV002', invoiceNumber: '2024-002', dealerName: 'Quick Stop', amount: 15000, date: '2024-07-05', dueDate: '2024-07-20', eWayBillNumber: 'EWB12346', status: 'Sent to Lender' },
-  { id: 'INV003', invoiceNumber: '2024-003', dealerName: 'Global Mart', amount: 30000, date: '2024-07-10', dueDate: '2024-08-10', eWayBillNumber: 'EWB12347', status: 'Approved' },
-  { id: 'INV004', invoiceNumber: '2024-004', dealerName: 'City Grocers', amount: 10000, date: '2024-07-12', dueDate: '2024-08-12', eWayBillNumber: 'EWB12348', status: 'Initiated' },
-  { id: 'INV005', invoiceNumber: '2024-005', dealerName: 'Fresh Foods Inc.', amount: 50000, date: '2024-07-15', dueDate: '2024-08-15', eWayBillNumber: 'EWB12349', status: 'Disbursed' },
-  { id: 'INV006', invoiceNumber: '2024-006', dealerName: 'Quick Stop', amount: 18000, date: '2024-07-18', dueDate: '2024-08-18', eWayBillNumber: 'EWB12350', status: 'Approved' },
-  { id: 'INV007', invoiceNumber: '2024-007', dealerName: 'Super Bazaar', amount: 5000, date: '2024-07-20', dueDate: '2024-08-20', eWayBillNumber: 'EWB12351', status: 'Rejected' },
+  { id: 'INV001', invoiceNumber: '2024-001', dealerName: 'Global Mart', amount: 25000, date: '2024-07-01', dueDate: '2024-08-01', eWayBillNumber: 'EWB12345', status: 'Disbursed', lender: 'Supermoney Finance', overdueAmount: 0 },
+  { id: 'INV002', invoiceNumber: '2024-002', dealerName: 'Quick Stop', amount: 15000, date: '2024-07-05', dueDate: '2024-07-20', eWayBillNumber: 'EWB12346', status: 'Sent to Lender', lender: 'CHOLAMANDALAM INVEST...', overdueAmount: 15000 },
+  { id: 'INV003', invoiceNumber: '2024-003', dealerName: 'Global Mart', amount: 30000, date: '2024-07-10', dueDate: '2024-08-10', eWayBillNumber: 'EWB12347', status: 'Approved', lender: 'Supermoney Finance', overdueAmount: 0 },
+  { id: 'INV004', invoiceNumber: '2024-004', dealerName: 'City Grocers', amount: 10000, date: '2024-07-12', dueDate: '2024-08-12', eWayBillNumber: 'EWB12348', status: 'Initiated', lender: 'ADITYA BIRLA CAPITAL LTD', overdueAmount: 0 },
+  { id: 'INV005', invoiceNumber: '2024-005', dealerName: 'Fresh Foods Inc.', amount: 50000, date: '2024-07-15', dueDate: '2024-08-15', eWayBillNumber: 'EWB12349', status: 'Disbursed', lender: 'Supply Chain Finance Co.', overdueAmount: 0 },
+  { id: 'INV006', invoiceNumber: '2024-006', dealerName: 'Quick Stop', amount: 18000, date: '2024-07-18', dueDate: '2024-08-18', eWayBillNumber: 'EWB12350', status: 'Approved', lender: 'CHOLAMANDALAM INVEST...', overdueAmount: 0 },
+  { id: 'INV007', invoiceNumber: '2024-007', dealerName: 'Super Bazaar', amount: 5000, date: '2024-07-20', dueDate: '2024-08-20', eWayBillNumber: 'EWB12351', status: 'Rejected', lender: 'Flexi Loans', overdueAmount: 0 },
 ];
 
 export const programs: Program[] = [

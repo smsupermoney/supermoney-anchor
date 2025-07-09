@@ -22,6 +22,8 @@ export type Invoice = {
   eWayBillNumber: string;
   documentUrl?: string;
   status: InvoiceStatus;
+  lender: string;
+  overdueAmount: number;
 };
 
 export type Program = {
