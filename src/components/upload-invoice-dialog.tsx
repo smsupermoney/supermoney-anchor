@@ -97,8 +97,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
         <DialogHeader>
           <DialogTitle>Upload Invoice</DialogTitle>
           <DialogDescription>
-            Drag and drop your invoice documents below or click to browse. You
-            can upload up to 2 documents.
+            Drag and drop your invoice document and Eway Bill (If Eway Bill number is not in invoice document) below or click to browse.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-4">

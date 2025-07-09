@@ -5,14 +5,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { invoices } from "@/lib/data";
 import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, UploadCloud } from "lucide-react";
+import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 
 export default function InvoicesPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
 
   return (
     <>
-      <PageHeader title="Invoices" />
+      <PageHeader title="Invoices">
+        <UploadInvoiceDialog>
+          <Button>
+            <UploadCloud className="mr-2 h-4 w-4" />
+            Raise Invoice
+          </Button>
+        </UploadInvoiceDialog>
+      </PageHeader>
       <Card>
         <CardHeader>
             <CardTitle>All Invoices</CardTitle>
