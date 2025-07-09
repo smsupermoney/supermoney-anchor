@@ -1,5 +1,5 @@
 import PageHeader from "@/components/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs, dealers } from "@/lib/data";
 import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, UploadCloud, CheckCircle, CalendarClock } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
@@ -11,6 +11,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 
 export default function Dashboard() {
   const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
@@ -71,10 +72,12 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full gap-4 p-2">
       <PageHeader title="Dashboard">
-        <Button size="sm">
-          <UploadCloud className="mr-2 h-4 w-4" />
-          Raise Invoice
-        </Button>
+        <UploadInvoiceDialog>
+          <Button size="sm">
+            <UploadCloud className="mr-2 h-4 w-4" />
+            Raise Invoice
+          </Button>
+        </UploadInvoiceDialog>
       </PageHeader>
       
       {/* Top Row Carousel */}
@@ -247,7 +250,7 @@ export default function Dashboard() {
 
                 return (
                   <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                    <Card className="h-full">
+                    <Card className="h-full flex flex-col">
                       <CardHeader className="p-3">
                         <div className="flex justify-between items-start">
                             <div>
@@ -257,7 +260,7 @@ export default function Dashboard() {
                             <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
                         </div>
                       </CardHeader>
-                      <CardContent className="pt-0 flex flex-col gap-2 p-3">
+                      <CardContent className="pt-0 flex flex-col gap-2 p-3 flex-1">
                         <div>
                           <div className="flex justify-between text-xs mb-1">
                             <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
@@ -284,12 +287,15 @@ export default function Dashboard() {
                               <p className="font-semibold text-xs">{program.overdueCount}</p>
                           </div>
                         </div>
-                        <Separator />
-                        <Button variant="outline" size="sm" className="hover:bg-primary hover:text-primary-foreground">
-                          <UploadCloud className="mr-2 h-4 w-4" />
-                          Raise Invoice
-                        </Button>
                       </CardContent>
+                      <CardFooter className="p-3 pt-0">
+                        <UploadInvoiceDialog>
+                          <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                            <UploadCloud className="mr-2 h-4 w-4" />
+                            Raise Invoice
+                          </Button>
+                        </UploadInvoiceDialog>
+                      </CardFooter>
                     </Card>
                   </CarouselItem>
                 );
