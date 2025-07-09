@@ -86,15 +86,15 @@ export default function Dashboard() {
           className="w-full"
         >
           <CarouselContent className="-ml-4">
-              {/* Card 1: Credit Overview */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                  <Card className="h-full">
+              {/* Slide 1: Credit Overview */}
+              <CarouselItem className="basis-full md:basis-1/2 lg:basis-1/3 pl-4">
+                  <Card className="h-full flex flex-col">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
                           <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
                           <IndianRupee className="w-4 h-4 text-muted-foreground" />
                       </CardHeader>
-                      <CardContent className="p-3 pt-0 text-xs">
-                          <div className="space-y-3">
+                      <CardContent className="p-3 pt-0 text-xs flex-1">
+                          <div className="space-y-3 h-full flex flex-col justify-around">
                               <div>
                                   <h4 className="font-semibold mb-1 text-primary">Supermoney</h4>
                                   <div className="space-y-1">
@@ -144,85 +144,85 @@ export default function Dashboard() {
                       </CardContent>
                   </Card>
               </CarouselItem>
-              {/* Card 2: Invoice Summary */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                  <Card className="h-full">
-                      <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
-                          <CardTitle className="text-sm font-semibold">Invoice Summary</CardTitle>
-                          <FileText className="w-4 h-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent className="p-3 pt-0">
-                          <div className="grid grid-cols-2 gap-y-2">
-                              <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold">{invoices.length}</span>
-                                  <span className="text-xs text-muted-foreground">Total</span>
-                              </div>
-                              <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold">{activeInvoicesCount}</span>
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Active</span>
-                              </div>
-                              <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold">{pendingApprovalCount}</span>
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                              </div>
-                              <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold text-destructive">{overdueInvoicesCount}</span>
-                                  <span className="text-destructive flex items-center gap-1 text-xs font-medium"><AlertTriangle className="w-3 h-3" /> Overdue</span>
-                              </div>
-                          </div>
-                      </CardContent>
-                  </Card>
+              
+              {/* Slide 2: Invoice & Payments */}
+              <CarouselItem className="basis-full md:basis-1/2 lg:basis-1/3 pl-4">
+                <div className="flex flex-col gap-4 h-full">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                            <CardTitle className="text-sm font-semibold">Invoice Summary</CardTitle>
+                            <FileText className="w-4 h-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="p-3 pt-0">
+                            <div className="grid grid-cols-2 gap-y-2">
+                                <div className="flex flex-col items-center">
+                                    <span className="text-lg font-bold">{invoices.length}</span>
+                                    <span className="text-xs text-muted-foreground">Total</span>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-lg font-bold">{activeInvoicesCount}</span>
+                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Active</span>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-lg font-bold">{pendingApprovalCount}</span>
+                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-lg font-bold text-destructive">{overdueInvoicesCount}</span>
+                                    <span className="text-destructive flex items-center gap-1 text-xs font-medium"><AlertTriangle className="w-3 h-3" /> Overdue</span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                            <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
+                            <CalendarClock className="w-4 h-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="p-3 pt-0">
+                            <p className="text-2xl font-bold">{formatCurrency(upcomingPaymentsAmount)}</p>
+                            <p className="text-xs text-muted-foreground">Across {upcomingPaymentsCount} invoices in next 30 days</p>
+                        </CardContent>
+                    </Card>
+                </div>
               </CarouselItem>
-              {/* Card 3: Upcoming Payments */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                  <Card className="h-full">
-                      <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
-                          <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
-                          <CalendarClock className="w-4 h-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent className="p-3 pt-0">
-                          <p className="text-2xl font-bold">{formatCurrency(upcomingPaymentsAmount)}</p>
-                          <p className="text-xs text-muted-foreground">Across {upcomingPaymentsCount} invoices in next 30 days</p>
-                      </CardContent>
-                  </Card>
-              </CarouselItem>
-              {/* Card 4: Disbursal Summary */}
-              <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                   <Card className="h-full">
-                      <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
-                          <CardTitle className="text-sm font-semibold">Disbursal Summary</CardTitle>
-                          <CheckCircle className="w-4 h-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent className="p-3 pt-0">
-                          <p className="text-2xl font-bold">{formatCurrency(disbursedAmount)}</p>
-                          <p className="text-xs text-muted-foreground">Total across {disbursedCount} invoices</p>
-                      </CardContent>
-                  </Card>
-              </CarouselItem>
-              {/* Card 5: Dealers Summary */}
-               <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                  <Card className="h-full">
-                      <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
-                          <CardTitle className="text-sm font-semibold">Dealers Summary</CardTitle>
-                          <Users className="w-4 h-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent className="p-3 pt-0">
-                          <div className="grid grid-cols-2 gap-y-2">
-                              <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold">{totalDealers}</span>
-                                  <span className="text-xs text-muted-foreground">Total</span>
-                              </div>
-                              <div className="flex flex-col items-center">
-                                  <span className="text-lg font-bold">{activeDealers}</span>
-                                  <span className="text-xs text-muted-foreground">Active</span>
-                              </div>
-                               <div className="flex flex-col items-center col-span-2">
-                                  <span className="text-lg font-bold">{pendingDealers}</span>
-                                  <span className="text-xs text-muted-foreground">Pending</span>
-                              </div>
-                          </div>
-                      </CardContent>
-                  </Card>
+
+              {/* Slide 3: Disbursal & Dealers */}
+              <CarouselItem className="basis-full md:basis-1/2 lg:basis-1/3 pl-4">
+                <div className="flex flex-col gap-4 h-full">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                            <CardTitle className="text-sm font-semibold">Disbursal Summary</CardTitle>
+                            <CheckCircle className="w-4 h-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="p-3 pt-0">
+                            <p className="text-2xl font-bold">{formatCurrency(disbursedAmount)}</p>
+                            <p className="text-xs text-muted-foreground">Total across {disbursedCount} invoices</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                            <CardTitle className="text-sm font-semibold">Dealers Summary</CardTitle>
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="p-3 pt-0">
+                            <div className="grid grid-cols-2 gap-y-2">
+                                <div className="flex flex-col items-center">
+                                    <span className="text-lg font-bold">{totalDealers}</span>
+                                    <span className="text-xs text-muted-foreground">Total</span>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <span className="text-lg font-bold">{activeDealers}</span>
+                                    <span className="text-xs text-muted-foreground">Active</span>
+                                </div>
+                                <div className="flex flex-col items-center col-span-2">
+                                    <span className="text-lg font-bold">{pendingDealers}</span>
+                                    <span className="text-xs text-muted-foreground">Pending</span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
               </CarouselItem>
           </CarouselContent>
           <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:hidden -translate-x-8 group-hover:translate-x-0 transition-all duration-300" />
