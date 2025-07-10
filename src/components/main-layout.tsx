@@ -16,10 +16,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   if (!isMounted) {
     return (
-        <div className="flex min-h-screen w-full">
-            <div className="hidden md:block w-[16rem] h-screen" />
-            <div className="flex-1" />
-        </div>
+      <div className="flex min-h-screen w-full">
+        <div className="hidden md:block w-[16rem] h-screen" />
+        <div className="flex-1" />
+      </div>
     )
   }
 
@@ -33,20 +33,20 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <SidebarHeader>
           <div className="p-2 flex justify-center">
             <SupermoneyLogo className="group-data-[collapsible=icon]:hidden" />
-            <SupermoneyLogo className="hidden group-data-[collapsible=icon]:block" collapsed />
+
           </div>
           <Separator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
-              <Avatar className="h-9 w-9">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
-                  <AvatarFallback>S</AvatarFallback>
-              </Avatar>
-              <div className="group-data-[collapsible=icon]:hidden">
-                  <p className="text-sm font-medium leading-none text-sidebar-foreground">Supplier User</p>
-                  <p className="text-xs leading-none text-sidebar-foreground/70">
-                  supplier@example.com
-                  </p>
-              </div>
+            <Avatar className="h-9 w-9">
+              <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
+              <AvatarFallback>S</AvatarFallback>
+            </Avatar>
+            <div className="group-data-[collapsible=icon]:hidden">
+              <p className="text-sm font-medium leading-none text-sidebar-foreground">Supplier User</p>
+              <p className="text-xs leading-none text-sidebar-foreground/70">
+                supplier@example.com
+              </p>
+            </div>
           </div>
         </SidebarHeader>
         <SidebarContent className="p-4">
@@ -81,7 +81,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarTrigger />
         </header>
         <main className="flex-1 p-2 min-w-0">
-            {children}
+          {children}
         </main>
       </SidebarInset>
     </SidebarProvider>
