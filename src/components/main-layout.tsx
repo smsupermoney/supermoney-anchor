@@ -18,10 +18,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   if (!isMounted) {
     return (
-        <div className="flex min-h-screen w-full">
-            <div className="hidden md:block w-[16rem] h-screen" />
-            <div className="flex-1" />
-        </div>
+      <div className="flex min-h-screen w-full">
+        <div className="hidden md:block w-[16rem] h-screen" />
+        <div className="flex-1" />
+      </div>
     )
   }
 
@@ -41,7 +41,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <SidebarHeader>
           <div className="p-2 flex justify-center">
             <SupermoneyLogo className="group-data-[collapsible=icon]:hidden" />
-            <SupermoneyLogo className="hidden group-data-[collapsible=icon]:block" collapsed />
+
           </div>
           <Separator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
@@ -89,7 +89,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarTrigger />
         </header>
         <main className="flex-1 p-2 min-w-0">
-            {children}
+          {children}
         </main>
       </SidebarInset>
     </SidebarProvider>
