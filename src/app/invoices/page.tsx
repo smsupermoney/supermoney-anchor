@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/table";
 import { invoices, invoiceStatuses } from "@/lib/data";
 import StatusBadge from "@/components/status-badge";
-import Link from "next/link";
-import { ArrowRight, UploadCloud, Calendar as CalendarIcon } from "lucide-react";
+import { ArrowRight, UploadCloud, Calendar as CalendarIcon, X as XIcon } from "lucide-react";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,15 +39,15 @@ export default function InvoicesPage() {
       currency: "INR",
     }).format(amount);
 
-  const [date, setDate] = useState<DateRange | undefined>();
-
-  const [filters, setFilters] = useState({
+  const initialFilters = {
     invoiceNumber: "",
     dealerName: "",
     lender: "",
     status: "",
-  });
+  };
 
+  const [date, setDate] = useState<DateRange | undefined>();
+  const [filters, setFilters] = useState(initialFilters);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const handleFilterChange = (
@@ -57,6 +56,15 @@ export default function InvoicesPage() {
   ) => {
     setFilters((prev) => ({ ...prev, [filterName]: value }));
   };
+
+  const clearFilters = () => {
+    setFilters(initialFilters);
+    setDate(undefined);
+  };
+  
+  const hasActiveFilters = useMemo(() => {
+    return Object.values(filters).some(val => val !== "") || !!date;
+  }, [filters, date]);
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
@@ -91,7 +99,7 @@ export default function InvoicesPage() {
       </PageHeader>
       <Card className="mt-4">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             <Input
               placeholder="Filter Invoice #"
               value={filters.invoiceNumber}
@@ -162,6 +170,12 @@ export default function InvoicesPage() {
                 />
               </PopoverContent>
             </Popover>
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <XIcon className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+            )}
           </div>
           <Table>
             <TableHeader>

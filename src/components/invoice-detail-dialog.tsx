@@ -26,7 +26,7 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
         <DialogHeader className="p-6 pb-0">
             <DialogTitle>
                 <PageHeader title={`Invoice ${invoice.invoiceNumber}`}>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pr-8">
                         <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
                         <Button><Download className="mr-2 h-4 w-4" /> Download</Button>
                     </div>
@@ -74,6 +74,10 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
                         <Separator />
                         <div className="space-y-2 text-xs">
                             <div className="flex justify-between">
+                                <span className="text-muted-foreground">Lender</span>
+                                <span className="font-medium">{invoice.lender}</span>
+                            </div>
+                            <div className="flex justify-between">
                                 <span className="text-muted-foreground">Invoice Date</span>
                                 <span className="font-medium">{invoice.date}</span>
                             </div>
@@ -84,6 +88,10 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
                              <div className="flex justify-between">
                                 <span className="text-muted-foreground">E-Way Bill #</span>
                                 <span className="font-medium">{invoice.eWayBillNumber}</span>
+                            </div>
+                             <div className="flex justify-between">
+                                <span className="text-muted-foreground">Overdue Amount</span>
+                                <span className="font-medium text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}</span>
                             </div>
                         </div>
                     </CardContent>
