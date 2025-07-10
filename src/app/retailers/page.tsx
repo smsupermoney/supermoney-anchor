@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Dealer } from "@/types";
+import DealerDetailDialog from "@/components/dealer-detail-dialog";
 
 export default function DealersPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
@@ -27,6 +29,7 @@ export default function DealersPage() {
   };
 
   const [filters, setFilters] = useState(initialFilters);
+  const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
 
   const handleFilterChange = (
     filterName: keyof typeof filters,
@@ -85,7 +88,7 @@ export default function DealersPage() {
               value={filters.status}
               onValueChange={(value) => handleFilterChange("status", value === "all" ? "" : value)}
             >
-              <SelectTrigger className="h-9 max-w-40">
+              <SelectTrigger className="h-9 max-w-40 data-[placeholder]:text-muted-foreground">
                 <SelectValue placeholder="Filter by status..." />
               </SelectTrigger>
               <SelectContent>
@@ -119,7 +122,7 @@ export default function DealersPage() {
             </TableHeader>
             <TableBody>
               {filteredDealers.map((dealer) => (
-                <TableRow key={dealer.id}>
+                <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
                   <TableCell className="font-medium">{dealer.name}</TableCell>
                   <TableCell>{dealer.lender}</TableCell>
                   <TableCell><StatusBadge status={dealer.status} /></TableCell>
@@ -134,6 +137,15 @@ export default function DealersPage() {
           </Table>
         </CardContent>
       </Card>
+      {selectedDealer && (
+        <DealerDetailDialog
+          dealer={selectedDealer}
+          open={!!selectedDealer}
+          onOpenChange={(open) => {
+            if (!open) setSelectedDealer(null);
+          }}
+        />
+      )}
     </>
   );
 }
