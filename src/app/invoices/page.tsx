@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { invoices, invoiceStatuses } from "@/lib/data";
 import StatusBadge from "@/components/status-badge";
-import { ArrowRight, UploadCloud, Calendar as CalendarIcon, X as XIcon } from "lucide-react";
+import { UploadCloud, Calendar as CalendarIcon, X as XIcon } from "lucide-react";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -188,12 +188,11 @@ export default function InvoicesPage() {
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead className="text-right">Overdue Amount</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredInvoices.map((invoice) => (
-                <TableRow key={invoice.id}>
+                <TableRow key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="cursor-pointer">
                   <TableCell className="font-medium">
                     {invoice.invoiceNumber}
                   </TableCell>
@@ -209,11 +208,6 @@ export default function InvoicesPage() {
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={invoice.status} />
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedInvoice(invoice)}>
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

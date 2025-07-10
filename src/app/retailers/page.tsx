@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { dealers } from "@/lib/data";
-import { PlusCircle, X as XIcon } from "lucide-react";
+import { PlusCircle, UploadCloud, X as XIcon } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import type { Dealer } from "@/types";
 import DealerDetailDialog from "@/components/dealer-detail-dialog";
+import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 
 export default function DealersPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
@@ -61,6 +62,12 @@ export default function DealersPage() {
   return (
     <>
       <PageHeader title="Dealers">
+        <UploadInvoiceDialog>
+          <Button variant="outline">
+            <UploadCloud className="mr-2 h-4 w-4" />
+            Raise Invoice
+          </Button>
+        </UploadInvoiceDialog>
         <Button>
           <PlusCircle className="mr-2" />
           Add Dealer
