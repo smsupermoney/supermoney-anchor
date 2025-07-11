@@ -19,7 +19,7 @@ import type { Invoice } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays } from "date-fns";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Dashboard() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -83,7 +83,7 @@ export default function Dashboard() {
         </PageHeader>
         
         {/* Top Row Carousel */}
-        <div className="relative group overflow-hidden">
+        <div className="relative group">
           <Carousel
             opts={{
               align: "start",
@@ -215,7 +215,7 @@ export default function Dashboard() {
                                     <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
                                 </div>
                                 <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-destructive">{rejectedLeadsLast7Days}</span>
+                                    <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
                                     <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
                                 </div>
                             </div>
@@ -261,14 +261,16 @@ export default function Dashboard() {
                         <CardHeader className="p-3 pb-2">
                            <div className="flex justify-between items-start">
                               <div className="min-w-0">
-                                <Tooltip>
-                                  <TooltipTrigger>
-                                    <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{program.lenderName}</p>
-                                  </TooltipContent>
-                                </Tooltip>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{program.lenderName}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                                 <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
                               </div>
                               <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
@@ -378,3 +380,5 @@ export default function Dashboard() {
     
 
 }
+
+    

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { UploadCloud } from "lucide-react";
 import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function ProgramsPage() {
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
@@ -29,14 +29,16 @@ export default function ProgramsPage() {
               <CardHeader className="p-3 pb-2">
                 <div className="flex justify-between items-start">
                   <div className="min-w-0">
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{program.lenderName}</p>
-                      </TooltipContent>
-                    </Tooltip>
+                    <TooltipProvider>
+                        <Tooltip>
+                        <TooltipTrigger asChild>
+                            <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{program.lenderName}</p>
+                        </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                     <CardDescription className="text-xs">Total Limit: {formatCurrency(program.totalLimit)}</CardDescription>
                   </div>
                   <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
@@ -85,3 +87,5 @@ export default function ProgramsPage() {
     </>
   );
 }
+
+    
