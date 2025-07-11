@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -188,42 +189,44 @@ export default function InvoicesPage() {
               </Button>
             )}
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Invoice #</TableHead>
-                <TableHead>Dealer</TableHead>
-                <TableHead>Lender</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Overdue Amount</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredInvoices.map((invoice) => (
-                <TableRow key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="cursor-pointer">
-                  <TableCell className="font-medium">
-                    {invoice.invoiceNumber}
-                  </TableCell>
-                  <TableCell>{invoice.dealerName}</TableCell>
-                  <TableCell>{invoice.lender}</TableCell>
-                  <TableCell>{invoice.date}</TableCell>
-                  <TableCell>{invoice.dueDate}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(invoice.amount)}
-                  </TableCell>
-                  <TableCell className="text-right text-destructive">
-                    {invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={invoice.status} />
-                  </TableCell>
+          <div className="relative w-full overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Invoice #</TableHead>
+                  <TableHead>Dealer</TableHead>
+                  <TableHead>Lender</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Overdue Amount</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredInvoices.map((invoice) => (
+                  <TableRow key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="cursor-pointer">
+                    <TableCell className="font-medium">
+                      {invoice.invoiceNumber}
+                    </TableCell>
+                    <TableCell>{invoice.dealerName}</TableCell>
+                    <TableCell>{invoice.lender}</TableCell>
+                    <TableCell>{invoice.date}</TableCell>
+                    <TableCell>{invoice.dueDate}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(invoice.amount)}
+                    </TableCell>
+                    <TableCell className="text-right text-destructive">
+                      {invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={invoice.status} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
       {selectedInvoice && (

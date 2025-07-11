@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -126,34 +127,36 @@ export default function DealersPage() {
               </Button>
             )}
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Dealer Name</TableHead>
-                <TableHead>Lenders</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Credit Assigned</TableHead>
-                <TableHead className="text-right">Invoices</TableHead>
-                <TableHead className="text-right">Amount Disbursed</TableHead>
-                <TableHead className="text-right">Overdue</TableHead>
-                <TableHead className="text-right">Overdue Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredDealers.map((dealer) => (
-                <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
-                  <TableCell className="font-medium">{dealer.name}</TableCell>
-                  <TableCell>{dealer.lenders.join(', ')}</TableCell>
-                  <TableCell><StatusBadge status={dealer.status} /></TableCell>
-                  <TableCell className="text-right">{formatCurrency(dealer.creditAssigned)}</TableCell>
-                  <TableCell className="text-right">{dealer.invoicesSubmitted}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(dealer.amountDisbursed)}</TableCell>
-                  <TableCell className="text-right">{dealer.overdueCount}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(dealer.overdueAmount)}</TableCell>
+          <div className="relative w-full overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Dealer Name</TableHead>
+                  <TableHead>Lenders</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Credit Assigned</TableHead>
+                  <TableHead className="text-right">Invoices</TableHead>
+                  <TableHead className="text-right">Amount Disbursed</TableHead>
+                  <TableHead className="text-right">Overdue</TableHead>
+                  <TableHead className="text-right">Overdue Amount</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredDealers.map((dealer) => (
+                  <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
+                    <TableCell className="font-medium">{dealer.name}</TableCell>
+                    <TableCell>{dealer.lenders.join(', ')}</TableCell>
+                    <TableCell><StatusBadge status={dealer.status} /></TableCell>
+                    <TableCell className="text-right">{formatCurrency(dealer.creditAssigned)}</TableCell>
+                    <TableCell className="text-right">{dealer.invoicesSubmitted}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(dealer.amountDisbursed)}</TableCell>
+                    <TableCell className="text-right">{dealer.overdueCount}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(dealer.overdueAmount)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
       {selectedDealer && (

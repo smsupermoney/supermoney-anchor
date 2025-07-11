@@ -1,3 +1,4 @@
+
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,28 +22,30 @@ export default function LeadsPage() {
             <CardTitle>All Leads</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Dealer Name</TableHead>
-                <TableHead>Contact Person</TableHead>
-                <TableHead>Current Status</TableHead>
-                <TableHead>Onboarding Progress</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leads.map((lead) => (
-                <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.dealerName}</TableCell>
-                  <TableCell>{lead.contactPerson} <span className="text-muted-foreground">({lead.contactEmail})</span></TableCell>
-                  <TableCell><StatusBadge status={lead.status} /></TableCell>
-                  <TableCell>
-                    <ProgressTracker steps={leadStatuses.filter(s => s !== 'Dropped')} currentStep={lead.status} className="w-full min-w-[600px]" />
-                  </TableCell>
+          <div className="relative w-full overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Dealer Name</TableHead>
+                  <TableHead>Contact Person</TableHead>
+                  <TableHead>Current Status</TableHead>
+                  <TableHead>Onboarding Progress</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {leads.map((lead) => (
+                  <TableRow key={lead.id}>
+                    <TableCell className="font-medium">{lead.dealerName}</TableCell>
+                    <TableCell>{lead.contactPerson} <span className="text-muted-foreground">({lead.contactEmail})</span></TableCell>
+                    <TableCell><StatusBadge status={lead.status} /></TableCell>
+                    <TableCell>
+                      <ProgressTracker steps={leadStatuses.filter(s => s !== 'Dropped')} currentStep={lead.status} className="w-full min-w-[600px]" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </>
