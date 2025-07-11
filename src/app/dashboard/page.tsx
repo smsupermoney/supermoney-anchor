@@ -5,7 +5,7 @@ import { useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs, leads } from "@/lib/data";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins } from "lucide-react";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -207,12 +207,24 @@ export default function Dashboard() {
             </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Total Disbursed Amount <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
-                    <HandCoins className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm font-semibold">Quick Actions</CardTitle>
+                     <HelpCircle className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent className="p-3 pt-0">
-                    <p className="text-2xl font-bold text-primary">{formatCurrency(disbursedAmountLast7Days)}</p>
-                    <p className="text-xs text-muted-foreground">From invoices disbursed recently</p>
+                <CardContent className="p-3 pt-0 flex flex-col gap-2">
+                    <Button variant="outline" size="sm" className="w-full justify-start text-left">
+                        <HandCoins className="mr-2 h-4 w-4" />
+                        Request for additional limit
+                    </Button>
+                    <Button variant="outline" size="sm" className="w-full justify-start text-left" asChild>
+                        <Link href="/leads">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add new lead
+                        </Link>
+                    </Button>
+                    <Separator />
+                    <div className="text-xs text-muted-foreground text-center px-1">
+                        Have any query? <a href="mailto:nitin.chorge@supermoney.in" className="text-primary hover:underline font-medium">Send us an email</a>
+                    </div>
                 </CardContent>
             </Card>
           </div>
@@ -220,74 +232,78 @@ export default function Dashboard() {
       </div>
       
       {/* Program Overview */}
-      <div className="space-y-2">
+       <div className="space-y-2">
         <h2 className="text-lg font-bold tracking-tight">Program Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {programs.map((program) => {
-            const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
-            const remainingLimit = program.totalLimit - program.usedLimit;
+        <div className="relative">
+          <div className="overflow-x-auto pb-4 -mb-4">
+            <div className="flex gap-4">
+              {programs.map((program) => {
+                const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
+                const remainingLimit = program.totalLimit - program.usedLimit;
 
-            return (
-              <div key={program.id}>
-                <Card className="w-full flex flex-col h-full">
-                  <CardHeader className="p-3 pb-2">
-                    <div className="flex justify-between items-start">
-                      <div className="min-w-0">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{program.lenderName}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
-                      </div>
-                      <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
-                        <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
-                      </div>
-                      <Progress value={utilizationPercentage} className="h-2" />
-                    </div>
-                    <Separator />
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                      <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                        <p className="text-[10px] text-muted-foreground">Invoices</p>
-                        <p className="font-semibold text-xs">{program.invoicesCount}</p>
-                      </Link>
-                      <div className="space-y-0 p-1 rounded-md">
-                        <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                        <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
-                      </div>
-                      <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                        <p className="text-[10px] text-muted-foreground">Total Dealers</p>
-                        <p className="font-semibold text-xs">{program.totalDealers}</p>
-                      </Link>
-                      <div className="space-y-0 p-1 rounded-md">
-                        <p className="text-[10px] text-muted-foreground">Total Overdue</p>
-                        <p className="font-semibold text-xs">{program.overdueCount}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="p-3 pt-0">
-                    <UploadInvoiceDialog defaultLender={program.lenderName}>
-                      <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
-                        <UploadCloud className="mr-2 h-4 w-4" />
-                        Raise Invoice
-                      </Button>
-                    </UploadInvoiceDialog>
-                  </CardFooter>
-                </Card>
-              </div>
-            );
-          })}
+                return (
+                  <div key={program.id} className="min-w-[280px] w-[280px]">
+                    <Card className="w-full flex flex-col h-full">
+                      <CardHeader className="p-3 pb-2">
+                        <div className="flex justify-between items-start">
+                          <div className="min-w-0">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{program.lenderName}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                          </div>
+                          <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
+                            <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
+                          </div>
+                          <Progress value={utilizationPercentage} className="h-2" />
+                        </div>
+                        <Separator />
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                          <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                            <p className="text-[10px] text-muted-foreground">Invoices</p>
+                            <p className="font-semibold text-xs">{program.invoicesCount}</p>
+                          </Link>
+                          <div className="space-y-0 p-1 rounded-md">
+                            <p className="text-[10px] text-muted-foreground">Disbursed</p>
+                            <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
+                          </div>
+                          <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                            <p className="text-[10px] text-muted-foreground">Total Dealers</p>
+                            <p className="font-semibold text-xs">{program.totalDealers}</p>
+                          </Link>
+                          <div className="space-y-0 p-1 rounded-md">
+                            <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                            <p className="font-semibold text-xs">{program.overdueCount}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="p-3 pt-0">
+                        <UploadInvoiceDialog defaultLender={program.lenderName}>
+                          <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                            <UploadCloud className="mr-2 h-4 w-4" />
+                            Raise Invoice
+                          </Button>
+                        </UploadInvoiceDialog>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
