@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { UploadCloud, File as FileIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { dealers } from "@/lib/data";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
@@ -23,6 +26,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
   const [open, setOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedDealer, setSelectedDealer] = useState("");
   const { toast } = useToast();
 
   const handleFileChange = (newFiles: FileList | null) => {
@@ -72,6 +76,14 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
   };
 
   const handleSubmit = () => {
+    if (!selectedDealer) {
+      toast({
+        variant: "destructive",
+        title: "Dealer Not Selected",
+        description: "Please select a dealer.",
+      });
+      return;
+    }
     if (files.length === 0) {
       toast({
         variant: "destructive",
@@ -81,12 +93,13 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
       return;
     }
     // Handle submission logic here
-    console.log("Submitting files:", files);
+    console.log("Submitting files for dealer:", selectedDealer, files);
     toast({
       title: "Invoice Submitted",
-      description: `${files.length} document(s) have been submitted for processing.`,
+      description: `${files.length} document(s) for ${selectedDealer} have been submitted for processing.`,
     });
     setFiles([]);
+    setSelectedDealer("");
     setOpen(false);
   };
 
@@ -97,10 +110,25 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
         <DialogHeader>
           <DialogTitle>Upload Invoice</DialogTitle>
           <DialogDescription>
-            Drag and drop your invoice document and Eway Bill (If Eway Bill number is not in invoice document) below or click to browse.
+            Select a dealer and upload the invoice document and E-Way Bill.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="dealer-select">Choose Dealer</Label>
+            <Select value={selectedDealer} onValueChange={setSelectedDealer}>
+              <SelectTrigger id="dealer-select">
+                <SelectValue placeholder="Select a dealer..." />
+              </SelectTrigger>
+              <SelectContent>
+                {dealers.map((dealer) => (
+                  <SelectItem key={dealer.id} value={dealer.name}>
+                    {dealer.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}

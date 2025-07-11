@@ -6,6 +6,8 @@ export const dealers: Dealer[] = [
   { id: 'RET003', name: 'City Grocers', status: 'Pending', creditAssigned: 200000, invoicesSubmitted: 5, amountDisbursed: 50000, overdueCount: 0, overdueAmount: 0, lender: 'ADITYA BIRLA' },
   { id: 'RET004', name: 'Super Bazaar', status: 'Inactive', creditAssigned: 100000, invoicesSubmitted: 2, amountDisbursed: 20000, overdueCount: 0, overdueAmount: 0, lender: 'Supermoney Finance' },
   { id: 'RET005', name: 'Fresh Foods Inc.', status: 'Active', creditAssigned: 750000, invoicesSubmitted: 40, amountDisbursed: 700000, overdueCount: 5, overdueAmount: 120000, lender: 'Supply Chain Co.' },
+  { id: 'RET006', name: 'Modern Retailers', status: 'Active', creditAssigned: 600000, invoicesSubmitted: 30, amountDisbursed: 550000, overdueCount: 0, overdueAmount: 0, lender: 'CHOLAMANDALAM' },
+  { id: 'RET007', name: 'Daily Needs Store', status: 'Active', creditAssigned: 400000, invoicesSubmitted: 22, amountDisbursed: 380000, overdueCount: 1, overdueAmount: 20000, lender: 'ADITYA BIRLA' },
 ];
 
 export const invoiceStatuses: InvoiceStatus[] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];
