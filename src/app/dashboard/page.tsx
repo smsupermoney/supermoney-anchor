@@ -98,12 +98,12 @@ export default function Dashboard() {
                 {/* Slide 1: Credit Overview */}
                 <CarouselItem className="basis-full md:basis-1/2 lg:basis-1/3 pl-4">
                     <Card className="h-full flex flex-col">
-                        <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                        <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
                             <IndianRupee className="w-4 h-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent className="p-3 pt-0 text-xs flex-1">
-                            <div className="space-y-3 h-full flex flex-col justify-around">
+                            <div className="space-y-2 h-full flex flex-col justify-around">
                                 <div>
                                     <h4 className="font-semibold mb-1 text-primary">Supermoney</h4>
                                     <div className="space-y-1">
@@ -158,7 +158,7 @@ export default function Dashboard() {
                 <CarouselItem className="basis-full md:basis-1/2 lg:basis-1/3 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                       <Card>
-                          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                               <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
                               <FileText className="w-4 h-4 text-muted-foreground" />
                           </CardHeader>
@@ -184,7 +184,7 @@ export default function Dashboard() {
                           </CardContent>
                       </Card>
                       <Card>
-                          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                               <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
                               <CalendarClock className="w-4 h-4 text-muted-foreground" />
                           </CardHeader>
@@ -200,7 +200,7 @@ export default function Dashboard() {
                 <CarouselItem className="basis-full md:basis-1/2 lg:basis-1/3 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                       <Card>
-                          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                               <CardTitle className="text-sm font-semibold">Disbursal Summary</CardTitle>
                               <CheckCircle className="w-4 h-4 text-muted-foreground" />
                           </CardHeader>
@@ -210,7 +210,7 @@ export default function Dashboard() {
                           </CardContent>
                       </Card>
                       <Card>
-                          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
+                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                               <CardTitle className="text-sm font-semibold">Dealers Summary</CardTitle>
                               <Users className="w-4 h-4 text-muted-foreground" />
                           </CardHeader>
