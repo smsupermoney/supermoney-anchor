@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs, dealers } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, UploadCloud, CheckCircle, CalendarClock } from "lucide-react";
+import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, UploadCloud, CheckCircle, CalendarClock, Ban, CircleOff } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import type { Invoice } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
+import { subDays } from "date-fns";
 
 export default function Dashboard() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -39,24 +41,20 @@ export default function Dashboard() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const sevenDaysAgo = subDays(today, 7);
 
   const thirtyDaysFromNow = new Date();
   thirtyDaysFromNow.setDate(today.getDate() + 30);
+  
+  const invoicesLast7Days = invoices.filter(
+    (i) => new Date(i.date) >= sevenDaysAgo && new Date(i.date) <= today
+  );
 
-  const overdueInvoicesCount = invoices.filter(
-    (i) =>
-    new Date(i.dueDate).getTime() < today.getTime() &&
-    i.status !== "Disbursed" &&
-    i.status !== "Rejected"
-  ).length;
+  const totalLast7Days = invoicesLast7Days.length;
+  const disbursedLast7Days = invoicesLast7Days.filter(i => i.status === 'Disbursed').length;
+  const pendingLast7Days = invoicesLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
+  const rejectedLast7Days = invoicesLast7Days.filter(i => i.status === 'Rejected').length;
 
-  const pendingApprovalCount = invoices.filter(
-    i => i.status === 'Initiated' || i.status === 'Approved'
-  ).length;
-
-  const activeInvoicesCount = invoices.filter(
-    i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender'
-  ).length;
 
   const upcomingPayments = invoices.filter(
     (i) =>
@@ -161,26 +159,26 @@ export default function Dashboard() {
                   <div className="flex flex-col gap-4 h-full">
                       <Card>
                           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3">
-                              <CardTitle className="text-sm font-semibold">Invoice Summary</CardTitle>
+                              <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
                               <FileText className="w-4 h-4 text-muted-foreground" />
                           </CardHeader>
                           <CardContent className="p-3 pt-0">
                               <div className="grid grid-cols-2 gap-y-2">
                                   <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold">{invoices.length}</span>
-                                      <span className="text-xs text-muted-foreground">Total</span>
+                                      <span className="text-lg font-bold">{totalLast7Days}</span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
                                   </div>
                                   <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold">{activeInvoicesCount}</span>
-                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Active</span>
+                                      <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
                                   </div>
                                   <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold">{pendingApprovalCount}</span>
+                                      <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
                                       <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                                   </div>
                                   <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold text-destructive">{overdueInvoicesCount}</span>
-                                      <span className="text-destructive flex items-center gap-1 text-xs font-medium"><AlertTriangle className="w-3 h-3" /> Overdue</span>
+                                      <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
                                   </div>
                               </div>
                           </CardContent>
