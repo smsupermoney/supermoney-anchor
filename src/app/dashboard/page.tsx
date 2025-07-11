@@ -5,7 +5,7 @@ import { useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs } from "@/lib/data";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, CalendarClock } from "lucide-react";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -43,9 +43,6 @@ export default function Dashboard() {
   today.setHours(0, 0, 0, 0);
   const sevenDaysAgo = subDays(today, 7);
 
-  const thirtyDaysFromNow = new Date();
-  thirtyDaysFromNow.setDate(today.getDate() + 30);
-  
   const invoicesLast7Days = invoices.filter(
     (i) => new Date(i.date) >= sevenDaysAgo && new Date(i.date) <= today
   );
@@ -55,15 +52,10 @@ export default function Dashboard() {
   const pendingLast7Days = invoicesLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   const rejectedLast7Days = invoicesLast7Days.filter(i => i.status === 'Rejected').length;
 
-
-  const upcomingPayments = invoices.filter(
-    (i) =>
-      i.status === "Disbursed" &&
-      new Date(i.dueDate) >= today &&
-      new Date(i.dueDate) <= thirtyDaysFromNow
-  );
-  const upcomingPaymentsCount = upcomingPayments.length;
-  const upcomingPaymentsAmount = upcomingPayments.reduce((sum, i) => sum + i.amount, 0);
+  const overdueInvoices = invoices.filter((i) => i.overdueAmount > 0);
+  const totalOverdueAmount = overdueInvoices.reduce((sum, i) => sum + i.overdueAmount, 0);
+  const overdueInvoicesCount = overdueInvoices.length;
+  const dealersInOverdue = new Set(overdueInvoices.map(i => i.dealerName)).size;
   
   return (
     <>
@@ -87,7 +79,7 @@ export default function Dashboard() {
           >
             <CarouselContent className="-ml-4">
                 {/* Slide 1: Credit Overview */}
-                <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                     <Card className="h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
@@ -146,7 +138,7 @@ export default function Dashboard() {
                 </CarouselItem>
                 
                 {/* Slide 2: Invoice & Payments */}
-                <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                       <Card>
                           <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -174,14 +166,14 @@ export default function Dashboard() {
                               </div>
                           </CardContent>
                       </Card>
-                      <Card>
+                       <Card>
                           <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                              <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
-                              <CalendarClock className="w-4 h-4 text-muted-foreground" />
+                              <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
+                              <AlertTriangle className="w-4 h-4 text-destructive" />
                           </CardHeader>
                           <CardContent className="p-3 pt-0">
-                              <p className="text-2xl font-bold">{formatCurrency(upcomingPaymentsAmount)}</p>
-                              <p className="text-xs text-muted-foreground">Across {upcomingPaymentsCount} invoices in next 30 days</p>
+                              <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
+                              <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
                           </CardContent>
                       </Card>
                   </div>
