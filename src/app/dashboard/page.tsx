@@ -19,6 +19,7 @@ import type { Invoice } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays } from "date-fns";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Dashboard() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -259,11 +260,18 @@ export default function Dashboard() {
                       <Card className="h-full flex flex-col">
                         <CardHeader className="p-3 pb-2">
                            <div className="flex justify-between items-start">
-                              <div>
-                                  <CardTitle className="text-base">{program.lenderName}</CardTitle>
-                                  <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                              <div className="min-w-0">
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{program.lenderName}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                                <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
                               </div>
-                              <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
+                              <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
                           </div>
                         </CardHeader>
                         <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
