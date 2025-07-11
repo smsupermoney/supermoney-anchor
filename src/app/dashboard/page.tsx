@@ -18,8 +18,6 @@ import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
 
 
 export default function Dashboard() {
@@ -220,84 +218,73 @@ export default function Dashboard() {
       </div>
       
       {/* Program Overview */}
-      <div className="w-full min-w-0">
+      <div>
         <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
-         <Swiper
-          spaceBetween={16}
-          slidesPerView={1.1}
-          breakpoints={{
-            640: { slidesPerView: 2.2 },
-            1024: { slidesPerView: 3.5 },
-            1280: { slidesPerView: 4.5 },
-          }}
-          className="pb-2"
-        >
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {programs.map((program) => {
             const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
             const remainingLimit = program.totalLimit - program.usedLimit;
 
             return (
-              <SwiperSlide key={program.id} className="h-full">
-                  <Card>
-                      <CardHeader className="p-3 pb-2">
-                          <div className="flex justify-between items-start">
-                            <div className="min-w-0">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{program.lenderName}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                              <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
-                            </div>
-                            <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
+              <Card key={program.id} className="flex flex-col">
+                  <CardHeader className="p-3 pb-2">
+                      <div className="flex justify-between items-start">
+                        <div className="min-w-0">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{program.lenderName}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
                         </div>
-                      </CardHeader>
-                      <CardContent className="p-3 pt-0 flex flex-col gap-2">
-                        <div>
-                          <div className="flex justify-between text-xs mb-1">
-                            <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
-                            <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
-                          </div>
-                          <Progress value={utilizationPercentage} className="h-2" />
-                        </div>
-                        <Separator />
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                          <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                              <p className="text-[10px] text-muted-foreground">Invoices</p>
-                              <p className="font-semibold text-xs">{program.invoicesCount}</p>
-                          </Link>
-                            <div className="space-y-0 p-1 rounded-md">
-                              <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                              <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
-                          </div>
-                          <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                              <p className="text-[10px] text-muted-foreground">Total Dealers</p>
-                              <p className="font-semibold text-xs">{program.totalDealers}</p>
-                          </Link>
-                          <div className="space-y-0 p-1 rounded-md">
-                              <p className="text-[10px] text-muted-foreground">Total Overdue</p>
-                              <p className="font-semibold text-xs">{program.overdueCount}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="p-3 pt-0">
-                        <UploadInvoiceDialog defaultLender={program.lenderName}>
-                          <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
-                            <UploadCloud className="mr-2 h-4 w-4" />
-                            Raise Invoice
-                          </Button>
-                        </UploadInvoiceDialog>
-                      </CardFooter>
-                  </Card>
-              </SwiperSlide>
+                        <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
+                        <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
+                      </div>
+                      <Progress value={utilizationPercentage} className="h-2" />
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                      <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                          <p className="text-[10px] text-muted-foreground">Invoices</p>
+                          <p className="font-semibold text-xs">{program.invoicesCount}</p>
+                      </Link>
+                        <div className="space-y-0 p-1 rounded-md">
+                          <p className="text-[10px] text-muted-foreground">Disbursed</p>
+                          <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
+                      </div>
+                      <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                          <p className="text-[10px] text-muted-foreground">Total Dealers</p>
+                          <p className="font-semibold text-xs">{program.totalDealers}</p>
+                      </Link>
+                      <div className="space-y-0 p-1 rounded-md">
+                          <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                          <p className="font-semibold text-xs">{program.overdueCount}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-3 pt-0">
+                    <UploadInvoiceDialog defaultLender={program.lenderName}>
+                      <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                        <UploadCloud className="mr-2 h-4 w-4" />
+                        Raise Invoice
+                      </Button>
+                    </UploadInvoiceDialog>
+                  </CardFooter>
+              </Card>
             );
           })}
-        </Swiper>
+        </div>
       </div>
 
       {/* Recent Invoices */}
@@ -351,5 +338,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-    
