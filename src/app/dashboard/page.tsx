@@ -76,10 +76,12 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full gap-4">
       <PageHeader title="Dashboard">
-        <Button size="sm">
-          <UploadCloud className="mr-2 h-4 w-4" />
-          Raise Invoice
-        </Button>
+        <UploadInvoiceDialog>
+            <Button size="sm">
+            <UploadCloud className="mr-2 h-4 w-4" />
+            Raise Invoice
+            </Button>
+        </UploadInvoiceDialog>
       </PageHeader>
       
       {/* Top Row Cards */}
@@ -220,16 +222,16 @@ export default function Dashboard() {
       </div>
       
       {/* Program Overview */}
-      <div className="w-full">
+      <div className="w-full overflow-hidden">
         <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
         <Carousel opts={{ align: "start" }} className="w-full">
-          <CarouselContent>
+          <CarouselContent className="-ml-1">
             {programs.map((program) => {
               const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <CarouselItem key={program.id} className="basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                <CarouselItem key={program.id} className="basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <div className="p-1">
                     <Card className="h-full flex flex-col">
                         <CardHeader className="p-3 pb-2">
