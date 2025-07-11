@@ -92,7 +92,7 @@ export default function Dashboard() {
           >
             <CarouselContent className="-ml-4">
                 {/* Slide 1: Credit Overview */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-[30%] pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                     <Card className="h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
@@ -151,7 +151,7 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 2: Overdue & Invoice Summary */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-[35%] pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/3 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -193,7 +193,7 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 3: Lead Summary & Disbursed Amount */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-[35%] pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/3 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
