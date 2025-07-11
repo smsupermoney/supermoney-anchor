@@ -64,7 +64,9 @@ export default function Dashboard() {
   const needsAttentionLeads = leads.filter(l => ['KYC', 'Credit', 'Operations'].includes(l.status)).length;
   const rejectedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'Dropped').length;
 
-  const totalDisbursedAmount = programs.reduce((sum, p) => sum + p.disbursedAmount, 0);
+  const disbursedAmountLast7Days = invoicesLast7Days
+    .filter(i => i.status === 'Disbursed')
+    .reduce((sum, i) => sum + i.amount, 0);
 
 
   return (
@@ -220,12 +222,12 @@ export default function Dashboard() {
                     </Card>
                      <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                            <CardTitle className="text-sm font-semibold">Total Disbursed Amount</CardTitle>
+                            <CardTitle className="text-sm font-semibold">Total Disbursed Amount <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
                             <HandCoins className="w-4 h-4 text-primary" />
                         </CardHeader>
                         <CardContent className="p-3 pt-0">
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(totalDisbursedAmount)}</p>
-                            <p className="text-xs text-muted-foreground">Across all programs</p>
+                            <p className="text-2xl font-bold text-primary">{formatCurrency(disbursedAmountLast7Days)}</p>
+                            <p className="text-xs text-muted-foreground">From invoices disbursed recently</p>
                         </CardContent>
                     </Card>
                   </div>
