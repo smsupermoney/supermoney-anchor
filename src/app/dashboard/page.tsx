@@ -4,8 +4,8 @@
 import { useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { invoices, programs, dealers } from "@/lib/data";
-import { IndianRupee, FileText, AlertTriangle, Clock, Activity, ArrowRight, Library, Users, UploadCloud, CheckCircle, CalendarClock, Ban, CircleOff } from "lucide-react";
+import { invoices, programs } from "@/lib/data";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, CalendarClock } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -65,15 +65,6 @@ export default function Dashboard() {
   const upcomingPaymentsCount = upcomingPayments.length;
   const upcomingPaymentsAmount = upcomingPayments.reduce((sum, i) => sum + i.amount, 0);
   
-  const disbursedInvoices = invoices.filter(i => i.status === 'Disbursed');
-  const disbursedCount = disbursedInvoices.length;
-  const disbursedAmount = disbursedInvoices.reduce((sum, inv) => sum + inv.amount, 0);
-
-
-  const totalDealers = dealers.length;
-  const activeDealers = dealers.filter(r => r.status === 'Active').length;
-  const pendingDealers = dealers.filter(r => r.status === 'Pending').length;
-
   return (
     <>
       <div className="flex flex-col h-full gap-4 p-2">
@@ -196,43 +187,6 @@ export default function Dashboard() {
                   </div>
                 </CarouselItem>
 
-                {/* Slide 3: Disbursal & Dealers */}
-                <CarouselItem className="basis-full md:basis-1/2 lg:basis-1/3 pl-4">
-                  <div className="flex flex-col gap-4 h-full">
-                      <Card>
-                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                              <CardTitle className="text-sm font-semibold">Disbursal Summary</CardTitle>
-                              <CheckCircle className="w-4 h-4 text-muted-foreground" />
-                          </CardHeader>
-                          <CardContent className="p-3 pt-0">
-                              <p className="text-2xl font-bold">{formatCurrency(disbursedAmount)}</p>
-                              <p className="text-xs text-muted-foreground">Total across {disbursedCount} invoices</p>
-                          </CardContent>
-                      </Card>
-                      <Card>
-                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                              <CardTitle className="text-sm font-semibold">Dealers Summary</CardTitle>
-                              <Users className="w-4 h-4 text-muted-foreground" />
-                          </CardHeader>
-                          <CardContent className="p-3 pt-0">
-                              <div className="grid grid-cols-2 gap-y-2">
-                                  <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold">{totalDealers}</span>
-                                      <span className="text-xs text-muted-foreground">Total</span>
-                                  </div>
-                                  <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold">{activeDealers}</span>
-                                      <span className="text-xs text-muted-foreground">Active</span>
-                                  </div>
-                                  <div className="flex flex-col items-center col-span-2">
-                                      <span className="text-lg font-bold">{pendingDealers}</span>
-                                      <span className="text-xs text-muted-foreground">Pending</span>
-                                  </div>
-                              </div>
-                          </CardContent>
-                      </Card>
-                  </div>
-                </CarouselItem>
             </CarouselContent>
             <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:hidden -translate-x-8 group-hover:translate-x-0 transition-all duration-300" />
             <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 translate-x-8 group-hover:translate-x-0 transition-all duration-300" />
@@ -363,4 +317,5 @@ export default function Dashboard() {
       )}
     </>
   );
-}
+
+    
