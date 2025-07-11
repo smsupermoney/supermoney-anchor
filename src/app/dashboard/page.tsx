@@ -82,8 +82,146 @@ export default function Dashboard() {
           </UploadInvoiceDialog>
         </PageHeader>
         
-        {/* Top Row Carousel */}
-        <div className="w-full">
+        {/* Top Row Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Card className="h-full flex flex-col">
+              <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                  <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
+                  <IndianRupee className="w-4 h-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="p-3 pt-0 text-xs flex-1">
+                  <div className="space-y-2 h-full flex flex-col justify-around">
+                      <div>
+                          <h4 className="font-semibold mb-1 text-primary">Supermoney</h4>
+                          <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Total Limit</span>
+                                  <span className="font-medium">{formatCurrency(supermoneyTotalLimit)}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Utilized</span>
+                                  <span className="font-medium">{formatCurrency(supermoneyUtilizedCredit)}</span>
+                              </div>
+                          </div>
+                      </div>
+                      <Separator />
+                      <div>
+                          <h4 className="font-semibold mb-1">External Lenders</h4>
+                          <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Total Limit</span>
+                                  <span className="font-medium">{formatCurrency(externalTotalLimit)}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Utilized</span>
+                                  <span className="font-medium">{formatCurrency(externalUtilizedCredit)}</span>
+                              </div>
+                          </div>
+                      </div>
+                      <Separator />
+                      <div>
+                          <h4 className="font-bold mb-1">Total</h4>
+                          <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Total Limit</span>
+                                  <span className="font-semibold">{formatCurrency(totalCreditLimit)}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Utilized</span>
+                                  <span className="font-semibold">{formatCurrency(utilizedCredit)}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">Available</span>
+                                  <span className="font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </CardContent>
+          </Card>
+
+          <div className="flex flex-col gap-4 h-full">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                    <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                    <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
+                    <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                    <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
+                    <FileText className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                    <div className="grid grid-cols-2 gap-y-2">
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold">{totalLast7Days}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+          </div>
+          
+          <div className="flex flex-col gap-4 h-full">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                    <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                      <div className="grid grid-cols-2 gap-y-2">
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold">{totalPendingLeads}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-green-600">{convertedLeadsLast7Days}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> Converted (7d)</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-yellow-600">{needsAttentionLeads}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                    <CardTitle className="text-sm font-semibold">Total Disbursed Amount <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
+                    <HandCoins className="w-4 h-4 text-primary" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(disbursedAmountLast7Days)}</p>
+                    <p className="text-xs text-muted-foreground">From invoices disbursed recently</p>
+                </CardContent>
+            </Card>
+          </div>
+        </div>
+        
+        {/* Program Overview Carousel */}
+        <div className="w-full overflow-hidden">
+          <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
           <Carousel
             opts={{
               align: "start",
@@ -91,232 +229,73 @@ export default function Dashboard() {
             className="w-full"
           >
             <CarouselContent className="-ml-4">
-                {/* Slide 1: Credit Overview */}
-                <CarouselItem className="basis-auto pl-4">
-                    <Card className="h-full flex flex-col w-[320px]">
-                        <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                            <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
-                            <IndianRupee className="w-4 h-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0 text-xs flex-1">
-                            <div className="space-y-2 h-full flex flex-col justify-around">
-                                <div>
-                                    <h4 className="font-semibold mb-1 text-primary">Supermoney</h4>
-                                    <div className="space-y-1">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground">Total Limit</span>
-                                            <span className="font-medium">{formatCurrency(supermoneyTotalLimit)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground">Utilized</span>
-                                            <span className="font-medium">{formatCurrency(supermoneyUtilizedCredit)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <Separator />
-                                <div>
-                                    <h4 className="font-semibold mb-1">External Lenders</h4>
-                                    <div className="space-y-1">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground">Total Limit</span>
-                                            <span className="font-medium">{formatCurrency(externalTotalLimit)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground">Utilized</span>
-                                            <span className="font-medium">{formatCurrency(externalUtilizedCredit)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <Separator />
-                                <div>
-                                    <h4 className="font-bold mb-1">Total</h4>
-                                    <div className="space-y-1">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground">Total Limit</span>
-                                            <span className="font-semibold">{formatCurrency(totalCreditLimit)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground">Utilized</span>
-                                            <span className="font-semibold">{formatCurrency(utilizedCredit)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground">Available</span>
-                                            <span className="font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </CarouselItem>
+              {programs.map((program) => {
+                const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
+                const remainingLimit = program.totalLimit - program.usedLimit;
 
-                {/* Slide 2: Overdue & Invoice Summary */}
-                <CarouselItem className="basis-auto pl-4">
-                  <div className="flex flex-col gap-4 h-full w-[300px]">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                            <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
-                            <AlertTriangle className="w-4 h-4 text-destructive" />
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
-                            <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
-                            <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                            <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
-                            <FileText className="w-4 h-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
-                            <div className="grid grid-cols-2 gap-y-2">
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold">{totalLast7Days}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
-                                </div>
+                return (
+                  <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                    <Card className="h-full flex flex-col">
+                      <CardHeader className="p-3 pb-2">
+                          <div className="flex justify-between items-start">
+                            <div className="min-w-0">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{program.lenderName}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                              <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
                             </div>
-                        </CardContent>
+                            <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
+                            <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
+                          </div>
+                          <Progress value={utilizationPercentage} className="h-2" />
+                        </div>
+                        <Separator />
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                          <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                              <p className="text-[10px] text-muted-foreground">Invoices</p>
+                              <p className="font-semibold text-xs">{program.invoicesCount}</p>
+                          </Link>
+                            <div className="space-y-0 p-1 rounded-md">
+                              <p className="text-[10px] text-muted-foreground">Disbursed</p>
+                              <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
+                          </div>
+                          <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                              <p className="text-[10px] text-muted-foreground">Total Dealers</p>
+                              <p className="font-semibold text-xs">{program.totalDealers}</p>
+                          </Link>
+                          <div className="space-y-0 p-1 rounded-md">
+                              <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                              <p className="font-semibold text-xs">{program.overdueCount}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="p-3 pt-0">
+                        <UploadInvoiceDialog defaultLender={program.lenderName}>
+                          <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                            <UploadCloud className="mr-2 h-4 w-4" />
+                            Raise Invoice
+                          </Button>
+                        </UploadInvoiceDialog>
+                      </CardFooter>
                     </Card>
-                  </div>
-                </CarouselItem>
-
-                {/* Slide 3: Lead Summary & Disbursed Amount */}
-                <CarouselItem className="basis-auto pl-4">
-                  <div className="flex flex-col gap-4 h-full w-[300px]">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                            <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
-                             <div className="grid grid-cols-2 gap-y-2">
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold">{totalPendingLeads}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-green-600">{convertedLeadsLast7Days}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> Converted (7d)</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-yellow-600">{needsAttentionLeads}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
-                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                            <CardTitle className="text-sm font-semibold">Total Disbursed Amount <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
-                            <HandCoins className="w-4 h-4 text-primary" />
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0">
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(disbursedAmountLast7Days)}</p>
-                            <p className="text-xs text-muted-foreground">From invoices disbursed recently</p>
-                        </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
           </Carousel>
-        </div>
-        
-        {/* Program Overview Carousel */}
-        <div className="w-full overflow-hidden">
-          <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
-          <div className="w-full">
-            <Carousel
-              opts={{
-                align: "start",
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-4">
-                {programs.map((program) => {
-                  const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
-                  const remainingLimit = program.totalLimit - program.usedLimit;
-
-                  return (
-                    <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                      <Card className="h-full flex flex-col">
-                        <CardHeader className="p-3 pb-2">
-                           <div className="flex justify-between items-start">
-                              <div className="min-w-0">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{program.lenderName}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                                <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
-                              </div>
-                              <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
-                          <div>
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
-                              <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
-                            </div>
-                            <Progress value={utilizationPercentage} className="h-2" />
-                          </div>
-                          <Separator />
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                            <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                                <p className="text-[10px] text-muted-foreground">Invoices</p>
-                                <p className="font-semibold text-xs">{program.invoicesCount}</p>
-                            </Link>
-                             <div className="space-y-0 p-1 rounded-md">
-                                <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                                <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
-                            </div>
-                            <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                                <p className="text-[10px] text-muted-foreground">Total Dealers</p>
-                                <p className="font-semibold text-xs">{program.totalDealers}</p>
-                            </Link>
-                            <div className="space-y-0 p-1 rounded-md">
-                                <p className="text-[10px] text-muted-foreground">Total Overdue</p>
-                                <p className="font-semibold text-xs">{program.overdueCount}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                        <CardFooter className="p-3 pt-0">
-                          <UploadInvoiceDialog defaultLender={program.lenderName}>
-                            <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
-                              <UploadCloud className="mr-2 h-4 w-4" />
-                              Raise Invoice
-                            </Button>
-                          </UploadInvoiceDialog>
-                        </CardFooter>
-                      </Card>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
-          </div>
         </div>
 
         {/* Recent Invoices */}
@@ -369,10 +348,4 @@ export default function Dashboard() {
       )}
     </>
   );
-
-    
-    
-
-    
-
 }

@@ -81,7 +81,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <header className="sticky top-0 z-10 flex h-14 items-center justify-start gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:hidden">
           <SidebarTrigger />
         </header>
-        <main className="flex-1 p-2 min-w-0">
+        <main className="flex-1 p-4 min-w-0">
           {children}
         </main>
       </SidebarInset>
