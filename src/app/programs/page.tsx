@@ -11,7 +11,7 @@ export default function ProgramsPage() {
   return (
     <>
       <PageHeader title="Lender Programs" />
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {programs.map((program) => {
           const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
           const remainingLimit = program.totalLimit - program.usedLimit;
