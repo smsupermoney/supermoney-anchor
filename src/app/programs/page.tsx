@@ -1,9 +1,14 @@
+"use client";
+
 import PageHeader from "@/components/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { programs } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
+import { UploadCloud } from "lucide-react";
 
 export default function ProgramsPage() {
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
@@ -17,7 +22,7 @@ export default function ProgramsPage() {
           const remainingLimit = program.totalLimit - program.usedLimit;
           
           return (
-            <Card key={program.id}>
+            <Card key={program.id} className="flex flex-col">
               <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
@@ -27,7 +32,7 @@ export default function ProgramsPage() {
                     <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1">
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between text-xs mb-1">
@@ -49,6 +54,14 @@ export default function ProgramsPage() {
                   </div>
                 </div>
               </CardContent>
+              <CardFooter>
+                  <UploadInvoiceDialog>
+                    <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                      <UploadCloud className="mr-2 h-4 w-4" />
+                      Raise Invoice
+                    </Button>
+                  </UploadInvoiceDialog>
+              </CardFooter>
             </Card>
           );
         })}
