@@ -72,7 +72,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="flex flex-col h-full gap-4 p-2">
+      <div className="flex flex-col h-full gap-4">
         <PageHeader title="Dashboard">
           <UploadInvoiceDialog>
             <Button size="sm">
@@ -83,7 +83,7 @@ export default function Dashboard() {
         </PageHeader>
         
         {/* Top Row Carousel */}
-        <div className="relative group w-full max-w-7xl mx-auto">
+        <div className="w-full">
           <Carousel
             opts={{
               align: "start",
@@ -241,7 +241,7 @@ export default function Dashboard() {
         {/* Program Overview Carousel */}
         <div className="w-full overflow-hidden">
           <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
-          <div className="relative group w-full">
+          <div className="w-full">
             <Carousel
               opts={{
                 align: "start",
