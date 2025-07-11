@@ -224,7 +224,7 @@ export default function Dashboard() {
         <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
          <Swiper
           spaceBetween={16}
-          slidesPerView={1.2}
+          slidesPerView={1.1}
           breakpoints={{
             640: { slidesPerView: 2.2 },
             1024: { slidesPerView: 3.5 },
