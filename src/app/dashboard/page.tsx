@@ -92,8 +92,8 @@ export default function Dashboard() {
           >
             <CarouselContent className="-ml-4">
                 {/* Slide 1: Credit Overview */}
-                <CarouselItem style={{width: '150px'}} className="pl-4">
-                    <Card className="h-full flex flex-col">
+                <CarouselItem className="basis-auto pl-4">
+                    <Card className="h-full flex flex-col w-[320px]">
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
                             <IndianRupee className="w-4 h-4 text-muted-foreground" />
@@ -151,8 +151,8 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 2: Overdue & Invoice Summary */}
-                <CarouselItem style={{width: '150px'}} className="pl-4">
-                  <div className="flex flex-col gap-4 h-full">
+                <CarouselItem className="basis-auto pl-4">
+                  <div className="flex flex-col gap-4 h-full w-[300px]">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
@@ -193,8 +193,8 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 3: Lead Summary & Disbursed Amount */}
-                <CarouselItem style={{width: '150px'}} className="pl-4">
-                  <div className="flex flex-col gap-4 h-full">
+                <CarouselItem className="basis-auto pl-4">
+                  <div className="flex flex-col gap-4 h-full w-[300px]">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
