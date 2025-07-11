@@ -4,8 +4,8 @@
 import { useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { invoices, programs } from "@/lib/data";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle } from "lucide-react";
+import { invoices, programs, leads } from "@/lib/data";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,13 @@ export default function Dashboard() {
   const overdueInvoicesCount = overdueInvoices.length;
   const dealersInOverdue = new Set(overdueInvoices.map(i => i.dealerName)).size;
   
+  // Lead Summary Calculations
+  const leadsLast7Days = leads.filter(l => new Date(l.createdAt) >= sevenDaysAgo && new Date(l.createdAt) <= today);
+  const totalPendingLeads = leads.filter(l => !['PSD Completed', 'Dropped'].includes(l.status)).length;
+  const convertedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'PSD Completed').length;
+  const needsAttentionLeads = leads.filter(l => ['KYC', 'Credit', 'Operations'].includes(l.status)).length;
+  const rejectedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'Dropped').length;
+
   return (
     <>
       <div className="flex flex-col h-full gap-4 p-2">
@@ -137,36 +144,40 @@ export default function Dashboard() {
                     </Card>
                 </CarouselItem>
                 
-                {/* Slide 2: Invoice & Payments */}
+                {/* Slide 2: Invoice Summary */}
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                  <Card>
+                      <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                          <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
+                          <FileText className="w-4 h-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent className="p-3 pt-0">
+                          <div className="grid grid-cols-2 gap-y-2">
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold">{totalLast7Days}</span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                  <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
+                              </div>
+                          </div>
+                      </CardContent>
+                  </Card>
+                </CarouselItem>
+
+                {/* Slide 3: Overdue & Lead Summary */}
                 <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                       <Card>
-                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                              <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
-                              <FileText className="w-4 h-4 text-muted-foreground" />
-                          </CardHeader>
-                          <CardContent className="p-3 pt-0">
-                              <div className="grid grid-cols-2 gap-y-2">
-                                  <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold">{totalLast7Days}</span>
-                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
-                                  </div>
-                                  <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
-                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
-                                  </div>
-                                  <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
-                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                                  </div>
-                                  <div className="flex flex-col items-center">
-                                      <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
-                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
-                                  </div>
-                              </div>
-                          </CardContent>
-                      </Card>
-                       <Card>
                           <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                               <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
                               <AlertTriangle className="w-4 h-4 text-destructive" />
@@ -174,6 +185,32 @@ export default function Dashboard() {
                           <CardContent className="p-3 pt-0">
                               <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
                               <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
+                          </CardContent>
+                      </Card>
+                       <Card>
+                          <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                              <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
+                              <Users className="w-4 h-4 text-muted-foreground" />
+                          </CardHeader>
+                          <CardContent className="p-3 pt-0">
+                               <div className="grid grid-cols-2 gap-y-2">
+                                  <div className="flex flex-col items-center">
+                                      <span className="text-lg font-bold">{totalPendingLeads}</span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                                  </div>
+                                  <div className="flex flex-col items-center">
+                                      <span className="text-lg font-bold text-green-600">{convertedLeadsLast7Days}</span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> Converted (7d)</span>
+                                  </div>
+                                  <div className="flex flex-col items-center">
+                                      <span className="text-lg font-bold text-yellow-600">{needsAttentionLeads}</span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
+                                  </div>
+                                  <div className="flex flex-col items-center">
+                                      <span className="text-lg font-bold text-destructive">{rejectedLeadsLast7Days}</span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
+                                  </div>
+                              </div>
                           </CardContent>
                       </Card>
                   </div>
@@ -311,4 +348,6 @@ export default function Dashboard() {
   );
 
     
+    
+
     
