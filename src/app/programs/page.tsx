@@ -1,3 +1,4 @@
+
 "use client";
 
 import PageHeader from "@/components/page-header";
@@ -33,7 +34,7 @@ export default function ProgramsPage() {
                     <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0 flex flex-col gap-2 p-3 flex-1">
+              <CardContent className="pt-0 flex flex-col gap-1 p-3 flex-1">
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="font-medium">Used: {formatCurrency(program.usedLimit)}</span>
@@ -42,7 +43,7 @@ export default function ProgramsPage() {
                   <Progress value={utilizationPercentage} className="h-2" />
                 </div>
                 <Separator />
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Invoices</p>
                       <p className="font-semibold text-xs">{program.invoicesCount}</p>
