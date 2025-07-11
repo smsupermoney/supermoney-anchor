@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { dealers } from "@/lib/data";
+import { dealers, programs } from "@/lib/data";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
@@ -27,6 +27,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState("");
+  const [selectedLender, setSelectedLender] = useState("");
   const { toast } = useToast();
 
   const handleFileChange = (newFiles: FileList | null) => {
@@ -84,6 +85,14 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
       });
       return;
     }
+    if (!selectedLender) {
+      toast({
+        variant: "destructive",
+        title: "Lender Not Selected",
+        description: "Please select a lender.",
+      });
+      return;
+    }
     if (files.length === 0) {
       toast({
         variant: "destructive",
@@ -93,13 +102,14 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
       return;
     }
     // Handle submission logic here
-    console.log("Submitting files for dealer:", selectedDealer, files);
+    console.log("Submitting files for dealer:", selectedDealer, "with lender:", selectedLender, files);
     toast({
       title: "Invoice Submitted",
       description: `${files.length} document(s) for ${selectedDealer} have been submitted for processing.`,
     });
     setFiles([]);
     setSelectedDealer("");
+    setSelectedLender("");
     setOpen(false);
   };
 
@@ -110,7 +120,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
         <DialogHeader>
           <DialogTitle>Upload Invoice</DialogTitle>
           <DialogDescription>
-            Select a dealer and upload the invoice document and E-Way Bill.
+            Select a dealer and lender, then upload the invoice and E-Way Bill.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-4">
@@ -124,6 +134,21 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
                 {dealers.map((dealer) => (
                   <SelectItem key={dealer.id} value={dealer.name}>
                     {dealer.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="lender-select">Choose Lender</Label>
+            <Select value={selectedLender} onValueChange={setSelectedLender}>
+              <SelectTrigger id="lender-select">
+                <SelectValue placeholder="Select a lender..." />
+              </SelectTrigger>
+              <SelectContent>
+                {programs.map((program) => (
+                  <SelectItem key={program.id} value={program.lenderName}>
+                    {program.lenderName}
                   </SelectItem>
                 ))}
               </SelectContent>
