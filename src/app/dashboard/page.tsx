@@ -75,7 +75,7 @@ export default function Dashboard() {
       <div className="flex flex-col h-full gap-4 p-2">
         <PageHeader title="Dashboard">
           <UploadInvoiceDialog>
-            <Button size="sm">
+            <Button>
               <UploadCloud className="mr-2 h-4 w-4" />
               Raise Invoice
             </Button>
@@ -83,7 +83,7 @@ export default function Dashboard() {
         </PageHeader>
         
         {/* Top Row Carousel */}
-        <div className="relative group">
+        <div className="relative group w-full">
           <Carousel
             opts={{
               align: "start",
@@ -215,7 +215,7 @@ export default function Dashboard() {
                                     <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
                                 </div>
                                 <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-destructive">{rejectedLeadsLast7Days}</span>
+                                    <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
                                     <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
                                 </div>
                             </div>
@@ -235,15 +235,15 @@ export default function Dashboard() {
                 </CarouselItem>
 
             </CarouselContent>
-            <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:hidden translate-x-2 group-hover:translate-x-4 transition-all duration-300" />
-            <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 -translate-x-2 group-hover:-translate-x-4 transition-all duration-300" />
+            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
+            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
           </Carousel>
         </div>
         
         {/* Program Overview Carousel */}
         <div className="w-full">
           <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
-          <div className="relative group">
+          <div className="relative group w-full">
             <Carousel
               opts={{
                 align: "start",
@@ -264,7 +264,7 @@ export default function Dashboard() {
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                      <CardTitle className="text-base truncate">{program.lenderName}</CardTitle>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p>{program.lenderName}</p>
@@ -306,7 +306,7 @@ export default function Dashboard() {
                         </CardContent>
                         <CardFooter className="p-3 pt-0">
                           <UploadInvoiceDialog defaultLender={program.lenderName}>
-                            <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                            <Button variant="outline" className="w-full hover:bg-primary hover:text-primary-foreground">
                               <UploadCloud className="mr-2 h-4 w-4" />
                               Raise Invoice
                             </Button>
@@ -317,8 +317,8 @@ export default function Dashboard() {
                   );
                 })}
               </CarouselContent>
-              <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:hidden translate-x-2 group-hover:translate-x-4 transition-all duration-300" />
-              <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 -translate-x-2 group-hover:-translate-x-4 transition-all duration-300" />
+              <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
+              <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
             </Carousel>
           </div>
         </div>
@@ -380,5 +380,3 @@ export default function Dashboard() {
     
 
 }
-
-    
