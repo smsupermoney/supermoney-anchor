@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +31,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import type { Invoice } from "@/types";
+import { useSearchParams } from "next/navigation";
 
 export default function InvoicesPage() {
   const formatCurrency = (amount: number) =>
@@ -45,10 +46,20 @@ export default function InvoicesPage() {
     lender: "",
     status: "",
   };
+  
+  const searchParams = useSearchParams();
+  const lenderQuery = searchParams.get('lender');
 
   const [date, setDate] = useState<DateRange | undefined>();
-  const [filters, setFilters] = useState(initialFilters);
+  const [filters, setFilters] = useState({...initialFilters, lender: lenderQuery || ""});
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  
+  useEffect(() => {
+    const lender = searchParams.get('lender');
+    if (lender) {
+      setFilters(prev => ({...prev, lender: lender}));
+    }
+  }, [searchParams]);
 
   const handleFilterChange = (
     filterName: keyof typeof filters,

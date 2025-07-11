@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import type { Invoice } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
+import Link from "next/link";
 
 export default function Dashboard() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -277,19 +278,19 @@ export default function Dashboard() {
                           </div>
                           <Separator />
                           <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                            <div className="space-y-1">
+                            <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
                                 <p className="text-[10px] text-muted-foreground">Invoices</p>
                                 <p className="font-semibold text-xs">{program.invoicesCount}</p>
-                            </div>
-                             <div className="space-y-1">
+                            </Link>
+                             <div className="space-y-1 p-1 rounded-md">
                                 <p className="text-[10px] text-muted-foreground">Disbursed</p>
                                 <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
                             </div>
-                            <div className="space-y-1">
+                            <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
                                 <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                                 <p className="font-semibold text-xs">{program.totalDealers}</p>
-                            </div>
-                            <div className="space-y-1">
+                            </Link>
+                            <div className="space-y-1 p-1 rounded-md">
                                 <p className="text-[10px] text-muted-foreground">Total Overdue</p>
                                 <p className="font-semibold text-xs">{program.overdueCount}</p>
                             </div>

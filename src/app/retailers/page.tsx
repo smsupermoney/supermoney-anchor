@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import {
 import type { Dealer } from "@/types";
 import DealerDetailDialog from "@/components/dealer-detail-dialog";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
+import { useSearchParams } from "next/navigation";
 
 export default function DealersPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
@@ -29,8 +30,18 @@ export default function DealersPage() {
     status: "",
   };
 
-  const [filters, setFilters] = useState(initialFilters);
+  const searchParams = useSearchParams();
+  const lenderQuery = searchParams.get('lender');
+
+  const [filters, setFilters] = useState({...initialFilters, lender: lenderQuery || ""});
   const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
+
+  useEffect(() => {
+    const lender = searchParams.get('lender');
+    if (lender) {
+      setFilters(prev => ({ ...prev, lender: lender }));
+    }
+  }, [searchParams]);
 
   const handleFilterChange = (
     filterName: keyof typeof filters,

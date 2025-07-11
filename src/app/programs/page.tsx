@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { UploadCloud } from "lucide-react";
+import Link from "next/link";
 
 export default function ProgramsPage() {
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
@@ -42,19 +43,19 @@ export default function ProgramsPage() {
                 </div>
                 <Separator />
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                  <div className="space-y-1">
+                  <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Invoices</p>
                       <p className="font-semibold text-xs">{program.invoicesCount}</p>
-                  </div>
-                   <div className="space-y-1">
+                  </Link>
+                   <div className="space-y-1 p-1 rounded-md">
                       <p className="text-[10px] text-muted-foreground">Disbursed</p>
                       <p className="font-semibold text-xs">{formatCurrency(program.disbursedAmount)}</p>
                   </div>
-                  <div className="space-y-1">
+                  <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                       <p className="font-semibold text-xs">{program.totalDealers}</p>
-                  </div>
-                  <div className="space-y-1">
+                  </Link>
+                  <div className="space-y-1 p-1 rounded-md">
                       <p className="text-[10px] text-muted-foreground">Total Overdue</p>
                       <p className="font-semibold text-xs">{program.overdueCount}</p>
                   </div>
