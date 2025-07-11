@@ -188,12 +188,12 @@ export default function Dashboard() {
 
                 {/* Slide 3: Lead Summary */}
                 <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
-                  <Card className="h-full">
+                  <Card className="h-full flex flex-col">
                       <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                           <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
                           <Users className="w-4 h-4 text-muted-foreground" />
                       </CardHeader>
-                      <CardContent className="p-3 pt-0">
+                      <CardContent className="p-3 pt-0 flex-grow flex flex-col justify-center">
                            <div className="grid grid-cols-2 gap-y-2 mt-4">
                               <div className="flex flex-col items-center">
                                   <span className="text-lg font-bold">{totalPendingLeads}</span>
