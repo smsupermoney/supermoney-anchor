@@ -18,23 +18,23 @@ export default function ProgramsPage() {
   return (
     <>
       <PageHeader title="Lender Programs" />
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
         {programs.map((program) => {
           const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
           const remainingLimit = program.totalLimit - program.usedLimit;
           
           return (
             <Card key={program.id} className="flex flex-col">
-              <CardHeader className="p-3">
+              <CardHeader className="p-3 pb-2">
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle className="text-sm">{program.lenderName}</CardTitle>
-                        <CardDescription>Total Limit: {formatCurrency(program.totalLimit)}</CardDescription>
+                        <CardTitle className="text-base">{program.lenderName}</CardTitle>
+                        <CardDescription className="text-xs">Total Limit: {formatCurrency(program.totalLimit)}</CardDescription>
                     </div>
                     <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0 flex flex-col gap-1 p-3 flex-1">
+              <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="font-medium">Used: {formatCurrency(program.usedLimit)}</span>
@@ -44,19 +44,19 @@ export default function ProgramsPage() {
                 </div>
                 <Separator />
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
+                  <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Invoices</p>
                       <p className="font-semibold text-xs">{program.invoicesCount}</p>
                   </Link>
-                   <div className="space-y-1 p-1 rounded-md">
+                   <div className="space-y-0 p-1 rounded-md">
                       <p className="text-[10px] text-muted-foreground">Disbursed</p>
                       <p className="font-semibold text-xs">{formatCurrency(program.disbursedAmount)}</p>
                   </div>
-                  <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
+                  <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                       <p className="font-semibold text-xs">{program.totalDealers}</p>
                   </Link>
-                  <div className="space-y-1 p-1 rounded-md">
+                  <div className="space-y-0 p-1 rounded-md">
                       <p className="text-[10px] text-muted-foreground">Total Overdue</p>
                       <p className="font-semibold text-xs">{program.overdueCount}</p>
                   </div>

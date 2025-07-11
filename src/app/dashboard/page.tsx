@@ -91,7 +91,7 @@ export default function Dashboard() {
           >
             <CarouselContent className="-ml-4">
                 {/* Slide 1: Credit Overview */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-[30%] pl-4">
                     <Card className="h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
@@ -150,7 +150,7 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 2: Overdue & Invoice Summary */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-[35%] pl-4">
                   <div className="flex flex-col gap-4 h-full">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -192,7 +192,7 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 3: Lead Summary & Disbursed Amount */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-[35%] pl-4">
                   <div className="flex flex-col gap-4 h-full">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -257,16 +257,16 @@ export default function Dashboard() {
                   return (
                     <CarouselItem key={program.id} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
                       <Card className="h-full flex flex-col">
-                        <CardHeader className="p-3">
-                          <div className="flex justify-between items-start">
+                        <CardHeader className="p-3 pb-2">
+                           <div className="flex justify-between items-start">
                               <div>
-                                  <CardTitle className="text-sm">{program.lenderName}</CardTitle>
-                                  <CardDescription>Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                                  <CardTitle className="text-base">{program.lenderName}</CardTitle>
+                                  <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
                               </div>
                               <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
                           </div>
                         </CardHeader>
-                        <CardContent className="pt-0 flex flex-col gap-1 p-3 flex-1">
+                        <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
                           <div>
                             <div className="flex justify-between text-xs mb-1">
                               <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
@@ -276,19 +276,19 @@ export default function Dashboard() {
                           </div>
                           <Separator />
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                            <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
+                            <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                                 <p className="text-[10px] text-muted-foreground">Invoices</p>
                                 <p className="font-semibold text-xs">{program.invoicesCount}</p>
                             </Link>
-                             <div className="space-y-1 p-1 rounded-md">
+                             <div className="space-y-0 p-1 rounded-md">
                                 <p className="text-[10px] text-muted-foreground">Disbursed</p>
                                 <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
                             </div>
-                            <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-1 hover:bg-secondary p-1 rounded-md transition-colors">
+                            <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                                 <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                                 <p className="font-semibold text-xs">{program.totalDealers}</p>
                             </Link>
-                            <div className="space-y-1 p-1 rounded-md">
+                            <div className="space-y-0 p-1 rounded-md">
                                 <p className="text-[10px] text-muted-foreground">Total Overdue</p>
                                 <p className="font-semibold text-xs">{program.overdueCount}</p>
                             </div>
