@@ -9,7 +9,6 @@ import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTrian
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -219,70 +218,72 @@ export default function Dashboard() {
         </div>
         
         {/* Program Overview */}
-        <div>
+        <div className="w-full">
           <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="flex overflow-x-auto pb-4 gap-4">
             {programs.map((program) => {
               const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
               const remainingLimit = program.totalLimit - program.usedLimit;
 
               return (
-                <Card key={program.id} className="h-full flex flex-col">
-                  <CardHeader className="p-3 pb-2">
-                      <div className="flex justify-between items-start">
-                        <div className="min-w-0">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{program.lenderName}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                <div key={program.id} className="min-w-[280px] flex-shrink-0">
+                  <Card className="h-full flex flex-col">
+                    <CardHeader className="p-3 pb-2">
+                        <div className="flex justify-between items-start">
+                          <div className="min-w-0">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{program.lenderName}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                          </div>
+                          <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
+                          <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
                         </div>
-                        <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
-                    <div>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
-                        <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
+                        <Progress value={utilizationPercentage} className="h-2" />
                       </div>
-                      <Progress value={utilizationPercentage} className="h-2" />
-                    </div>
-                    <Separator />
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                      <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                          <p className="text-[10px] text-muted-foreground">Invoices</p>
-                          <p className="font-semibold text-xs">{program.invoicesCount}</p>
-                      </Link>
+                      <Separator />
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                            <p className="text-[10px] text-muted-foreground">Invoices</p>
+                            <p className="font-semibold text-xs">{program.invoicesCount}</p>
+                        </Link>
+                          <div className="space-y-0 p-1 rounded-md">
+                            <p className="text-[10px] text-muted-foreground">Disbursed</p>
+                            <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
+                        </div>
+                        <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                            <p className="text-[10px] text-muted-foreground">Total Dealers</p>
+                            <p className="font-semibold text-xs">{program.totalDealers}</p>
+                        </Link>
                         <div className="space-y-0 p-1 rounded-md">
-                          <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                          <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
+                            <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                            <p className="font-semibold text-xs">{program.overdueCount}</p>
+                        </div>
                       </div>
-                      <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                          <p className="text-[10px] text-muted-foreground">Total Dealers</p>
-                          <p className="font-semibold text-xs">{program.totalDealers}</p>
-                      </Link>
-                      <div className="space-y-0 p-1 rounded-md">
-                          <p className="text-[10px] text-muted-foreground">Total Overdue</p>
-                          <p className="font-semibold text-xs">{program.overdueCount}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="p-3 pt-0">
-                    <UploadInvoiceDialog defaultLender={program.lenderName}>
-                      <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
-                        <UploadCloud className="mr-2 h-4 w-4" />
-                        Raise Invoice
-                      </Button>
-                    </UploadInvoiceDialog>
-                  </CardFooter>
-                </Card>
+                    </CardContent>
+                    <CardFooter className="p-3 pt-0">
+                      <UploadInvoiceDialog defaultLender={program.lenderName}>
+                        <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                          <UploadCloud className="mr-2 h-4 w-4" />
+                          Raise Invoice
+                        </Button>
+                      </UploadInvoiceDialog>
+                    </CardFooter>
+                  </Card>
+                </div>
               );
             })}
           </div>
