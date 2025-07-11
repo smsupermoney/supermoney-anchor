@@ -75,7 +75,7 @@ export default function Dashboard() {
       <div className="flex flex-col h-full gap-4 p-2">
         <PageHeader title="Dashboard">
           <UploadInvoiceDialog>
-            <Button>
+            <Button size="sm">
               <UploadCloud className="mr-2 h-4 w-4" />
               Raise Invoice
             </Button>
@@ -83,7 +83,7 @@ export default function Dashboard() {
         </PageHeader>
         
         {/* Top Row Carousel */}
-        <div className="relative group w-full">
+        <div className="relative group w-full max-w-7xl mx-auto">
           <Carousel
             opts={{
               align: "start",
@@ -92,7 +92,7 @@ export default function Dashboard() {
           >
             <CarouselContent className="-ml-4">
                 {/* Slide 1: Credit Overview */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 pl-4">
                     <Card className="h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                             <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
@@ -151,7 +151,7 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 2: Overdue & Invoice Summary */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/3 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -193,7 +193,7 @@ export default function Dashboard() {
                 </CarouselItem>
 
                 {/* Slide 3: Lead Summary & Disbursed Amount */}
-                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/3 pl-4">
+                <CarouselItem className="basis-full sm:basis-1/2 lg:basis-1/3 pl-4">
                   <div className="flex flex-col gap-4 h-full">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -235,8 +235,8 @@ export default function Dashboard() {
                 </CarouselItem>
 
             </CarouselContent>
-            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
-            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
+            <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
+            <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
           </Carousel>
         </div>
         
@@ -264,7 +264,7 @@ export default function Dashboard() {
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <CardTitle className="text-base truncate">{program.lenderName}</CardTitle>
+                                      <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p>{program.lenderName}</p>
@@ -306,7 +306,7 @@ export default function Dashboard() {
                         </CardContent>
                         <CardFooter className="p-3 pt-0">
                           <UploadInvoiceDialog defaultLender={program.lenderName}>
-                            <Button variant="outline" className="w-full hover:bg-primary hover:text-primary-foreground">
+                            <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
                               <UploadCloud className="mr-2 h-4 w-4" />
                               Raise Invoice
                             </Button>
@@ -317,8 +317,8 @@ export default function Dashboard() {
                   );
                 })}
               </CarouselContent>
-              <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
-              <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
+              <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
+              <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex hover:bg-primary hover:text-primary-foreground opacity-0 group-hover:opacity-100 disabled:opacity-0 transition-opacity duration-300" />
             </Carousel>
           </div>
         </div>
