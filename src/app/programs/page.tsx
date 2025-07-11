@@ -23,38 +23,44 @@ export default function ProgramsPage() {
           
           return (
             <Card key={program.id} className="flex flex-col">
-              <CardHeader>
+              <CardHeader className="p-3">
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle>{program.lenderName}</CardTitle>
+                        <CardTitle className="text-sm">{program.lenderName}</CardTitle>
                         <CardDescription>Total Limit: {formatCurrency(program.totalLimit)}</CardDescription>
                     </div>
                     <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs">{program.lenderType}</Badge>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1">
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="font-medium">Used: {formatCurrency(program.usedLimit)}</span>
-                      <span className="text-muted-foreground">Available: {formatCurrency(remainingLimit)}</span>
-                    </div>
-                    <Progress value={utilizationPercentage} className="h-2" />
+              <CardContent className="pt-0 flex flex-col gap-2 p-3 flex-1">
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="font-medium">Used: {formatCurrency(program.usedLimit)}</span>
+                    <span className="text-muted-foreground">Available: {formatCurrency(remainingLimit)}</span>
                   </div>
-                  <Separator />
-                  <div className="grid grid-cols-2 gap-4 text-xs">
-                    <div className="space-y-1">
-                        <p className="text-muted-foreground">Invoices</p>
-                        <p className="font-semibold text-base">{program.invoicesCount}</p>
-                    </div>
-                     <div className="space-y-1">
-                        <p className="text-muted-foreground">Disbursed</p>
-                        <p className="font-semibold text-base">{formatCurrency(program.disbursedAmount)}</p>
-                    </div>
+                  <Progress value={utilizationPercentage} className="h-2" />
+                </div>
+                <Separator />
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                  <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground">Invoices</p>
+                      <p className="font-semibold text-xs">{program.invoicesCount}</p>
+                  </div>
+                   <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground">Disbursed</p>
+                      <p className="font-semibold text-xs">{formatCurrency(program.disbursedAmount)}</p>
+                  </div>
+                  <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground">Total Dealers</p>
+                      <p className="font-semibold text-xs">{program.totalDealers}</p>
+                  </div>
+                  <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                      <p className="font-semibold text-xs">{program.overdueCount}</p>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="p-3 pt-0">
                   <UploadInvoiceDialog>
                     <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
                       <UploadCloud className="mr-2 h-4 w-4" />
