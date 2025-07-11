@@ -239,7 +239,7 @@ export default function Dashboard() {
         </div>
         
         {/* Program Overview Carousel */}
-        <div className="w-full">
+        <div className="w-full overflow-hidden">
           <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
           <div className="relative group w-full">
             <Carousel
