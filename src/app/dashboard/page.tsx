@@ -220,7 +220,7 @@ export default function Dashboard() {
       </div>
       
       {/* Program Overview */}
-      <div>
+      <div className="w-full min-w-0">
         <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
          <Swiper
           spaceBetween={16}
@@ -230,13 +230,14 @@ export default function Dashboard() {
             1024: { slidesPerView: 3.5 },
             1280: { slidesPerView: 4.5 },
           }}
+          className="pb-2"
         >
           {programs.map((program) => {
             const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
             const remainingLimit = program.totalLimit - program.usedLimit;
 
             return (
-              <SwiperSlide key={program.id}>
+              <SwiperSlide key={program.id} className="h-full">
                   <Card>
                       <CardHeader className="p-3 pb-2">
                           <div className="flex justify-between items-start">
