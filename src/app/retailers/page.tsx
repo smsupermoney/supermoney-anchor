@@ -60,9 +60,10 @@ export default function DealersPage() {
 
   const filteredDealers = useMemo(() => {
     return dealers.filter((dealer) => {
+      const lenderMatch = filters.lender === "" || dealer.lenders.some(l => l.toLowerCase().includes(filters.lender.toLowerCase()));
       return (
         dealer.name.toLowerCase().includes(filters.name.toLowerCase()) &&
-        dealer.lender.toLowerCase().includes(filters.lender.toLowerCase()) &&
+        lenderMatch &&
         (filters.status === "" || dealer.status === filters.status)
       );
     });
@@ -129,7 +130,7 @@ export default function DealersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Dealer Name</TableHead>
-                <TableHead>Lender</TableHead>
+                <TableHead>Lenders</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Credit Assigned</TableHead>
                 <TableHead className="text-right">Invoices</TableHead>
@@ -142,7 +143,7 @@ export default function DealersPage() {
               {filteredDealers.map((dealer) => (
                 <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
                   <TableCell className="font-medium">{dealer.name}</TableCell>
-                  <TableCell>{dealer.lender}</TableCell>
+                  <TableCell>{dealer.lenders.join(', ')}</TableCell>
                   <TableCell><StatusBadge status={dealer.status} /></TableCell>
                   <TableCell className="text-right">{formatCurrency(dealer.creditAssigned)}</TableCell>
                   <TableCell className="text-right">{dealer.invoicesSubmitted}</TableCell>

@@ -7,7 +7,7 @@ export type Dealer = {
   amountDisbursed: number;
   overdueCount: number;
   overdueAmount: number;
-  lender: string;
+  lenders: string[]; // Changed from lender to lenders
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';

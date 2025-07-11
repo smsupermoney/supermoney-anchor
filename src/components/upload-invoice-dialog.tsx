@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,19 +16,55 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { dealers, programs } from "@/lib/data";
+import { dealers } from "@/lib/data";
+import type { Dealer } from "@/types";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
+  defaultLender?: string;
 };
 
-export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogProps) {
+export default function UploadInvoiceDialog({ children, defaultLender }: UploadInvoiceDialogProps) {
   const [open, setOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedDealer, setSelectedDealer] = useState("");
+  const [selectedDealerId, setSelectedDealerId] = useState("");
   const [selectedLender, setSelectedLender] = useState("");
   const { toast } = useToast();
+
+  const selectedDealer: Dealer | undefined = useMemo(() => dealers.find(d => d.id === selectedDealerId), [selectedDealerId]);
+  
+  const availableLenders = useMemo(() => {
+    if (!selectedDealer) return [];
+    // In a real app, you'd filter programs based on what's available for the dealer.
+    // For now, we use the `lenders` array on the dealer object.
+    return selectedDealer.lenders;
+  }, [selectedDealer]);
+
+  useEffect(() => {
+    if (open) {
+      // Reset state when dialog opens
+      setFiles([]);
+      setIsDragging(false);
+      setSelectedDealerId("");
+      setSelectedLender(defaultLender || "");
+    }
+  }, [open, defaultLender]);
+
+  useEffect(() => {
+    // If there's only one available lender for the selected dealer, auto-select it.
+    if (availableLenders.length === 1) {
+      setSelectedLender(availableLenders[0]);
+    } else {
+        // if a default lender is passed and is valid for the new dealer, keep it
+        if(defaultLender && availableLenders.includes(defaultLender)){
+            setSelectedLender(defaultLender);
+        } else if(!availableLenders.includes(selectedLender)) {
+            // otherwise reset if the current lender is not valid for the new dealer
+            setSelectedLender("");
+        }
+    }
+  }, [availableLenders, selectedDealerId, defaultLender, selectedLender]);
 
   const handleFileChange = (newFiles: FileList | null) => {
     if (newFiles) {
@@ -77,7 +113,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
   };
 
   const handleSubmit = () => {
-    if (!selectedDealer) {
+    if (!selectedDealerId) {
       toast({
         variant: "destructive",
         title: "Dealer Not Selected",
@@ -102,14 +138,11 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
       return;
     }
     // Handle submission logic here
-    console.log("Submitting files for dealer:", selectedDealer, "with lender:", selectedLender, files);
+    console.log("Submitting files for dealer:", selectedDealer?.name, "with lender:", selectedLender, files);
     toast({
       title: "Invoice Submitted",
-      description: `${files.length} document(s) for ${selectedDealer} have been submitted for processing.`,
+      description: `${files.length} document(s) for ${selectedDealer?.name} have been submitted for processing.`,
     });
-    setFiles([]);
-    setSelectedDealer("");
-    setSelectedLender("");
     setOpen(false);
   };
 
@@ -126,13 +159,13 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
         <div className="py-4 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="dealer-select">Choose Dealer</Label>
-            <Select value={selectedDealer} onValueChange={setSelectedDealer}>
+            <Select value={selectedDealerId} onValueChange={setSelectedDealerId}>
               <SelectTrigger id="dealer-select">
                 <SelectValue placeholder="Select a dealer..." />
               </SelectTrigger>
               <SelectContent>
                 {dealers.map((dealer) => (
-                  <SelectItem key={dealer.id} value={dealer.name}>
+                  <SelectItem key={dealer.id} value={dealer.id}>
                     {dealer.name}
                   </SelectItem>
                 ))}
@@ -141,14 +174,14 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
           </div>
            <div className="space-y-2">
             <Label htmlFor="lender-select">Choose Lender</Label>
-            <Select value={selectedLender} onValueChange={setSelectedLender}>
+            <Select value={selectedLender} onValueChange={setSelectedLender} disabled={!selectedDealerId || availableLenders.length === 0}>
               <SelectTrigger id="lender-select">
-                <SelectValue placeholder="Select a lender..." />
+                <SelectValue placeholder={!selectedDealerId ? "Select a dealer first" : "Select a lender..."} />
               </SelectTrigger>
               <SelectContent>
-                {programs.map((program) => (
-                  <SelectItem key={program.id} value={program.lenderName}>
-                    {program.lenderName}
+                {availableLenders.map((lender) => (
+                  <SelectItem key={lender} value={lender}>
+                    {lender}
                   </SelectItem>
                 ))}
               </SelectContent>

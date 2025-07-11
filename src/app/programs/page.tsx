@@ -62,7 +62,7 @@ export default function ProgramsPage() {
                 </div>
               </CardContent>
               <CardFooter className="p-3 pt-0">
-                  <UploadInvoiceDialog>
+                  <UploadInvoiceDialog defaultLender={program.lenderName}>
                     <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
                       <UploadCloud className="mr-2 h-4 w-4" />
                       Raise Invoice
