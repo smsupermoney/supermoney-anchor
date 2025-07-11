@@ -215,7 +215,7 @@ export default function Dashboard() {
                                     <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
                                 </div>
                                 <div className="flex flex-col items-center">
-                                    <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                                    <span className="text-lg font-bold text-destructive">{rejectedLeadsLast7Days}</span>
                                     <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
                                 </div>
                             </div>
@@ -243,7 +243,7 @@ export default function Dashboard() {
         {/* Program Overview Carousel */}
         <div className="w-full">
           <h2 className="text-lg font-bold tracking-tight mb-2">Program Overview</h2>
-          <div className="relative group overflow-hidden">
+          <div className="relative group">
             <Carousel
               opts={{
                 align: "start",
