@@ -81,8 +81,8 @@ export default function Dashboard() {
       </PageHeader>
       
       {/* Top Row Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="lg:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                 <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
                 <IndianRupee className="w-4 h-4 text-muted-foreground" />
