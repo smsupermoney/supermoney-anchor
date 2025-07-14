@@ -45,6 +45,14 @@ export default function InvoicesPage() {
       currency: "INR",
     }).format(amount);
 
+  const lenderFullNameMapping: Record<string, string> = {
+    'CHOLAMANDALAM INVEST...': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
+    'ADITYA BIRLA CAPITAL LTD': 'ADITYA BIRLA CAPITAL LTD',
+    'Supply Chain Finance Co.': 'Supply Chain Finance Co.',
+    'Flexi Loans': 'Flexi Loans',
+    'Supermoney Finance': 'Supermoney Finance'
+  };
+  
   const initialFilters = {
     invoiceNumber: "",
     dealerName: "",
@@ -319,7 +327,7 @@ export default function InvoicesPage() {
                           <TooltipTrigger asChild>
                             <div className="truncate max-w-[120px]">{invoice.lender}</div>
                           </TooltipTrigger>
-                          <TooltipContent><p>{invoice.lender}</p></TooltipContent>
+                          <TooltipContent><p>{lenderFullNameMapping[invoice.lender] || invoice.lender}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
@@ -363,8 +371,15 @@ export default function InvoicesPage() {
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell>
-                      <StatusBadge status={invoice.status} />
+                    <TableCell className="whitespace-nowrap">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div><StatusBadge status={invoice.status} /></div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.status}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 ))}
