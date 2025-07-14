@@ -36,10 +36,6 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                 <CardContent>
                      <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
                         <div className="flex justify-between items-baseline">
-                            <span className="text-muted-foreground">Credit Assigned</span>
-                            <span className="font-semibold">{formatCurrency(dealer.creditAssigned)}</span>
-                        </div>
-                        <div className="flex justify-between items-baseline">
                             <span className="text-muted-foreground">Amount Disbursed</span>
                             <span className="font-semibold">{formatCurrency(dealer.amountDisbursed)}</span>
                         </div>

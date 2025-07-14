@@ -8,7 +8,7 @@
  * 2.  Select your project.
  * 3.  In the left-hand menu, go to "Build" > "Firestore Database".
  *
- * 4.  For each collection (users, programs, dealers, invoices):
+ * 4.  For each collection (users, programs, dealers, invoices, dealerProgramLimits):
  *     a. Click "+ Start collection".
  *     b. For the "Collection ID", enter the name (e.g., "users").
  *     c. Instead of adding documents one by one, Firestore will create the first one for you. Click "Next".
@@ -71,7 +71,7 @@ export const dummyUsers = [
 export const dummyPrograms = [
   {
     id: 'PROG001',
-    anchorIds: ['ANC001'], // Linked to Stark Industries
+    anchorIds: ['ANC001'],
     lenderName: 'Supermoney Finance',
     lenderType: 'Supermoney',
     totalLimit: 5000000,
@@ -84,7 +84,7 @@ export const dummyPrograms = [
   },
   {
     id: 'PROG002',
-    anchorIds: ['ANC001', 'ANC002'], // Linked to Stark Industries AND Wayne Enterprises
+    anchorIds: ['ANC001', 'ANC002'],
     lenderName: 'CHOLAMANDALAM INVEST...',
     lenderType: 'External',
     totalLimit: 10000000,
@@ -97,7 +97,7 @@ export const dummyPrograms = [
   },
   {
     id: 'PROG003',
-    anchorIds: ['ANC002'], // Linked to Wayne Enterprises
+    anchorIds: ['ANC002'],
     lenderName: 'ADITYA BIRLA CAPITAL LTD',
     lenderType: 'External',
     totalLimit: 7500000,
@@ -110,16 +110,29 @@ export const dummyPrograms = [
   },
 ];
 
+// --- DUMMY DEALER-PROGRAM LIMIT MAPPING ---
+// This new collection maps dealers to programs with specific credit limits.
+export const dummyDealerProgramLimits = [
+  // Star Electronics (DLR001) has a limit of 2,000,000 in the Supermoney program
+  { id: 'DPL001', dealerId: 'DLR001', programId: 'PROG001', creditLimit: 2000000, usedLimit: 750000 },
+  // Future Gadgets (DLR002) has limits in two different programs
+  { id: 'DPL002', dealerId: 'DLR002', programId: 'PROG001', creditLimit: 1000000, usedLimit: 500000 },
+  { id: 'DPL003', dealerId: 'DLR002', programId: 'PROG002', creditLimit: 2000000, usedLimit: 0 },
+  // Innovative Tech (DLR003) has a limit in the Cholamandalam program
+  { id: 'DPL004', dealerId: 'DLR003', programId: 'PROG002', creditLimit: 5000000, usedLimit: 4500000 },
+  // Gotham Goods (DLR004) has limits in two different programs
+  { id: 'DPL005', dealerId: 'DLR004', programId: 'PROG003', creditLimit: 3000000, usedLimit: 750000 },
+  { id: 'DPL006', dealerId: 'DLR004', programId: 'PROG002', creditLimit: 1000000, usedLimit: 100000 },
+];
+
 // --- DUMMY DEALERS ---
-// Each dealer is linked to an anchor and one or more programs.
+// `creditAssigned` is removed. This info is now in `dealerProgramLimits`.
 export const dummyDealers = [
   {
     id: 'DLR001',
     anchorId: 'ANC001',
-    programIds: ['PROG001'],
     name: 'Star Electronics',
     status: 'Active',
-    creditAssigned: 2000000,
     invoicesSubmitted: 5,
     amountDisbursed: 750000,
     overdueCount: 1,
@@ -129,10 +142,8 @@ export const dummyDealers = [
   {
     id: 'DLR002',
     anchorId: 'ANC001',
-    programIds: ['PROG001', 'PROG002'],
     name: 'Future Gadgets',
     status: 'Active',
-    creditAssigned: 3000000,
     invoicesSubmitted: 5,
     amountDisbursed: 500000,
     overdueCount: 0,
@@ -142,10 +153,8 @@ export const dummyDealers = [
   {
     id: 'DLR003',
     anchorId: 'ANC001',
-    programIds: ['PROG002'],
     name: 'Innovative Tech',
     status: 'Inactive',
-    creditAssigned: 5000000,
     invoicesSubmitted: 15,
     amountDisbursed: 4500000,
     overdueCount: 0,
@@ -155,15 +164,13 @@ export const dummyDealers = [
   {
     id: 'DLR004',
     anchorId: 'ANC002',
-    programIds: ['PROG003', 'PROG002'],
     name: 'Gotham Goods',
     status: 'Active',
-    creditAssigned: 4000000,
     invoicesSubmitted: 8,
     amountDisbursed: 2000000,
     overdueCount: 2,
     overdueAmount: 250000,
-    lenders: ['ADITYA BIRLA CAPITAL LTD'],
+    lenders: ['ADITYA BIRLA CAPITAL LTD', 'CHOLAMANDALAM INVEST...'],
   },
 ];
 

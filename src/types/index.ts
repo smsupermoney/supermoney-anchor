@@ -2,7 +2,6 @@ export type Dealer = {
   id: string;
   name: string;
   status: 'Active' | 'Inactive' | 'Pending';
-  creditAssigned: number;
   invoicesSubmitted: number;
   amountDisbursed: number;
   overdueCount: number;
@@ -28,6 +27,7 @@ export type Invoice = {
 
 export type Program = {
   id: string;
+  anchorIds: string[];
   lenderName: string;
   lenderType: 'Supermoney' | 'External';
   totalLimit: number;
@@ -60,4 +60,12 @@ export type User = {
     roleType: "Anchor" | "Dealer" | "Admin";
     lastLoginTime: string;
     lastLoginIp: string;
-}
+};
+
+export type DealerProgramLimit = {
+  id: string;
+  dealerId: string;
+  programId: string;
+  creditLimit: number;
+  usedLimit: number;
+};

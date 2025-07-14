@@ -157,7 +157,6 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   <TableHead>Dealer Name</TableHead>
                   <TableHead>Lenders</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Credit Assigned</TableHead>
                   <TableHead className="text-right">Invoices</TableHead>
                   <TableHead className="text-right">Amount Disbursed</TableHead>
                   <TableHead className="text-right">Overdue</TableHead>
@@ -194,16 +193,6 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                             <div><StatusBadge status={dealer.status} /></div>
                           </TooltipTrigger>
                           <TooltipContent><p>{dealer.status}</p></TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableCell>
-                    <TableCell className="text-right">
-                       <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.creditAssigned)}</div>
-                          </TooltipTrigger>
-                          <TooltipContent><p>{formatCurrency(dealer.creditAssigned)}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
