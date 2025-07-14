@@ -349,24 +349,81 @@ export default function Dashboard() {
                     </TableHeader>
                     <TableBody>
                     {invoices.slice(0, 10).map((invoice) => (
-                        <TableRow key={invoice.id} className="h-10 cursor-pointer">
-                            <TableCell className="p-2 font-medium text-primary cursor-pointer hover:underline" onClick={() => setSelectedInvoice(invoice)}>
-                                {invoice.invoiceNumber}
+                        <TableRow key={invoice.id} className="h-10 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>
+                            <TableCell className="p-2 font-medium text-primary">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="truncate max-w-[100px]">{invoice.invoiceNumber}</div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{invoice.invoiceNumber}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </TableCell>
                             <TableCell className="p-2">
-                                <Link href={`/invoices?dealerName=${encodeURIComponent(invoice.dealerName)}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
-                                    {invoice.dealerName}
-                                </Link>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                             <Link href={`/invoices?dealerName=${encodeURIComponent(invoice.dealerName)}`} className="hover:underline truncate max-w-[120px] block" onClick={(e) => e.stopPropagation()}>
+                                                {invoice.dealerName}
+                                            </Link>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{invoice.dealerName}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </TableCell>
                             <TableCell className="p-2">
-                                <Link href={`/invoices?lender=${encodeURIComponent(invoice.lender)}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
-                                    {invoice.lender}
-                                </Link>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Link href={`/invoices?lender=${encodeURIComponent(invoice.lender)}`} className="hover:underline truncate max-w-[120px] block" onClick={(e) => e.stopPropagation()}>
+                                                {invoice.lender}
+                                            </Link>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{lenderFullNameMapping[invoice.lender] || invoice.lender}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </TableCell>
-                            <TableCell className="p-2 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>{invoice.date}</TableCell>
-                            <TableCell className="p-2 text-right cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>{formatCurrency(invoice.amount)}</TableCell>
-                            <TableCell className="p-2 text-right text-destructive cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
-                            <TableCell className="p-2 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}><StatusBadge status={invoice.status} /></TableCell>
+                            <TableCell className="p-2">
+                                 <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="truncate max-w-[100px]">{invoice.date}</div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{invoice.date}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </TableCell>
+                            <TableCell className="p-2 text-right">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="truncate max-w-[100px]">{formatCurrency(invoice.amount)}</div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{formatCurrency(invoice.amount)}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </TableCell>
+                            <TableCell className="p-2 text-right text-destructive">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="truncate max-w-[100px]">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </TableCell>
+                            <TableCell className="p-2">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div><StatusBadge status={invoice.status} /></div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{invoice.status}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </TableCell>
                         </TableRow>
                     ))}
                     </TableBody>
