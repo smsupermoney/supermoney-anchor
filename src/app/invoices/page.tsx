@@ -80,8 +80,7 @@ export default function InvoicesPage() {
   };
   
   const hasActiveFilters = useMemo(() => {
-    // We check initialFilters to see if any query params were applied
-    return Object.keys(filters).some(key => filters[key as keyof typeof filters] !== initialFilters[key as keyof typeof initialFilters]) || !!date;
+    return Object.values(filters).some(val => val !== "") || !!date;
   }, [filters, date]);
 
   const filteredInvoices = useMemo(() => {
