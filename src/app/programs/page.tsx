@@ -54,22 +54,22 @@ export default function ProgramsPage() {
                 </div>
                 <Separator />
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                      <p className="text-[10px] text-muted-foreground">Invoices</p>
+                  <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}&status=Disbursed`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                      <p className="text-[10px] text-muted-foreground">Disbursed Invoices</p>
                       <p className="font-semibold text-xs">{program.invoicesCount}</p>
                   </Link>
-                   <div className="space-y-0 p-1 rounded-md">
-                      <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                      <p className="font-semibold text-xs">{formatCurrency(program.disbursedAmount)}</p>
-                  </div>
+                  <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}&status=Initiated`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                    <p className="text-[10px] text-muted-foreground">Initiated Invoices</p>
+                    <p className="font-semibold text-xs">{program.pendingInvoicesCount}</p>
+                  </Link>
                   <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                       <p className="font-semibold text-xs">{program.totalDealers}</p>
                   </Link>
-                  <div className="space-y-0 p-1 rounded-md">
-                      <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                  <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}&overdue=yes`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                      <p className="text-[10px] text-muted-foreground">Overdue Invoices</p>
                       <p className="font-semibold text-xs">{program.overdueCount}</p>
-                  </div>
+                  </Link>
                 </div>
               </CardContent>
               <CardFooter className="p-3 pt-0">
@@ -87,5 +87,3 @@ export default function ProgramsPage() {
     </>
   );
 }
-
-    
