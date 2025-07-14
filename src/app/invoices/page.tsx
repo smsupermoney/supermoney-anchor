@@ -59,8 +59,9 @@ export default function InvoicesPage() {
     const lenderQuery = searchParams.get('lender');
     const overdueQuery = searchParams.get('overdue');
     const statusQuery = searchParams.get('status');
+    const dealerNameQuery = searchParams.get('dealerName');
     const statusArray = statusQuery ? statusQuery.split(',') as InvoiceStatus[] : [];
-    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || "", status: statusArray};
+    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || "", status: statusArray, dealerName: dealerNameQuery || ""};
   });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
@@ -68,8 +69,9 @@ export default function InvoicesPage() {
     const lender = searchParams.get('lender');
     const overdue = searchParams.get('overdue');
     const status = searchParams.get('status');
+    const dealerName = searchParams.get('dealerName');
     const statusArray = status ? status.split(',') as InvoiceStatus[] : [];
-    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || "", status: statusArray}));
+    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || "", status: statusArray, dealerName: dealerName || ""}));
   }, [searchParams]);
 
   const handleStatusFilterChange = (status: InvoiceStatus) => {
@@ -325,5 +327,3 @@ export default function InvoicesPage() {
     </>
   );
 }
-
-    

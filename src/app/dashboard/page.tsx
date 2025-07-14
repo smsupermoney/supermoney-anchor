@@ -177,7 +177,7 @@ export default function Dashboard() {
                             <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
                         </Link>
-                        <Link href="/invoices" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices?status=Initiated,Approved,Sent to Lender" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                         </Link>
@@ -349,14 +349,24 @@ export default function Dashboard() {
                     </TableHeader>
                     <TableBody>
                     {invoices.slice(0, 10).map((invoice) => (
-                        <TableRow key={invoice.id} className="h-10 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>
-                        <TableCell className="p-2 font-medium">{invoice.invoiceNumber}</TableCell>
-                        <TableCell className="p-2">{invoice.dealerName}</TableCell>
-                        <TableCell className="p-2">{invoice.lender}</TableCell>
-                        <TableCell className="p-2">{invoice.date}</TableCell>
-                        <TableCell className="p-2 text-right">{formatCurrency(invoice.amount)}</TableCell>
-                        <TableCell className="p-2 text-right text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
-                        <TableCell className="p-2"><StatusBadge status={invoice.status} /></TableCell>
+                        <TableRow key={invoice.id} className="h-10 cursor-pointer">
+                            <TableCell className="p-2 font-medium text-primary cursor-pointer hover:underline" onClick={() => setSelectedInvoice(invoice)}>
+                                {invoice.invoiceNumber}
+                            </TableCell>
+                            <TableCell className="p-2">
+                                <Link href={`/invoices?dealerName=${encodeURIComponent(invoice.dealerName)}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
+                                    {invoice.dealerName}
+                                </Link>
+                            </TableCell>
+                            <TableCell className="p-2">
+                                <Link href={`/invoices?lender=${encodeURIComponent(invoice.lender)}`} className="hover:underline" onClick={(e) => e.stopPropagation()}>
+                                    {invoice.lender}
+                                </Link>
+                            </TableCell>
+                            <TableCell className="p-2 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>{invoice.date}</TableCell>
+                            <TableCell className="p-2 text-right cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>{formatCurrency(invoice.amount)}</TableCell>
+                            <TableCell className="p-2 text-right text-destructive cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
+                            <TableCell className="p-2 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}><StatusBadge status={invoice.status} /></TableCell>
                         </TableRow>
                     ))}
                     </TableBody>
