@@ -10,8 +10,12 @@ export const anchorNavigationLinks = [
 ];
 
 export const adminNavigationLinks = [
-  { href: '/programs', label: 'Programs', icon: Library },
-  { href: '/retailers', label: 'Dealers', icon: Users },
-  { href: '/invoices', label: 'Invoices', icon: FileText },
-  { href: '/leads', label: 'Leads', icon: PlusCircle },
+  { href: '/add-program', label: 'Add Program', icon: PlusCircle },
+  { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
+  { href: '/add-invoice', label: 'Add Invoice', icon: PlusCircle },
+  { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
+  { href: '/programs', label: 'View Programs', icon: Library },
+  { href: '/retailers', label: 'View Dealers', icon: Users },
+  { href: '/invoices', label: 'View Invoices', icon: FileText },
+  { href: '/leads', label: 'View Leads', icon: FileText },
 ];

@@ -13,7 +13,7 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
-  console.log("Comming Here");
+  let userRole: "Admin" | "Anchor" | "Dealer" | undefined;
   try {
     const { email, password } = z
       .object({
@@ -41,6 +41,8 @@ export async function authenticate(
     session.emailAddress = user.emailAddress;
     await session.save();
 
+    userRole = user.roleType;
+
   } catch (error) {
     if (error instanceof z.ZodError) {
       return 'Invalid email or password format.';
@@ -49,7 +51,11 @@ export async function authenticate(
     return 'An unexpected error occurred.';
   }
 
-  redirect('/dashboard');
+  if (userRole === 'Admin') {
+    redirect('/add-program');
+  } else {
+    redirect('/dashboard');
+  }
 }
 
 export async function logout() {
