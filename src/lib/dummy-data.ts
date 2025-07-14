@@ -17,6 +17,7 @@
  *     f. In the Firestore UI, you will see fields like 'field' and 'value'.
  *        - For each key-value pair in the JSON object (like "id": "USR001"), enter the key (e.g., 'id') as the field name and the value (e.g., 'USR001') as the field value.
  *        - Make sure to select the correct data type (String, Number, etc.).
+ *        - For arrays (like `anchorIds`), set the data type to 'array'. Then you can add each string value to the array.
  *     g. Click "Save" to create the first document.
  *
  * 5.  To add the rest of the documents for that collection:
@@ -28,7 +29,7 @@
  *
  */
 
-// --- DUMMY USERS (Anchors) ---
+// --- DUMMY USERS (Anchors & Admins) ---
 export const dummyUsers = [
   {
     id: 'USR001',
@@ -66,11 +67,11 @@ export const dummyUsers = [
 ];
 
 // --- DUMMY PROGRAMS ---
-// Each program is linked to an anchor via `anchorId`.
+// Each program is linked to one or more anchors via `anchorIds`.
 export const dummyPrograms = [
   {
     id: 'PROG001',
-    anchorId: 'ANC001', // Stark Industries
+    anchorIds: ['ANC001'], // Linked to Stark Industries
     lenderName: 'Supermoney Finance',
     lenderType: 'Supermoney',
     totalLimit: 5000000,
@@ -83,7 +84,7 @@ export const dummyPrograms = [
   },
   {
     id: 'PROG002',
-    anchorId: 'ANC001', // Stark Industries
+    anchorIds: ['ANC001', 'ANC002'], // Linked to Stark Industries AND Wayne Enterprises
     lenderName: 'CHOLAMANDALAM INVEST...',
     lenderType: 'External',
     totalLimit: 10000000,
@@ -96,7 +97,7 @@ export const dummyPrograms = [
   },
   {
     id: 'PROG003',
-    anchorId: 'ANC002', // Wayne Enterprises
+    anchorIds: ['ANC002'], // Linked to Wayne Enterprises
     lenderName: 'ADITYA BIRLA CAPITAL LTD',
     lenderType: 'External',
     totalLimit: 7500000,
@@ -110,12 +111,12 @@ export const dummyPrograms = [
 ];
 
 // --- DUMMY DEALERS ---
-// Each dealer is linked to an anchor and a program.
+// Each dealer is linked to an anchor and one or more programs.
 export const dummyDealers = [
   {
     id: 'DLR001',
     anchorId: 'ANC001',
-    programId: 'PROG001',
+    programIds: ['PROG001'],
     name: 'Star Electronics',
     status: 'Active',
     creditAssigned: 2000000,
@@ -128,7 +129,7 @@ export const dummyDealers = [
   {
     id: 'DLR002',
     anchorId: 'ANC001',
-    programId: 'PROG001',
+    programIds: ['PROG001', 'PROG002'],
     name: 'Future Gadgets',
     status: 'Active',
     creditAssigned: 3000000,
@@ -141,7 +142,7 @@ export const dummyDealers = [
   {
     id: 'DLR003',
     anchorId: 'ANC001',
-    programId: 'PROG002',
+    programIds: ['PROG002'],
     name: 'Innovative Tech',
     status: 'Inactive',
     creditAssigned: 5000000,
@@ -154,7 +155,7 @@ export const dummyDealers = [
   {
     id: 'DLR004',
     anchorId: 'ANC002',
-    programId: 'PROG003',
+    programIds: ['PROG003', 'PROG002'],
     name: 'Gotham Goods',
     status: 'Active',
     creditAssigned: 4000000,
@@ -167,12 +168,14 @@ export const dummyDealers = [
 ];
 
 // --- DUMMY INVOICES ---
-// Each invoice is linked to a dealer.
+// Each invoice is linked to a dealer, an anchor, and a program.
 export const dummyInvoices = [
-  // Invoices for Star Electronics (DLR001)
+  // Invoices for Star Electronics (DLR001) under Stark (ANC001) in Program PROG001
   {
     id: 'INV001',
     dealerId: 'DLR001',
+    anchorId: 'ANC001',
+    programId: 'PROG001',
     invoiceNumber: 'SE-2024-001',
     dealerName: 'Star Electronics',
     amount: 150000,
@@ -186,6 +189,8 @@ export const dummyInvoices = [
   {
     id: 'INV002',
     dealerId: 'DLR001',
+    anchorId: 'ANC001',
+    programId: 'PROG001',
     invoiceNumber: 'SE-2024-002',
     dealerName: 'Star Electronics',
     amount: 250000,
@@ -196,10 +201,12 @@ export const dummyInvoices = [
     lender: 'Supermoney Finance',
     overdueAmount: 0,
   },
-  // Invoices for Future Gadgets (DLR002)
+  // Invoices for Future Gadgets (DLR002) under Stark (ANC001) in Program PROG002
   {
     id: 'INV003',
     dealerId: 'DLR002',
+    anchorId: 'ANC001',
+    programId: 'PROG002',
     invoiceNumber: 'FG-2024-001',
     dealerName: 'Future Gadgets',
     amount: 300000,
@@ -210,10 +217,12 @@ export const dummyInvoices = [
     lender: 'CHOLAMANDALAM INVEST...',
     overdueAmount: 0,
   },
-  // Invoices for Gotham Goods (DLR004)
+  // Invoices for Gotham Goods (DLR004) under Wayne (ANC002) in Program PROG003
   {
     id: 'INV004',
     dealerId: 'DLR004',
+    anchorId: 'ANC002',
+    programId: 'PROG003',
     invoiceNumber: 'GG-2024-001',
     dealerName: 'Gotham Goods',
     amount: 500000,
@@ -227,6 +236,8 @@ export const dummyInvoices = [
   {
     id: 'INV005',
     dealerId: 'DLR004',
+    anchorId: 'ANC002',
+    programId: 'PROG003',
     invoiceNumber: 'GG-2024-002',
     dealerName: 'Gotham Goods',
     amount: 250000,
@@ -236,5 +247,21 @@ export const dummyInvoices = [
     status: 'Disbursed',
     lender: 'ADITYA BIRLA CAPITAL LTD',
     overdueAmount: 250000,
+  },
+  // Invoice for Gotham Goods (DLR004) under Wayne (ANC002) but in the shared Program PROG002
+  {
+    id: 'INV006',
+    dealerId: 'DLR004',
+    anchorId: 'ANC002',
+    programId: 'PROG002',
+    invoiceNumber: 'GG-2024-003',
+    dealerName: 'Gotham Goods',
+    amount: 100000,
+    date: '2024-07-18',
+    dueDate: '2024-08-17',
+    eWayBillNumber: 'EWB334457',
+    status: 'Initiated',
+    lender: 'CHOLAMANDALAM INVEST...',
+    overdueAmount: 0,
   },
 ];
