@@ -41,7 +41,7 @@ export async function authenticate(
     
     // Log the actual error for debugging, but return a generic message to the user.
     console.error('Authentication Error:', error);
-    return 'An unexpected error occurred.';
+    return JSON.stringify(error);
   }
 
   // Redirect only on successful authentication.
