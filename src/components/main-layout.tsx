@@ -40,7 +40,7 @@ export default function MainLayout({ children, user }: { children: React.ReactNo
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar variant="sidebar">
         <SidebarHeader>
           <div className="p-2 flex justify-center">
             <SupermoneyLogo className="group-data-[collapsible=icon]:hidden" />
