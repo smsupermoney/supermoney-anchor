@@ -202,7 +202,7 @@ export default function Dashboard() {
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                            <span className="text-lg font-bold text-destructive">{rejectedLeadsLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
                         </div>
                     </div>
@@ -238,118 +238,120 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <Card className="h-full flex flex-col">
-        <CardHeader className="p-3">
-            <CardTitle className="text-base font-semibold">Recent Invoices</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 flex-1">
-            <div className="relative w-full overflow-auto">
-            <Table>
-                <TableHeader>
-                <TableRow>
-                    <TableHead>Invoice #</TableHead>
-                    <TableHead>Dealer</TableHead>
-                    <TableHead>Lender</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Overdue</TableHead>
-                    <TableHead>Status</TableHead>
-                </TableRow>
-                </TableHeader>
-                <TableBody>
-                {invoices.slice(0, 10).map((invoice) => (
-                    <TableRow key={invoice.id} className="h-10 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>
-                    <TableCell className="p-2 font-medium">{invoice.invoiceNumber}</TableCell>
-                    <TableCell className="p-2">{invoice.dealerName}</TableCell>
-                    <TableCell className="p-2">{invoice.lender}</TableCell>
-                    <TableCell className="p-2">{invoice.date}</TableCell>
-                    <TableCell className="p-2 text-right">{formatCurrency(invoice.amount)}</TableCell>
-                    <TableCell className="p-2 text-right text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
-                    <TableCell className="p-2"><StatusBadge status={invoice.status} /></TableCell>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Card className="h-full flex flex-col xl:col-span-3">
+            <CardHeader className="p-3">
+                <CardTitle className="text-base font-semibold">Recent Invoices</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 flex-1">
+                <div className="relative w-full overflow-auto">
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Invoice #</TableHead>
+                        <TableHead>Dealer</TableHead>
+                        <TableHead>Lender</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Overdue</TableHead>
+                        <TableHead>Status</TableHead>
                     </TableRow>
-                ))}
-                </TableBody>
-            </Table>
-            </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-            <CardTitle className="text-base font-semibold">Program Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="overflow-x-auto">
-                <div className="flex space-x-4 pb-2">
-                    {programs.map((program) => {
-                    const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
-                    const remainingLimit = program.totalLimit - program.usedLimit;
-
-                    return (
-                        <div key={program.id} className="min-w-[300px]">
-                        <Card className="w-full flex flex-col h-full">
-                            <CardHeader className="p-3 pb-2">
-                            <div className="flex justify-between items-start">
-                                <div className="min-w-0">
-                                <TooltipProvider>
-                                    <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>{program.lenderName}</p>
-                                    </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                                <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
-                                </div>
-                                <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
-                            </div>
-                            </CardHeader>
-                            <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
-                            <div>
-                                <div className="flex justify-between text-xs mb-1">
-                                <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
-                                <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
-                                </div>
-                                <Progress value={utilizationPercentage} className="h-2" />
-                            </div>
-                            <Separator />
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                                <p className="text-[10px] text-muted-foreground">Invoices</p>
-                                <p className="font-semibold text-xs">{program.invoicesCount}</p>
-                                </Link>
-                                <div className="space-y-0 p-1 rounded-md">
-                                <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                                <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
-                                </div>
-                                <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                                <p className="text-[10px] text-muted-foreground">Total Dealers</p>
-                                <p className="font-semibold text-xs">{program.totalDealers}</p>
-                                </Link>
-                                <div className="space-y-0 p-1 rounded-md">
-                                <p className="text-[10px] text-muted-foreground">Total Overdue</p>
-                                <p className="font-semibold text-xs">{program.overdueCount}</p>
-                                </div>
-                            </div>
-                            </CardContent>
-                            <CardFooter className="p-3 pt-0">
-                            <UploadInvoiceDialog defaultLender={program.lenderName}>
-                                <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
-                                <UploadCloud className="mr-2 h-4 w-4" />
-                                Raise Invoice
-                                </Button>
-                            </UploadInvoiceDialog>
-                            </CardFooter>
-                        </Card>
-                        </div>
-                    );
-                    })}
+                    </TableHeader>
+                    <TableBody>
+                    {invoices.slice(0, 10).map((invoice) => (
+                        <TableRow key={invoice.id} className="h-10 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>
+                        <TableCell className="p-2 font-medium">{invoice.invoiceNumber}</TableCell>
+                        <TableCell className="p-2">{invoice.dealerName}</TableCell>
+                        <TableCell className="p-2">{invoice.lender}</TableCell>
+                        <TableCell className="p-2">{invoice.date}</TableCell>
+                        <TableCell className="p-2 text-right">{formatCurrency(invoice.amount)}</TableCell>
+                        <TableCell className="p-2 text-right text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
+                        <TableCell className="p-2"><StatusBadge status={invoice.status} /></TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
                 </div>
-            </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+        </Card>
+        
+        <Card className="xl:col-span-3">
+            <CardHeader>
+                <CardTitle className="text-base font-semibold">Program Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="overflow-x-auto">
+                    <div className="flex space-x-4 pb-4">
+                        {programs.map((program) => {
+                        const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
+                        const remainingLimit = program.totalLimit - program.usedLimit;
+
+                        return (
+                            <div key={program.id} className="min-w-[300px]">
+                            <Card className="w-full flex flex-col h-full">
+                                <CardHeader className="p-3 pb-2">
+                                <div className="flex justify-between items-start">
+                                    <div className="min-w-0">
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{program.lenderName}</p>
+                                        </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                    <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                                    </div>
+                                    <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
+                                </div>
+                                </CardHeader>
+                                <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                    <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
+                                    <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
+                                    </div>
+                                    <Progress value={utilizationPercentage} className="h-2" />
+                                </div>
+                                <Separator />
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                                    <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                                    <p className="text-[10px] text-muted-foreground">Invoices</p>
+                                    <p className="font-semibold text-xs">{program.invoicesCount}</p>
+                                    </Link>
+                                    <div className="space-y-0 p-1 rounded-md">
+                                    <p className="text-[10px] text-muted-foreground">Disbursed</p>
+                                    <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
+                                    </div>
+                                    <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                                    <p className="text-[10px] text-muted-foreground">Total Dealers</p>
+                                    <p className="font-semibold text-xs">{program.totalDealers}</p>
+                                    </Link>
+                                    <div className="space-y-0 p-1 rounded-md">
+                                    <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                                    <p className="font-semibold text-xs">{program.overdueCount}</p>
+                                    </div>
+                                </div>
+                                </CardContent>
+                                <CardFooter className="p-3 pt-0">
+                                <UploadInvoiceDialog defaultLender={program.lenderName}>
+                                    <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
+                                    <UploadCloud className="mr-2 h-4 w-4" />
+                                    Raise Invoice
+                                    </Button>
+                                </UploadInvoiceDialog>
+                                </CardFooter>
+                            </Card>
+                            </div>
+                        );
+                        })}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+      </div>
       
       {selectedInvoice && (
         <InvoiceDetailDialog 
@@ -363,3 +365,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+    
