@@ -91,8 +91,8 @@ export default function DealersPage() {
         <CardHeader>
             <CardTitle>All Dealers</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-center gap-2 mb-4">
+        <CardContent className="grid gap-4">
+          <div className="flex flex-wrap items-center gap-2">
             <Input
               placeholder="Filter by name..."
               value={filters.name}
