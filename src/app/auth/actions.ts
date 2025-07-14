@@ -30,10 +30,10 @@ export async function authenticate(
     if (!passwordsMatch) {
         return 'Invalid email or password.';
     }
-
+    
     // In a real app, you would create a session here.
-    // For now, we just redirect.
-
+    // For now, we just redirect on success.
+    
   } catch (error) {
     if (error instanceof z.ZodError) {
       return 'Invalid email or password format.';
@@ -43,3 +43,4 @@ export async function authenticate(
 
   redirect('/dashboard');
 }
+
