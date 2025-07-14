@@ -1,25 +1,16 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Users can read their own data, and the system can query for login
+    // Allow anyone to read the users collection for login purposes
     match /users/{userId} {
-      allow read, write: if request.auth != null;
+      allow read: if true;
+      allow write: if request.auth != null; // Only authenticated users can modify user data
     }
-
-    // Authenticated users can read and write dealers
-    match /dealers/{dealerId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Authenticated users can read and write invoices
-    match /invoices/{invoiceId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Authenticated users can read and write programs
-    match /programs/{programId} {
+    
+    // Allow authenticated users to access other collections
+    match /{collection}/{id} where collection in ['invoices', 'dealers', 'programs'] {
       allow read, write: if request.auth != null;
     }
   }
