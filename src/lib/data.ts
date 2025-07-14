@@ -23,11 +23,11 @@ export const invoices: Invoice[] = [
 ];
 
 export const programs: Program[] = [
-  { id: 'PROG00', lenderName: 'Supermoney Finance', lenderType: 'Supermoney', totalLimit: 1500000, usedLimit: 1000000, invoicesCount: 50, disbursedAmount: 950000, totalDealers: 15, overdueCount: 2 },
-  { id: 'PROG01', lenderName: 'CHOLAMANDALAM INVEST...', lenderType: 'External', totalLimit: 1000000, usedLimit: 700000, invoicesCount: 40, disbursedAmount: 650000, totalDealers: 12, overdueCount: 3 },
-  { id: 'PROG02', lenderName: 'ADITYA BIRLA CAPITAL LTD', lenderType: 'External', totalLimit: 800000, usedLimit: 300000, invoicesCount: 20, disbursedAmount: 250000, totalDealers: 26, overdueCount: 1 },
-  { id: 'PROG03', lenderName: 'Supply Chain Finance Co.', lenderType: 'External', totalLimit: 1200000, usedLimit: 900000, invoicesCount: 60, disbursedAmount: 850000, totalDealers: 18, overdueCount: 5 },
-  { id: 'PROG04', lenderName: 'Flexi Loans', lenderType: 'External', totalLimit: 500000, usedLimit: 100000, invoicesCount: 15, disbursedAmount: 100000, totalDealers: 8, overdueCount: 0 },
+  { id: 'PROG00', lenderName: 'Supermoney Finance', lenderType: 'Supermoney', totalLimit: 1500000, usedLimit: 1000000, invoicesCount: 50, disbursedAmount: 950000, totalDealers: 15, overdueCount: 2, pendingInvoicesCount: 8 },
+  { id: 'PROG01', lenderName: 'CHOLAMANDALAM INVEST...', lenderType: 'External', totalLimit: 1000000, usedLimit: 700000, invoicesCount: 40, disbursedAmount: 650000, totalDealers: 12, overdueCount: 3, pendingInvoicesCount: 5 },
+  { id: 'PROG02', lenderName: 'ADITYA BIRLA CAPITAL LTD', lenderType: 'External', totalLimit: 800000, usedLimit: 300000, invoicesCount: 20, disbursedAmount: 250000, totalDealers: 26, overdueCount: 1, pendingInvoicesCount: 10 },
+  { id: 'PROG03', lenderName: 'Supply Chain Finance Co.', lenderType: 'External', totalLimit: 1200000, usedLimit: 900000, invoicesCount: 60, disbursedAmount: 850000, totalDealers: 18, overdueCount: 5, pendingInvoicesCount: 12 },
+  { id: 'PROG04', lenderName: 'Flexi Loans', lenderType: 'External', totalLimit: 500000, usedLimit: 100000, invoicesCount: 15, disbursedAmount: 100000, totalDealers: 8, overdueCount: 0, pendingInvoicesCount: 2 },
 ];
 
 export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];

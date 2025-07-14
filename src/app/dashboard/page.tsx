@@ -294,19 +294,19 @@ export default function Dashboard() {
                                     <Separator />
                                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                                         <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                                        <p className="text-[10px] text-muted-foreground">Invoices</p>
+                                        <p className="text-[10px] text-muted-foreground">Active Invoices</p>
                                         <p className="font-semibold text-xs">{program.invoicesCount}</p>
                                         </Link>
                                         <div className="space-y-0 p-1 rounded-md">
-                                        <p className="text-[10px] text-muted-foreground">Disbursed</p>
-                                        <p className="font-semibold text-xs">{formatCompactCurrency(program.disbursedAmount)}</p>
+                                        <p className="text-[10px] text-muted-foreground">Pending Invoices</p>
+                                        <p className="font-semibold text-xs">{program.pendingInvoicesCount}</p>
                                         </div>
                                         <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                                         <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                                         <p className="font-semibold text-xs">{program.totalDealers}</p>
                                         </Link>
                                         <div className="space-y-0 p-1 rounded-md">
-                                        <p className="text-[10px] text-muted-foreground">Total Overdue</p>
+                                        <p className="text-[10px] text-muted-foreground">Overdue Invoices</p>
                                         <p className="font-semibold text-xs">{program.overdueCount}</p>
                                         </div>
                                     </div>
@@ -378,6 +378,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-
