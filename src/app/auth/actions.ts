@@ -1,3 +1,4 @@
+
 'use server';
 
 import { redirect } from 'next/navigation';
@@ -37,6 +38,7 @@ export async function authenticate(
     session.id = user.id;
     session.userName = user.userName;
     session.roleType = user.roleType;
+    session.emailAddress = user.emailAddress;
     await session.save();
 
   } catch (error) {
