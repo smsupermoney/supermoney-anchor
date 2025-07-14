@@ -6,7 +6,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, UploadCloud, X as XIcon } from "lucide-react";
+import { PlusCircle, Upload, UploadCloud, X as XIcon } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,9 +24,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 type RetailersClientPageProps = {
   initialDealers: Dealer[];
+  isAdmin: boolean;
 };
 
-export default function RetailersClientPage({ initialDealers }: RetailersClientPageProps) {
+export default function RetailersClientPage({ initialDealers, isAdmin }: RetailersClientPageProps) {
   const [dealers, setDealers] = useState(initialDealers);
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
   
@@ -88,16 +89,25 @@ export default function RetailersClientPage({ initialDealers }: RetailersClientP
   return (
     <>
       <PageHeader title="Dealers">
-        <UploadInvoiceDialog>
-          <Button variant="outline">
-            <UploadCloud className="mr-2 h-4 w-4" />
-            Raise Invoice
-          </Button>
-        </UploadInvoiceDialog>
-        <Button>
-          <PlusCircle className="mr-2" />
-          Add Dealer
-        </Button>
+        {isAdmin ? (
+          <div className="flex gap-2">
+            <Button variant="outline"><Upload className="mr-2 h-4 w-4"/>Upload Excel</Button>
+            <Button><PlusCircle className="mr-2 h-4 w-4"/>Add Dealer</Button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <UploadInvoiceDialog>
+              <Button variant="outline">
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Raise Invoice
+              </Button>
+            </UploadInvoiceDialog>
+            <Button>
+              <PlusCircle className="mr-2" />
+              Add Dealer
+            </Button>
+          </div>
+        )}
       </PageHeader>
       <Card className="mt-6">
         <CardHeader>

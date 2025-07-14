@@ -1,5 +1,4 @@
 
-
 import { getPrograms } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,12 +7,18 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
-import { UploadCloud } from "lucide-react";
+import { PlusCircle, Upload, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/page-header";
+import { getIronSession } from "iron-session";
+import { cookies } from "next/headers";
+import { sessionOptions } from "@/lib/session";
+import type { User } from "@/types";
 
 export default async function ProgramsPage() {
     const programs = await getPrograms();
+    const session = await getIronSession<User>(cookies(), sessionOptions);
+    const isAdmin = session.roleType === 'Admin';
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
     
     const lenderFullNameMapping: Record<string, string> = {
@@ -24,10 +29,22 @@ export default async function ProgramsPage() {
         'Supermoney Finance': 'Supermoney Finance'
     };
 
-
   return (
     <>
-      <PageHeader title="Lender Programs" />
+      <PageHeader title="Lender Programs">
+        {isAdmin && (
+            <div className="flex gap-2">
+                <Button variant="outline">
+                    <Upload className="mr-2 h-4 w-4"/>
+                    Upload Excel
+                </Button>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4"/>
+                    Add Program
+                </Button>
+            </div>
+        )}
+      </PageHeader>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
         {programs.map((program) => {
           const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;

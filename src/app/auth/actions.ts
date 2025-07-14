@@ -3,6 +3,10 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getUserByEmail } from '@/lib/data';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '@/lib/session';
+import { cookies } from 'next/headers';
+import type { User } from '@/types';
 
 export async function authenticate(
   prevState: string | undefined,
@@ -23,28 +27,31 @@ export async function authenticate(
       return 'Invalid email or password.';
     }
 
-    // For a real app, you MUST hash and compare passwords.
-    // This is a temporary solution for the prototype.
     const passwordsMatch = password === user.password;
 
     if (!passwordsMatch) {
         return 'Invalid email or password.';
     }
     
-    // If we reach here, the credentials are valid.
-    // The redirect will happen outside the try...catch block.
+    const session = await getIronSession<User>(cookies(), sessionOptions);
+    session.id = user.id;
+    session.userName = user.userName;
+    session.roleType = user.roleType;
+    await session.save();
 
   } catch (error) {
     if (error instanceof z.ZodError) {
       return 'Invalid email or password format.';
     }
-    
-    // Log the actual error for debugging, but return a generic message to the user.
     console.error('Authentication Error:', error);
-    return JSON.stringify(error);
+    return 'An unexpected error occurred.';
   }
 
-  // Redirect only on successful authentication.
-  // The redirect function throws an error, so it must be outside the `try` block.
   redirect('/dashboard');
+}
+
+export async function logout() {
+  const session = await getIronSession<User>(cookies(), sessionOptions);
+  session.destroy();
+  redirect('/');
 }

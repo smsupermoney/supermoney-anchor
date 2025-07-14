@@ -4,18 +4,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { leads, leadStatuses } from "@/lib/data";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Upload } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import ProgressTracker from "@/components/progress-tracker";
+import { getIronSession } from "iron-session";
+import { cookies } from "next/headers";
+import { sessionOptions } from "@/lib/session";
+import type { User } from "@/types";
 
-export default function LeadsPage() {
+export default async function LeadsPage() {
+  const session = await getIronSession<User>(cookies(), sessionOptions);
+  const isAdmin = session.roleType === 'Admin';
   return (
     <>
       <PageHeader title="Leads">
-        <Button>
-          <PlusCircle className="mr-2" />
-          Add Lead
-        </Button>
+        {isAdmin ? (
+          <div className="flex gap-2">
+            <Button variant="outline"><Upload className="mr-2 h-4 w-4"/>Upload Excel</Button>
+            <Button><PlusCircle className="mr-2 h-4 w-4"/>Add Lead</Button>
+          </div>
+        ) : (
+          <Button>
+            <PlusCircle className="mr-2" />
+            Add Lead
+          </Button>
+        )}
       </PageHeader>
       <Card>
         <CardHeader>

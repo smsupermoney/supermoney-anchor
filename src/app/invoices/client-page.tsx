@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { invoiceStatuses } from "@/lib/data";
 import StatusBadge from "@/components/status-badge";
-import { UploadCloud, Calendar as CalendarIcon, X as XIcon, ChevronDown } from "lucide-react";
+import { Upload, UploadCloud, Calendar as CalendarIcon, X as XIcon, ChevronDown, PlusCircle } from "lucide-react";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,9 +40,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 type InvoicesClientPageProps = {
   initialInvoices: Invoice[];
+  isAdmin: boolean;
 };
 
-export default function InvoicesClientPage({ initialInvoices }: InvoicesClientPageProps) {
+export default function InvoicesClientPage({ initialInvoices, isAdmin }: InvoicesClientPageProps) {
   const [invoices, setInvoices] = useState(initialInvoices);
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -146,12 +147,19 @@ export default function InvoicesClientPage({ initialInvoices }: InvoicesClientPa
   return (
     <>
       <PageHeader title="Invoices">
-        <UploadInvoiceDialog>
-          <Button>
-            <UploadCloud className="mr-2 h-4 w-4" />
-            Raise Invoice
-          </Button>
-        </UploadInvoiceDialog>
+        {isAdmin ? (
+            <div className="flex gap-2">
+                <Button variant="outline"><Upload className="mr-2 h-4 w-4"/>Upload Excel</Button>
+                <Button><PlusCircle className="mr-2 h-4 w-4"/>Add Invoice</Button>
+            </div>
+        ) : (
+            <UploadInvoiceDialog>
+            <Button>
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Raise Invoice
+            </Button>
+            </UploadInvoiceDialog>
+        )}
       </PageHeader>
       <Card className="mt-4">
         <CardContent className="pt-6 grid gap-4">

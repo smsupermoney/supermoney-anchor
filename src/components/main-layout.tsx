@@ -2,19 +2,24 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { navigationLinks } from './nav';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from '@/components/ui/sidebar';
+import { adminNavigationLinks, anchorNavigationLinks } from './nav';
 import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import SupermoneyLogo from './supermoney-logo';
+import { logout } from '@/app/auth/actions';
+import type { User } from '@/types';
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+
+export default function MainLayout({ children, user }: { children: React.ReactNode, user: User | null }) {
   const pathname = usePathname();
   const isMounted = useMounted();
 
+  const navigationLinks = user?.roleType === 'Admin' ? adminNavigationLinks : anchorNavigationLinks;
+  
   if (!isMounted) {
     return (
       <div className="flex min-h-screen w-full">
@@ -28,24 +33,28 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     return <>{children}</>;
   }
 
+  if (!user) {
+    // This could be a loading state or a redirect to login
+     return <>{children}</>;
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
           <div className="p-2 flex justify-center">
             <SupermoneyLogo className="group-data-[collapsible=icon]:hidden" />
-
           </div>
           <Separator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
             <Avatar className="h-9 w-9">
               <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
-              <AvatarFallback>S</AvatarFallback>
+              <AvatarFallback>{user.userName.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="group-data-[collapsible=icon]:hidden">
-              <p className="text-sm font-medium leading-none text-sidebar-foreground">Supplier User</p>
+              <p className="text-sm font-medium leading-none text-sidebar-foreground">{user.userName}</p>
               <p className="text-xs leading-none text-sidebar-foreground/70">
-                supplier@example.com
+                {user.emailAddress}
               </p>
             </div>
           </div>
@@ -69,12 +78,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-          <SidebarMenuButton asChild tooltip={{ children: 'Logout' }}>
-            <Link href="/">
-              <LogOut />
-              <span>Logout</span>
-            </Link>
-          </SidebarMenuButton>
+          <form action={logout}>
+            <SidebarMenuButton asChild tooltip={{ children: 'Logout' }} type="submit" className='w-full'>
+              <button>
+                <LogOut />
+                <span>Logout</span>
+              </button>
+            </SidebarMenuButton>
+          </form>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
