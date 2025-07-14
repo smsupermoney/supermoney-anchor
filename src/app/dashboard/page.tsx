@@ -5,7 +5,7 @@ import { useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { invoices, programs, leads } from "@/lib/data";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail } from "lucide-react";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail, ArrowRight } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -363,6 +363,14 @@ export default function Dashboard() {
                 </Table>
                 </div>
             </CardContent>
+             <CardFooter className="p-3 justify-center border-t">
+                <Button asChild variant="ghost" size="sm">
+                    <Link href="/invoices">
+                        View All Invoices
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </CardFooter>
         </Card>
       </div>
       
