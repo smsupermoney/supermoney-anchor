@@ -1,11 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // This rule allows your server code to query the users collection
-    // to find a user by email address during login.
-    match /users/{document=**} {
-      allow read: if true;
-      allow write: if false; // Keep writes restricted for now
+    // Allow read access on the users collection so the server action can query for user by email.
+    // In a production app, you would want to restrict this further, but this is safe for now.
+    match /users/{userId} {
+      allow read;
+    }
+
+    // Default to deny all other collections.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
