@@ -25,6 +25,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 export default function DealersPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+  
+  const lenderFullNameMapping: Record<string, string> = {
+    'CHOLAMANDALAM INVEST...': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
+    'ADITYA BIRLA CAPITAL LTD': 'ADITYA BIRLA CAPITAL LTD',
+    'Supply Chain Finance Co.': 'Supply Chain Finance Co.',
+    'Flexi Loans': 'Flexi Loans',
+    'Supermoney Finance': 'Supermoney Finance'
+  };
 
   const initialFilters = {
     name: "",
@@ -161,11 +169,20 @@ export default function DealersPage() {
                           <TooltipTrigger asChild>
                             <div className="truncate max-w-[200px]">{dealer.lenders.join(', ')}</div>
                           </TooltipTrigger>
-                          <TooltipContent><p>{dealer.lenders.join(', ')}</p></TooltipContent>
+                          <TooltipContent><p>{dealer.lenders.map(l => lenderFullNameMapping[l] || l).join(', ')}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell><StatusBadge status={dealer.status} /></TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div><StatusBadge status={dealer.status} /></div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{dealer.status}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="text-right">
                        <TooltipProvider>
                         <Tooltip>
