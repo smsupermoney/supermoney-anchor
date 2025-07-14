@@ -18,6 +18,7 @@ import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import AiChat from "@/components/ai-chat";
 
 
 export default function Dashboard() {
@@ -82,7 +83,7 @@ export default function Dashboard() {
       
       {/* Top Row Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="lg:col-span-1 h-full">
+        <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                 <CardTitle className="text-sm font-semibold">Credit Overview</CardTitle>
                 <IndianRupee className="w-4 h-4 text-muted-foreground" />
@@ -138,103 +139,94 @@ export default function Dashboard() {
             </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 grid-rows-2 gap-4">
-            <Card className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
-                    <AlertTriangle className="w-4 h-4 text-destructive" />
-                </CardHeader>
-                <CardContent className="p-3 pt-0">
-                    <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
-                    <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
-                </CardContent>
-            </Card>
-            <Card className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-y-2">
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">{totalLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
-                        </div>
+        <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+                <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
+                <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
+            </CardContent>
+        </Card>
+        <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
+                <FileText className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+                <div className="grid grid-cols-2 gap-y-2">
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold">{totalLast7Days}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
           
-        <div className="grid grid-cols-1 grid-rows-2 gap-4">
-            <Card className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
-                    <Users className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-3 pt-0">
-                      <div className="grid grid-cols-2 gap-y-2">
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">{totalPendingLeads}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-green-600">{convertedLeadsLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> Converted (7d)</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-yellow-600">{needsAttentionLeads}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
-                        </div>
+        <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
+                <Users className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0">
+                  <div className="grid grid-cols-2 gap-y-2">
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold">{totalPendingLeads}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                     </div>
-                </CardContent>
-            </Card>
-              <Card className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Quick Actions</CardTitle>
-                     <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-3 pt-0 flex flex-col gap-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start text-left">
-                        <HandCoins className="mr-2 h-4 w-4" />
-                        Request for additional limit
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start text-left" asChild>
-                        <Link href="/leads">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Add new lead
-                        </Link>
-                    </Button>
-                    <Separator />
-                    <div className="text-xs text-muted-foreground text-center px-1">
-                        Have any query? <a href="mailto:nitin.chorge@supermoney.in" className="text-primary hover:underline font-medium">Send us an email</a>
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold text-green-600">{convertedLeadsLast7Days}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> Converted (7d)</span>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
-        
-        <div className="grid grid-cols-1 grid-rows-2 gap-4">
-             {/* This is a placeholder for the fourth column to balance the grid. 
-                 You can add more summary cards here in the future. 
-                 For now, we can leave it empty or add some other info.
-                 Or we can change the lg:grid-cols-4 to lg:grid-cols-3 if we only have 3 columns of content.
-                 Let's assume for now we might add a 4th column of cards.
-             */}
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold text-yellow-600">{needsAttentionLeads}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+        <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                <CardTitle className="text-sm font-semibold">Quick Actions</CardTitle>
+                 <HelpCircle className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0 flex flex-col gap-2">
+                <Button variant="outline" size="sm" className="w-full justify-start text-left">
+                    <HandCoins className="mr-2 h-4 w-4" />
+                    Request for additional limit
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start text-left" asChild>
+                    <Link href="/leads">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add new lead
+                    </Link>
+                </Button>
+                <Separator />
+                <div className="text-xs text-muted-foreground text-center px-1">
+                    Have any query? <a href="mailto:nitin.chorge@supermoney.in" className="text-primary hover:underline font-medium">Send us an email</a>
+                </div>
+            </CardContent>
+        </Card>
+
+        <div className="lg:col-span-2 h-full">
+          <AiChat />
         </div>
       </div>
       
