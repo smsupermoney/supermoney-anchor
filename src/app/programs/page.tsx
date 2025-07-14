@@ -15,6 +15,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 export default function ProgramsPage() {
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
+    
+    const lenderFullNameMapping: Record<string, string> = {
+        'CHOLAMANDALAM INVEST...': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
+        'ADITYA BIRLA CAPITAL LTD': 'ADITYA BIRLA CAPITAL LTD',
+        'Supply Chain Finance Co.': 'Supply Chain Finance Co.',
+        'Flexi Loans': 'Flexi Loans',
+        'Supermoney Finance': 'Supermoney Finance'
+    };
+
 
   return (
     <>
@@ -23,7 +32,8 @@ export default function ProgramsPage() {
         {programs.map((program) => {
           const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
           const remainingLimit = program.totalLimit - program.usedLimit;
-          
+          const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
+
           return (
             <Card key={program.id} className="flex flex-col">
               <CardHeader className="p-3 pb-2">
@@ -35,7 +45,7 @@ export default function ProgramsPage() {
                             <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>{program.lenderName}</p>
+                            <p>{fullName}</p>
                         </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
