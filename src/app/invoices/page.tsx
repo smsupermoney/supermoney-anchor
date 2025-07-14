@@ -293,7 +293,7 @@ export default function InvoicesPage() {
               <TableBody>
                 {filteredInvoices.map((invoice) => (
                   <TableRow key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="cursor-pointer">
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium text-primary">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -323,8 +323,26 @@ export default function InvoicesPage() {
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell>{invoice.date}</TableCell>
-                    <TableCell>{invoice.dueDate}</TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="truncate max-w-[100px]">{invoice.date}</div>
+                            </TooltipTrigger>
+                            <TooltipContent><p>{invoice.date}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[100px]">{invoice.dueDate}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.dueDate}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="text-right">
                        <TooltipProvider>
                         <Tooltip>
