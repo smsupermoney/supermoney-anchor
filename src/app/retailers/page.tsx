@@ -21,6 +21,7 @@ import type { Dealer } from "@/types";
 import DealerDetailDialog from "@/components/dealer-detail-dialog";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { useSearchParams } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function DealersPage() {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
@@ -144,14 +145,59 @@ export default function DealersPage() {
               <TableBody>
                 {filteredDealers.map((dealer) => (
                   <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
-                    <TableCell className="font-medium">{dealer.name}</TableCell>
-                    <TableCell>{dealer.lenders.join(', ')}</TableCell>
+                    <TableCell className="font-medium">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[150px]">{dealer.name}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{dealer.name}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[200px]">{dealer.lenders.join(', ')}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{dealer.lenders.join(', ')}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell><StatusBadge status={dealer.status} /></TableCell>
-                    <TableCell className="text-right">{formatCurrency(dealer.creditAssigned)}</TableCell>
+                    <TableCell className="text-right">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.creditAssigned)}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{formatCurrency(dealer.creditAssigned)}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="text-right">{dealer.invoicesSubmitted}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(dealer.amountDisbursed)}</TableCell>
+                    <TableCell className="text-right">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.amountDisbursed)}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{formatCurrency(dealer.amountDisbursed)}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="text-right">{dealer.overdueCount}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(dealer.overdueAmount)}</TableCell>
+                    <TableCell className="text-right">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.overdueAmount)}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{formatCurrency(dealer.overdueAmount)}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
