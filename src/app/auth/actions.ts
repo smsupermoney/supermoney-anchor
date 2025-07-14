@@ -9,6 +9,7 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
+  console.log("Comming Here")
   try {
     const { email, password } = z
       .object({
