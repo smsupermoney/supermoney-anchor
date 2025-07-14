@@ -169,22 +169,22 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
                     <div className="grid grid-cols-2 gap-y-2">
-                        <div className="flex flex-col items-center">
+                        <Link href="/invoices" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold">{totalLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
-                        </div>
-                        <div className="flex flex-col items-center">
+                        </Link>
+                        <Link href="/invoices?status=Disbursed" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
-                        </div>
-                        <div className="flex flex-col items-center">
+                        </Link>
+                        <Link href="/invoices" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
-                        </div>
-                        <div className="flex flex-col items-center">
+                        </Link>
+                        <Link href="/invoices?status=Rejected" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
-                        </div>
+                        </Link>
                     </div>
                 </CardContent>
             </Card>
@@ -378,5 +378,6 @@ export default function Dashboard() {
     </div>
   );
 }
+
 
 

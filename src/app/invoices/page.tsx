@@ -55,14 +55,16 @@ export default function InvoicesPage() {
   const [filters, setFilters] = useState(() => {
     const lenderQuery = searchParams.get('lender');
     const overdueQuery = searchParams.get('overdue');
-    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || ""};
+    const statusQuery = searchParams.get('status');
+    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || "", status: statusQuery || ""};
   });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
   useEffect(() => {
     const lender = searchParams.get('lender');
     const overdue = searchParams.get('overdue');
-    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || ""}));
+    const status = searchParams.get('status');
+    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || "", status: status || ""}));
   }, [searchParams]);
 
   const handleFilterChange = (
