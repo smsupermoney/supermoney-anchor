@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from './ui/separator';
 import SupermoneyLogo from './supermoney-logo';
 import { logout } from '@/app/auth/actions';
 import type { User } from '@/types';
