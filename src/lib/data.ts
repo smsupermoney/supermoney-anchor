@@ -1,35 +1,40 @@
-import type { Dealer, Invoice, Program, Lead, InvoiceStatus, LeadStatus } from '@/types';
+import type { Lead, LeadStatus } from '@/types';
+import { db } from './firebase';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import type { Dealer, Invoice, Program } from '@/types';
 
-export const dealers: Dealer[] = [
-  { id: 'RET001', name: 'Global Mart', status: 'Active', creditAssigned: 500000, invoicesSubmitted: 25, amountDisbursed: 450000, overdueCount: 2, overdueAmount: 50000, lenders: ['Supermoney Finance', 'ADITYA BIRLA CAPITAL LTD'] },
-  { id: 'RET002', name: 'Quick Stop', status: 'Active', creditAssigned: 300000, invoicesSubmitted: 15, amountDisbursed: 250000, overdueCount: 1, overdueAmount: 15000, lenders: ['CHOLAMANDALAM INVEST...'] },
-  { id: 'RET003', name: 'City Grocers', status: 'Pending', creditAssigned: 200000, invoicesSubmitted: 5, amountDisbursed: 50000, overdueCount: 0, overdueAmount: 0, lenders: ['ADITYA BIRLA CAPITAL LTD'] },
-  { id: 'RET004', name: 'Super Bazaar', status: 'Inactive', creditAssigned: 100000, invoicesSubmitted: 2, amountDisbursed: 20000, overdueCount: 0, overdueAmount: 0, lenders: ['Supermoney Finance', 'Flexi Loans'] },
-  { id: 'RET005', name: 'Fresh Foods Inc.', status: 'Active', creditAssigned: 750000, invoicesSubmitted: 40, amountDisbursed: 700000, overdueCount: 5, overdueAmount: 120000, lenders: ['Supply Chain Finance Co.'] },
-  { id: 'RET006', name: 'Modern Retailers', status: 'Active', creditAssigned: 600000, invoicesSubmitted: 30, amountDisbursed: 550000, overdueCount: 0, overdueAmount: 0, lenders: ['CHOLAMANDALAM INVEST...'] },
-  { id: 'RET007', name: 'Daily Needs Store', status: 'Active', creditAssigned: 400000, invoicesSubmitted: 22, amountDisbursed: 380000, overdueCount: 1, overdueAmount: 20000, lenders: ['ADITYA BIRLA CAPITAL LTD', 'Supermoney Finance'] },
-];
+// Functions to fetch data from Firestore
 
-export const invoiceStatuses: InvoiceStatus[] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];
+export async function getDealers() {
+  const dealersCol = collection(db, 'dealers');
+  const dealerSnapshot = await getDocs(dealersCol);
+  const dealerList = dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dealer));
+  return dealerList;
+}
 
-export const invoices: Invoice[] = [
-  { id: 'INV001', invoiceNumber: '2024-001', dealerName: 'Global Mart', amount: 25000, date: '2024-07-01', dueDate: '2024-08-01', eWayBillNumber: 'EWB12345', status: 'Disbursed', lender: 'Supermoney Finance', overdueAmount: 0 },
-  { id: 'INV002', invoiceNumber: '2024-002', dealerName: 'Quick Stop', amount: 15000, date: '2024-07-05', dueDate: '2024-07-20', eWayBillNumber: 'EWB12346', status: 'Sent to Lender', lender: 'CHOLAMANDALAM INVEST...', overdueAmount: 15000 },
-  { id: 'INV003', invoiceNumber: '2024-003', dealerName: 'Global Mart', amount: 30000, date: '2024-07-10', dueDate: '2024-08-10', eWayBillNumber: 'EWB12347', status: 'Approved', lender: 'Supermoney Finance', overdueAmount: 0 },
-  { id: 'INV004', invoiceNumber: '2024-004', dealerName: 'City Grocers', amount: 10000, date: '2024-07-12', dueDate: '2024-08-12', eWayBillNumber: 'EWB12348', status: 'Initiated', lender: 'ADITYA BIRLA CAPITAL LTD', overdueAmount: 0 },
-  { id: 'INV005', invoiceNumber: '2024-005', dealerName: 'Fresh Foods Inc.', amount: 50000, date: '2024-07-15', dueDate: '2024-08-15', eWayBillNumber: 'EWB12349', status: 'Disbursed', lender: 'Supply Chain Finance Co.', overdueAmount: 0 },
-  { id: 'INV006', invoiceNumber: '2024-006', dealerName: 'Quick Stop', amount: 18000, date: '2024-07-18', dueDate: '2024-08-18', eWayBillNumber: 'EWB12350', status: 'Approved', lender: 'CHOLAMANDALAM INVEST...', overdueAmount: 0 },
-  { id: 'INV007', invoiceNumber: '2024-007', dealerName: 'Super Bazaar', amount: 5000, date: '2024-07-20', dueDate: '2024-08-20', eWayBillNumber: 'EWB12351', status: 'Rejected', lender: 'Flexi Loans', overdueAmount: 0 },
-];
+export async function getInvoices() {
+  const invoicesCol = collection(db, 'invoices');
+  const invoiceSnapshot = await getDocs(invoicesCol);
+  const invoiceList = invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+  return invoiceList;
+}
 
-export const programs: Program[] = [
-  { id: 'PROG00', lenderName: 'Supermoney Finance', lenderType: 'Supermoney', totalLimit: 1500000, usedLimit: 1000000, invoicesCount: 50, disbursedAmount: 950000, totalDealers: 15, overdueCount: 2, pendingInvoicesCount: 8 },
-  { id: 'PROG01', lenderName: 'CHOLAMANDALAM INVEST...', lenderType: 'External', totalLimit: 1000000, usedLimit: 700000, invoicesCount: 40, disbursedAmount: 650000, totalDealers: 12, overdueCount: 3, pendingInvoicesCount: 5 },
-  { id: 'PROG02', lenderName: 'ADITYA BIRLA CAPITAL LTD', lenderType: 'External', totalLimit: 800000, usedLimit: 300000, invoicesCount: 20, disbursedAmount: 250000, totalDealers: 26, overdueCount: 1, pendingInvoicesCount: 10 },
-  { id: 'PROG03', lenderName: 'Supply Chain Finance Co.', lenderType: 'External', totalLimit: 1200000, usedLimit: 900000, invoicesCount: 60, disbursedAmount: 850000, totalDealers: 18, overdueCount: 5, pendingInvoicesCount: 12 },
-  { id: 'PROG04', lenderName: 'Flexi Loans', lenderType: 'External', totalLimit: 500000, usedLimit: 100000, invoicesCount: 15, disbursedAmount: 100000, totalDealers: 8, overdueCount: 0, pendingInvoicesCount: 2 },
-];
+export async function getRecentInvoices(count: number) {
+    const invoicesCol = collection(db, 'invoices');
+    const q = query(invoicesCol, orderBy('date', 'desc'), limit(count));
+    const invoiceSnapshot = await getDocs(q);
+    const invoiceList = invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+    return invoiceList;
+}
 
+export async function getPrograms() {
+  const programsCol = collection(db, 'programs');
+  const programSnapshot = await getDocs(programsCol);
+  const programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+  return programList;
+}
+
+// Keeping leads data static as per request
 export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];
 
 export const leads: Lead[] = [
@@ -39,3 +44,6 @@ export const leads: Lead[] = [
   { id: 'LEAD004', dealerName: 'Daily Needs', contactPerson: 'Mary Johnson', contactEmail: 'mary.j@dailyneeds.com', status: 'PSD Completed', createdAt: '2024-06-25' },
   { id: 'LEAD005', dealerName: 'Value Mart', contactPerson: 'Chris Lee', contactEmail: 'chris.l@valuemart.com', status: 'Dropped', createdAt: '2024-07-05' },
 ];
+
+// For filter dropdowns, we can keep some static lists or derive them
+export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];

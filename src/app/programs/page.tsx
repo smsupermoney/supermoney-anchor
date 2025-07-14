@@ -1,19 +1,19 @@
 
-"use client";
 
-import PageHeader from "@/components/page-header";
+import { getPrograms } from "@/lib/data";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { programs } from "@/lib/data";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { UploadCloud } from "lucide-react";
 import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import PageHeader from "@/components/page-header";
 
-export default function ProgramsPage() {
+export default async function ProgramsPage() {
+    const programs = await getPrograms();
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
     
     const lenderFullNameMapping: Record<string, string> = {

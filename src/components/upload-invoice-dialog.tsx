@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -16,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { dealers } from "@/lib/data";
+import { getDealers } from "@/lib/data";
 import type { Dealer } from "@/types";
 
 type UploadInvoiceDialogProps = {
@@ -30,9 +31,20 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
   const [isDragging, setIsDragging] = useState(false);
   const [selectedDealerId, setSelectedDealerId] = useState("");
   const [selectedLender, setSelectedLender] = useState("");
+  const [dealers, setDealers] = useState<Dealer[]>([]);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    async function fetchDealers() {
+      if (open) {
+        const dealersData = await getDealers();
+        setDealers(dealersData);
+      }
+    }
+    fetchDealers();
+  }, [open]);
 
-  const selectedDealer: Dealer | undefined = useMemo(() => dealers.find(d => d.id === selectedDealerId), [selectedDealerId]);
+  const selectedDealer: Dealer | undefined = useMemo(() => dealers.find(d => d.id === selectedDealerId), [selectedDealerId, dealers]);
   
   const availableLenders = useMemo(() => {
     if (!selectedDealer) return [];

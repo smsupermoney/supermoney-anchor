@@ -1,7 +1,8 @@
+
 "use server";
 
 import { assessDealerRisk } from "@/ai/flows/risk-assessment";
-import { invoices } from "@/lib/data";
+import { getInvoices, getDealers } from "@/lib/data";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -34,7 +35,9 @@ export async function generateDealerRiskAssessment(
   }
 
   const { dealerId } = validatedFields.data;
-  const dealer = (await import("@/lib/data")).dealers.find(d => d.id === dealerId);
+  
+  const dealers = await getDealers();
+  const dealer = dealers.find(d => d.id === dealerId);
 
   if (!dealer) {
     return {
@@ -44,6 +47,7 @@ export async function generateDealerRiskAssessment(
   }
   
   // Create a summary of invoice data for the AI
+  const invoices = await getInvoices();
   const dealerInvoices = invoices.filter(i => i.dealerName === dealer.name);
   const invoiceDataSummary = `Total invoices: ${dealerInvoices.length}. 
     Statuses: ${JSON.stringify(dealerInvoices.reduce((acc, inv) => {
