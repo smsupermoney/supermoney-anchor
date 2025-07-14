@@ -234,6 +234,45 @@ export default function Dashboard() {
         </div>
       </div>
       
+      {/* Recent Invoices */}
+      <div className="flex-1 min-h-0">
+          <Card className="h-full flex flex-col">
+              <CardHeader className="p-3">
+                  <CardTitle className="text-base font-semibold">Recent Invoices</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 flex-1">
+                <div className="relative w-full overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Invoice #</TableHead>
+                        <TableHead>Dealer</TableHead>
+                        <TableHead>Lender</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Overdue</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invoices.slice(0, 10).map((invoice) => (
+                        <TableRow key={invoice.id} className="h-10 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>
+                          <TableCell className="p-2 font-medium">{invoice.invoiceNumber}</TableCell>
+                          <TableCell className="p-2">{invoice.dealerName}</TableCell>
+                          <TableCell className="p-2">{invoice.lender}</TableCell>
+                          <TableCell className="p-2">{invoice.date}</TableCell>
+                          <TableCell className="p-2 text-right">{formatCurrency(invoice.amount)}</TableCell>
+                          <TableCell className="p-2 text-right text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
+                          <TableCell className="p-2"><StatusBadge status={invoice.status} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+          </Card>
+      </div>
+      
       {/* Program Overview */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {programs.map((program) => {
@@ -301,45 +340,6 @@ export default function Dashboard() {
             </div>
           );
         })}
-      </div>
-
-      {/* Recent Invoices */}
-      <div className="flex-1 min-h-0">
-          <Card className="h-full flex flex-col">
-              <CardHeader className="p-3">
-                  <CardTitle className="text-base font-semibold">Recent Invoices</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 flex-1">
-                <div className="relative w-full overflow-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Invoice #</TableHead>
-                        <TableHead>Dealer</TableHead>
-                        <TableHead>Lender</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead className="text-right">Overdue</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {invoices.slice(0, 10).map((invoice) => (
-                        <TableRow key={invoice.id} className="h-10 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>
-                          <TableCell className="p-2 font-medium">{invoice.invoiceNumber}</TableCell>
-                          <TableCell className="p-2">{invoice.dealerName}</TableCell>
-                          <TableCell className="p-2">{invoice.lender}</TableCell>
-                          <TableCell className="p-2">{invoice.date}</TableCell>
-                          <TableCell className="p-2 text-right">{formatCurrency(invoice.amount)}</TableCell>
-                          <TableCell className="p-2 text-right text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</TableCell>
-                          <TableCell className="p-2"><StatusBadge status={invoice.status} /></TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-          </Card>
       </div>
 
       {selectedInvoice && (
