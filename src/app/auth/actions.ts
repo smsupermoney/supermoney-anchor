@@ -1,4 +1,3 @@
-
 'use server';
 
 import { redirect } from 'next/navigation';
@@ -9,7 +8,7 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
-  console.log("Comming Here")
+  console.log("Comming Here");
   try {
     const { email, password } = z
       .object({
