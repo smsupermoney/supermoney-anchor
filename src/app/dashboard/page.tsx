@@ -297,8 +297,8 @@ export default function Dashboard() {
                                         <p className="text-[10px] text-muted-foreground">Disbursed Invoices</p>
                                         <p className="font-semibold text-xs">{program.invoicesCount}</p>
                                         </Link>
-                                        <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
-                                        <p className="text-[10px] text-muted-foreground">Pending Invoices</p>
+                                        <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}&status=Initiated`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                                        <p className="text-[10px] text-muted-foreground">Initiated Invoices</p>
                                         <p className="font-semibold text-xs">{program.pendingInvoicesCount}</p>
                                         </Link>
                                         <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
@@ -378,5 +378,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-    
