@@ -46,6 +46,7 @@ export default function InvoicesPage() {
     dealerName: "",
     lender: "",
     status: "",
+    overdue: "",
   };
   
   const searchParams = useSearchParams();
@@ -84,6 +85,11 @@ export default function InvoicesPage() {
       const isAfterStartDate = !date?.from || invoiceDate >= date.from;
       const isBeforeEndDate = !date?.to || invoiceDate <= date.to;
 
+      const overdueCondition =
+        filters.overdue === "" ||
+        (filters.overdue === "yes" && invoice.overdueAmount > 0) ||
+        (filters.overdue === "no" && invoice.overdueAmount === 0);
+
       return (
         invoice.invoiceNumber
           .toLowerCase()
@@ -93,6 +99,7 @@ export default function InvoicesPage() {
           .includes(filters.dealerName.toLowerCase()) &&
         invoice.lender.toLowerCase().includes(filters.lender.toLowerCase()) &&
         (filters.status === "" || invoice.status === filters.status) &&
+        overdueCondition &&
         isAfterStartDate &&
         isBeforeEndDate
       );
@@ -144,6 +151,19 @@ export default function InvoicesPage() {
                     {status}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.overdue}
+              onValueChange={(value) => handleFilterChange("overdue", value === "all" ? "" : value)}
+            >
+              <SelectTrigger className="h-9 max-w-40">
+                <SelectValue placeholder="Overdue?" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="yes">Yes</SelectItem>
+                <SelectItem value="no">No</SelectItem>
               </SelectContent>
             </Select>
             <Popover>
