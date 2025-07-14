@@ -14,16 +14,9 @@ import {
 } from "@/components/ui/table";
 import { invoices, invoiceStatuses } from "@/lib/data";
 import StatusBadge from "@/components/status-badge";
-import { UploadCloud, Calendar as CalendarIcon, X as XIcon } from "lucide-react";
+import { UploadCloud, Calendar as CalendarIcon, X as XIcon, ChevronDown } from "lucide-react";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -31,8 +24,17 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
-import type { Invoice } from "@/types";
+import type { Invoice, InvoiceStatus } from "@/types";
 import { useSearchParams } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 export default function InvoicesPage() {
   const formatCurrency = (amount: number) =>
@@ -45,7 +47,7 @@ export default function InvoicesPage() {
     invoiceNumber: "",
     dealerName: "",
     lender: "",
-    status: "",
+    status: [] as InvoiceStatus[],
     overdue: "",
   };
   
@@ -56,7 +58,8 @@ export default function InvoicesPage() {
     const lenderQuery = searchParams.get('lender');
     const overdueQuery = searchParams.get('overdue');
     const statusQuery = searchParams.get('status');
-    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || "", status: statusQuery || ""};
+    const statusArray = statusQuery ? statusQuery.split(',') as InvoiceStatus[] : [];
+    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || "", status: statusArray};
   });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
@@ -64,11 +67,21 @@ export default function InvoicesPage() {
     const lender = searchParams.get('lender');
     const overdue = searchParams.get('overdue');
     const status = searchParams.get('status');
-    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || "", status: status || ""}));
+    const statusArray = status ? status.split(',') as InvoiceStatus[] : [];
+    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || "", status: statusArray}));
   }, [searchParams]);
 
+  const handleStatusFilterChange = (status: InvoiceStatus) => {
+    setFilters((prev) => {
+      const newStatuses = prev.status.includes(status)
+        ? prev.status.filter((s) => s !== status)
+        : [...prev.status, status];
+      return { ...prev, status: newStatuses };
+    });
+  };
+
   const handleFilterChange = (
-    filterName: keyof typeof filters,
+    filterName: keyof Omit<typeof filters, 'status'>,
     value: string
   ) => {
     setFilters((prev) => ({ ...prev, [filterName]: value }));
@@ -80,7 +93,7 @@ export default function InvoicesPage() {
   };
   
   const hasActiveFilters = useMemo(() => {
-    return Object.values(filters).some(val => val !== "") || !!date;
+    return Object.values(filters).some(val => Array.isArray(val) ? val.length > 0 : val !== "") || !!date;
   }, [filters, date]);
 
   const filteredInvoices = useMemo(() => {
@@ -94,6 +107,9 @@ export default function InvoicesPage() {
         (filters.overdue === "yes" && invoice.overdueAmount > 0) ||
         (filters.overdue === "no" && invoice.overdueAmount === 0);
 
+      const statusCondition =
+        filters.status.length === 0 || filters.status.includes(invoice.status);
+
       return (
         invoice.invoiceNumber
           .toLowerCase()
@@ -102,7 +118,7 @@ export default function InvoicesPage() {
           .toLowerCase()
           .includes(filters.dealerName.toLowerCase()) &&
         invoice.lender.toLowerCase().includes(filters.lender.toLowerCase()) &&
-        (filters.status === "" || invoice.status === filters.status) &&
+        statusCondition &&
         overdueCondition &&
         isAfterStartDate &&
         isBeforeEndDate
@@ -141,35 +157,78 @@ export default function InvoicesPage() {
               onChange={(e) => handleFilterChange("lender", e.target.value)}
               className="h-9 max-w-40"
             />
-            <Select
-              value={filters.status}
-              onValueChange={(value) => handleFilterChange("status", value === "all" ? "" : value)}
-            >
-              <SelectTrigger className="h-9 max-w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="h-9 max-w-60">
+                  Status
+                  {filters.status.length > 0 && (
+                    <>
+                      <Separator orientation="vertical" className="mx-2 h-4" />
+                      <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                        {filters.status.length}
+                      </Badge>
+                      <div className="hidden space-x-1 lg:flex">
+                        {filters.status.length > 2 ? (
+                          <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                            {filters.status.length} selected
+                          </Badge>
+                        ) : (
+                          filters.status.map((status) => (
+                            <Badge
+                              variant="secondary"
+                              key={status}
+                              className="rounded-sm px-1 font-normal"
+                            >
+                              {status}
+                            </Badge>
+                          ))
+                        )}
+                      </div>
+                    </>
+                  )}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="start">
+                <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 {invoiceStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
+                  <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={filters.status.includes(status)}
+                    onCheckedChange={() => handleStatusFilterChange(status)}
+                    onSelect={(e) => e.preventDefault()} // prevent menu from closing
+                  >
                     {status}
-                  </SelectItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={filters.overdue}
-              onValueChange={(value) => handleFilterChange("overdue", value === "all" ? "" : value)}
-            >
-              <SelectTrigger className="h-9 max-w-40">
-                <SelectValue placeholder="Overdue?" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="yes">Yes</SelectItem>
-                <SelectItem value="no">No</SelectItem>
-              </SelectContent>
-            </Select>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Popover>
+               <PopoverTrigger asChild>
+                <Button
+                  id="overdue-select"
+                  variant="outline"
+                  className={cn("h-9 w-[150px] justify-start text-left font-normal",
+                    !filters.overdue && "text-muted-foreground"
+                  )}
+                >
+                  {filters.overdue ? (
+                    <>{filters.overdue === 'yes' ? 'Overdue: Yes' : 'Overdue: No'}</>
+                  ) : (
+                    <>Overdue?</>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <div className="flex flex-col">
+                  <Button variant="ghost" className="justify-start" onClick={() => handleFilterChange('overdue', 'yes')}>Yes</Button>
+                  <Button variant="ghost" className="justify-start" onClick={() => handleFilterChange('overdue', 'no')}>No</Button>
+                  <Button variant="ghost" className="justify-start" onClick={() => handleFilterChange('overdue', '')}>All</Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -265,3 +324,5 @@ export default function InvoicesPage() {
     </>
   );
 }
+
+    
