@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function InvoicesPage() {
   const formatCurrency = (amount: number) =>
@@ -293,17 +294,56 @@ export default function InvoicesPage() {
                 {filteredInvoices.map((invoice) => (
                   <TableRow key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="cursor-pointer">
                     <TableCell className="font-medium">
-                      {invoice.invoiceNumber}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[100px]">{invoice.invoiceNumber}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.invoiceNumber}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
-                    <TableCell>{invoice.dealerName}</TableCell>
-                    <TableCell>{invoice.lender}</TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px]">{invoice.dealerName}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.dealerName}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px]">{invoice.lender}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.lender}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell>{invoice.date}</TableCell>
                     <TableCell>{invoice.dueDate}</TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency(invoice.amount)}
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[100px] ml-auto">{formatCurrency(invoice.amount)}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{formatCurrency(invoice.amount)}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
                     <TableCell className="text-right text-destructive">
-                      {invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[100px] ml-auto">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={invoice.status} />
