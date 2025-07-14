@@ -140,8 +140,8 @@ export default function InvoicesPage() {
         </UploadInvoiceDialog>
       </PageHeader>
       <Card className="mt-4">
-        <CardContent className="pt-6">
-          <div className="flex flex-wrap items-center gap-2 mb-4">
+        <CardContent className="pt-6 grid gap-4">
+          <div className="flex flex-wrap items-center gap-2">
             <Input
               placeholder="Filter Invoice #"
               value={filters.invoiceNumber}
