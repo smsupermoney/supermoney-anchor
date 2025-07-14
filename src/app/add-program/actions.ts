@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/firebase";
-import { collection, addDoc, writeBatch, doc } from "firebase/firestore";
+import { collection, writeBatch, doc } from "firebase/firestore";
 
 type ActionResult = {
   message?: string;
@@ -11,11 +11,22 @@ type ActionResult = {
 
 // A more forgiving JSON parser
 function parseRelaxedJson(jsonString: string) {
-    // 1. Remove comments
-    let cleanedString = jsonString.replace(/\/\/.*$/gm, '');
-    // 2. Replace single quotes with double quotes for keys and values
-    cleanedString = cleanedString.replace(/'/g, '"');
-    return JSON.parse(cleanedString);
+    try {
+        // Remove comments
+        let cleanedString = jsonString.replace(/\/\/.*$/gm, '');
+        // Remove trailing commas from objects and arrays
+        cleanedString = cleanedString.replace(/,(\s*[}\]])/g, '$1');
+        // Add quotes to unquoted keys
+        cleanedString = cleanedString.replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
+        // Replace single quotes with double quotes
+        cleanedString = cleanedString.replace(/'/g, '"');
+        return JSON.parse(cleanedString);
+    } catch (e) {
+        // If the above fails, it might be an issue with the regex. 
+        // We re-throw the error with a more specific message.
+        console.error("Advanced JSON Parsing Error:", e);
+        throw new Error("Invalid JSON format. Please check for syntax errors like missing commas or mismatched brackets.");
+    }
 }
 
 
@@ -26,7 +37,10 @@ export async function addPrograms(jsonString: string): Promise<ActionResult> {
     programsArray = parseRelaxedJson(jsonString);
   } catch (error) {
     console.error("JSON Parsing Error:", error);
-    return { error: "Invalid JSON format. Please check your input for issues like trailing commas or syntax errors." };
+    if (error instanceof Error) {
+        return { error: error.message };
+    }
+    return { error: "An unknown error occurred during JSON parsing." };
   }
 
   if (!Array.isArray(programsArray)) {
