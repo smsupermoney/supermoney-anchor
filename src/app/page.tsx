@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { authenticate } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -22,7 +23,7 @@ function LoginButton() {
 }
 
 export default function LoginPage() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [errorMessage, dispatch] = useActionState(authenticate, undefined);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
