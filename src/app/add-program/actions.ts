@@ -2,20 +2,31 @@
 "use server";
 
 import { db } from "@/lib/firebase";
-import { collection, addDoc, writeBatch } from "firebase/firestore";
+import { collection, addDoc, writeBatch, doc } from "firebase/firestore";
 
 type ActionResult = {
   message?: string;
   error?: string;
 };
 
+// A more forgiving JSON parser
+function parseRelaxedJson(jsonString: string) {
+    // 1. Remove comments
+    let cleanedString = jsonString.replace(/\/\/.*$/gm, '');
+    // 2. Replace single quotes with double quotes for keys and values
+    cleanedString = cleanedString.replace(/'/g, '"');
+    return JSON.parse(cleanedString);
+}
+
+
 export async function addPrograms(jsonString: string): Promise<ActionResult> {
   let programsArray: any[];
 
   try {
-    programsArray = JSON.parse(jsonString);
+    programsArray = parseRelaxedJson(jsonString);
   } catch (error) {
-    return { error: "Invalid JSON format. Please check your input." };
+    console.error("JSON Parsing Error:", error);
+    return { error: "Invalid JSON format. Please check your input for issues like trailing commas or syntax errors." };
   }
 
   if (!Array.isArray(programsArray)) {
@@ -27,12 +38,19 @@ export async function addPrograms(jsonString: string): Promise<ActionResult> {
   }
 
   try {
-    const programsCollection = collection(db, "programs");
     const batch = writeBatch(db);
 
     programsArray.forEach(program => {
-        // Firestore will auto-generate an ID for the new document
-        const docRef = addDoc(programsCollection, program).then().catch().then().catch().then().catch().then().catch().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().catch().then().e;
+        // Use the provided 'id' for the document ID, or let Firestore auto-generate one
+        const docRef = program.id ? doc(db, "programs", program.id) : doc(collection(db, "programs"));
+        
+        // If an ID was present in the object, we don't want to write it as a field
+        const programData = {...program};
+        if (programData.id) {
+            delete programData.id;
+        }
+        
+        batch.set(docRef, programData);
     });
     
     await batch.commit();
