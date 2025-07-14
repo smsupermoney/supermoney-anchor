@@ -31,14 +31,20 @@ export async function authenticate(
         return 'Invalid email or password.';
     }
     
+    // If we reach here, the credentials are valid.
+    // The redirect will happen outside the try...catch block.
+
   } catch (error) {
     if (error instanceof z.ZodError) {
       return 'Invalid email or password format.';
     }
+    
+    // Log the actual error for debugging, but return a generic message to the user.
     console.error('Authentication Error:', error);
     return 'An unexpected error occurred.';
   }
 
-  // Redirect only on successful authentication, outside the try...catch block.
+  // Redirect only on successful authentication.
+  // The redirect function throws an error, so it must be outside the `try` block.
   redirect('/dashboard');
 }
