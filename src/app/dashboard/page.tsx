@@ -414,7 +414,7 @@ export default function Dashboard() {
                                     </Tooltip>
                                 </TooltipProvider>
                             </TableCell>
-                            <TableCell className="p-2">
+                            <TableCell className="p-2 whitespace-nowrap">
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
