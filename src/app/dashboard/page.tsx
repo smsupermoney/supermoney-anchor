@@ -69,6 +69,14 @@ export default function Dashboard() {
     .filter(i => i.status === 'Disbursed')
     .reduce((sum, i) => sum + i.amount, 0);
 
+  const lenderFullNameMapping: Record<string, string> = {
+    'CHOLAMANDALAM INVEST...': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
+    'ADITYA BIRLA CAPITAL LTD': 'ADITYA BIRLA CAPITAL LTD',
+    'Supply Chain Finance Co.': 'Supply Chain Finance Co.',
+    'Flexi Loans': 'Flexi Loans',
+    'Supermoney Finance': 'Supermoney Finance'
+  };
+
 
   return (
     <div className="flex flex-col h-full gap-4">
@@ -250,6 +258,7 @@ export default function Dashboard() {
                             {programs.map((program) => {
                             const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
                             const remainingLimit = program.totalLimit - program.usedLimit;
+                            const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
 
                             return (
                                 <div key={program.id} className="min-w-[300px]">
@@ -263,7 +272,7 @@ export default function Dashboard() {
                                                 <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>{program.lenderName}</p>
+                                                <p>{fullName}</p>
                                             </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -367,3 +376,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
