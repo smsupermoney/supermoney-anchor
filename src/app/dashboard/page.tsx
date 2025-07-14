@@ -149,16 +149,18 @@ export default function Dashboard() {
         
         {/* Overdue and Invoice Summary Column */}
         <div className="flex flex-col gap-4">
-            <Card className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
-                    <AlertTriangle className="w-4 h-4 text-destructive" />
-                </CardHeader>
-                <CardContent className="p-3 pt-0">
-                    <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
-                    <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
-                </CardContent>
-            </Card>
+            <Link href="/invoices?overdue=yes">
+              <Card className="h-full hover:bg-secondary transition-colors">
+                  <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                      <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
+                      <AlertTriangle className="w-4 h-4 text-destructive" />
+                  </CardHeader>
+                  <CardContent className="p-3 pt-0">
+                      <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
+                      <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
+                  </CardContent>
+              </Card>
+            </Link>
             
             <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -210,7 +212,7 @@ export default function Dashboard() {
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                            <span className="text-lg font-bold text-destructive">{rejectedLeadsLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
                         </div>
                     </div>
@@ -376,4 +378,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 

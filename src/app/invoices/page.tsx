@@ -50,17 +50,19 @@ export default function InvoicesPage() {
   };
   
   const searchParams = useSearchParams();
-  const lenderQuery = searchParams.get('lender');
-
+  
   const [date, setDate] = useState<DateRange | undefined>();
-  const [filters, setFilters] = useState({...initialFilters, lender: lenderQuery || ""});
+  const [filters, setFilters] = useState(() => {
+    const lenderQuery = searchParams.get('lender');
+    const overdueQuery = searchParams.get('overdue');
+    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || ""};
+  });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
   useEffect(() => {
     const lender = searchParams.get('lender');
-    if (lender) {
-      setFilters(prev => ({...prev, lender: lender}));
-    }
+    const overdue = searchParams.get('overdue');
+    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || ""}));
   }, [searchParams]);
 
   const handleFilterChange = (
@@ -76,7 +78,8 @@ export default function InvoicesPage() {
   };
   
   const hasActiveFilters = useMemo(() => {
-    return Object.values(filters).some(val => val !== "") || !!date;
+    // We check initialFilters to see if any query params were applied
+    return Object.keys(filters).some(key => filters[key as keyof typeof filters] !== initialFilters[key as keyof typeof initialFilters]) || !!date;
   }, [filters, date]);
 
   const filteredInvoices = useMemo(() => {
