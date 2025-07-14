@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, UsersCog } from 'lucide-react';
 
 export const navigationLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -7,4 +7,5 @@ export const navigationLinks = [
   { href: '/invoices', label: 'Invoices', icon: FileText },
   { href: '/leads', label: 'Leads', icon: PlusCircle },
   { href: '/risk-assessment', label: 'Risk Assessment', icon: ShieldCheck },
+  { href: '/settings', label: 'User Accounts', icon: UsersCog },
 ];

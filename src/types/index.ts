@@ -49,3 +49,14 @@ export type Lead = {
   status: LeadStatus;
   createdAt: string;
 };
+
+export type User = {
+    id: string;
+    userName: string;
+    password?: string;
+    phoneNumber: string;
+    emailAddress: string;
+    roleType: "Anchor" | "Dealer" | "Admin";
+    lastLoginTime: string;
+    lastLoginIp: string;
+}
