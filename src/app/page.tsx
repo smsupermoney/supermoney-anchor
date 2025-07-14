@@ -1,19 +1,28 @@
+
 "use client";
 
+import { useFormState, useFormStatus } from "react-dom";
+import { authenticate } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import SupermoneyLogo from "@/components/supermoney-logo";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+
+function LoginButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" className="w-full !mt-6" size="lg" aria-disabled={pending}>
+      {pending ? "Signing In..." : "Sign In"}
+    </Button>
+  );
+}
 
 export default function LoginPage() {
-  const router = useRouter();
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push("/dashboard");
-  };
+  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -26,18 +35,23 @@ export default function LoginPage() {
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form action={dispatch} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="supplier@example.com" required defaultValue="supplier@example.com" />
+              <Input id="email" name="email" type="email" placeholder="supplier@example.com" required defaultValue="anchor@supermoney.in" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required defaultValue="password" />
+              <Input id="password" name="password" type="password" required defaultValue="password" />
             </div>
-            <Button type="submit" className="w-full !mt-6" size="lg">
-              Sign In
-            </Button>
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Login Failed</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
+            <LoginButton />
           </form>
         </CardContent>
       </Card>

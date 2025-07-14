@@ -1,4 +1,4 @@
-import type { Lead, LeadStatus } from '@/types';
+import type { Lead, LeadStatus, User } from '@/types';
 import { db } from './firebase';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import type { Dealer, Invoice, Program } from '@/types';
@@ -33,6 +33,20 @@ export async function getPrograms() {
   const programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
   return programList;
 }
+
+export async function getUserByEmail(email: string) {
+  const usersRef = collection(db, 'users');
+  const q = query(usersRef, where('emailAddress', '==', email), limit(1));
+  const querySnapshot = await getDocs(q);
+  
+  if (querySnapshot.empty) {
+    return null;
+  }
+  
+  const userDoc = querySnapshot.docs[0];
+  return { id: userDoc.id, ...userDoc.data() } as User;
+}
+
 
 // Keeping leads data static as per request
 export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];

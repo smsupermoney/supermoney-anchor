@@ -52,6 +52,7 @@ export type Lead = {
 
 export type User = {
     id: string;
+    externalId: string;
     userName: string;
     password?: string;
     phoneNumber: string;
