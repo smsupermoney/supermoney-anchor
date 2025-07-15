@@ -8,7 +8,7 @@ import type { User } from '@/types';
 
 export default async function Dashboard() {
   const session = await getIronSession<User>(cookies(), sessionOptions);
-  const anchorId = session.externalId;
+  const anchorId = session.roleType === 'Admin' ? undefined : session.externalId;
 
   // Fetch programs and invoices separately, filtered by the anchor.
   const { programs } = await getPrograms(anchorId);

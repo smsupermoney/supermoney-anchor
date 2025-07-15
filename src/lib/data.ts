@@ -72,14 +72,14 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
   }
   
   let programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
-  const programIds = programList.map(p => p.id);
   
   const [dealerProgramLimits, allInvoices] = await Promise.all([
       getDealerProgramLimits(),
       getInvoices(anchorId), // get only invoices relevant to the anchor
   ]);
-
-  const anchorInvoices = allInvoices.filter(i => programIds.includes(i.programId));
+  
+  const relevantProgramIds = new Set(programList.map(p => p.id));
+  const anchorInvoices = allInvoices.filter(i => relevantProgramIds.has(i.programId));
 
   // Calculate total and used limits for each program
   programList.forEach(program => {
