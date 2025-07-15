@@ -52,7 +52,11 @@ export async function authenticate(
     return 'An unexpected error occurred.';
   }
 
-  redirect('/dashboard');
+  if (userRole === 'Admin') {
+    redirect('/add-program');
+  } else {
+    redirect('/dashboard');
+  }
 }
 
 export async function logout() {
