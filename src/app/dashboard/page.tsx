@@ -13,7 +13,7 @@ export default async function Dashboard() {
 
   const programs = await getPrograms(anchorId);
   // Fetch invoices specifically for the programs associated with the logged-in anchor.
-  const allInvoices = await getRecentInvoices(1000, anchorId);
+  const allInvoices = await getRecentInvoices(undefined, anchorId);
 
   return (
     <DashboardClient 

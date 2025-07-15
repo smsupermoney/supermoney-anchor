@@ -39,31 +39,34 @@ export async function getInvoices(): Promise<Invoice[]> {
   return invoiceList;
 }
 
-export async function getRecentInvoices(count: number, anchorId?: string): Promise<Invoice[]> {
+export async function getRecentInvoices(count?: number, anchorId?: string): Promise<Invoice[]> {
     const invoicesCol = collection(db, 'invoices');
     let q;
 
-    if (anchorId) {
-        // Find programs for the anchor
-        const programsCol = collection(db, 'programs');
-        const anchorProgramsQuery = query(programsCol, where('anchorIds', 'array-contains', anchorId));
-        const programSnapshot = await getDocs(anchorProgramsQuery);
-        const programIds = programSnapshot.docs.map(doc => doc.id);
+    const baseQuery = anchorId
+        ? query(invoicesCol, where('anchorId', '==', anchorId))
+        : invoicesCol;
 
-        if (programIds.length === 0) {
-            return []; // No programs for this anchor, so no invoices
-        }
-
-        // Fetch invoices for those programs
-        q = query(invoicesCol, where('programId', 'in', programIds), orderBy('date', 'desc'), limit(count));
-
+    if (count) {
+        q = query(baseQuery, orderBy('date', 'desc'), limit(count));
     } else {
-        // Fetch all recent invoices if no anchorId is provided
-        q = query(invoicesCol, orderBy('date', 'desc'), limit(count));
+        q = query(baseQuery, orderBy('date', 'desc'));
     }
-
+    
     const invoiceSnapshot = await getDocs(q);
     const invoiceList = invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+    
+    // This is a temporary workaround because Firestore SDK for web does not support `in` queries with more than 10 elements.
+    // In a production app with a proper backend, you would fetch programs first, then invoices.
+    if(anchorId) {
+      const programs = await getPrograms(anchorId);
+      const programIds = programs.map(p => p.id);
+      if(programIds.length > 0){
+        return invoiceList.filter(invoice => programIds.includes(invoice.programId));
+      }
+      return [];
+    }
+
     return invoiceList;
 }
 

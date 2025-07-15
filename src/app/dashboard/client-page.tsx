@@ -16,7 +16,7 @@ import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import type { Invoice, Program } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
-import { subDays } from "date-fns";
+import { subDays, startOfDay } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AiChat from "@/components/ai-chat";
 
@@ -46,15 +46,14 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount).replace('₹', '₹ ');
   const formatCompactCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
 
+  const today = startOfDay(new Date());
+  const sevenDaysAgo = subDays(today, 6); // To include today, we go back 6 days
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const sevenDaysAgo = subDays(today, 7);
-
-  const invoicesLast7Days = invoices.filter(
-    (i) => new Date(i.date) >= sevenDaysAgo && new Date(i.date) <= today
-  );
-
+  const invoicesLast7Days = invoices.filter((i) => {
+    const invoiceDate = startOfDay(new Date(i.date));
+    return invoiceDate >= sevenDaysAgo && invoiceDate <= today;
+  });
+  
   const totalLast7Days = invoicesLast7Days.length;
   const disbursedLast7Days = invoicesLast7Days.filter(i => i.status === 'Disbursed').length;
   const pendingLast7Days = invoicesLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
@@ -460,4 +459,3 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
     </div>
   );
 }
-
