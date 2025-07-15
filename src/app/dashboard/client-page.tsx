@@ -181,15 +181,15 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
                         </Link>
                         <Link href="/invoices?status=Disbursed" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
-                            <span className="text-lg font-bold text-green-600">{disbursedLast7Days}</span>
+                            <span className="text-lg font-bold">{disbursedLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
                         </Link>
                         <Link href="/invoices?status=Initiated,Approved,Sent to Lender" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
-                            <span className="text-lg font-bold text-yellow-600">{pendingLast7Days}</span>
+                            <span className="text-lg font-bold">{pendingLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                         </Link>
                         <Link href="/invoices?status=Rejected" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
-                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                            <span className="text-lg font-bold">{rejectedLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
                         </Link>
                     </div>
@@ -211,15 +211,15 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-green-600">{convertedLeadsLast7Days}</span>
+                            <span className="text-lg font-bold">{convertedLeadsLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> Converted (7d)</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-yellow-600">{needsAttentionLeads}</span>
+                            <span className="text-lg font-bold">{needsAttentionLeads}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-destructive">{rejectedLast7Days}</span>
+                            <span className="text-lg font-bold">{rejectedLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
                         </div>
                     </div>
