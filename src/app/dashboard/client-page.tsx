@@ -460,3 +460,4 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
     </div>
   );
 }
+
