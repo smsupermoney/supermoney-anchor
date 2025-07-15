@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Upload } from "lucide-react";
+import { AlertCircle, Upload, File as FileIcon, X } from "lucide-react";
 
 type UploadExcelFormProps = {
     action: (formData: FormData) => Promise<{ message?: string; error?: string }>;
@@ -17,18 +17,36 @@ type UploadExcelFormProps = {
 export default function UploadExcelForm({ action }: UploadExcelFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { toast } = useToast();
     const formRef = useRef<HTMLFormElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setSelectedFile(file);
+            setError(null); 
+        }
+    };
+    
+    const clearFile = () => {
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const file = formData.get('excel-file') as File;
 
-        if (!file || file.size === 0) {
+        if (!selectedFile) {
             setError("Please select an Excel file to upload.");
             return;
         }
+        
+        const formData = new FormData(event.currentTarget);
+        // The file is already in the formData due to the input element
         
         setError(null);
         setIsSubmitting(true);
@@ -43,6 +61,7 @@ export default function UploadExcelForm({ action }: UploadExcelFormProps) {
                     description: result.message,
                 });
                 formRef.current?.reset();
+                clearFile();
             }
         } catch (e) {
             setError("An unexpected error occurred. Please check the console for more details.");
@@ -55,14 +74,39 @@ export default function UploadExcelForm({ action }: UploadExcelFormProps) {
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="excel-file">Excel File</Label>
-                <Input
-                    id="excel-file"
-                    name="excel-file"
-                    type="file"
-                    accept=".xlsx, .xls"
-                    disabled={isSubmitting}
-                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                />
+                <div className="flex items-center gap-2">
+                    <Input
+                        id="excel-file"
+                        name="excel-file"
+                        type="file"
+                        accept=".xlsx, .xls"
+                        disabled={isSubmitting}
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="sr-only" // Hide the default input
+                    />
+                    <Label 
+                        htmlFor="excel-file" 
+                        className="flex-shrink-0 cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                    >
+                        Choose File
+                    </Label>
+                    <div className="flex-grow p-2 border border-input rounded-md h-10 flex items-center bg-secondary/50">
+                        {selectedFile ? (
+                           <div className="flex items-center justify-between w-full">
+                             <div className="flex items-center gap-2 truncate">
+                                <FileIcon className="h-4 w-4 text-muted-foreground shrink-0"/>
+                                <span className="text-sm text-foreground truncate">{selectedFile.name}</span>
+                             </div>
+                             <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={clearFile}>
+                                 <X className="h-4 w-4"/>
+                             </Button>
+                           </div>
+                        ) : (
+                            <span className="text-sm text-muted-foreground">No file chosen</span>
+                        )}
+                    </div>
+                </div>
             </div>
              {error && (
                 <Alert variant="destructive">
@@ -72,7 +116,7 @@ export default function UploadExcelForm({ action }: UploadExcelFormProps) {
                 </Alert>
             )}
             <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || !selectedFile}>
                     <Upload className="mr-2 h-4 w-4" />
                     {isSubmitting ? "Uploading..." : "Upload and Add"}
                 </Button>
