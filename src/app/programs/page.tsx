@@ -16,9 +16,12 @@ import { sessionOptions } from "@/lib/session";
 import type { User } from "@/types";
 
 export default async function ProgramsPage() {
-    const programs = await getPrograms();
     const session = await getIronSession<User>(cookies(), sessionOptions);
     const isAdmin = session.roleType === 'Admin';
+    const anchorId = isAdmin ? undefined : session.externalId;
+
+    const { programs } = await getPrograms(anchorId);
+    
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
     
     const lenderFullNameMapping: Record<string, string> = {
@@ -47,8 +50,8 @@ export default async function ProgramsPage() {
       </PageHeader>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
         {programs.map((program) => {
-          const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
-          const remainingLimit = program.totalLimit - program.usedLimit;
+          const utilizationPercentage = (program.usedLimit && program.totalLimit) ? (program.usedLimit / program.totalLimit) * 100 : 0;
+          const remainingLimit = (program.totalLimit || 0) - (program.usedLimit || 0);
           const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
 
           return (
@@ -66,7 +69,7 @@ export default async function ProgramsPage() {
                         </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                    <CardDescription className="text-xs">Total Limit: {formatCurrency(program.totalLimit)}</CardDescription>
+                    <CardDescription className="text-xs">Total Limit: {formatCurrency(program.totalLimit || 0)}</CardDescription>
                   </div>
                   <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
                 </div>
@@ -74,7 +77,7 @@ export default async function ProgramsPage() {
               <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
                 <div>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium">Used: {formatCurrency(program.usedLimit)}</span>
+                    <span className="font-medium">Used: {formatCurrency(program.usedLimit || 0)}</span>
                     <span className="text-muted-foreground">Available: {formatCurrency(remainingLimit)}</span>
                   </div>
                   <Progress value={utilizationPercentage} className="h-2" />
