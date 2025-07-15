@@ -269,7 +269,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                             const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
 
                             return (
-                                <div key={program.id} className="min-w-[300px]">
+                                <div key={program.id} className="w-[320px] shrink-0">
                                 <Card className="w-full flex flex-col h-full">
                                     <CardHeader className="p-3 pb-2">
                                     <div className="flex justify-between items-start">
