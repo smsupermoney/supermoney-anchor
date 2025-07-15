@@ -1,7 +1,8 @@
 
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AddDealerLimitForm from "./add-dealer-limit-form";
+import UploadExcelForm from "../add-program/upload-excel-form";
+import { addDealerProgramLimits } from "./actions";
 
 export default function AddDealerLimitPage() {
   return (
@@ -11,11 +12,11 @@ export default function AddDealerLimitPage() {
         <CardHeader>
           <CardTitle>Bulk Import Dealer-Program Limits</CardTitle>
           <CardDescription>
-            Paste a JSON array of limit objects below. Each object will be added as a new document in the 'dealerProgramLimits' collection.
+            Upload an Excel file with dealer-program limit data. The first sheet should contain a header row and rows with the limit information.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AddDealerLimitForm />
+          <UploadExcelForm action={addDealerProgramLimits} />
         </CardContent>
       </Card>
     </>
