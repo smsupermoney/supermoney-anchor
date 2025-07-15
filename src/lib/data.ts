@@ -2,7 +2,7 @@
 import type { Lead, LeadStatus, User } from '@/types';
 import { db } from './firebase';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
-import type { Dealer, Invoice, Program } from '@/types';
+import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // --- API FUNCTIONS ---
 
@@ -12,7 +12,24 @@ export async function getDealers(): Promise<Dealer[]> {
   const dealersCol = collection(db, 'dealers');
   const dealerSnapshot = await getDocs(dealersCol);
   const dealerList = dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dealer));
-  return dealerList;
+  
+  const allInvoices = await getInvoices();
+
+  // Calculate aggregates
+  return dealerList.map(dealer => {
+    const dealerInvoices = allInvoices.filter(i => i.dealerId === dealer.id);
+    const overdueInvoices = dealerInvoices.filter(i => i.overdueAmount > 0);
+    const disbursedAmount = dealerInvoices.filter(i => i.status === 'Disbursed').reduce((sum, i) => sum + i.amount, 0);
+    
+    return {
+      ...dealer,
+      invoicesSubmitted: dealerInvoices.length,
+      amountDisbursed: disbursedAmount,
+      overdueCount: overdueInvoices.length,
+      overdueAmount: overdueInvoices.reduce((sum, i) => sum + i.overdueAmount, 0),
+      lenders: Array.from(new Set(dealerInvoices.map(i => i.lender))),
+    };
+  });
 }
 
 export async function getInvoices(): Promise<Invoice[]> {
@@ -30,12 +47,64 @@ export async function getRecentInvoices(count: number): Promise<Invoice[]> {
     return invoiceList;
 }
 
-export async function getPrograms(): Promise<Program[]> {
+export async function getDealerProgramLimits(): Promise<DealerProgramLimit[]> {
+    const limitsCol = collection(db, 'dealerProgramLimits');
+    const limitsSnapshot = await getDocs(limitsCol);
+    return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
+}
+
+
+export async function getPrograms(anchorId?: string): Promise<Program[]> {
   const programsCol = collection(db, 'programs');
-  const programSnapshot = await getDocs(programsCol);
-  const programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+  let programSnapshot;
+
+  if (anchorId) {
+    const q = query(programsCol, where('anchorIds', 'array-contains', anchorId));
+    programSnapshot = await getDocs(q);
+  } else {
+    programSnapshot = await getDocs(programsCol);
+  }
+  
+  let programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+  
+  const [dealerProgramLimits, allInvoices] = await Promise.all([
+      getDealerProgramLimits(),
+      getInvoices(),
+  ]);
+
+  // Calculate total and used limits for each program
+  programList.forEach(program => {
+    program.totalLimit = 0;
+    program.usedLimit = 0;
+    program.invoicesCount = 0;
+    program.disbursedAmount = 0;
+    program.totalDealers = 0;
+    program.overdueCount = 0;
+    program.pendingInvoicesCount = 0;
+
+    const relevantLimits = dealerProgramLimits.filter(l => l.programId === program.id);
+    const dealerIdsInProgram = new Set(relevantLimits.map(l => l.dealerId));
+    
+    program.totalDealers = dealerIdsInProgram.size;
+
+    relevantLimits.forEach(limit => {
+      program.totalLimit! += limit.creditLimit;
+      program.usedLimit! += limit.usedLimit;
+    });
+
+    const programInvoices = allInvoices.filter(i => i.programId === program.id);
+
+    program.invoicesCount = programInvoices.length;
+    program.disbursedAmount = programInvoices
+        .filter(i => i.status === 'Disbursed')
+        .reduce((sum, i) => sum + i.amount, 0);
+    program.overdueCount = programInvoices.filter(i => i.overdueAmount > 0).length;
+    program.pendingInvoicesCount = programInvoices.filter(i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender').length;
+  });
+  
   return programList;
 }
+
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   const usersRef = collection(db, 'users');
