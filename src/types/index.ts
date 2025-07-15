@@ -2,11 +2,8 @@ export type Dealer = {
   id: string;
   name: string;
   status: 'Active' | 'Inactive' | 'Pending';
-  invoicesSubmitted: number;
-  amountDisbursed: number;
-  overdueCount: number;
-  overdueAmount: number;
-  lenders: string[];
+  // Aggregate fields removed, will be calculated at runtime.
+  // lenders will be derived from dealerProgramLimits.
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';
@@ -14,6 +11,9 @@ export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbu
 export type Invoice = {
   id: string;
   invoiceNumber: string;
+  dealerId: string; // Link to Dealer
+  programId: string; // Link to Program
+  anchorId: string; // Link to Anchor/User
   dealerName: string;
   amount: number;
   date: string;
@@ -30,13 +30,7 @@ export type Program = {
   anchorIds: string[];
   lenderName: string;
   lenderType: 'Supermoney' | 'External';
-  totalLimit: number;
-  usedLimit: number;
-  invoicesCount: number;
-  disbursedAmount: number;
-  totalDealers: number;
-  overdueCount: number;
-  pendingInvoicesCount: number;
+  // Aggregate fields removed, will be calculated at runtime.
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';

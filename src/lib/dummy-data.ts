@@ -1,4 +1,3 @@
-
 /**
  * ==================================================================
  * HOW TO IMPORT THIS DATA INTO FIRESTORE
@@ -12,17 +11,15 @@
  *     a. Click "+ Start collection".
  *     b. For the "Collection ID", enter the name (e.g., "users").
  *     c. Instead of adding documents one by one, Firestore will create the first one for you. Click "Next".
- *     d. For "Document ID", click "Auto-ID".
- *     e. Now, copy one of the JSON objects from the corresponding array below (e.g., the first user object from `dummyUsers`).
- *     f. In the Firestore UI, you will see fields like 'field' and 'value'.
- *        - For each key-value pair in the JSON object (like "id": "USR001"), enter the key (e.g., 'id') as the field name and the value (e.g., 'USR001') as the field value.
- *        - Make sure to select the correct data type (String, Number, etc.).
- *        - For arrays (like `anchorIds`), set the data type to 'array'. Then you can add each string value to the array.
- *     g. Click "Save" to create the first document.
+ *     d. For "Document ID", you can click "Auto-ID" or specify your own (like USR001). For this data, it's easier to specify the ID from the `id` field in the objects below.
+ *     e. Now, copy the fields from one of the JSON objects below.
+ *     f. In the Firestore UI, for each key-value pair in the object (like "userName": "Stark Industries"), enter the key (e.g., 'userName') as the field name and the value (e.g., 'Stark Industries') as the field value.
+ *     g. Make sure to select the correct data type (String, Number, Array, etc.).
+ *     h. Click "Save" to create the document.
  *
  * 5.  To add the rest of the documents for that collection:
  *     a. Click "+ Add document" just below the collection name.
- *     b. Repeat step 4d-4g for each remaining item in the array.
+ *     b. Repeat steps 4d-4h for each remaining item in the array.
  *
  * This manual process is great for getting started with a small amount of data.
  * For larger datasets, you would typically use the Firebase Admin SDK in a script.
@@ -67,117 +64,73 @@ export const dummyUsers = [
 ];
 
 // --- DUMMY PROGRAMS ---
-// Each program is linked to one or more anchors via `anchorIds`.
+// Aggregate fields like totalLimit, usedLimit, etc., are removed.
+// They will be calculated at runtime based on dealerProgramLimits and invoices.
 export const dummyPrograms = [
   {
     id: 'PROG001',
     anchorIds: ['ANC001'],
     lenderName: 'Supermoney Finance',
     lenderType: 'Supermoney',
-    totalLimit: 5000000,
-    usedLimit: 1250000,
-    invoicesCount: 10,
-    disbursedAmount: 1250000,
-    totalDealers: 2,
-    overdueCount: 1,
-    pendingInvoicesCount: 3,
   },
   {
     id: 'PROG002',
     anchorIds: ['ANC001', 'ANC002'],
-    lenderName: 'CHOLAMANDALAM INVEST...',
+    lenderName: 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
     lenderType: 'External',
-    totalLimit: 10000000,
-    usedLimit: 4500000,
-    invoicesCount: 15,
-    disbursedAmount: 4500000,
-    totalDealers: 1,
-    overdueCount: 0,
-    pendingInvoicesCount: 5,
   },
   {
     id: 'PROG003',
     anchorIds: ['ANC002'],
     lenderName: 'ADITYA BIRLA CAPITAL LTD',
     lenderType: 'External',
-    totalLimit: 7500000,
-    usedLimit: 2000000,
-    invoicesCount: 8,
-    disbursedAmount: 2000000,
-    totalDealers: 1,
-    overdueCount: 2,
-    pendingInvoicesCount: 2,
   },
 ];
 
 // --- DUMMY DEALER-PROGRAM LIMIT MAPPING ---
-// This new collection maps dealers to programs with specific credit limits.
+// This collection is crucial for calculating program and dealer aggregates.
 export const dummyDealerProgramLimits = [
-  // Star Electronics (DLR001) has a limit of 2,000,000 in the Supermoney program
   { id: 'DPL001', dealerId: 'DLR001', programId: 'PROG001', creditLimit: 2000000, usedLimit: 750000 },
-  // Future Gadgets (DLR002) has limits in two different programs
   { id: 'DPL002', dealerId: 'DLR002', programId: 'PROG001', creditLimit: 1000000, usedLimit: 500000 },
   { id: 'DPL003', dealerId: 'DLR002', programId: 'PROG002', creditLimit: 2000000, usedLimit: 0 },
-  // Innovative Tech (DLR003) has a limit in the Cholamandalam program
   { id: 'DPL004', dealerId: 'DLR003', programId: 'PROG002', creditLimit: 5000000, usedLimit: 4500000 },
-  // Gotham Goods (DLR004) has limits in two different programs
   { id: 'DPL005', dealerId: 'DLR004', programId: 'PROG003', creditLimit: 3000000, usedLimit: 750000 },
   { id: 'DPL006', dealerId: 'DLR004', programId: 'PROG002', creditLimit: 1000000, usedLimit: 100000 },
 ];
 
 // --- DUMMY DEALERS ---
-// `creditAssigned` is removed. This info is now in `dealerProgramLimits`.
+// Aggregate fields are removed. Lenders are derived from their program participation.
 export const dummyDealers = [
   {
     id: 'DLR001',
     anchorId: 'ANC001',
     name: 'Star Electronics',
     status: 'Active',
-    invoicesSubmitted: 5,
-    amountDisbursed: 750000,
-    overdueCount: 1,
-    overdueAmount: 150000,
-    lenders: ['Supermoney Finance'],
   },
   {
     id: 'DLR002',
     anchorId: 'ANC001',
     name: 'Future Gadgets',
     status: 'Active',
-    invoicesSubmitted: 5,
-    amountDisbursed: 500000,
-    overdueCount: 0,
-    overdueAmount: 0,
-    lenders: ['Supermoney Finance', 'CHOLAMANDALAM INVEST...'],
   },
   {
     id: 'DLR003',
     anchorId: 'ANC001',
     name: 'Innovative Tech',
     status: 'Inactive',
-    invoicesSubmitted: 15,
-    amountDisbursed: 4500000,
-    overdueCount: 0,
-    overdueAmount: 0,
-    lenders: ['CHOLAMANDALAM INVEST...'],
   },
   {
     id: 'DLR004',
     anchorId: 'ANC002',
     name: 'Gotham Goods',
     status: 'Active',
-    invoicesSubmitted: 8,
-    amountDisbursed: 2000000,
-    overdueCount: 2,
-    overdueAmount: 250000,
-    lenders: ['ADITYA BIRLA CAPITAL LTD', 'CHOLAMANDALAM INVEST...'],
   },
 ];
 
+
 // --- DUMMY INVOICES ---
-// Each invoice is linked to a dealer, an anchor, and a program.
+// Each invoice links to a dealer, anchor, and program. This is the source for all financial calculations.
 export const dummyInvoices = [
-  // Invoices for Star Electronics (DLR001) under Stark (ANC001) in Program PROG001
   {
     id: 'INV001',
     dealerId: 'DLR001',
@@ -208,7 +161,6 @@ export const dummyInvoices = [
     lender: 'Supermoney Finance',
     overdueAmount: 0,
   },
-  // Invoices for Future Gadgets (DLR002) under Stark (ANC001) in Program PROG002
   {
     id: 'INV003',
     dealerId: 'DLR002',
@@ -221,10 +173,9 @@ export const dummyInvoices = [
     dueDate: '2024-08-09',
     eWayBillNumber: 'EWB223344',
     status: 'Sent to Lender',
-    lender: 'CHOLAMANDALAM INVEST...',
+    lender: 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
     overdueAmount: 0,
   },
-  // Invoices for Gotham Goods (DLR004) under Wayne (ANC002) in Program PROG003
   {
     id: 'INV004',
     dealerId: 'DLR004',
@@ -255,7 +206,6 @@ export const dummyInvoices = [
     lender: 'ADITYA BIRLA CAPITAL LTD',
     overdueAmount: 250000,
   },
-  // Invoice for Gotham Goods (DLR004) under Wayne (ANC002) but in the shared Program PROG002
   {
     id: 'INV006',
     dealerId: 'DLR004',
@@ -268,7 +218,7 @@ export const dummyInvoices = [
     dueDate: '2024-08-17',
     eWayBillNumber: 'EWB334457',
     status: 'Initiated',
-    lender: 'CHOLAMANDALAM INVEST...',
+    lender: 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
     overdueAmount: 0,
   },
 ];
