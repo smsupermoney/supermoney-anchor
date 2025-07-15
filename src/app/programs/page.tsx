@@ -25,7 +25,7 @@ export default async function ProgramsPage() {
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
     
     const lenderFullNameMapping: Record<string, string> = {
-        'CHOLAMANDALAM INVEST...': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
+        'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
         'ADITYA BIRLA CAPITAL LTD': 'ADITYA BIRLA CAPITAL LTD',
         'Supply Chain Finance Co.': 'Supply Chain Finance Co.',
         'Flexi Loans': 'Flexi Loans',
@@ -50,7 +50,7 @@ export default async function ProgramsPage() {
       </PageHeader>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
         {programs.map((program) => {
-          const utilizationPercentage = (program.usedLimit && program.totalLimit) ? (program.usedLimit / program.totalLimit) * 100 : 0;
+          const utilizationPercentage = (program.totalLimit && program.totalLimit > 0) ? ((program.usedLimit || 0) / program.totalLimit) * 100 : 0;
           const remainingLimit = (program.totalLimit || 0) - (program.usedLimit || 0);
           const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
 

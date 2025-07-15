@@ -8,10 +8,10 @@ import type { User } from "@/types";
 
 export default async function DealersPage() {
   const session = await getIronSession<User>(cookies(), sessionOptions);
-  const anchorId = session.externalId;
   const isAdmin = session.roleType === 'Admin';
+  const anchorId = isAdmin ? undefined : session.externalId;
   
-  const dealers = await getDealers(isAdmin ? undefined : anchorId);
+  const dealers = await getDealers(anchorId);
 
   return <RetailersClientPage initialDealers={dealers} isAdmin={isAdmin} />;
 }
