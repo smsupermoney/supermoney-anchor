@@ -34,11 +34,11 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
   const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
   const externalPrograms = programs.filter(p => p.lenderType === 'External');
 
-  const supermoneyTotalLimit = supermoneyPrograms.reduce((sum, p) => sum + p.totalLimit, 0);
-  const supermoneyUtilizedCredit = supermoneyPrograms.reduce((sum, p) => sum + p.usedLimit, 0);
+  const supermoneyTotalLimit = supermoneyPrograms.reduce((sum, p) => sum + (p.totalLimit || 0), 0);
+  const supermoneyUtilizedCredit = supermoneyPrograms.reduce((sum, p) => sum + (p.usedLimit || 0), 0);
 
-  const externalTotalLimit = externalPrograms.reduce((sum, p) => sum + p.totalLimit, 0);
-  const externalUtilizedCredit = externalPrograms.reduce((sum, p) => sum + p.usedLimit, 0);
+  const externalTotalLimit = externalPrograms.reduce((sum, p) => sum + (p.totalLimit || 0), 0);
+  const externalUtilizedCredit = externalPrograms.reduce((sum, p) => sum + (p.usedLimit || 0), 0);
   
   const totalCreditLimit = supermoneyTotalLimit + externalTotalLimit;
   const utilizedCredit = supermoneyUtilizedCredit + externalUtilizedCredit;
@@ -77,7 +77,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
     .reduce((sum, i) => sum + i.amount, 0);
 
   const lenderFullNameMapping: Record<string, string> = {
-    'CHOLAMANDALAM INVEST...': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
+    'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
     'ADITYA BIRLA CAPITAL LTD': 'ADITYA BIRLA CAPITAL LTD',
     'Supply Chain Finance Co.': 'Supply Chain Finance Co.',
     'Flexi Loans': 'Flexi Loans',
@@ -265,8 +265,8 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                     <div className="overflow-x-auto">
                         <div className="flex space-x-4 pb-4">
                             {programs.map((program) => {
-                            const utilizationPercentage = (program.usedLimit / program.totalLimit) * 100;
-                            const remainingLimit = program.totalLimit - program.usedLimit;
+                            const utilizationPercentage = (program.totalLimit && program.totalLimit > 0) ? ((program.usedLimit || 0) / program.totalLimit) * 100 : 0;
+                            const remainingLimit = (program.totalLimit || 0) - (program.usedLimit || 0);
                             const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
 
                             return (
@@ -285,7 +285,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                                             </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
-                                        <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit)}</CardDescription>
+                                        <CardDescription className="text-xs">Total Limit: {formatCompactCurrency(program.totalLimit || 0)}</CardDescription>
                                         </div>
                                         <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'} className="text-xs shrink-0">{program.lenderType}</Badge>
                                     </div>
@@ -293,7 +293,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                                     <CardContent className="p-3 pt-0 flex flex-col gap-2 flex-1">
                                     <div>
                                         <div className="flex justify-between text-xs mb-1">
-                                        <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit)}</span>
+                                        <span className="font-medium">Used: {formatCompactCurrency(program.usedLimit || 0)}</span>
                                         <span className="text-muted-foreground">Available: {formatCompactCurrency(remainingLimit)}</span>
                                         </div>
                                         <Progress value={utilizationPercentage} className="h-2" />
@@ -460,4 +460,3 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
     </div>
   );
 }
-
