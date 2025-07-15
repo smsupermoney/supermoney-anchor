@@ -8,12 +8,18 @@ import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // Functions to fetch data from Firestore
 
-export async function getDealers(): Promise<Dealer[]> {
+export async function getDealers(anchorId?: string): Promise<Dealer[]> {
   const dealersCol = collection(db, 'dealers');
-  const dealerSnapshot = await getDocs(dealersCol);
+  let dealerQuery = query(dealersCol);
+  if (anchorId) {
+    dealerQuery = query(dealersCol, where('anchorId', '==', anchorId));
+  }
+  
+  const dealerSnapshot = await getDocs(dealerQuery);
   const dealerList = dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dealer));
   
-  const allInvoices = await getInvoices(); // Fetches all invoices for calculations
+  // Pass anchorId to getInvoices to ensure we only get relevant invoices for calculations
+  const allInvoices = await getInvoices(anchorId); 
 
   // Calculate aggregates
   return dealerList.map(dealer => {
@@ -70,7 +76,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
   
   const [dealerProgramLimits, allInvoices] = await Promise.all([
       getDealerProgramLimits(),
-      getInvoices(), // get all invoices to calculate program-specific details
+      getInvoices(anchorId), // get only invoices relevant to the anchor
   ]);
 
   const anchorInvoices = allInvoices.filter(i => programIds.includes(i.programId));
