@@ -7,6 +7,7 @@ import { getSession } from '@/lib/session';
 export default async function Dashboard() {
   noStore();
   const session = await getSession();
+  console.log(JSON.stringify(session));
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
   
   const { programs, invoices } = await getPrograms(anchorId);
