@@ -83,7 +83,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
   // 2. Fetch related data (limits and invoices) scoped by the programs and/or anchor.
   const [dealerProgramLimits, anchorInvoices] = await Promise.all([
-      getDealerProgramLimits(anchorId ? programIds : undefined),
+      getDealerProgramLimits(programIds), // Fetch limits only for the relevant programs
       getInvoices(anchorId),
   ]);
   
@@ -104,6 +104,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     });
     program.totalDealers = dealerIdsInProgram.size;
 
+    // Filter invoices for the current program being processed
     const programInvoices = anchorInvoices.filter(i => i.programId === program.id);
     
     program.invoicesCount = programInvoices.length;

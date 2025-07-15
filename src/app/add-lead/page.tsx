@@ -6,8 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { getIronSession } from 'iron-session';
+import { cookies } from 'next/headers';
+import { sessionOptions } from '@/lib/session';
+import type { User } from '@/types';
 
-export default function AddLeadPage() {
+export default async function AddLeadPage() {
+  const session = await getIronSession<User>(cookies(), sessionOptions);
+
   return (
     <>
       <PageHeader title="Add New Lead">
