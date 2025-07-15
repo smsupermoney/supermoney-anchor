@@ -1,4 +1,5 @@
 
+import { unstable_noStore as noStore } from 'next/cache';
 import PageHeader from '@/components/page-header';
 import RiskAssessmentClient from '@/components/risk-assessment-client';
 import { getDealers, getInvoices } from '@/lib/data';
@@ -8,6 +9,7 @@ import { sessionOptions } from '@/lib/session';
 import type { User } from '@/types';
 
 export default async function RiskAssessmentPage() {
+  noStore();
   const session = await getIronSession<User>(cookies(), sessionOptions);
   const anchorId = session.roleType === 'Admin' ? undefined : session.externalId;
 

@@ -1,3 +1,5 @@
+
+import { unstable_noStore as noStore } from 'next/cache';
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -17,12 +19,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  noStore();
   const session = await getIronSession<User>(cookies(), sessionOptions);
   const user = session.id ? {
     id: session.id,
     userName: session.userName,
     roleType: session.roleType,
     emailAddress: session.emailAddress,
+    externalId: session.externalId,
   } as User : null;
 
   return (

@@ -1,4 +1,5 @@
 
+import { unstable_noStore as noStore } from 'next/cache';
 import { getPrograms } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { sessionOptions } from "@/lib/session";
 import type { User } from "@/types";
 
 export default async function ProgramsPage() {
+    noStore();
     const session = await getIronSession<User>(cookies(), sessionOptions);
     const isAdmin = session.roleType === 'Admin';
     const anchorId = isAdmin ? undefined : session.externalId;

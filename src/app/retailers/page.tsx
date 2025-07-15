@@ -1,4 +1,5 @@
 
+import { unstable_noStore as noStore } from 'next/cache';
 import { getDealers } from "@/lib/data";
 import RetailersClientPage from "./client-page";
 import { getIronSession } from "iron-session";
@@ -7,6 +8,7 @@ import { sessionOptions } from "@/lib/session";
 import type { User } from "@/types";
 
 export default async function DealersPage() {
+  noStore();
   const session = await getIronSession<User>(cookies(), sessionOptions);
   const isAdmin = session.roleType === 'Admin';
   const anchorId = isAdmin ? undefined : session.externalId;
