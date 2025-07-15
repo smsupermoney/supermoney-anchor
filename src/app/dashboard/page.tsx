@@ -4,7 +4,7 @@ import { getPrograms } from '@/lib/data';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { sessionOptions } from '@/lib/session';
-import type { User, Invoice, Program } from '@/types';
+import type { User } from '@/types';
 
 export default async function Dashboard() {
   const session = await getIronSession<User>(cookies(), sessionOptions);

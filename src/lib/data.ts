@@ -11,6 +11,8 @@ import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 export async function getDealers(anchorId?: string): Promise<Dealer[]> {
   const dealersCol = collection(db, 'dealers');
   let dealerQuery = query(dealersCol);
+
+  // If an anchorId is provided, filter dealers by that anchor.
   if (anchorId) {
     dealerQuery = query(dealersCol, where('anchorId', '==', anchorId));
   }
@@ -21,7 +23,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
   // Pass anchorId to getInvoices to ensure we only get relevant invoices for calculations
   const allInvoices = await getInvoices(anchorId); 
 
-  // Calculate aggregates
+  // Calculate aggregates for each dealer based on the correctly scoped invoices.
   return dealerList.map(dealer => {
     const dealerInvoices = allInvoices.filter(i => i.dealerId === dealer.id);
     const overdueInvoices = dealerInvoices.filter(i => i.overdueAmount > 0);
@@ -43,9 +45,10 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   let q;
 
   if (anchorId) {
+    // For an anchor, fetch only their invoices.
     q = query(invoicesCol, where('anchorId', '==', anchorId));
   } else {
-    // Admin gets all invoices
+    // For an admin (anchorId is undefined), fetch all invoices.
     q = query(invoicesCol);
   }
 
@@ -58,12 +61,14 @@ export async function getDealerProgramLimits(programIds?: string[]): Promise<Dea
     const limitsCol = collection(db, 'dealerProgramLimits');
     let q = query(limitsCol);
 
+    // If programIds are provided (which they will be for an anchor), filter limits by those programs.
     if (programIds && programIds.length > 0) {
         q = query(limitsCol, where('programId', 'in', programIds));
     } else if (programIds && programIds.length === 0) {
-        // If we are filtering by programs but the list is empty, return nothing.
+        // If an anchor has no programs, they have no limits. Return empty.
         return [];
     }
+    // If no programIds (admin), fetch all limits.
     
     const limitsSnapshot = await getDocs(q);
     return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
@@ -71,7 +76,7 @@ export async function getDealerProgramLimits(programIds?: string[]): Promise<Dea
 
 
 export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
-  // 1. Fetch programs relevant to the anchor.
+  // 1. Fetch programs. If anchorId is provided, filter by it.
   const programsCol = collection(db, 'programs');
   let programQuery = query(programsCol);
   if (anchorId) {
@@ -81,10 +86,9 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
   let programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
   const programIds = programList.map(p => p.id);
 
-  // 2. Fetch all related data, now scoped by the anchor's programs.
-  //    - If programIds is empty (anchor has no programs), these will correctly return empty arrays.
+  // 2. Fetch related data (limits and invoices) scoped by the programs and/or anchor.
   const [dealerProgramLimits, anchorInvoices] = await Promise.all([
-      getDealerProgramLimits(programIds),
+      getDealerProgramLimits(anchorId ? programIds : undefined), // Pass programIds for anchor, undefined for admin
       getInvoices(anchorId), // This is already correctly scoped to the anchor
   ]);
   
@@ -106,7 +110,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     });
     program.totalDealers = dealerIdsInProgram.size;
 
-    // Filter invoices for the current program
+    // Filter invoices for the current program from the already-scoped invoice list
     const programInvoices = anchorInvoices.filter(i => i.programId === program.id);
 
     // Calculate invoice-based aggregates
@@ -118,7 +122,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     program.pendingInvoicesCount = programInvoices.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   });
   
-  // 4. Return both programs and the filtered invoices for use in client components
+  // 4. Return both the calculated programs and the filtered invoices for use in client components
   return { programs: programList, invoices: anchorInvoices };
 }
 
