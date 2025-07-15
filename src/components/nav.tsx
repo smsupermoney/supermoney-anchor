@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings } from 'lucide-react';
 
 export const anchorNavigationLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -7,9 +7,11 @@ export const anchorNavigationLinks = [
   { href: '/invoices', label: 'Invoices', icon: FileText },
   { href: '/leads', label: 'Leads', icon: PlusCircle },
   { href: '/risk-assessment', label: 'Risk Assessment', icon: ShieldCheck },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export const adminNavigationLinks = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/add-program', label: 'Add Program', icon: PlusCircle },
   { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
   { href: '/add-dealer-limit', label: 'Add Dealer Limit', icon: Link2 },
@@ -20,4 +22,5 @@ export const adminNavigationLinks = [
   { href: '/retailers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
   { href: '/leads', label: 'View Leads', icon: FileText },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];

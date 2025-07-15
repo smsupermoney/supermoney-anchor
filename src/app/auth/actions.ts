@@ -39,6 +39,7 @@ export async function authenticate(
     session.userName = user.userName;
     session.roleType = user.roleType;
     session.emailAddress = user.emailAddress;
+    session.externalId = user.externalId;
     await session.save();
 
     userRole = user.roleType;
@@ -51,11 +52,7 @@ export async function authenticate(
     return 'An unexpected error occurred.';
   }
 
-  if (userRole === 'Admin') {
-    redirect('/add-program');
-  } else {
-    redirect('/dashboard');
-  }
+  redirect('/dashboard');
 }
 
 export async function logout() {
