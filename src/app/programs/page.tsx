@@ -11,16 +11,13 @@ import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { PlusCircle, Upload, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/page-header";
-import { getIronSession } from "iron-session";
-import { cookies } from "next/headers";
-import { sessionOptions } from "@/lib/session";
-import type { User } from "@/types";
+import { getSession } from "@/lib/session";
 
 export default async function ProgramsPage() {
     noStore();
-    const session = await getIronSession<User>(cookies(), sessionOptions);
-    const isAdmin = session.roleType === 'Admin';
-    const anchorId = isAdmin ? undefined : session.externalId;
+    const session = await getSession();
+    const isAdmin = session?.roleType === 'Admin';
+    const anchorId = isAdmin ? undefined : session?.externalId;
 
     const { programs } = await getPrograms(anchorId);
     

@@ -4,9 +4,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import MainLayout from '@/components/main-layout';
-import { getIronSession } from 'iron-session';
-import { cookies } from 'next/headers';
-import { sessionOptions } from '@/lib/session';
+import { getSession } from '@/lib/session';
 import type { User } from '@/types';
 
 export const metadata: Metadata = {
@@ -20,14 +18,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   noStore();
-  const session = await getIronSession<User>(cookies(), sessionOptions);
-  const user = session.id ? {
-    id: session.id,
-    userName: session.userName,
-    roleType: session.roleType,
-    emailAddress: session.emailAddress,
-    externalId: session.externalId,
-  } as User : null;
+  const user = await getSession();
 
   return (
     <html lang="en" suppressHydrationWarning>

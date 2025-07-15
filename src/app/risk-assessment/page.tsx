@@ -3,15 +3,12 @@ import { unstable_noStore as noStore } from 'next/cache';
 import PageHeader from '@/components/page-header';
 import RiskAssessmentClient from '@/components/risk-assessment-client';
 import { getDealers, getInvoices } from '@/lib/data';
-import { getIronSession } from 'iron-session';
-import { cookies } from 'next/headers';
-import { sessionOptions } from '@/lib/session';
-import type { User } from '@/types';
+import { getSession } from '@/lib/session';
 
 export default async function RiskAssessmentPage() {
   noStore();
-  const session = await getIronSession<User>(cookies(), sessionOptions);
-  const anchorId = session.roleType === 'Admin' ? undefined : session.externalId;
+  const session = await getSession();
+  const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
 
   const dealers = await getDealers(anchorId);
   const allInvoices = await getInvoices(anchorId);

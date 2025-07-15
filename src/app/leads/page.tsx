@@ -7,14 +7,11 @@ import { leads, leadStatuses } from "@/lib/data";
 import { PlusCircle, Upload } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import ProgressTracker from "@/components/progress-tracker";
-import { getIronSession } from "iron-session";
-import { cookies } from "next/headers";
-import { sessionOptions } from "@/lib/session";
-import type { User } from "@/types";
+import { getSession } from "@/lib/session";
 
 export default async function LeadsPage() {
-  const session = await getIronSession<User>(cookies(), sessionOptions);
-  const isAdmin = session.roleType === 'Admin';
+  const session = await getSession();
+  const isAdmin = session?.roleType === 'Admin';
   return (
     <>
       <PageHeader title="Leads">
