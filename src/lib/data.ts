@@ -35,6 +35,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
   
   const dealerList = dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dealer));
   
+  // Fetch invoices only for the relevant anchor to ensure calculations are scoped
   const allInvoices = await getInvoices(anchorId); 
 
   return dealerList.map(dealer => {
@@ -56,7 +57,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
 export async function getDealerProgramLimits(programIds?: string[]): Promise<DealerProgramLimit[]> {
     const limitsCol = collection(db, 'dealerProgramLimits');
     
-    if (!programIds) { // Admin case
+    if (!programIds) { // Admin case - fetch all
         const limitsSnapshot = await getDocs(query(limitsCol));
         return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
     }
@@ -83,7 +84,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
   // 2. Fetch related data (limits and invoices) scoped by the programs and/or anchor.
   const [dealerProgramLimits, anchorInvoices] = await Promise.all([
-      getDealerProgramLimits(programIds), // Fetch limits only for the relevant programs
+      getDealerProgramLimits(programIds.length > 0 ? programIds : undefined),
       getInvoices(anchorId),
   ]);
   
