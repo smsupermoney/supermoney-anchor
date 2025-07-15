@@ -1,8 +1,9 @@
 
-import type { IronSessionOptions } from 'iron-session';
-import { getIronSession } from 'iron-session';
+import { unsealData } from 'iron-session';
 import { cookies } from 'next/headers';
+import type { IronSessionOptions } from 'iron-session';
 import type { User } from '@/types';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export const sessionOptions: IronSessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD as string,
@@ -12,20 +13,38 @@ export const sessionOptions: IronSessionOptions = {
   },
 };
 
-// This is the new, reliable way to get the session on the server
-export async function getSession() {
-  const session = await getIronSession<User>(cookies(), sessionOptions);
-  
-  // Using .get() on the session object will not return the session data.
-  // The session object itself is the data. We check for a property like `id`
-  // to see if the session is populated.
-  if (!session.id) {
+export async function getSession(): Promise<User | null> {
+  noStore();
+  const cookieStore = cookies();
+  const encryptedSession = cookieStore.get(sessionOptions.cookieName)?.value;
+
+  if (!encryptedSession) {
     return null;
   }
-  return session;
-}
 
+  try {
+    const sessionData = await unsealData<User>(encryptedSession, {
+      password: sessionOptions.password,
+    });
+    
+    if (!sessionData || !sessionData.id) {
+        return null;
+    }
 
-declare module 'iron-session' {
-  interface IronSessionData extends User {}
+    // Return a plain object, not the session instance
+    return {
+      id: sessionData.id,
+      externalId: sessionData.externalId,
+      userName: sessionData.userName,
+      emailAddress: sessionData.emailAddress,
+      roleType: sessionData.roleType,
+      phoneNumber: sessionData.phoneNumber,
+      lastLoginIp: sessionData.lastLoginIp,
+      lastLoginTime: sessionData.lastLoginTime
+    };
+
+  } catch (error) {
+    console.error('Failed to unseal session:', error);
+    return null;
+  }
 }
