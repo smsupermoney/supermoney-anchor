@@ -11,7 +11,6 @@ export const anchorNavigationLinks = [
 ];
 
 export const adminNavigationLinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/add-program', label: 'Add Program', icon: PlusCircle },
   { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
   { href: '/add-dealer-limit', label: 'Add Dealer Limit', icon: Link2 },

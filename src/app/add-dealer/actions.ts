@@ -3,62 +3,35 @@
 
 import { db } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
+import * as xlsx from 'xlsx';
 
 type ActionResult = {
   message?: string;
   error?: string;
 };
 
-// A more forgiving JSON parser
-function parseRelaxedJson(jsonString: string) {
-    try {
-        // Remove comments
-        let cleanedString = jsonString.replace(/\/\/.*$/gm, '');
-        // Remove trailing commas from objects and arrays
-        cleanedString = cleanedString.replace(/,(\s*[}\]])/g, '$1');
-        // Add quotes to unquoted keys
-        cleanedString = cleanedString.replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
-        // Replace single quotes with double quotes
-        cleanedString = cleanedString.replace(/'/g, '"');
-        return JSON.parse(cleanedString);
-    } catch (e) {
-        // If the above fails, it might be an issue with the regex. 
-        // We re-throw the error with a more specific message.
-        console.error("Advanced JSON Parsing Error:", e);
-        throw new Error("Invalid JSON format. Please check for syntax errors like missing commas or mismatched brackets.");
-    }
-}
-
-
-export async function addDealers(jsonString: string): Promise<ActionResult> {
-  let dealersArray: any[];
-
-  try {
-    dealersArray = parseRelaxedJson(jsonString);
-  } catch (error) {
-    console.error("JSON Parsing Error:", error);
-    if (error instanceof Error) {
-        return { error: error.message };
-    }
-    return { error: "An unknown error occurred during JSON parsing." };
-  }
-
-  if (!Array.isArray(dealersArray)) {
-    return { error: "Input must be a JSON array of dealer objects." };
-  }
-  
-  if (dealersArray.length === 0) {
-    return { error: "The JSON array cannot be empty." };
+export async function addDealers(formData: FormData): Promise<ActionResult> {
+  const file = formData.get('excel-file') as File;
+  if (!file) {
+    return { error: "No file uploaded." };
   }
 
   try {
+    const bytes = await file.arrayBuffer();
+    const workbook = xlsx.read(bytes, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const dealersArray = xlsx.utils.sheet_to_json(sheet);
+
+    if (!Array.isArray(dealersArray) || dealersArray.length === 0) {
+      return { error: "The Excel file is empty or not in the correct format." };
+    }
+
     const batch = writeBatch(db);
 
-    dealersArray.forEach(dealer => {
-        // Use the provided 'id' for the document ID, or let Firestore auto-generate one
-        const docRef = dealer.id ? doc(db, "dealers", dealer.id) : doc(collection(db, "dealers"));
+    dealersArray.forEach((dealer: any) => {
+        const docRef = dealer.id ? doc(db, "dealers", dealer.id.toString()) : doc(collection(db, "dealers"));
         
-        // If an ID was present in the object, we don't want to write it as a field
         const dealerData = {...dealer};
         if (dealerData.id) {
             delete dealerData.id;
@@ -69,12 +42,12 @@ export async function addDealers(jsonString: string): Promise<ActionResult> {
     
     await batch.commit();
 
-    return { message: `${dealersArray.length} dealer(s) added successfully.` };
+    return { message: `${dealersArray.length} dealer(s) added successfully from the Excel file.` };
   } catch (error) {
-    console.error("Error writing to Firestore:", error);
+    console.error("Error processing Excel file or writing to Firestore:", error);
     if (error instanceof Error) {
-        return { error: `Failed to add dealers to Firestore: ${error.message}` };
+        return { error: `Failed to process file: ${error.message}` };
     }
-    return { error: "An unknown error occurred while writing to Firestore." };
+    return { error: "An unknown error occurred during the upload process." };
   }
 }

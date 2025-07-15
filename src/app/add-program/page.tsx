@@ -1,7 +1,8 @@
 
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AddProgramForm from "./add-program-form";
+import UploadExcelForm from "./upload-excel-form";
+import { addPrograms } from "./actions";
 
 export default function AddProgramPage() {
   return (
@@ -11,11 +12,11 @@ export default function AddProgramPage() {
         <CardHeader>
           <CardTitle>Bulk Import Programs</CardTitle>
           <CardDescription>
-            Paste a JSON array of program objects into the textarea below. Each object in the array will be added as a new document in the 'programs' collection.
+            Upload an Excel file with program data. The first sheet should contain a header row and rows with program information.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AddProgramForm />
+          <UploadExcelForm action={addPrograms} />
         </CardContent>
       </Card>
     </>

@@ -1,7 +1,8 @@
 
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AddDealerForm from "./add-dealer-form";
+import { addDealers } from "./actions";
+import UploadExcelForm from "../add-program/upload-excel-form";
 
 export default function AddDealerPage() {
   return (
@@ -11,11 +12,11 @@ export default function AddDealerPage() {
         <CardHeader>
           <CardTitle>Bulk Import Dealers</CardTitle>
           <CardDescription>
-            Paste a JSON array of dealer objects into the textarea below. Each object will be added as a new document in the 'dealers' collection.
+            Upload an Excel file with dealer data. The first sheet should contain a header row and rows with dealer information.
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <AddDealerForm />
+            <UploadExcelForm action={addDealers} />
         </CardContent>
       </Card>
     </>

@@ -1,7 +1,8 @@
 
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AddInvoiceForm from "./add-invoice-form";
+import { addInvoices } from "./actions";
+import UploadExcelForm from "../add-program/upload-excel-form";
 
 export default function AddInvoicePage() {
   return (
@@ -11,11 +12,11 @@ export default function AddInvoicePage() {
         <CardHeader>
           <CardTitle>Bulk Import Invoices</CardTitle>
           <CardDescription>
-            Paste a JSON array of invoice objects into the textarea below. Each object will be added as a new document in the 'invoices' collection.
+            Upload an Excel file with invoice data. The first sheet should contain a header row and rows with invoice information.
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <AddInvoiceForm />
+            <UploadExcelForm action={addInvoices} />
         </CardContent>
       </Card>
     </>

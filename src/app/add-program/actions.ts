@@ -3,78 +3,66 @@
 
 import { db } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
+import * as xlsx from 'xlsx';
 
 type ActionResult = {
   message?: string;
   error?: string;
 };
 
-// A more forgiving JSON parser
-function parseRelaxedJson(jsonString: string) {
-    try {
-        // Remove comments
-        let cleanedString = jsonString.replace(/\/\/.*$/gm, '');
-        // Remove trailing commas from objects and arrays
-        cleanedString = cleanedString.replace(/,(\s*[}\]])/g, '$1');
-        // Add quotes to unquoted keys
-        cleanedString = cleanedString.replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
-        // Replace single quotes with double quotes
-        cleanedString = cleanedString.replace(/'/g, '"');
-        return JSON.parse(cleanedString);
-    } catch (e) {
-        // If the above fails, it might be an issue with the regex. 
-        // We re-throw the error with a more specific message.
-        console.error("Advanced JSON Parsing Error:", e);
-        throw new Error("Invalid JSON format. Please check for syntax errors like missing commas or mismatched brackets.");
-    }
-}
-
-
-export async function addPrograms(jsonString: string): Promise<ActionResult> {
-  let programsArray: any[];
-
-  try {
-    programsArray = parseRelaxedJson(jsonString);
-  } catch (error) {
-    console.error("JSON Parsing Error:", error);
-    if (error instanceof Error) {
-        return { error: error.message };
-    }
-    return { error: "An unknown error occurred during JSON parsing." };
-  }
-
-  if (!Array.isArray(programsArray)) {
-    return { error: "Input must be a JSON array of program objects." };
-  }
-  
-  if (programsArray.length === 0) {
-    return { error: "The JSON array cannot be empty." };
+export async function addPrograms(formData: FormData): Promise<ActionResult> {
+  const file = formData.get('excel-file') as File;
+  if (!file) {
+    return { error: "No file uploaded." };
   }
 
   try {
+    const bytes = await file.arrayBuffer();
+    const workbook = xlsx.read(bytes, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const programsArray = xlsx.utils.sheet_to_json(sheet, {
+        raw: true,
+        // Convert boolean-like values
+        transform: (value, header, R) => {
+            if (typeof value === 'string') {
+                if (value.toLowerCase() === 'true') return true;
+                if (value.toLowerCase() === 'false') return false;
+            }
+            return value;
+        }
+    });
+
+    if (!Array.isArray(programsArray) || programsArray.length === 0) {
+      return { error: "The Excel file is empty or not in the correct format." };
+    }
+
     const batch = writeBatch(db);
 
-    programsArray.forEach(program => {
-        // Use the provided 'id' for the document ID, or let Firestore auto-generate one
-        const docRef = program.id ? doc(db, "programs", program.id) : doc(collection(db, "programs"));
-        
-        // If an ID was present in the object, we don't want to write it as a field
-        const programData = {...program};
-        if (programData.id) {
-            delete programData.id;
-        }
-        
-        batch.set(docRef, programData);
+    programsArray.forEach((program: any) => {
+      const docRef = program.id ? doc(db, "programs", program.id.toString()) : doc(collection(db, "programs"));
+      
+      const programData = { ...program };
+      if (programData.id) {
+        delete programData.id;
+      }
+
+      // Convert array-like strings to actual arrays
+      if (typeof programData.anchorIds === 'string') {
+          programData.anchorIds = programData.anchorIds.split(',').map((s:string) => s.trim());
+      }
+      
+      batch.set(docRef, programData);
     });
     
     await batch.commit();
 
-    return { message: `${programsArray.length} program(s) added successfully.` };
+    return { message: `${programsArray.length} program(s) added successfully from the Excel file.` };
   } catch (error) {
-    console.error("Error writing to Firestore:", error);
+    console.error("Error processing Excel file or writing to Firestore:", error);
     if (error instanceof Error) {
-        return { error: `Failed to add programs to Firestore: ${error.message}` };
+        return { error: `Failed to process file: ${error.message}` };
     }
-    return { error: "An unknown error occurred while writing to Firestore." };
+    return { error: "An unknown error occurred during the upload process." };
   }
 }
