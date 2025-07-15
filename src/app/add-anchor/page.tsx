@@ -6,12 +6,12 @@ import AddAnchorForm from "./add-anchor-form";
 export default function AddAnchorPage() {
   return (
     <>
-      <PageHeader title="Add New Anchors (Bulk)" />
+      <PageHeader title="Add New Anchor" />
       <Card className="mt-4">
         <CardHeader>
-          <CardTitle>Bulk Import Anchors</CardTitle>
+          <CardTitle>Anchor Details</CardTitle>
           <CardDescription>
-            Paste a JSON array of anchor user objects into the textarea below. Each object will be added as a new document in the 'users' collection with roleType 'Anchor'.
+            Enter the details for the new anchor user. An anchor is typically a large enterprise in the supply chain.
           </CardDescription>
         </CardHeader>
         <CardContent>
