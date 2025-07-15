@@ -10,8 +10,9 @@ export default async function Dashboard() {
   const session = await getIronSession<User>(cookies(), sessionOptions);
   const anchorId = session.externalId;
 
-  // Fetch all data needed for the dashboard in one go.
-  const { programs, invoices } = await getPrograms(anchorId);
+  // Fetch programs and invoices separately, filtered by the anchor.
+  const { programs } = await getPrograms(anchorId);
+  const invoices = await getInvoices(anchorId);
   
   return (
     <DashboardClient 

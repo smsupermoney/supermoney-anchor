@@ -13,7 +13,7 @@ export async function getDealers(): Promise<Dealer[]> {
   const dealerSnapshot = await getDocs(dealersCol);
   const dealerList = dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dealer));
   
-  const allInvoices = await getInvoices();
+  const allInvoices = await getInvoices(); // Fetches all invoices for calculations
 
   // Calculate aggregates
   return dealerList.map(dealer => {
@@ -32,42 +32,19 @@ export async function getDealers(): Promise<Dealer[]> {
   });
 }
 
-export async function getInvoices(): Promise<Invoice[]> {
+export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   const invoicesCol = collection(db, 'invoices');
-  const invoiceSnapshot = await getDocs(invoicesCol);
+  let q;
+
+  if (anchorId) {
+    q = query(invoicesCol, where('anchorId', '==', anchorId));
+  } else {
+    q = query(invoicesCol);
+  }
+
+  const invoiceSnapshot = await getDocs(q);
   const invoiceList = invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
   return invoiceList;
-}
-
-export async function getRecentInvoices(count?: number, anchorId?: string): Promise<Invoice[]> {
-    const invoicesCol = collection(db, 'invoices');
-    let q;
-
-    const baseQuery = anchorId
-        ? query(invoicesCol, where('anchorId', '==', anchorId))
-        : invoicesCol;
-
-    if (count) {
-        q = query(baseQuery, orderBy('date', 'desc'), limit(count));
-    } else {
-        q = query(baseQuery, orderBy('date', 'desc'));
-    }
-    
-    const invoiceSnapshot = await getDocs(q);
-    const invoiceList = invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
-    
-    // This is a temporary workaround because Firestore SDK for web does not support `in` queries with more than 10 elements.
-    // In a production app with a proper backend, you would fetch programs first, then invoices.
-    if(anchorId) {
-      const { programs } = await getPrograms(anchorId);
-      const programIds = programs.map(p => p.id);
-      if(programIds.length > 0){
-        return invoiceList.filter(invoice => programIds.includes(invoice.programId));
-      }
-      return [];
-    }
-
-    return invoiceList;
 }
 
 export async function getDealerProgramLimits(): Promise<DealerProgramLimit[]> {
@@ -77,7 +54,7 @@ export async function getDealerProgramLimits(): Promise<DealerProgramLimit[]> {
 }
 
 
-export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
+export async function getPrograms(anchorId?: string): Promise<{programs: Program[]}> {
   const programsCol = collection(db, 'programs');
   let programSnapshot;
 
@@ -93,7 +70,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
   
   const [dealerProgramLimits, allInvoices] = await Promise.all([
       getDealerProgramLimits(),
-      getInvoices(),
+      getInvoices(), // get all invoices to calculate program-specific details
   ]);
 
   const anchorInvoices = allInvoices.filter(i => programIds.includes(i.programId));
@@ -128,7 +105,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     program.pendingInvoicesCount = programInvoices.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   });
   
-  return { programs: programList, invoices: anchorInvoices };
+  return { programs: programList };
 }
 
 
