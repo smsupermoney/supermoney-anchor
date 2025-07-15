@@ -60,29 +60,30 @@ export async function getDealerProgramLimits(): Promise<DealerProgramLimit[]> {
 }
 
 
-export async function getPrograms(anchorId?: string): Promise<{programs: Program[]}> {
+export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
   const programsCol = collection(db, 'programs');
   let programSnapshot;
 
+  // 1. Fetch programs relevant to the anchor
   if (anchorId) {
     const q = query(programsCol, where('anchorIds', 'array-contains', anchorId));
     programSnapshot = await getDocs(q);
   } else {
+    // Admin gets all programs
     programSnapshot = await getDocs(programsCol);
   }
   
   let programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
   
+  // 2. Fetch all related data
   const [dealerProgramLimits, allInvoices] = await Promise.all([
       getDealerProgramLimits(),
-      getInvoices(anchorId), // get only invoices relevant to the anchor
+      getInvoices(anchorId), // IMPORTANT: Get only invoices relevant to the anchor
   ]);
   
-  const relevantProgramIds = new Set(programList.map(p => p.id));
-  const anchorInvoices = allInvoices.filter(i => relevantProgramIds.has(i.programId));
-
-  // Calculate total and used limits for each program
+  // 3. Calculate aggregates for each program using ONLY the anchor's invoices
   programList.forEach(program => {
+    // Initialize aggregates
     program.totalLimit = 0;
     program.usedLimit = 0;
     program.invoicesCount = 0;
@@ -91,18 +92,20 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     program.overdueCount = 0;
     program.pendingInvoicesCount = 0;
 
+    // Calculate total limit and dealer count from dealerProgramLimits
     const relevantLimits = dealerProgramLimits.filter(l => l.programId === program.id);
     const dealerIdsInProgram = new Set(relevantLimits.map(l => l.dealerId));
     
     program.totalDealers = dealerIdsInProgram.size;
-
     relevantLimits.forEach(limit => {
       program.totalLimit! += limit.creditLimit;
       program.usedLimit! += limit.usedLimit;
     });
 
-    const programInvoices = anchorInvoices.filter(i => i.programId === program.id);
+    // Filter invoices for the current program
+    const programInvoices = allInvoices.filter(i => i.programId === program.id);
 
+    // Calculate invoice-based aggregates
     program.invoicesCount = programInvoices.length;
     program.disbursedAmount = programInvoices
         .filter(i => i.status === 'Disbursed')
@@ -111,7 +114,8 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     program.pendingInvoicesCount = programInvoices.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   });
   
-  return { programs: programList };
+  // 4. Return both programs and the filtered invoices for use in client components
+  return { programs: programList, invoices: allInvoices };
 }
 
 
