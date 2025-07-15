@@ -45,6 +45,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   if (anchorId) {
     q = query(invoicesCol, where('anchorId', '==', anchorId));
   } else {
+    // Admin gets all invoices
     q = query(invoicesCol);
   }
 
@@ -53,57 +54,60 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   return invoiceList;
 }
 
-export async function getDealerProgramLimits(): Promise<DealerProgramLimit[]> {
+export async function getDealerProgramLimits(programIds?: string[]): Promise<DealerProgramLimit[]> {
     const limitsCol = collection(db, 'dealerProgramLimits');
-    const limitsSnapshot = await getDocs(limitsCol);
+    let q = query(limitsCol);
+
+    if (programIds && programIds.length > 0) {
+        q = query(limitsCol, where('programId', 'in', programIds));
+    } else if (programIds && programIds.length === 0) {
+        // If we are filtering by programs but the list is empty, return nothing.
+        return [];
+    }
+    
+    const limitsSnapshot = await getDocs(q);
     return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
 }
 
 
 export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
+  // 1. Fetch programs relevant to the anchor.
   const programsCol = collection(db, 'programs');
-  let programSnapshot;
-
-  // 1. Fetch programs relevant to the anchor
+  let programQuery = query(programsCol);
   if (anchorId) {
-    const q = query(programsCol, where('anchorIds', 'array-contains', anchorId));
-    programSnapshot = await getDocs(q);
-  } else {
-    // Admin gets all programs
-    programSnapshot = await getDocs(programsCol);
+    programQuery = query(programsCol, where('anchorIds', 'array-contains', anchorId));
   }
-  
+  const programSnapshot = await getDocs(programQuery);
   let programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
-  
-  // 2. Fetch all related data
-  const [dealerProgramLimits, allInvoices] = await Promise.all([
-      getDealerProgramLimits(),
-      getInvoices(anchorId), // IMPORTANT: Get only invoices relevant to the anchor
+  const programIds = programList.map(p => p.id);
+
+  // 2. Fetch all related data, now scoped by the anchor's programs.
+  //    - If programIds is empty (anchor has no programs), these will correctly return empty arrays.
+  const [dealerProgramLimits, anchorInvoices] = await Promise.all([
+      getDealerProgramLimits(programIds),
+      getInvoices(anchorId), // This is already correctly scoped to the anchor
   ]);
   
-  // 3. Calculate aggregates for each program using ONLY the anchor's invoices
+  // 3. Calculate aggregates for each program using ONLY the correctly scoped data.
   programList.forEach(program => {
-    // Initialize aggregates
+    // Initialize aggregates to 0
     program.totalLimit = 0;
     program.usedLimit = 0;
-    program.invoicesCount = 0;
-    program.disbursedAmount = 0;
     program.totalDealers = 0;
-    program.overdueCount = 0;
-    program.pendingInvoicesCount = 0;
 
-    // Calculate total limit and dealer count from dealerProgramLimits
+    // Calculate total limit, used limit, and dealer count from the filtered dealerProgramLimits
     const relevantLimits = dealerProgramLimits.filter(l => l.programId === program.id);
-    const dealerIdsInProgram = new Set(relevantLimits.map(l => l.dealerId));
+    const dealerIdsInProgram = new Set<string>();
     
-    program.totalDealers = dealerIdsInProgram.size;
     relevantLimits.forEach(limit => {
       program.totalLimit! += limit.creditLimit;
       program.usedLimit! += limit.usedLimit;
+      dealerIdsInProgram.add(limit.dealerId);
     });
+    program.totalDealers = dealerIdsInProgram.size;
 
     // Filter invoices for the current program
-    const programInvoices = allInvoices.filter(i => i.programId === program.id);
+    const programInvoices = anchorInvoices.filter(i => i.programId === program.id);
 
     // Calculate invoice-based aggregates
     program.invoicesCount = programInvoices.length;
@@ -115,7 +119,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
   });
   
   // 4. Return both programs and the filtered invoices for use in client components
-  return { programs: programList, invoices: allInvoices };
+  return { programs: programList, invoices: anchorInvoices };
 }
 
 
