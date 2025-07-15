@@ -59,7 +59,7 @@ export async function getRecentInvoices(count?: number, anchorId?: string): Prom
     // This is a temporary workaround because Firestore SDK for web does not support `in` queries with more than 10 elements.
     // In a production app with a proper backend, you would fetch programs first, then invoices.
     if(anchorId) {
-      const programs = await getPrograms(anchorId);
+      const { programs } = await getPrograms(anchorId);
       const programIds = programs.map(p => p.id);
       if(programIds.length > 0){
         return invoiceList.filter(invoice => programIds.includes(invoice.programId));
@@ -77,7 +77,7 @@ export async function getDealerProgramLimits(): Promise<DealerProgramLimit[]> {
 }
 
 
-export async function getPrograms(anchorId?: string): Promise<Program[]> {
+export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
   const programsCol = collection(db, 'programs');
   let programSnapshot;
 
@@ -89,11 +89,14 @@ export async function getPrograms(anchorId?: string): Promise<Program[]> {
   }
   
   let programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+  const programIds = programList.map(p => p.id);
   
   const [dealerProgramLimits, allInvoices] = await Promise.all([
       getDealerProgramLimits(),
       getInvoices(),
   ]);
+
+  const anchorInvoices = allInvoices.filter(i => programIds.includes(i.programId));
 
   // Calculate total and used limits for each program
   programList.forEach(program => {
@@ -115,17 +118,17 @@ export async function getPrograms(anchorId?: string): Promise<Program[]> {
       program.usedLimit! += limit.usedLimit;
     });
 
-    const programInvoices = allInvoices.filter(i => i.programId === program.id);
+    const programInvoices = anchorInvoices.filter(i => i.programId === program.id);
 
     program.invoicesCount = programInvoices.length;
     program.disbursedAmount = programInvoices
         .filter(i => i.status === 'Disbursed')
         .reduce((sum, i) => sum + i.amount, 0);
     program.overdueCount = programInvoices.filter(i => i.overdueAmount > 0).length;
-    program.pendingInvoicesCount = programInvoices.filter(i => i.status === 'Initiated' || i.status === 'Approved' || i.status === 'Sent to Lender').length;
+    program.pendingInvoicesCount = programInvoices.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   });
   
-  return programList;
+  return { programs: programList, invoices: anchorInvoices };
 }
 
 
