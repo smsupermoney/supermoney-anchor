@@ -12,9 +12,8 @@ export default async function Dashboard() {
   const anchorId = session.externalId;
 
   const programs = await getPrograms(anchorId);
-  // This logic now needs all invoices, so we have to fetch them all
-  // In a real app, this would be done with optimized queries or aggregated data
-  const allInvoices = await getRecentInvoices(1000); // Assuming not more than 1000 invoices for now
+  // Fetch invoices specifically for the programs associated with the logged-in anchor.
+  const allInvoices = await getRecentInvoices(1000, anchorId);
 
   return (
     <DashboardClient 

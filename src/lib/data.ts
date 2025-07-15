@@ -1,7 +1,7 @@
 
 import type { Lead, LeadStatus, User } from '@/types';
 import { db } from './firebase';
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit, documentId } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // --- API FUNCTIONS ---
@@ -39,9 +39,29 @@ export async function getInvoices(): Promise<Invoice[]> {
   return invoiceList;
 }
 
-export async function getRecentInvoices(count: number): Promise<Invoice[]> {
+export async function getRecentInvoices(count: number, anchorId?: string): Promise<Invoice[]> {
     const invoicesCol = collection(db, 'invoices');
-    const q = query(invoicesCol, orderBy('date', 'desc'), limit(count));
+    let q;
+
+    if (anchorId) {
+        // Find programs for the anchor
+        const programsCol = collection(db, 'programs');
+        const anchorProgramsQuery = query(programsCol, where('anchorIds', 'array-contains', anchorId));
+        const programSnapshot = await getDocs(anchorProgramsQuery);
+        const programIds = programSnapshot.docs.map(doc => doc.id);
+
+        if (programIds.length === 0) {
+            return []; // No programs for this anchor, so no invoices
+        }
+
+        // Fetch invoices for those programs
+        q = query(invoicesCol, where('programId', 'in', programIds), orderBy('date', 'desc'), limit(count));
+
+    } else {
+        // Fetch all recent invoices if no anchorId is provided
+        q = query(invoicesCol, orderBy('date', 'desc'), limit(count));
+    }
+
     const invoiceSnapshot = await getDocs(q);
     const invoiceList = invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
     return invoiceList;
