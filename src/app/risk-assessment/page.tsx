@@ -9,11 +9,10 @@ import type { User } from '@/types';
 
 export default async function RiskAssessmentPage() {
   const session = await getIronSession<User>(cookies(), sessionOptions);
-  const anchorId = session.externalId;
-  const isAdmin = session.roleType === 'Admin';
+  const anchorId = session.roleType === 'Admin' ? undefined : session.externalId;
 
-  const dealers = await getDealers(isAdmin ? undefined : anchorId);
-  const allInvoices = await getInvoices(isAdmin ? undefined : anchorId);
+  const dealers = await getDealers(anchorId);
+  const allInvoices = await getInvoices(anchorId);
   
   return (
     <>
