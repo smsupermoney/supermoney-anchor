@@ -1,29 +1,42 @@
 
 import type { Lead, LeadStatus, User } from '@/types';
 import { db } from './firebase';
-import { collection, getDocs, query, where, orderBy, limit, documentId } from 'firebase/firestore';
+import { collection, getDocs, query, where, documentId } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // --- API FUNCTIONS ---
 
 // Functions to fetch data from Firestore
 
+export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
+  const invoicesCol = collection(db, 'invoices');
+  let q = query(invoicesCol);
+
+  if (anchorId) {
+    q = query(invoicesCol, where('anchorId', '==', anchorId));
+  }
+
+  const invoiceSnapshot = await getDocs(q);
+  return invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+}
+
 export async function getDealers(anchorId?: string): Promise<Dealer[]> {
   const dealersCol = collection(db, 'dealers');
   let dealerQuery = query(dealersCol);
 
-  // If an anchorId is provided, filter dealers by that anchor.
   if (anchorId) {
     dealerQuery = query(dealersCol, where('anchorId', '==', anchorId));
   }
   
   const dealerSnapshot = await getDocs(dealerQuery);
+  if (dealerSnapshot.empty) {
+    return [];
+  }
+  
   const dealerList = dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dealer));
   
-  // Pass anchorId to getInvoices to ensure we only get relevant invoices for calculations
   const allInvoices = await getInvoices(anchorId); 
 
-  // Calculate aggregates for each dealer based on the correctly scoped invoices.
   return dealerList.map(dealer => {
     const dealerInvoices = allInvoices.filter(i => i.dealerId === dealer.id);
     const overdueInvoices = dealerInvoices.filter(i => i.overdueAmount > 0);
@@ -40,37 +53,19 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
   });
 }
 
-export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
-  const invoicesCol = collection(db, 'invoices');
-  let q;
-
-  if (anchorId) {
-    // For an anchor, fetch only their invoices.
-    q = query(invoicesCol, where('anchorId', '==', anchorId));
-  } else {
-    // For an admin (anchorId is undefined), fetch all invoices.
-    q = query(invoicesCol);
-  }
-
-  const invoiceSnapshot = await getDocs(q);
-  const invoiceList = invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
-  return invoiceList;
-}
-
 export async function getDealerProgramLimits(programIds?: string[]): Promise<DealerProgramLimit[]> {
     const limitsCol = collection(db, 'dealerProgramLimits');
-    let q = query(limitsCol);
-
-    // If programIds are provided (which they will be for an anchor), filter limits by those programs.
-    if (programIds && programIds.length > 0) {
-        q = query(limitsCol, where('programId', 'in', programIds));
-    } else if (programIds && programIds.length === 0) {
-        // If an anchor has no programs, they have no limits. Return empty.
+    
+    if (!programIds) { // Admin case
+        const limitsSnapshot = await getDocs(query(limitsCol));
+        return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
+    }
+    
+    if (programIds.length === 0) {
         return [];
     }
-    // If no programIds (admin), fetch all limits.
-    
-    const limitsSnapshot = await getDocs(q);
+
+    const limitsSnapshot = await getDocs(query(limitsCol, where('programId', 'in', programIds)));
     return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
 }
 
@@ -88,18 +83,17 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
   // 2. Fetch related data (limits and invoices) scoped by the programs and/or anchor.
   const [dealerProgramLimits, anchorInvoices] = await Promise.all([
-      getDealerProgramLimits(anchorId ? programIds : undefined), // Pass programIds for anchor, undefined for admin
-      getInvoices(anchorId), // This is already correctly scoped to the anchor
+      getDealerProgramLimits(anchorId ? programIds : undefined),
+      getInvoices(anchorId),
   ]);
   
   // 3. Calculate aggregates for each program using ONLY the correctly scoped data.
   programList.forEach(program => {
-    // Initialize aggregates to 0
+    // Initialize aggregates
     program.totalLimit = 0;
     program.usedLimit = 0;
     program.totalDealers = 0;
 
-    // Calculate total limit, used limit, and dealer count from the filtered dealerProgramLimits
     const relevantLimits = dealerProgramLimits.filter(l => l.programId === program.id);
     const dealerIdsInProgram = new Set<string>();
     
@@ -110,10 +104,8 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     });
     program.totalDealers = dealerIdsInProgram.size;
 
-    // Filter invoices for the current program from the already-scoped invoice list
     const programInvoices = anchorInvoices.filter(i => i.programId === program.id);
-
-    // Calculate invoice-based aggregates
+    
     program.invoicesCount = programInvoices.length;
     program.disbursedAmount = programInvoices
         .filter(i => i.status === 'Disbursed')
@@ -122,14 +114,13 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     program.pendingInvoicesCount = programInvoices.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   });
   
-  // 4. Return both the calculated programs and the filtered invoices for use in client components
   return { programs: programList, invoices: anchorInvoices };
 }
 
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   const usersRef = collection(db, 'users');
-  const q = query(usersRef, where('emailAddress', '==', email), limit(1));
+  const q = query(usersRef, where('emailAddress', '==', email));
   const querySnapshot = await getDocs(q);
   
   if (querySnapshot.empty) {
