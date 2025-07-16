@@ -161,10 +161,6 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
   };
 
   const handleSubmit = () => {
-    if (!selectedLender) {
-      toast({ variant: "destructive", title: "Lender Not Selected", description: "Please select a lender." });
-      return;
-    }
     if (uploadedFiles.length === 0) {
       toast({ variant: "destructive", title: "No Files Uploaded", description: "Please upload at least one invoice document." });
       return;
