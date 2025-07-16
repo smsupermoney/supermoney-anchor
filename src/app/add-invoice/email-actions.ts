@@ -8,6 +8,7 @@ type EmailData = {
     fileName: string;
     extractedData?: ExtractInvoiceDataOutput;
     error?: string;
+    fileContent?: string; // Base64 data URI
 };
 
 type ActionResult = {
@@ -70,11 +71,19 @@ export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult>
         return { error: "Email service is not configured on the server. Please contact the administrator." };
     }
 
+    const attachments = data
+        .filter(item => item.fileContent)
+        .map(item => ({
+            filename: item.fileName,
+            path: item.fileContent,
+        }));
+
     const mailOptions = {
         from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
         to: "nitin.chorge@supermoney.in",
         subject: "New Invoice Submission",
         html: generateEmailBody(data),
+        attachments: attachments,
     };
 
     try {

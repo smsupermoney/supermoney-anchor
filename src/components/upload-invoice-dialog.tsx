@@ -51,7 +51,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
     }
   }, [open]);
 
-  const fileToBase64 = (file: File): Promise<string> => {
+  const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -62,7 +62,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
 
   const handleAIExtraction = async (file: File, index: number) => {
     try {
-      const documentDataUri = await fileToBase64(file);
+      const documentDataUri = await fileToDataUri(file);
       const result = await extractInvoiceData({ documentDataUri });
       
       setUploadedFiles(prev => prev.map((f, i) => 
@@ -137,29 +137,40 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
 
     setIsSubmitting(true);
 
-    const emailData = uploadedFiles.map(upFile => ({
-        fileName: upFile.file.name,
-        extractedData: upFile.extractedData,
-        error: upFile.error,
-    }));
+    try {
+      const emailDataPromises = uploadedFiles.map(async (upFile) => ({
+          fileName: upFile.file.name,
+          extractedData: upFile.extractedData,
+          error: upFile.error,
+          fileContent: await fileToDataUri(upFile.file), // Pass file content as data URI
+      }));
+      
+      const emailData = await Promise.all(emailDataPromises);
 
-    const result = await sendInvoiceEmail(emailData);
+      const result = await sendInvoiceEmail(emailData);
 
-    if (result.error) {
-        toast({
-            variant: "destructive",
-            title: "Failed to Send Email",
-            description: result.error,
-        });
-    } else {
-        toast({
-            title: "Invoices Submitted",
-            description: "The invoice details have been sent successfully.",
-        });
-        setOpen(false);
+      if (result.error) {
+          toast({
+              variant: "destructive",
+              title: "Failed to Send Email",
+              description: result.error,
+          });
+      } else {
+          toast({
+              title: "Invoices Submitted",
+              description: "The invoice details have been sent successfully.",
+          });
+          setOpen(false);
+      }
+    } catch (error) {
+       toast({
+          variant: "destructive",
+          title: "An unexpected error occurred.",
+          description: "Could not process files for submission. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   const formatCurrency = (amount?: number) => {
