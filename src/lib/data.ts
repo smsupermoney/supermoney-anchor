@@ -171,7 +171,7 @@ export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
 ];
 
 export const dealerLeads: DealerLead[] = [
-    // For sales_manager
+    // For sales_manager to validate
     {
         id: 'DL001',
         dealerName: 'Global Electronics',
@@ -180,10 +180,13 @@ export const dealerLeads: DealerLead[] = [
         location: 'Mumbai, MH',
         region: 'West',
         status: 'Lead Created',
-        createdBy: 'sales_person_1',
+        createdBy: 'Sales Person',
         createdAt: '2024-07-20',
+        comments: [
+          { user: 'Sales Person', comment: 'New lead, looks promising.', timestamp: '2024-07-20 10:00 AM' }
+        ]
     },
-    // For sales_person / onboarding_ops to collect docs
+    // For sales_person/onboarding_ops to collect documents
     {
         id: 'DL007',
         dealerName: 'Modern Mobiles',
@@ -192,10 +195,14 @@ export const dealerLeads: DealerLead[] = [
         location: 'Kolkata, WB',
         region: 'East',
         status: 'Lead Verified',
-        createdBy: 'sales_person_3',
+        createdBy: 'Sales Person',
         createdAt: '2024-07-19',
+        comments: [
+            { user: 'Sales Person', comment: 'Initial contact made.', timestamp: '2024-07-19 02:15 PM' },
+            { user: 'Sales Manager', comment: 'Lead has been verified. Please proceed with document collection.', timestamp: '2024-07-20 11:00 AM' }
+        ]
     },
-    // For onboarding_ops & legal_compliance to verify docs
+    // For onboarding_ops/legal_compliance to verify documents
     {
         id: 'DL006',
         dealerName: 'Fresh Grocers',
@@ -204,13 +211,16 @@ export const dealerLeads: DealerLead[] = [
         location: 'Hyderabad, TS',
         region: 'South',
         status: 'Documents Collected',
-        createdBy: 'sales_person_2',
+        createdBy: 'Sales Person',
         createdAt: '2024-07-21',
         documents: [
             { name: 'GST Certificate', url: '#', status: 'Pending' },
             { name: 'PAN Card', url: '#', status: 'Pending' },
             { name: 'Shop License', url: '#', status: 'Pending' },
         ],
+        comments: [
+           { user: 'Onboarding Ops', comment: 'All initial documents have been uploaded.', timestamp: '2024-07-21 03:00 PM' }
+        ]
     },
     // For field_inspector to do site visit
     {
@@ -221,14 +231,17 @@ export const dealerLeads: DealerLead[] = [
         location: 'Delhi, DL',
         region: 'North',
         status: 'Documents Verified',
-        createdBy: 'sales_person_2',
+        createdBy: 'Sales Person',
         createdAt: '2024-07-18',
         documents: [
             { name: 'GST Certificate', url: '#', status: 'Verified' },
             { name: 'PAN Card', url: '#', status: 'Verified' },
         ],
+        comments: [
+          { user: 'Legal Compliance', comment: 'Documents look good. Cleared for site visit.', timestamp: '2024-07-22 09:30 AM'}
+        ]
     },
-    // For regional_manager & legal_compliance to approve limit
+    // For regional_manager/legal_compliance to approve limit
     {
         id: 'DL003',
         dealerName: 'Metro Appliances',
@@ -237,7 +250,7 @@ export const dealerLeads: DealerLead[] = [
         location: 'Bengaluru, KA',
         region: 'South',
         status: 'Site Visit Done',
-        createdBy: 'sales_person_3',
+        createdBy: 'Sales Person',
         createdAt: '2024-07-15',
         documents: [
             { name: 'GST Certificate', url: '#', status: 'Verified' },
@@ -247,7 +260,10 @@ export const dealerLeads: DealerLead[] = [
         siteVisitReport: {
             notes: 'Shop is in a prime location with good footfall. Owner is cooperative.',
             images: ['/placeholder.png', '/placeholder.png']
-        }
+        },
+        comments: [
+            { user: 'Field Inspector', comment: 'Site visit completed. Report submitted.', timestamp: '2024-07-22 01:00 PM'}
+        ]
     },
     // For dealer_admin to activate
     {
@@ -260,8 +276,11 @@ export const dealerLeads: DealerLead[] = [
         status: 'Business Limit Approved',
         businessLimit: 500000,
         paymentTerms: 'Net 30',
-        createdBy: 'sales_person_1',
+        createdBy: 'Sales Person',
         createdAt: '2024-07-12',
+        comments: [
+            { user: 'Regional Manager', comment: 'Approved a limit of 5 Lacs with Net 30 terms. Ready for activation.', timestamp: '2024-07-23 11:00 AM'}
+        ]
     },
     // Completed
     {
@@ -275,7 +294,8 @@ export const dealerLeads: DealerLead[] = [
         businessLimit: 250000,
         paymentTerms: 'Net 45',
         dealerCode: 'DEALER-CH-00123',
-        createdBy: 'sales_person_4',
+        createdBy: 'Sales Person',
         createdAt: '2024-07-10',
     },
 ];
+

@@ -1,27 +1,38 @@
 
-"use server"
+"use client"
 
+import * as React from 'react';
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ProgressTracker from "@/components/progress-tracker";
 import { dealerLeads, dealerOnboardingStatuses } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2 } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getSession } from "@/lib/session";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from '@/context/auth-context';
+import type { DealerLead } from '@/types';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
-export default async function DealerLeadDetailPage({ params }: { params: { id: string } }) {
-    const lead = dealerLeads.find(l => l.id === params.id);
-    const session = await getSession();
-    const userSubRole = session?.userSubRole;
+export default function DealerLeadDetailPage({ params }: { params: { id: string } }) {
+    const { user } = useAuth();
+    
+    // Find the initial lead data
+    const initialLead = React.useMemo(() => dealerLeads.find(l => l.id === params.id), [params.id]);
+
+    const [lead, setLead] = React.useState<DealerLead | undefined>(initialLead);
+    const [newComment, setNewComment] = React.useState("");
 
     if (!lead) {
         notFound();
     }
     
+    const userSubRole = user?.userSubRole;
+
     const canValidateLead = userSubRole === 'sales_manager' && lead.status === 'Lead Created';
     const canManageDocs = (userSubRole === 'sales_person' || userSubRole === 'onboarding_ops') && lead.status === 'Lead Verified';
     const canVerifyDocs = (userSubRole === 'onboarding_ops' || userSubRole === 'legal_compliance') && lead.status === 'Documents Collected';
@@ -29,15 +40,22 @@ export default async function DealerLeadDetailPage({ params }: { params: { id: s
     const canApproveLimit = (userSubRole === 'regional_manager' || userSubRole === 'legal_compliance') && lead.status === 'Site Visit Done';
     const canActivateDealer = userSubRole === 'dealer_admin' && lead.status === 'Business Limit Approved';
 
-    const getActionTitle = () => {
-        if (canValidateLead) return "Validate Lead";
-        if (canManageDocs) return "Collect Documents";
-        if (canVerifyDocs) return "Verify Documents";
-        if (canDoSiteVisit) return "Perform Site Visit";
-        if (canApproveLimit) return "Approve Business Limit";
-        if (canActivateDealer) return "Activate Dealer";
-        return "Lead Details";
-    }
+    const handleAddComment = () => {
+        if (newComment.trim() && user) {
+            const comment = {
+                user: user.userName,
+                comment: newComment,
+                timestamp: new Date().toLocaleString(),
+            };
+            setLead(prevLead => {
+                if (!prevLead) return;
+                const updatedComments = [...(prevLead.comments || []), comment];
+                return { ...prevLead, comments: updatedComments };
+            });
+            setNewComment("");
+        }
+    };
+
 
     return (
         <>
@@ -86,7 +104,6 @@ export default async function DealerLeadDetailPage({ params }: { params: { id: s
                                 <CardTitle>Documents</CardTitle>
                                 <CardDescription>Manage and review uploaded documents.</CardDescription>
                             </div>
-                            {canManageDocs && <Button variant="outline" size="sm"><FilePlus2 className="mr-2 h-4 w-4"/>Upload</Button>}
                         </CardHeader>
                         <CardContent className="space-y-3">
                            {lead.documents && lead.documents.length > 0 ? (
@@ -101,7 +118,7 @@ export default async function DealerLeadDetailPage({ params }: { params: { id: s
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {canVerifyDocs && <Button variant="ghost" size="sm">Verify</Button>}
+                                                {canVerifyDocs && doc.status !== 'Verified' && <Button variant="ghost" size="sm">Verify</Button>}
                                                 <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/>Download</Button>
                                             </div>
                                         </div>
@@ -110,6 +127,73 @@ export default async function DealerLeadDetailPage({ params }: { params: { id: s
                             ) : (
                                 <p className="text-sm text-muted-foreground text-center py-4">No documents uploaded yet.</p>
                             )}
+                            {canManageDocs && (
+                                <>
+                                    <Separator />
+                                    <div className="pt-2 space-y-2">
+                                        <p className="text-sm font-medium">Upload New Document</p>
+                                        <div className='flex gap-2 items-center'>
+                                            <Input type="text" placeholder="Document Name (e.g. Aadhaar Card)" className='h-9'/>
+                                            <Input type="file" className="text-xs h-9"/>
+                                            <Button size="sm"><Upload className="mr-2 h-4 w-4" />Upload</Button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                    
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className='flex items-center gap-2'>
+                                <MessageSquare className='h-5 w-5 text-primary' />
+                                Comments
+                            </CardTitle>
+                             <CardDescription>View and add comments to this lead's onboarding process.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div className='max-h-60 overflow-y-auto border rounded-md'>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className='w-[180px]'>User</TableHead>
+                                            <TableHead>Comment</TableHead>
+                                            <TableHead className='text-right w-[200px]'>Timestamp</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {lead.comments && lead.comments.length > 0 ? (
+                                            lead.comments.map((comment, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell className='font-medium'>{comment.user}</TableCell>
+                                                    <TableCell className='text-muted-foreground'>{comment.comment}</TableCell>
+                                                    <TableCell className='text-right'>{comment.timestamp}</TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className='text-center text-muted-foreground'>No comments yet.</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                                </div>
+                                <div className='space-y-2'>
+                                    <Textarea 
+                                        placeholder="Add your comment..." 
+                                        value={newComment} 
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        rows={3}
+                                    />
+                                    <div className='flex justify-end'>
+                                        <Button onClick={handleAddComment} disabled={!newComment.trim()}>
+                                            <SendHorizonal className="mr-2 h-4 w-4"/>
+                                            Add Comment
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

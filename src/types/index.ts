@@ -1,4 +1,5 @@
 
+
 export type Dealer = {
   id: string;
   name: string;
@@ -61,7 +62,6 @@ export type UserSubRole =
   | "AP/AR Approver"
   | "Executive"
   | "Business Lead"
-  | "Regional Manager"
   | "Auditor"
   | "Super Admin"
   | "Not Subscribed"
@@ -71,6 +71,7 @@ export type UserSubRole =
   | "onboarding_ops"
   | "field_inspector"
   | "legal_compliance"
+  | "regional_manager"
   | "dealer_admin";
 
 
@@ -115,6 +116,12 @@ export type Document = {
     status?: 'Pending' | 'Verified' | 'Rejected';
 };
 
+export type Comment = {
+  user: string;
+  comment: string;
+  timestamp: string;
+};
+
 export type DealerLead = {
     id: string;
     dealerName: string;
@@ -130,4 +137,5 @@ export type DealerLead = {
     businessLimit?: number;
     paymentTerms?: string;
     dealerCode?: string;
+    comments?: Comment[];
 };
