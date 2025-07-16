@@ -12,22 +12,33 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, File as FileIcon, X } from "lucide-react";
+import { UploadCloud, File as FileIcon, X, Loader2, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { getDealers } from "@/lib/data";
 import type { Dealer } from "@/types";
+import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
+import { Card, CardContent } from "./ui/card";
+import { Separator } from "./ui/separator";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
   defaultLender?: string;
 };
 
+type UploadedFile = {
+  file: File;
+  preview: string;
+  extractedData?: ExtractInvoiceDataOutput;
+  isLoading: boolean;
+  error?: string;
+};
+
 export default function UploadInvoiceDialog({ children, defaultLender }: UploadInvoiceDialogProps) {
   const [open, setOpen] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedDealerId, setSelectedDealerId] = useState("");
   const [selectedLender, setSelectedLender] = useState("");
@@ -48,53 +59,78 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
   
   const availableLenders = useMemo(() => {
     if (!selectedDealer) return [];
-    // In a real app, you'd filter programs based on what's available for the dealer.
-    // For now, we use the `lenders` array on the dealer object.
     return selectedDealer.lenders;
   }, [selectedDealer]);
 
+  const resetState = () => {
+    setUploadedFiles([]);
+    setIsDragging(false);
+    setSelectedDealerId("");
+    setSelectedLender(defaultLender || "");
+  };
+
   useEffect(() => {
     if (open) {
-      // Reset state when dialog opens
-      setFiles([]);
-      setIsDragging(false);
-      setSelectedDealerId("");
-      setSelectedLender(defaultLender || "");
+      resetState();
     }
   }, [open, defaultLender]);
 
   useEffect(() => {
-    // If there's only one available lender for the selected dealer, auto-select it.
     if (availableLenders.length === 1) {
       setSelectedLender(availableLenders[0]);
     } else {
-        // if a default lender is passed and is valid for the new dealer, keep it
         if(defaultLender && availableLenders.includes(defaultLender)){
             setSelectedLender(defaultLender);
         } else if(!availableLenders.includes(selectedLender)) {
-            // otherwise reset if the current lender is not valid for the new dealer
             setSelectedLender("");
         }
     }
   }, [availableLenders, selectedDealerId, defaultLender, selectedLender]);
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleAIExtraction = async (file: File, index: number) => {
+    try {
+      const documentDataUri = await fileToBase64(file);
+      const result = await extractInvoiceData({ documentDataUri });
+      
+      setUploadedFiles(prev => prev.map((f, i) => 
+        i === index ? { ...f, extractedData: result, isLoading: false } : f
+      ));
+
+    } catch (error) {
+      console.error("AI Extraction Error:", error);
+      setUploadedFiles(prev => prev.map((f, i) => 
+        i === index ? { ...f, isLoading: false, error: "AI failed to read this file." } : f
+      ));
+    }
+  };
+
   const handleFileChange = (newFiles: FileList | null) => {
     if (newFiles) {
-      const addedFiles = Array.from(newFiles);
-      if (files.length + addedFiles.length > 2) {
-        toast({
-          variant: "destructive",
-          title: "Upload Limit Exceeded",
-          description: "You can only upload a maximum of 2 documents.",
-        });
-        return;
-      }
-      setFiles((prevFiles) => [...prevFiles, ...addedFiles]);
+      const addedFiles = Array.from(newFiles).map(file => ({
+        file,
+        preview: URL.createObjectURL(file),
+        isLoading: true,
+      }));
+      
+      setUploadedFiles(prev => [...prev, ...addedFiles]);
+
+      addedFiles.forEach((newFile, i) => {
+        handleAIExtraction(newFile.file, uploadedFiles.length + i);
+      });
     }
   };
 
   const removeFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setUploadedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -125,131 +161,122 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
   };
 
   const handleSubmit = () => {
-    if (!selectedDealerId) {
-      toast({
-        variant: "destructive",
-        title: "Dealer Not Selected",
-        description: "Please select a dealer.",
-      });
-      return;
-    }
     if (!selectedLender) {
-      toast({
-        variant: "destructive",
-        title: "Lender Not Selected",
-        description: "Please select a lender.",
-      });
+      toast({ variant: "destructive", title: "Lender Not Selected", description: "Please select a lender." });
       return;
     }
-    if (files.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No Files Uploaded",
-        description: "Please upload at least one invoice document.",
-      });
+    if (uploadedFiles.length === 0) {
+      toast({ variant: "destructive", title: "No Files Uploaded", description: "Please upload at least one invoice document." });
       return;
     }
     // Handle submission logic here
-    console.log("Submitting files for dealer:", selectedDealer?.name, "with lender:", selectedLender, files);
+    console.log("Submitting files for dealer:", selectedDealer?.name, "with lender:", selectedLender, uploadedFiles);
     toast({
       title: "Invoice Submitted",
-      description: `${files.length} document(s) for ${selectedDealer?.name} have been submitted for processing.`,
+      description: `${uploadedFiles.length} document(s) for ${selectedDealer?.name || 'the detected dealer'} have been submitted.`,
     });
     setOpen(false);
+  };
+
+  const formatCurrency = (amount?: number) => {
+    if (typeof amount !== 'number') return "N/A";
+    return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upload Invoice</DialogTitle>
+          <DialogTitle>Raise Invoice with AI</DialogTitle>
           <DialogDescription>
-            Select a dealer and lender, then upload the invoice and E-Way Bill.
+            Upload invoice documents. The AI will automatically extract the details for you to review.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="dealer-select">Choose Dealer</Label>
-            <Select value={selectedDealerId} onValueChange={setSelectedDealerId}>
-              <SelectTrigger id="dealer-select">
-                <SelectValue placeholder="Select a dealer..." />
-              </SelectTrigger>
-              <SelectContent>
-                {dealers.map((dealer) => (
-                  <SelectItem key={dealer.id} value={dealer.id}>
-                    {dealer.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-           <div className="space-y-2">
-            <Label htmlFor="lender-select">Choose Lender</Label>
-            <Select value={selectedLender} onValueChange={setSelectedLender} disabled={!selectedDealerId || availableLenders.length === 0}>
-              <SelectTrigger id="lender-select">
-                <SelectValue placeholder={!selectedDealerId ? "Select a dealer first" : "Select a lender..."} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableLenders.map((lender) => (
-                  <SelectItem key={lender} value={lender}>
-                    {lender}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <div
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             className={cn(
-              "relative border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center transition-colors duration-200",
+              "relative border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 text-center transition-colors duration-200",
               isDragging ? "bg-accent" : "bg-transparent"
             )}
           >
             <input
               type="file"
               multiple
-              accept="image/*,.pdf"
+              accept="image/jpeg,image/png,application/pdf"
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={(e) => handleFileChange(e.target.files)}
-              disabled={files.length >= 2}
             />
             <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
-              <UploadCloud className="w-12 h-12" />
+              <UploadCloud className="w-10 h-10" />
               <p className="font-medium">
                 {isDragging ? "Drop files here" : "Drag & drop or click to upload"}
               </p>
-              <p className="text-xs">PDF, PNG, JPG accepted</p>
+              <p className="text-xs">PDF, PNG, or JPG files accepted.</p>
             </div>
           </div>
 
-          {files.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">Uploaded Files:</h4>
-              <ul className="space-y-2">
-                {files.map((file, index) => (
-                  <li
-                    key={index}
-                    className="flex items-center justify-between p-2 bg-secondary rounded-md text-sm"
-                  >
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <FileIcon className="w-4 h-4 shrink-0" />
-                      <span className="truncate">{file.name}</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => removeFile(index)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </li>
+          {uploadedFiles.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Review Documents:</h4>
+              <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                {uploadedFiles.map((upFile, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-3">
+                      <div className="flex items-start justify-between">
+                         <div className="flex items-start gap-3">
+                            <FileIcon className="w-5 h-5 mt-1 shrink-0 text-muted-foreground" />
+                            <div className="text-sm">
+                                <p className="font-semibold truncate max-w-48" title={upFile.file.name}>{upFile.file.name}</p>
+                                {upFile.isLoading ? (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                        <Loader2 className="w-3 h-3 animate-spin"/>
+                                        <span>AI is reading...</span>
+                                    </div>
+                                ) : upFile.error ? (
+                                    <p className="text-xs text-destructive mt-1">{upFile.error}</p>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-x-4 text-xs text-muted-foreground mt-2">
+                                        <p><span className="font-medium text-foreground">Dealer:</span> {upFile.extractedData?.dealerName || 'N/A'}</p>
+                                        <p><span className="font-medium text-foreground">Amount:</span> {formatCurrency(upFile.extractedData?.amount)}</p>
+                                        <p><span className="font-medium text-foreground">Type:</span> {upFile.extractedData?.documentType || 'N/A'}</p>
+                                        <p><span className="font-medium text-foreground">Due Date:</span> {upFile.extractedData?.dueDate || 'N/A'}</p>
+                                    </div>
+                                )}
+                            </div>
+                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 shrink-0"
+                          onClick={() => removeFile(index)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
-              </ul>
+              </div>
+              <Separator />
+               <div className="space-y-2">
+                <Label htmlFor="lender-select">Choose Lender</Label>
+                <Select value={selectedLender} onValueChange={setSelectedLender}>
+                  <SelectTrigger id="lender-select">
+                    <SelectValue placeholder="Select a lender..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* In a real app, you would get available lenders based on the detected dealer */}
+                    <SelectItem value="Supermoney Finance">Supermoney Finance</SelectItem>
+                    <SelectItem value="CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED">Cholamandalam</SelectItem>
+                    <SelectItem value="ADITYA BIRLA CAPITAL LTD">Aditya Birla Capital</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
         </div>
@@ -257,7 +284,10 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Submit Invoice</Button>
+          <Button onClick={handleSubmit} disabled={uploadedFiles.some(f => f.isLoading)}>
+            {uploadedFiles.some(f => f.isLoading) ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4"/>}
+            Submit Invoice
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
