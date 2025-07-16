@@ -2,7 +2,6 @@
 "use server";
 
 import nodemailer from "nodemailer";
-import { z } from "zod";
 import { type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
 
 type EmailData = {
@@ -19,7 +18,7 @@ type ActionResult = {
 // Basic validation for environment variables
 const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
 
-const transporter = nodemailer.createTransport({
+const transporter = smtpConfigured ? nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
     secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
@@ -27,7 +26,7 @@ const transporter = nodemailer.createTransport({
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
-});
+}) : null;
 
 const formatCurrency = (amount?: number) => {
     if (typeof amount !== 'number') return "N/A";
@@ -66,7 +65,7 @@ function generateEmailBody(data: EmailData[]): string {
 }
 
 export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult> {
-    if (!smtpConfigured) {
+    if (!smtpConfigured || !transporter) {
         console.error("SMTP environment variables are not configured.");
         return { error: "Email service is not configured on the server. Please contact the administrator." };
     }
