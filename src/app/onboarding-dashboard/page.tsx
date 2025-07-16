@@ -15,14 +15,13 @@ import { Button } from "@/components/ui/button";
 
 const getActionableLeads = (leads: DealerLead[], userSubRole: UserSubRole | undefined): DealerLead[] => {
   if (!userSubRole) return [];
-
   switch (userSubRole) {
     case "sales_person":
-      return leads.filter(lead => lead.status === 'Documents Collected' || lead.status === 'Lead Created');
+      return leads.filter(lead => lead.status === 'Lead Verified');
     case "sales_manager":
       return leads.filter(lead => lead.status === 'Lead Created');
     case "onboarding_ops":
-      return leads.filter(lead => lead.status === 'Documents Collected');
+       return leads.filter(lead => lead.status === 'Documents Collected');
     case "field_inspector":
         return leads.filter(lead => lead.status === 'Documents Verified');
     case "legal_compliance":

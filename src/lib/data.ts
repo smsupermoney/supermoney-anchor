@@ -178,9 +178,36 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Electronics Retail',
         location: 'Mumbai, MH',
         region: 'West',
-        status: 'Lead Created',
+        status: 'Lead Created', // Action for: sales_manager
         createdBy: 'sales_person_1',
         createdAt: '2024-07-20',
+    },
+    {
+        id: 'DL007',
+        dealerName: 'Modern Mobiles',
+        contactPerson: 'Rohan Gupta',
+        businessType: 'Mobile Retail',
+        location: 'Kolkata, WB',
+        region: 'East',
+        status: 'Lead Verified', // Action for: sales_person
+        createdBy: 'sales_person_3',
+        createdAt: '2024-07-19',
+    },
+    {
+        id: 'DL006',
+        dealerName: 'Fresh Grocers',
+        contactPerson: 'Alia Khan',
+        businessType: 'Grocery Store',
+        location: 'Hyderabad, TS',
+        region: 'South',
+        status: 'Documents Collected', // Action for: onboarding_ops, legal_compliance
+        createdBy: 'sales_person_2',
+        createdAt: '2024-07-21',
+        documents: [
+            { name: 'GST Certificate', url: '#', status: 'Pending' },
+            { name: 'PAN Card', url: '#', status: 'Pending' },
+            { name: 'Shop License', url: '#', status: 'Pending' },
+        ],
     },
     {
         id: 'DL002',
@@ -189,7 +216,7 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'General Store',
         location: 'Delhi, DL',
         region: 'North',
-        status: 'Documents Verified',
+        status: 'Documents Verified', // Action for: field_inspector
         createdBy: 'sales_person_2',
         createdAt: '2024-07-18',
         documents: [
@@ -204,7 +231,7 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Home Appliances',
         location: 'Bengaluru, KA',
         region: 'South',
-        status: 'Site Visit Done',
+        status: 'Site Visit Done', // Action for: regional_manager, legal_compliance
         createdBy: 'sales_person_3',
         createdAt: '2024-07-15',
         documents: [
@@ -224,7 +251,7 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Agri Supplies',
         location: 'Pune, MH',
         region: 'West',
-        status: 'Business Limit Approved',
+        status: 'Business Limit Approved', // Action for: dealer_admin
         businessLimit: 500000,
         paymentTerms: 'Net 30',
         createdBy: 'sales_person_1',
@@ -237,37 +264,11 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Hardware Store',
         location: 'Chennai, TN',
         region: 'South',
-        status: 'Dealer Activated',
+        status: 'Dealer Activated', // Final state, no action
         businessLimit: 250000,
         paymentTerms: 'Net 45',
         dealerCode: 'DEALER-CH-00123',
         createdBy: 'sales_person_4',
         createdAt: '2024-07-10',
     },
-    {
-        id: 'DL006',
-        dealerName: 'Fresh Grocers',
-        contactPerson: 'Alia Khan',
-        businessType: 'Grocery Store',
-        location: 'Hyderabad, TS',
-        region: 'South',
-        status: 'Documents Collected',
-        createdBy: 'sales_person_2',
-        createdAt: '2024-07-21',
-        documents: [
-            { name: 'GST Certificate', url: '#', status: 'Pending' },
-            { name: 'Shop License (Pending)', url: '#', status: 'Pending' },
-        ],
-    },
-    {
-        id: 'DL007',
-        dealerName: 'Modern Mobiles',
-        contactPerson: 'Rohan Gupta',
-        businessType: 'Mobile Retail',
-        location: 'Kolkata, WB',
-        region: 'East',
-        status: 'Lead Verified',
-        createdBy: 'sales_person_3',
-        createdAt: '2024-07-19',
-    }
 ];
