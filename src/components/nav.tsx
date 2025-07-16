@@ -1,4 +1,5 @@
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings } from 'lucide-react';
+
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins } from 'lucide-react';
 
 export const anchorNavigationLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -9,6 +10,14 @@ export const anchorNavigationLinks = [
   { href: '/risk-assessment', label: 'Risk Assessment', icon: ShieldCheck },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
+
+// Merged enterprise links for Anchor role
+export const enterpriseAnchorNavigationLinks = [
+    ...anchorNavigationLinks,
+    { href: '/reports', label: 'Reports', icon: FileBarChart, subRole: ['Manager'] },
+    { href: '/sanction-request', label: 'Sanction Request', icon: HandCoins, subRole: ['Manager'] },
+];
+
 
 export const adminNavigationLinks = [
   { href: '/add-program', label: 'Add Program', icon: PlusCircle },

@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import MainLayout from '@/components/main-layout';
 import { getSession } from '@/lib/session';
 import type { User } from '@/types';
+import { AuthProvider } from '@/context/auth-context';
 
 export const metadata: Metadata = {
   title: 'Anchor Dashboard',
@@ -28,9 +29,11 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-sans antialiased">
-        <MainLayout user={user}>
-          {children}
-        </MainLayout>
+        <AuthProvider session={user}>
+          <MainLayout>
+            {children}
+          </MainLayout>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

@@ -3,7 +3,7 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { adminNavigationLinks, anchorNavigationLinks } from './nav';
+import { adminNavigationLinks, enterpriseAnchorNavigationLinks } from './nav';
 import Link from 'next/link';
 import { LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
@@ -11,16 +11,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from './ui/separator';
 import SupermoneyLogo from './supermoney-logo';
 import { logout } from '@/app/auth/actions';
-import type { User } from '@/types';
+import { useAuth } from '@/context/auth-context';
 
 
-export default function MainLayout({ children, user }: { children: React.ReactNode, user: User | null }) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMounted = useMounted();
-
-  const navigationLinks = user?.roleType === 'Admin' ? adminNavigationLinks : anchorNavigationLinks;
+  const { user, loading } = useAuth();
   
-  if (!isMounted) {
+  if (!isMounted || loading) {
     return (
       <div className="flex min-h-screen w-full">
         <div className="hidden md:block w-[16rem] h-screen" />
@@ -34,9 +33,16 @@ export default function MainLayout({ children, user }: { children: React.ReactNo
   }
 
   if (!user) {
-    // This could be a loading state or a redirect to login
+     // This handles the redirect case where there's no user, so we show the login page.
      return <>{children}</>;
   }
+
+  const navigationLinks = user?.roleType === 'Admin' 
+    ? adminNavigationLinks 
+    : enterpriseAnchorNavigationLinks.filter(link => 
+        !link.subRole || (user.userSubRole && link.subRole.includes(user.userSubRole))
+      );
+
 
   return (
     <SidebarProvider>
