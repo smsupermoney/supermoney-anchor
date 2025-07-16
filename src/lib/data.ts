@@ -231,4 +231,26 @@ export const dealerLeads: DealerLead[] = [
         createdBy: 'sales_person_4',
         createdAt: '2024-07-10',
     },
+    {
+        id: 'DL006',
+        dealerName: 'Fresh Grocers',
+        contactPerson: 'Alia Khan',
+        businessType: 'Grocery Store',
+        location: 'Hyderabad, TS',
+        region: 'South',
+        status: 'Documents Collected',
+        createdBy: 'sales_person_2',
+        createdAt: '2024-07-21',
+    },
+    {
+        id: 'DL007',
+        dealerName: 'Modern Mobiles',
+        contactPerson: 'Rohan Gupta',
+        businessType: 'Mobile Retail',
+        location: 'Kolkata, WB',
+        region: 'East',
+        status: 'Site Visit Done',
+        createdBy: 'sales_person_3',
+        createdAt: '2024-07-19',
+    }
 ];

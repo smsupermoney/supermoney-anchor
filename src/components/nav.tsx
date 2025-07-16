@@ -34,6 +34,12 @@ export const adminNavigationLinks = [
 ];
 
 export const dealerOnboardingNavigationLinks: { href: string; label: string; icon: React.ElementType; subRole: UserSubRole[] }[] = [
+  {
+    href: '/onboarding-dashboard',
+    label: 'Onboarding Dashboard',
+    icon: LayoutDashboard,
+    subRole: ['sales_person', 'sales_manager', 'onboarding_ops', 'field_inspector', 'legal_compliance', 'regional_manager', 'dealer_admin']
+  },
   { 
     href: '/dealer-leads', 
     label: 'Dealer Leads', 
@@ -65,3 +71,4 @@ export const dealerOnboardingNavigationLinks: { href: string; label: string; ico
     subRole: ['dealer_admin']
   },
 ];
+
