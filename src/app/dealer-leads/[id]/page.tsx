@@ -6,27 +6,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ProgressTracker from "@/components/progress-tracker";
 import { dealerLeads, dealerOnboardingStatuses } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Send } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText, Send, Upload } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getSession } from "@/lib/session";
+import { Badge } from "@/components/ui/badge";
 
 export default async function DealerLeadDetailPage({ params }: { params: { id: string } }) {
     const lead = dealerLeads.find(l => l.id === params.id);
+    const session = await getSession();
+    const userSubRole = session?.userSubRole;
 
     if (!lead) {
         notFound();
     }
     
-    // In a real app, this would be based on the user's role
-    const canValidateLead = lead.status === 'Lead Created';
-    const canApproveLimit = lead.status === 'Site Visit Done';
-    const canActivateDealer = lead.status === 'Business Limit Approved';
+    // Determine which action is available based on user role and lead status
+    const canValidateLead = userSubRole === 'sales_manager' && lead.status === 'Lead Created';
+    const canManageDocs = (userSubRole === 'sales_person' || userSubRole === 'onboarding_ops') && lead.status === 'Lead Verified';
+    const canVerifyDocs = (userSubRole === 'onboarding_ops' || userSubRole === 'legal_compliance') && lead.status === 'Documents Collected';
+    const canDoSiteVisit = userSubRole === 'field_inspector' && lead.status === 'Documents Verified';
+    const canApproveLimit = (userSubRole === 'regional_manager' || userSubRole === 'legal_compliance') && lead.status === 'Site Visit Done';
+    const canActivateDealer = userSubRole === 'dealer_admin' && lead.status === 'Business Limit Approved';
 
     const getActionTitle = () => {
         if (canValidateLead) return "Validate Lead";
+        if (canManageDocs) return "Collect Documents";
+        if (canVerifyDocs) return "Verify Documents";
+        if (canDoSiteVisit) return "Perform Site Visit";
         if (canApproveLimit) return "Approve Business Limit";
         if (canActivateDealer) return "Activate Dealer";
-        return "Actions";
+        return "Lead Details";
     }
 
     return (
@@ -54,15 +64,36 @@ export default async function DealerLeadDetailPage({ params }: { params: { id: s
                     <Card>
                         <CardHeader>
                             <CardTitle>{getActionTitle()}</CardTitle>
-                            <CardDescription>Review the details and take the next step.</CardDescription>
+                            <CardDescription>Perform the required action for this stage of onboarding.</CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground">Action form will go here based on role and status.</p>
-                        </CardContent>
-                        <CardContent>
-                            {canValidateLead && <Button><Check className="mr-2 h-4 w-4" />Validate Lead</Button>}
-                            {canApproveLimit && <Button><Send className="mr-2 h-4 w-4" />Send for Approval</Button>}
-                            {canActivateDealer && <Button><Check className="mr-2 h-4 w-4" />Finalize Activation</Button>}
+                        <CardContent className="space-y-4">
+                           {lead.documents && lead.documents.length > 0 && (
+                                <div>
+                                    <h4 className="text-sm font-medium mb-2">Uploaded Documents</h4>
+                                    <div className="space-y-2">
+                                        {lead.documents.map((doc, index) => (
+                                            <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-md">
+                                                <div className="flex items-center gap-3">
+                                                    <FileText className="h-5 w-5 text-muted-foreground"/>
+                                                    <span className="font-medium text-sm">{doc.name}</span>
+                                                </div>
+                                                <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/>Download</Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                             {canValidateLead && <Button><Check className="mr-2 h-4 w-4" />Validate & Move to Next Step</Button>}
+                             {canManageDocs && <Button><Upload className="mr-2 h-4 w-4" />Upload Documents</Button>}
+                             {canVerifyDocs && <Button><Check className="mr-2 h-4 w-4" />Mark Documents as Verified</Button>}
+                             {canDoSiteVisit && <Button><Send className="mr-2 h-4 w-4" />Submit Site Visit Report</Button>}
+                             {canApproveLimit && <Button><Check className="mr-2 h-4 w-4" />Approve Limit & Send for Activation</Button>}
+                             {canActivateDealer && <Button><Check className="mr-2 h-4 w-4" />Generate Code & Activate Dealer</Button>}
+
+                             {!canValidateLead && !canManageDocs && !canVerifyDocs && !canDoSiteVisit && !canApproveLimit && !canActivateDealer && (
+                                 <p className="text-sm text-muted-foreground">No actions available for you at this stage.</p>
+                             )}
                         </CardContent>
                     </Card>
                 </div>
@@ -86,7 +117,7 @@ export default async function DealerLeadDetailPage({ params }: { params: { id: s
                             </div>
                              <div className="flex justify-between">
                                 <span className="text-muted-foreground">Region</span>
-                                <span className="font-medium">{lead.region}</span>
+                                <span className="font-medium"><Badge variant="secondary">{lead.region}</Badge></span>
                             </div>
                              <div className="flex justify-between">
                                 <span className="text-muted-foreground">Created By</span>

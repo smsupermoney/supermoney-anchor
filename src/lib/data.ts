@@ -192,6 +192,10 @@ export const dealerLeads: DealerLead[] = [
         status: 'Documents Verified',
         createdBy: 'sales_person_2',
         createdAt: '2024-07-18',
+        documents: [
+            { name: 'GST Certificate', url: '#' },
+            { name: 'PAN Card', url: '#' },
+        ],
     },
     {
         id: 'DL003',
@@ -203,6 +207,15 @@ export const dealerLeads: DealerLead[] = [
         status: 'Site Visit Done',
         createdBy: 'sales_person_3',
         createdAt: '2024-07-15',
+        documents: [
+            { name: 'GST Certificate', url: '#' },
+            { name: 'PAN Card', url: '#' },
+            { name: 'Shop License', url: '#' },
+        ],
+        siteVisitReport: {
+            notes: 'Shop is in a prime location with good footfall. Owner is cooperative.',
+            images: ['/placeholder.png', '/placeholder.png']
+        }
     },
     {
         id: 'DL004',
@@ -241,6 +254,10 @@ export const dealerLeads: DealerLead[] = [
         status: 'Documents Collected',
         createdBy: 'sales_person_2',
         createdAt: '2024-07-21',
+        documents: [
+            { name: 'GST Certificate', url: '#' },
+            { name: 'Shop License (Pending)', url: '#' },
+        ],
     },
     {
         id: 'DL007',
@@ -249,7 +266,7 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Mobile Retail',
         location: 'Kolkata, WB',
         region: 'East',
-        status: 'Site Visit Done',
+        status: 'Lead Verified',
         createdBy: 'sales_person_3',
         createdAt: '2024-07-19',
     }
