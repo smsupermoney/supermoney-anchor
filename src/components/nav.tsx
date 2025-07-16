@@ -25,6 +25,7 @@ export const adminNavigationLinks = [
   { href: '/add-dealer-limit', label: 'Add Dealer Limit', icon: Link2 },
   { href: '/add-invoice', label: 'Add Invoice', icon: PlusCircle },
   { href: '/add-anchor', label: 'Add Anchor', icon: UserPlus },
+  { href: '/add-users', label: 'Add Users', icon: UserPlus },
   { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/retailers', label: 'View Dealers', icon: Users },
