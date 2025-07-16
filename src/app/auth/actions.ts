@@ -3,7 +3,7 @@
 
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { getUserByEmail } from '@/lib/data';
+import { getUserByEmail, clearUserAuthToken } from '@/lib/data';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/lib/session';
 import { cookies } from 'next/headers';
@@ -40,6 +40,7 @@ export async function authenticate(
     session.roleType = user.roleType;
     session.emailAddress = user.emailAddress;
     session.externalId = user.externalId;
+    session.userSubRole = user.userSubRole;
     await session.save();
 
     userRole = user.roleType;
@@ -61,6 +62,11 @@ export async function authenticate(
 
 export async function logout() {
   const session = await getIronSession<User>(cookies(), sessionOptions);
+  
+  if (session.emailAddress) {
+      await clearUserAuthToken(session.emailAddress);
+  }
+  
   session.destroy();
   redirect('/');
 }

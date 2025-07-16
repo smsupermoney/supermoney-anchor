@@ -1,7 +1,7 @@
 
 import type { Lead, LeadStatus, User } from '@/types';
 import { db } from './firebase';
-import { collection, getDocs, query, where, documentId } from 'firebase/firestore';
+import { collection, getDocs, query, where, documentId, updateDoc, doc } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // --- API FUNCTIONS ---
@@ -131,6 +131,17 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   
   const userDoc = querySnapshot.docs[0];
   return { id: userDoc.id, ...userDoc.data() } as User;
+}
+
+export async function clearUserAuthToken(email: string): Promise<void> {
+  const user = await getUserByEmail(email);
+  if (user) {
+    const userRef = doc(db, 'users', user.id);
+    await updateDoc(userRef, {
+      authToken: '',
+      expiryTime: 0,
+    });
+  }
 }
 
 
