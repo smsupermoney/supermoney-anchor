@@ -63,7 +63,8 @@ export type UserSubRole =
   | "Business Lead"
   | "Regional Manager"
   | "Auditor"
-  | "Super Admin";
+  | "Super Admin"
+  | "Not Subscribed";
 
 export type User = {
     id: string;

@@ -2,13 +2,12 @@
 "use client";
 
 import { usePathname } from 'next/navigation';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger, SidebarSeparator } from '@/components/ui/sidebar';
 import { adminNavigationLinks, enterpriseAnchorNavigationLinks } from './nav';
 import Link from 'next/link';
-import { LogOut } from 'lucide-react';
+import { Crown, LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from './ui/separator';
 import SupermoneyLogo from './supermoney-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
@@ -51,7 +50,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <div className="p-2 flex justify-center">
             <SupermoneyLogo className="group-data-[collapsible=icon]:hidden" />
           </div>
-          <Separator className="my-2" />
+          <SidebarSeparator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
             <Avatar className="h-9 w-9">
               <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
@@ -81,7 +80,22 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-          </SidebarMenu>
+            </SidebarMenu>
+            
+            {user?.roleType === 'Anchor' && user?.userSubRole === 'Not Subscribed' && (
+              <>
+                <SidebarSeparator className="my-2" />
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip={{ children: 'Subscribe' }}>
+                            <Crown />
+                            <span>Subscribe</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+              </>
+            )}
+
         </SidebarContent>
         <SidebarFooter>
           <form action={logout}>
