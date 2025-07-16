@@ -54,6 +54,17 @@ export type Lead = {
   createdAt: string;
 };
 
+export type UserSubRole = 
+  | "Manager" 
+  | "Viewer"
+  | "Field Sales"
+  | "AP/AR Approver"
+  | "Executive"
+  | "Business Lead"
+  | "Regional Manager"
+  | "Auditor"
+  | "Super Admin";
+
 export type User = {
     id: string;
     externalId: string;
@@ -62,9 +73,11 @@ export type User = {
     phoneNumber: string;
     emailAddress: string;
     roleType: "Anchor" | "Dealer" | "Admin";
-    userSubRole?: "Manager" | "Viewer"; // Added sub-role
+    userSubRole?: UserSubRole;
     lastLoginTime: string;
     lastLoginIp: string;
+    authToken?: string;
+    expiryTime?: number;
 };
 
 export type DealerProgramLimit = {

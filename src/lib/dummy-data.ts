@@ -1,3 +1,4 @@
+
 /**
  * ==================================================================
  * HOW TO IMPORT THIS DATA INTO FIRESTORE
@@ -36,30 +37,109 @@ export const dummyUsers = [
     phoneNumber: '9876543210',
     emailAddress: 'anchor@supermoney.in',
     roleType: 'Anchor',
-    lastLoginTime: '2024-07-22T10:00:00Z',
-    lastLoginIp: '192.168.1.1',
+    userSubRole: 'Field Sales',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
   },
   {
     id: 'USR002',
+    externalId: 'ANC001',
+    userName: 'Stark Industries',
+    password: 'password',
+    phoneNumber: '9876543210',
+    emailAddress: 'sunita.sharma@example.com',
+    roleType: 'Anchor',
+    userSubRole: 'AP/AR Approver',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
+  },
+  {
+    id: 'USR003',
+    externalId: 'ANC001',
+    userName: 'Stark Industries',
+    password: 'password',
+    phoneNumber: '9876543210',
+    emailAddress: 'prakash.rao@example.com',
+    roleType: 'Anchor',
+    userSubRole: 'Executive',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
+  },
+  {
+    id: 'USR004',
+    externalId: 'ANC001',
+    userName: 'Stark Industries',
+    password: 'password',
+    phoneNumber: '9876543210',
+    emailAddress: 'ankit.desai@example.com',
+    roleType: 'Anchor',
+    userSubRole: 'Business Lead',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
+  },
+  {
+    id: 'USR005',
+    externalId: 'ANC001',
+    userName: 'Stark Industries',
+    password: 'password',
+    phoneNumber: '9876543210',
+    emailAddress: 'priya.singh@example.com',
+    roleType: 'Anchor',
+    userSubRole: 'Regional Manager',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
+  },
+  {
+    id: 'USR006',
+    externalId: 'ANC001',
+    userName: 'Stark Industries',
+    password: 'password',
+    phoneNumber: '9876543210',
+    emailAddress: 'vijay.sharma@example.com',
+    roleType: 'Anchor',
+    userSubRole: 'Auditor',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
+  },
+  {
+    id: 'USR007',
     externalId: 'ANC002',
     userName: 'Wayne Enterprises',
     password: 'password',
     phoneNumber: '9876543211',
     emailAddress: 'wayne@example.com',
     roleType: 'Anchor',
-    lastLoginTime: '2024-07-22T11:00:00Z',
-    lastLoginIp: '192.168.1.2',
+    userSubRole: 'Executive',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
   },
    {
-    id: 'USR003',
+    id: 'USR008',
     externalId: 'ADMIN001',
     userName: 'Supermoney Admin',
     password: 'password',
     phoneNumber: '9999999999',
     emailAddress: 'admin@supermoney.in',
     roleType: 'Admin',
-    lastLoginTime: '2024-07-22T12:00:00Z',
-    lastLoginIp: '127.0.0.1',
+    userSubRole: 'Super Admin',
+    lastLoginTime: '',
+    lastLoginIp: '',
+    authToken: '',
+    expiryTime: 0
   }
 ];
 
@@ -222,3 +302,5 @@ export const dummyInvoices = [
     overdueAmount: 0,
   },
 ];
+
+    
