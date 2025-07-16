@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +15,9 @@ import { Button } from "@/components/ui/button";
 import { UploadCloud, File as FileIcon, X, Loader2, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { getDealers } from "@/lib/data";
-import type { Dealer } from "@/types";
 import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
 import { Card, CardContent } from "./ui/card";
-import { Separator } from "./ui/separator";
+import { sendInvoiceEmail } from "@/app/add-invoice/email-actions";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
@@ -36,37 +32,24 @@ type UploadedFile = {
   error?: string;
 };
 
-export default function UploadInvoiceDialog({ children, defaultLender }: UploadInvoiceDialogProps) {
+export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogProps) {
   const [open, setOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedDealerId, setSelectedDealerId] = useState("");
-  const [dealers, setDealers] = useState<Dealer[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  
-  useEffect(() => {
-    async function fetchDealers() {
-      if (open) {
-        const dealersData = await getDealers();
-        setDealers(dealersData);
-      }
-    }
-    fetchDealers();
-  }, [open]);
-
-  const selectedDealer: Dealer | undefined = useMemo(() => dealers.find(d => d.id === selectedDealerId), [selectedDealerId, dealers]);
   
   const resetState = () => {
     setUploadedFiles([]);
     setIsDragging(false);
-    setSelectedDealerId("");
+    setIsSubmitting(false);
   };
 
   useEffect(() => {
     if (open) {
       resetState();
     }
-  }, [open, defaultLender]);
+  }, [open]);
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -141,42 +124,42 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (uploadedFiles.length === 0) {
       toast({ variant: "destructive", title: "No Files Uploaded", description: "Please upload at least one invoice document." });
       return;
     }
 
-    const emailTo = "nitin.chorge@supermoney.in";
-    const emailSubject = "New Invoice Submission";
-    let emailBody = "Hello,\n\nPlease find the details of the newly submitted invoice(s) below:\n\n";
+    if (uploadedFiles.some(f => f.isLoading)) {
+      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the AI to finish reading all documents." });
+      return;
+    }
 
-    uploadedFiles.forEach((upFile, index) => {
-      emailBody += `--- Document ${index + 1}: ${upFile.file.name} ---\n`;
-      if (upFile.extractedData) {
-        emailBody += `Dealer Name: ${upFile.extractedData.dealerName || 'Not Detected'}\n`;
-        emailBody += `Document Type: ${upFile.extractedData.documentType || 'Not Detected'}\n`;
-        emailBody += `Amount: ${formatCurrency(upFile.extractedData.amount)}\n`;
-        emailBody += `Due Date: ${upFile.extractedData.dueDate || 'Not Detected'}\n`;
-      } else if (upFile.error) {
-        emailBody += `Error: ${upFile.error}\n`;
-      } else {
-        emailBody += `Data could not be extracted.\n`;
-      }
-      emailBody += "\n";
-    });
+    setIsSubmitting(true);
 
-    emailBody += "Thank you.";
+    const emailData = uploadedFiles.map(upFile => ({
+        fileName: upFile.file.name,
+        extractedData: upFile.extractedData,
+        error: upFile.error,
+    }));
+
+    const result = await sendInvoiceEmail(emailData);
+
+    if (result.error) {
+        toast({
+            variant: "destructive",
+            title: "Failed to Send Email",
+            description: result.error,
+        });
+    } else {
+        toast({
+            title: "Invoices Submitted",
+            description: "The invoice details have been sent successfully.",
+        });
+        setOpen(false);
+    }
     
-    // Note: This does not attach the files. It only sends the extracted text data.
-    const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    window.location.href = mailtoLink;
-    
-    toast({
-      title: "Redirecting to Email Client",
-      description: `Your email client has been opened to send the invoice details.`,
-    });
-    setOpen(false);
+    setIsSubmitting(false);
   };
 
   const formatCurrency = (amount?: number) => {
@@ -270,9 +253,9 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={uploadedFiles.some(f => f.isLoading)}>
-            {uploadedFiles.some(f => f.isLoading) ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4"/>}
-            Submit Invoice
+          <Button onClick={handleSubmit} disabled={isSubmitting || uploadedFiles.some(f => f.isLoading)}>
+            {isSubmitting || uploadedFiles.some(f => f.isLoading) ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4"/>}
+            {isSubmitting ? 'Submitting...' : 'Submit Invoice'}
           </Button>
         </DialogFooter>
       </DialogContent>

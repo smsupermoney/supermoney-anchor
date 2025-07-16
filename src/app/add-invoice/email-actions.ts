@@ -1,0 +1,91 @@
+
+"use server";
+
+import nodemailer from "nodemailer";
+import { z } from "zod";
+import { type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
+
+type EmailData = {
+    fileName: string;
+    extractedData?: ExtractInvoiceDataOutput;
+    error?: string;
+};
+
+type ActionResult = {
+    message?: string;
+    error?: string;
+};
+
+// Basic validation for environment variables
+const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
+
+const formatCurrency = (amount?: number) => {
+    if (typeof amount !== 'number') return "N/A";
+    return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
+};
+
+function generateEmailBody(data: EmailData[]): string {
+    let html = `
+        <h1>New Invoice Submission</h1>
+        <p>Please find the details of the newly submitted invoice(s) below:</p>
+        <hr />
+    `;
+
+    data.forEach((item, index) => {
+        html += `
+            <h2>Document ${index + 1}: ${item.fileName}</h2>
+            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        `;
+        if (item.extractedData) {
+            html += `
+                <tr><td style="width: 30%;"><strong>Dealer Name</strong></td><td>${item.extractedData.dealerName || 'Not Detected'}</td></tr>
+                <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
+                <tr><td><strong>Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
+                <tr><td><strong>Due Date</strong></td><td>${item.extractedData.dueDate || 'Not Detected'}</td></tr>
+            `;
+        } else if (item.error) {
+            html += `<tr><td style="width: 30%;"><strong>Error</strong></td><td style="color: red;">${item.error}</td></tr>`;
+        } else {
+            html += `<tr><td style="width: 30%;"><strong>Status</strong></td><td>Data could not be extracted.</td></tr>`;
+        }
+        html += `</table><br />`;
+    });
+
+    html += "<p>Thank you.</p>";
+    return html;
+}
+
+export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult> {
+    if (!smtpConfigured) {
+        console.error("SMTP environment variables are not configured.");
+        return { error: "Email service is not configured on the server. Please contact the administrator." };
+    }
+
+    const mailOptions = {
+        from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+        to: "nitin.chorge@supermoney.in",
+        subject: "New Invoice Submission",
+        html: generateEmailBody(data),
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        return { message: "Email sent successfully." };
+    } catch (error) {
+        console.error("Failed to send email:", error);
+        if (error instanceof Error) {
+            return { error: `Failed to send email: ${error.message}` };
+        }
+        return { error: "An unknown error occurred while sending the email." };
+    }
+}
