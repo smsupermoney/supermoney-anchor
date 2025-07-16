@@ -71,7 +71,6 @@ export type UserSubRole =
   | "onboarding_ops"
   | "field_inspector"
   | "legal_compliance"
-  | "regional_manager" 
   | "dealer_admin";
 
 
@@ -110,6 +109,12 @@ export type DealerOnboardingStatus =
   | 'Dealer Activated'
   | 'Onboarding Dropped';
 
+export type Document = {
+    name: string;
+    url: string;
+    status?: 'Pending' | 'Verified' | 'Rejected';
+};
+
 export type DealerLead = {
     id: string;
     dealerName: string;
@@ -120,8 +125,7 @@ export type DealerLead = {
     status: DealerOnboardingStatus;
     createdBy: string; // Typically a sales_person ID
     createdAt: string;
-    // Fields for other stages can be added here
-    documents?: { name: string; url: string }[];
+    documents?: Document[];
     siteVisitReport?: { notes: string; images: string[] };
     businessLimit?: number;
     paymentTerms?: string;

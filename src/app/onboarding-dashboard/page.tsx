@@ -10,7 +10,8 @@ import StatusBadge from "@/components/status-badge";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { DealerLead, UserSubRole } from "@/types";
-import { ArrowRight, Building, CheckSquare, HandCoins, MapPin, UserCheck, Users } from "lucide-react";
+import { ArrowRight, Building, CheckSquare, HandCoins, MapPin, UserCheck, Users, PlusCircle, BadgePercent } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const getActionableLeads = (leads: DealerLead[], userSubRole: UserSubRole | undefined): DealerLead[] => {
   if (!userSubRole) return [];
@@ -78,9 +79,20 @@ export default async function OnboardingDashboardPage() {
   const actionableLeads = getActionableLeads(dealerLeads, userSubRole);
   const stats = getRoleBasedStats(dealerLeads, userSubRole);
 
+  const canCreateLead = userSubRole === 'sales_person';
+
   return (
     <>
-      <PageHeader title="Onboarding Dashboard" />
+      <PageHeader title="Onboarding Dashboard">
+        {canCreateLead && (
+            <Button asChild>
+                <Link href="/add-lead">
+                    <PlusCircle className="mr-2 h-4 w-4"/>
+                    Add Lead
+                </Link>
+            </Button>
+        )}
+      </PageHeader>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-4">
             {stats.map((stat, index) => (
             <Card key={index}>
@@ -113,9 +125,9 @@ export default async function OnboardingDashboardPage() {
               <TableBody>
                 {actionableLeads.length > 0 ? (
                     actionableLeads.map((lead) => (
-                    <TableRow key={lead.id} className="cursor-pointer">
+                    <TableRow key={lead.id} className="cursor-pointer hover:bg-muted">
                         <TableCell className="font-medium">
-                        <Link href={`/dealer-leads/${lead.id}`} className="text-primary hover:underline">
+                        <Link href={`/dealer-leads/${lead.id}`} className="text-primary hover:underline block">
                             {lead.dealerName}
                         </Link>
                         </TableCell>

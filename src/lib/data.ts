@@ -193,8 +193,8 @@ export const dealerLeads: DealerLead[] = [
         createdBy: 'sales_person_2',
         createdAt: '2024-07-18',
         documents: [
-            { name: 'GST Certificate', url: '#' },
-            { name: 'PAN Card', url: '#' },
+            { name: 'GST Certificate', url: '#', status: 'Verified' },
+            { name: 'PAN Card', url: '#', status: 'Verified' },
         ],
     },
     {
@@ -208,9 +208,9 @@ export const dealerLeads: DealerLead[] = [
         createdBy: 'sales_person_3',
         createdAt: '2024-07-15',
         documents: [
-            { name: 'GST Certificate', url: '#' },
-            { name: 'PAN Card', url: '#' },
-            { name: 'Shop License', url: '#' },
+            { name: 'GST Certificate', url: '#', status: 'Verified' },
+            { name: 'PAN Card', url: '#', status: 'Verified' },
+            { name: 'Shop License', url: '#', status: 'Verified' },
         ],
         siteVisitReport: {
             notes: 'Shop is in a prime location with good footfall. Owner is cooperative.',
@@ -255,8 +255,8 @@ export const dealerLeads: DealerLead[] = [
         createdBy: 'sales_person_2',
         createdAt: '2024-07-21',
         documents: [
-            { name: 'GST Certificate', url: '#' },
-            { name: 'Shop License (Pending)', url: '#' },
+            { name: 'GST Certificate', url: '#', status: 'Pending' },
+            { name: 'Shop License (Pending)', url: '#', status: 'Pending' },
         ],
     },
     {
