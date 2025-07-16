@@ -41,7 +41,6 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedDealerId, setSelectedDealerId] = useState("");
-  const [selectedLender, setSelectedLender] = useState("");
   const [dealers, setDealers] = useState<Dealer[]>([]);
   const { toast } = useToast();
   
@@ -57,16 +56,10 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
 
   const selectedDealer: Dealer | undefined = useMemo(() => dealers.find(d => d.id === selectedDealerId), [selectedDealerId, dealers]);
   
-  const availableLenders = useMemo(() => {
-    if (!selectedDealer) return [];
-    return selectedDealer.lenders;
-  }, [selectedDealer]);
-
   const resetState = () => {
     setUploadedFiles([]);
     setIsDragging(false);
     setSelectedDealerId("");
-    setSelectedLender(defaultLender || "");
   };
 
   useEffect(() => {
@@ -74,18 +67,6 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
       resetState();
     }
   }, [open, defaultLender]);
-
-  useEffect(() => {
-    if (availableLenders.length === 1) {
-      setSelectedLender(availableLenders[0]);
-    } else {
-        if(defaultLender && availableLenders.includes(defaultLender)){
-            setSelectedLender(defaultLender);
-        } else if(!availableLenders.includes(selectedLender)) {
-            setSelectedLender("");
-        }
-    }
-  }, [availableLenders, selectedDealerId, defaultLender, selectedLender]);
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -165,11 +146,35 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
       toast({ variant: "destructive", title: "No Files Uploaded", description: "Please upload at least one invoice document." });
       return;
     }
-    // Handle submission logic here
-    console.log("Submitting files for dealer:", selectedDealer?.name, "with lender:", selectedLender, uploadedFiles);
+
+    const emailTo = "nitin.chorge@supermoney.in";
+    const emailSubject = "New Invoice Submission";
+    let emailBody = "Hello,\n\nPlease find the details of the newly submitted invoice(s) below:\n\n";
+
+    uploadedFiles.forEach((upFile, index) => {
+      emailBody += `--- Document ${index + 1}: ${upFile.file.name} ---\n`;
+      if (upFile.extractedData) {
+        emailBody += `Dealer Name: ${upFile.extractedData.dealerName || 'Not Detected'}\n`;
+        emailBody += `Document Type: ${upFile.extractedData.documentType || 'Not Detected'}\n`;
+        emailBody += `Amount: ${formatCurrency(upFile.extractedData.amount)}\n`;
+        emailBody += `Due Date: ${upFile.extractedData.dueDate || 'Not Detected'}\n`;
+      } else if (upFile.error) {
+        emailBody += `Error: ${upFile.error}\n`;
+      } else {
+        emailBody += `Data could not be extracted.\n`;
+      }
+      emailBody += "\n";
+    });
+
+    emailBody += "Thank you.";
+    
+    // Note: This does not attach the files. It only sends the extracted text data.
+    const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    window.location.href = mailtoLink;
+    
     toast({
-      title: "Invoice Submitted",
-      description: `${uploadedFiles.length} document(s) for ${selectedDealer?.name || 'the detected dealer'} have been submitted.`,
+      title: "Redirecting to Email Client",
+      description: `Your email client has been opened to send the invoice details.`,
     });
     setOpen(false);
   };
@@ -257,21 +262,6 @@ export default function UploadInvoiceDialog({ children, defaultLender }: UploadI
                     </CardContent>
                   </Card>
                 ))}
-              </div>
-              <Separator />
-               <div className="space-y-2">
-                <Label htmlFor="lender-select">Choose Lender</Label>
-                <Select value={selectedLender} onValueChange={setSelectedLender}>
-                  <SelectTrigger id="lender-select">
-                    <SelectValue placeholder="Select a lender..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {/* In a real app, you would get available lenders based on the detected dealer */}
-                    <SelectItem value="Supermoney Finance">Supermoney Finance</SelectItem>
-                    <SelectItem value="CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED">Cholamandalam</SelectItem>
-                    <SelectItem value="ADITYA BIRLA CAPITAL LTD">Aditya Birla Capital</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           )}
