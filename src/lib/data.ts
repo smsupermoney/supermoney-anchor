@@ -1,5 +1,5 @@
 
-import type { Lead, LeadStatus, User } from '@/types';
+import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus } from '@/types';
 import { db } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
@@ -158,3 +158,77 @@ export const leads: Lead[] = [
 ];
 
 export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];
+
+// --- DEALER ONBOARDING STATIC DATA ---
+export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
+  'Lead Created',
+  'Lead Verified',
+  'Documents Collected',
+  'Documents Verified',
+  'Site Visit Done',
+  'Business Limit Approved',
+  'Dealer Activated'
+];
+
+export const dealerLeads: DealerLead[] = [
+    {
+        id: 'DL001',
+        dealerName: 'Global Electronics',
+        contactPerson: 'Ravi Kumar',
+        businessType: 'Electronics Retail',
+        location: 'Mumbai, MH',
+        region: 'West',
+        status: 'Lead Created',
+        createdBy: 'sales_person_1',
+        createdAt: '2024-07-20',
+    },
+    {
+        id: 'DL002',
+        dealerName: 'Quick Supplies',
+        contactPerson: 'Priya Sharma',
+        businessType: 'General Store',
+        location: 'Delhi, DL',
+        region: 'North',
+        status: 'Documents Verified',
+        createdBy: 'sales_person_2',
+        createdAt: '2024-07-18',
+    },
+    {
+        id: 'DL003',
+        dealerName: 'Metro Appliances',
+        contactPerson: 'Anil Mehta',
+        businessType: 'Home Appliances',
+        location: 'Bengaluru, KA',
+        region: 'South',
+        status: 'Site Visit Done',
+        createdBy: 'sales_person_3',
+        createdAt: '2024-07-15',
+    },
+    {
+        id: 'DL004',
+        dealerName: 'Super Farm Co.',
+        contactPerson: 'Sunita Rao',
+        businessType: 'Agri Supplies',
+        location: 'Pune, MH',
+        region: 'West',
+        status: 'Business Limit Approved',
+        businessLimit: 500000,
+        paymentTerms: 'Net 30',
+        createdBy: 'sales_person_1',
+        createdAt: '2024-07-12',
+    },
+    {
+        id: 'DL005',
+        dealerName: 'City Hardware',
+        contactPerson: 'Vijay Singh',
+        businessType: 'Hardware Store',
+        location: 'Chennai, TN',
+        region: 'South',
+        status: 'Dealer Activated',
+        businessLimit: 250000,
+        paymentTerms: 'Net 45',
+        dealerCode: 'DEALER-CH-00123',
+        createdBy: 'sales_person_4',
+        createdAt: '2024-07-10',
+    },
+];

@@ -64,7 +64,16 @@ export type UserSubRole =
   | "Regional Manager"
   | "Auditor"
   | "Super Admin"
-  | "Not Subscribed";
+  | "Not Subscribed"
+  // Dealer Onboarding Roles
+  | "sales_person"
+  | "sales_manager"
+  | "onboarding_ops"
+  | "field_inspector"
+  | "legal_compliance"
+  | "regional_manager" 
+  | "dealer_admin";
+
 
 export type User = {
     id: string;
@@ -87,4 +96,34 @@ export type DealerProgramLimit = {
   programId: string;
   creditLimit: number;
   usedLimit: number;
+};
+
+// --- Dealer Onboarding Module Types ---
+
+export type DealerOnboardingStatus = 
+  | 'Lead Created'
+  | 'Lead Verified'
+  | 'Documents Collected'
+  | 'Documents Verified'
+  | 'Site Visit Done'
+  | 'Business Limit Approved'
+  | 'Dealer Activated'
+  | 'Onboarding Dropped';
+
+export type DealerLead = {
+    id: string;
+    dealerName: string;
+    contactPerson: string;
+    businessType: string;
+    location: string;
+    region: string;
+    status: DealerOnboardingStatus;
+    createdBy: string; // Typically a sales_person ID
+    createdAt: string;
+    // Fields for other stages can be added here
+    documents?: { name: string; url: string }[];
+    siteVisitReport?: { notes: string; images: string[] };
+    businessLimit?: number;
+    paymentTerms?: string;
+    dealerCode?: string;
 };

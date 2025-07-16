@@ -3,7 +3,7 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger, SidebarSeparator } from '@/components/ui/sidebar';
-import { adminNavigationLinks, enterpriseAnchorNavigationLinks } from './nav';
+import { adminNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from './nav';
 import Link from 'next/link';
 import { Crown, LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
@@ -36,11 +36,21 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
      return <>{children}</>;
   }
 
-  const navigationLinks = user?.roleType === 'Admin' 
-    ? adminNavigationLinks 
-    : enterpriseAnchorNavigationLinks.filter(link => 
-        !link.subRole || (user.userSubRole && link.subRole.includes(user.userSubRole))
-      );
+  const getVisibleLinks = () => {
+    if (user.roleType === 'Admin') {
+      return adminNavigationLinks;
+    }
+    // For Anchor role, filter based on subRole if it exists
+    return enterpriseAnchorNavigationLinks.filter(link => 
+      !link.subRole || (user.userSubRole && link.subRole.includes(user.userSubRole))
+    );
+  };
+  
+  const navigationLinks = getVisibleLinks();
+
+  const subscribedOnboardingLinks = dealerOnboardingNavigationLinks.filter(link => 
+    user.userSubRole && link.subRole.includes(user.userSubRole)
+  );
 
 
   return (
@@ -82,19 +92,32 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             ))}
             </SidebarMenu>
             
-            {user?.roleType === 'Anchor' && user?.userSubRole === 'Not Subscribed' && (
-              <>
-                <SidebarSeparator className="my-2" />
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip={{ children: 'Subscribe' }}>
-                            <Crown />
-                            <span>Subscribe</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-              </>
-            )}
+            <SidebarSeparator className="my-2" />
+            
+            <SidebarMenu>
+              {user?.userSubRole === 'Not Subscribed' && (
+                <SidebarMenuItem>
+                    <SidebarMenuButton tooltip={{ children: 'Subscribe' }}>
+                        <Crown />
+                        <span>Subscribe to Dealer Onboarding</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+              {user?.userSubRole && user.userSubRole !== 'Not Subscribed' && subscribedOnboardingLinks.map((link) => (
+                <SidebarMenuItem key={link.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(link.href)}
+                    tooltip={{ children: link.label }}
+                  >
+                    <Link href={link.href}>
+                      <link.icon />
+                      <span>{link.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
 
         </SidebarContent>
         <SidebarFooter>

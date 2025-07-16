@@ -1,8 +1,9 @@
+
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { InvoiceStatus, LeadStatus, Retailer } from "@/types";
+import type { InvoiceStatus, LeadStatus, Retailer, DealerOnboardingStatus } from "@/types";
 
-type Status = Retailer['status'] | InvoiceStatus | LeadStatus;
+type Status = Retailer['status'] | InvoiceStatus | LeadStatus | DealerOnboardingStatus;
 
 type StatusBadgeProps = {
   status: Status;
@@ -30,6 +31,15 @@ const statusColors: Record<Status, string> = {
   'Operations': 'bg-teal-100 text-teal-800 border-teal-200',
   'PSD Completed': 'bg-green-100 text-green-800 border-green-200',
   'Dropped': 'bg-red-100 text-red-800 border-red-200',
+  
+  // Dealer Onboarding Status
+  'Lead Verified': 'bg-purple-100 text-purple-800 border-purple-200',
+  'Documents Collected': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'Documents Verified': 'bg-sky-100 text-sky-800 border-sky-200',
+  'Site Visit Done': 'bg-teal-100 text-teal-800 border-teal-200',
+  'Business Limit Approved': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  'Dealer Activated': 'bg-green-100 text-green-800 border-green-200',
+  'Onboarding Dropped': 'bg-red-100 text-red-800 border-red-200',
 };
 
 export default function StatusBadge({ status, className }: StatusBadgeProps) {
