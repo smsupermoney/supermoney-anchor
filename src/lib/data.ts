@@ -171,6 +171,7 @@ export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
 ];
 
 export const dealerLeads: DealerLead[] = [
+    // For sales_manager
     {
         id: 'DL001',
         dealerName: 'Global Electronics',
@@ -178,10 +179,22 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Electronics Retail',
         location: 'Mumbai, MH',
         region: 'West',
-        status: 'Lead Created', // Action for: sales_manager
+        status: 'Lead Created',
         createdBy: 'sales_person_1',
         createdAt: '2024-07-20',
     },
+    {
+        id: 'DL008',
+        dealerName: 'Pioneer Goods',
+        contactPerson: 'Priya Singh',
+        businessType: 'General Store',
+        location: 'Jaipur, RJ',
+        region: 'North',
+        status: 'Lead Created',
+        createdBy: 'sales_person_2',
+        createdAt: '2024-07-22',
+    },
+    // For sales_person
     {
         id: 'DL007',
         dealerName: 'Modern Mobiles',
@@ -189,10 +202,11 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Mobile Retail',
         location: 'Kolkata, WB',
         region: 'East',
-        status: 'Lead Verified', // Action for: sales_person
+        status: 'Lead Verified',
         createdBy: 'sales_person_3',
         createdAt: '2024-07-19',
     },
+    // For onboarding_ops & legal_compliance
     {
         id: 'DL006',
         dealerName: 'Fresh Grocers',
@@ -200,7 +214,7 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Grocery Store',
         location: 'Hyderabad, TS',
         region: 'South',
-        status: 'Documents Collected', // Action for: onboarding_ops, legal_compliance
+        status: 'Documents Collected',
         createdBy: 'sales_person_2',
         createdAt: '2024-07-21',
         documents: [
@@ -210,13 +224,29 @@ export const dealerLeads: DealerLead[] = [
         ],
     },
     {
+        id: 'DL009',
+        dealerName: 'Eastern Traders',
+        contactPerson: 'Amit Das',
+        businessType: 'Wholesale',
+        location: 'Bhubaneswar, OD',
+        region: 'East',
+        status: 'Documents Collected',
+        createdBy: 'sales_person_3',
+        createdAt: '2024-07-23',
+        documents: [
+            { name: 'GST Certificate', url: '#', status: 'Pending' },
+            { name: 'Bank Statement', url: '#', status: 'Pending' },
+        ],
+    },
+    // For field_inspector
+    {
         id: 'DL002',
         dealerName: 'Quick Supplies',
         contactPerson: 'Priya Sharma',
         businessType: 'General Store',
         location: 'Delhi, DL',
         region: 'North',
-        status: 'Documents Verified', // Action for: field_inspector
+        status: 'Documents Verified',
         createdBy: 'sales_person_2',
         createdAt: '2024-07-18',
         documents: [
@@ -224,6 +254,7 @@ export const dealerLeads: DealerLead[] = [
             { name: 'PAN Card', url: '#', status: 'Verified' },
         ],
     },
+    // For regional_manager & legal_compliance
     {
         id: 'DL003',
         dealerName: 'Metro Appliances',
@@ -231,7 +262,7 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Home Appliances',
         location: 'Bengaluru, KA',
         region: 'South',
-        status: 'Site Visit Done', // Action for: regional_manager, legal_compliance
+        status: 'Site Visit Done',
         createdBy: 'sales_person_3',
         createdAt: '2024-07-15',
         documents: [
@@ -244,6 +275,7 @@ export const dealerLeads: DealerLead[] = [
             images: ['/placeholder.png', '/placeholder.png']
         }
     },
+    // For dealer_admin
     {
         id: 'DL004',
         dealerName: 'Super Farm Co.',
@@ -251,12 +283,13 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Agri Supplies',
         location: 'Pune, MH',
         region: 'West',
-        status: 'Business Limit Approved', // Action for: dealer_admin
+        status: 'Business Limit Approved',
         businessLimit: 500000,
         paymentTerms: 'Net 30',
         createdBy: 'sales_person_1',
         createdAt: '2024-07-12',
     },
+    // Completed
     {
         id: 'DL005',
         dealerName: 'City Hardware',
@@ -264,7 +297,7 @@ export const dealerLeads: DealerLead[] = [
         businessType: 'Hardware Store',
         location: 'Chennai, TN',
         region: 'South',
-        status: 'Dealer Activated', // Final state, no action
+        status: 'Dealer Activated',
         businessLimit: 250000,
         paymentTerms: 'Net 45',
         dealerCode: 'DEALER-CH-00123',
