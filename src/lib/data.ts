@@ -183,18 +183,7 @@ export const dealerLeads: DealerLead[] = [
         createdBy: 'sales_person_1',
         createdAt: '2024-07-20',
     },
-    {
-        id: 'DL008',
-        dealerName: 'Pioneer Goods',
-        contactPerson: 'Priya Singh',
-        businessType: 'General Store',
-        location: 'Jaipur, RJ',
-        region: 'North',
-        status: 'Lead Created',
-        createdBy: 'sales_person_2',
-        createdAt: '2024-07-22',
-    },
-    // For sales_person
+    // For sales_person / onboarding_ops to collect docs
     {
         id: 'DL007',
         dealerName: 'Modern Mobiles',
@@ -206,7 +195,7 @@ export const dealerLeads: DealerLead[] = [
         createdBy: 'sales_person_3',
         createdAt: '2024-07-19',
     },
-    // For onboarding_ops & legal_compliance
+    // For onboarding_ops & legal_compliance to verify docs
     {
         id: 'DL006',
         dealerName: 'Fresh Grocers',
@@ -223,22 +212,7 @@ export const dealerLeads: DealerLead[] = [
             { name: 'Shop License', url: '#', status: 'Pending' },
         ],
     },
-    {
-        id: 'DL009',
-        dealerName: 'Eastern Traders',
-        contactPerson: 'Amit Das',
-        businessType: 'Wholesale',
-        location: 'Bhubaneswar, OD',
-        region: 'East',
-        status: 'Documents Collected',
-        createdBy: 'sales_person_3',
-        createdAt: '2024-07-23',
-        documents: [
-            { name: 'GST Certificate', url: '#', status: 'Pending' },
-            { name: 'Bank Statement', url: '#', status: 'Pending' },
-        ],
-    },
-    // For field_inspector
+    // For field_inspector to do site visit
     {
         id: 'DL002',
         dealerName: 'Quick Supplies',
@@ -254,7 +228,7 @@ export const dealerLeads: DealerLead[] = [
             { name: 'PAN Card', url: '#', status: 'Verified' },
         ],
     },
-    // For regional_manager & legal_compliance
+    // For regional_manager & legal_compliance to approve limit
     {
         id: 'DL003',
         dealerName: 'Metro Appliances',
@@ -275,7 +249,7 @@ export const dealerLeads: DealerLead[] = [
             images: ['/placeholder.png', '/placeholder.png']
         }
     },
-    // For dealer_admin
+    // For dealer_admin to activate
     {
         id: 'DL004',
         dealerName: 'Super Farm Co.',

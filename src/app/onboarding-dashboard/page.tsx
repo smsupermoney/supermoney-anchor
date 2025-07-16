@@ -17,6 +17,7 @@ const getActionableLeads = (leads: DealerLead[], userSubRole: UserSubRole | unde
   if (!userSubRole) return [];
   switch (userSubRole) {
     case "sales_person":
+      // Sales person can manage docs after lead is verified
       return leads.filter(lead => lead.status === 'Lead Verified');
     case "sales_manager":
       return leads.filter(lead => lead.status === 'Lead Created');
