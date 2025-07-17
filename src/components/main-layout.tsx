@@ -147,19 +147,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               {children}
           </main>
           <footer className="mt-auto border-t bg-background px-4 py-3 text-xs text-muted-foreground">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                  <div className="text-center sm:text-left">
-                      <p className="font-semibold text-foreground">COPYRIGHT © 2025</p>
-                      <p><a href="#" className="text-primary hover:underline">Supermoney (GetClarity Fintech Services Pvt Ltd)</a> All rights reserved.</p>
+              <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                      <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+                      <a href="#" className="text-primary hover:underline">Disclaimer</a>
+                      <a href="#" className="text-primary hover:underline">Terms and Conditions</a>
                   </div>
-                  <div className="flex flex-col items-center sm:items-end gap-2">
-                        <SupermoneyLogo />
-                        <div className="flex items-center gap-4">
-                            <a href="#" className="text-primary hover:underline">Privacy Policy</a>
-                            <a href="#" className="text-primary hover:underline">Disclaimer</a>
-                            <a href="#" className="text-primary hover:underline">Terms and Conditions</a>
-                        </div>
-                  </div>
+                  <SupermoneyLogo />
               </div>
           </footer>
         </div>
