@@ -311,4 +311,53 @@ export const dummyInvoices = [
   },
 ];
 
+// --- SAMPLE DATA FOR EXCEL DOWNLOADS ---
+
+export const samplePrograms = [
+    {
+        id: "PROG_SAMPLE_1",
+        anchorIds: "ANC001,ANC002",
+        lenderName: "Sample Finance Inc.",
+        lenderType: "External",
+    }
+];
+
+export const sampleDealers = [
+    {
+        id: "DLR_SAMPLE_1",
+        anchorId: "ANC001",
+        name: "Sample Dealer Electronics",
+        status: "Active"
+    }
+];
+
+export const sampleDealerLimits = [
+    {
+        id: "DPL_SAMPLE_1",
+        dealerId: "DLR_SAMPLE_1",
+        programId: "PROG_SAMPLE_1",
+        creditLimit: 500000,
+        usedLimit: 0,
+    }
+];
+
+export const sampleInvoices = [
+    {
+        id: "INV_SAMPLE_1",
+        dealerId: "DLR_SAMPLE_1",
+        anchorId: "ANC001",
+        programId: "PROG_SAMPLE_1",
+        invoiceNumber: "SAMPLE-2024-001",
+        dealerName: "Sample Dealer Electronics",
+        amount: 50000,
+        date: "2024-01-01",
+        dueDate: "2024-02-01",
+        eWayBillNumber: "EWB_SAMPLE_123",
+        status: "Initiated",
+        lender: "Sample Finance Inc.",
+        overdueAmount: 0,
+    }
+];
+
     
+
