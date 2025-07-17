@@ -27,9 +27,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     )
   }
 
-  if (pathname === '/') {
+  const isLoginPage = pathname === '/';
+  const isSubscribePage = pathname === '/subscribe';
+
+  if (isLoginPage || (isSubscribePage && !user)) {
     return <>{children}</>;
   }
+
 
   if (!user) {
      // This handles the redirect case where there's no user, so we show the login page.
@@ -97,10 +101,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <SidebarMenu>
               {user?.userSubRole === 'Not Subscribed' && (
                 <SidebarMenuItem>
-                    <SidebarMenuButton tooltip={{ children: 'Subscribe' }}>
-                        <Crown />
-                        <span>Subscribe to Dealer Onboarding</span>
-                    </SidebarMenuButton>
+                  <SidebarMenuButton asChild tooltip={{children: 'Subscribe'}} isActive={pathname === '/subscribe'}>
+                    <Link href="/subscribe">
+                      <Crown />
+                      <span>Subscribe to Dealer Onboarding</span>
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
               {user?.userSubRole && user.userSubRole !== 'Not Subscribed' && subscribedOnboardingLinks.map((link) => (
