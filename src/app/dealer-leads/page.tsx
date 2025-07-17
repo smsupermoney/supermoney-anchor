@@ -25,9 +25,11 @@ export default async function DealerLeadsPage() {
     <>
       <PageHeader title="Dealer Onboarding Leads">
         {canCreateLead && (
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4"/>
-            Create Lead
+          <Button asChild>
+            <Link href="/add-lead">
+                <PlusCircle className="mr-2 h-4 w-4"/>
+                Add Lead
+            </Link>
           </Button>
         )}
       </PageHeader>
