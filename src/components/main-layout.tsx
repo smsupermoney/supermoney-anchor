@@ -7,7 +7,7 @@ import { adminNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboarding
 import Link from 'next/link';
 import { Crown, LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import SavexLogo from './savex-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
@@ -57,6 +57,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     user.userSubRole && link.subRole.includes(user.userSubRole)
   );
 
+  const getInitials = (name: string) => {
+    const words = name.split(' ');
+    if (words.length > 1) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
 
   return (
     <SidebarProvider>
@@ -68,8 +76,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarSeparator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
             <Avatar className="h-9 w-9">
-              <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User Avatar" />
-              <AvatarFallback>{user.userName.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{getInitials(user.userName)}</AvatarFallback>
             </Avatar>
             <div className="group-data-[collapsible=icon]:hidden">
               <p className="text-sm font-medium leading-none text-sidebar-foreground">{user.userName}</p>
