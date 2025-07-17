@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import SiteVisitDialog from '@/components/site-visit-dialog';
 import CreditCheckDialog from '@/components/credit-check-dialog';
+import ApproveLimitDialog from '@/components/approve-limit-dialog';
 
 export default function DealerLeadDetailPage({ params }: { params: { id: string } }) {
     const { user } = useAuth();
@@ -31,6 +32,7 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
     const [newComment, setNewComment] = React.useState("");
     const [isSiteVisitDialogOpen, setIsSiteVisitDialogOpen] = React.useState(false);
     const [isCreditCheckDialogOpen, setIsCreditCheckDialogOpen] = React.useState(false);
+    const [isApproveLimitDialogOpen, setIsApproveLimitDialogOpen] = React.useState(false);
 
     if (!lead) {
         notFound();
@@ -84,6 +86,18 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
         setLead(prev => prev ? { ...prev, creditCheckScore: score } : undefined);
     };
     
+    const handleLimitApproval = (approvedLimit: number) => {
+        setLead(prev => {
+            if (!prev) return undefined;
+            return {
+                ...prev,
+                approvedLimit: approvedLimit,
+                businessLimit: approvedLimit, // Keep this consistent for now
+                status: 'Business Limit Approved'
+            };
+        });
+    };
+
     const formatCurrency = (amount?: number) => {
         if (typeof amount !== 'number') return "N/A";
         return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
@@ -132,7 +146,7 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                                     <Button onClick={() => setIsCreditCheckDialogOpen(true)} variant="outline">
                                         <ShieldCheck className="mr-2 h-4 w-4" />Credit Check
                                     </Button>
-                                    <Button><ThumbsUp className="mr-2 h-4 w-4" />Approve</Button>
+                                    <Button onClick={() => setIsApproveLimitDialogOpen(true)}><ThumbsUp className="mr-2 h-4 w-4" />Approve</Button>
                                     <Button variant="destructive"><ThumbsDown className="mr-2 h-4 w-4" />Reject</Button>
                                 </div>
                             )}
@@ -345,6 +359,15 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                     open={isCreditCheckDialogOpen}
                     onOpenChange={setIsCreditCheckDialogOpen}
                     onCreditCheckComplete={handleCreditCheckComplete}
+                />
+            )}
+            
+            {isApproveLimitDialogOpen && (
+                <ApproveLimitDialog
+                    open={isApproveLimitDialogOpen}
+                    onOpenChange={setIsApproveLimitDialogOpen}
+                    onSubmit={handleLimitApproval}
+                    requestedLimit={lead.requestedLimit}
                 />
             )}
         </>
