@@ -76,7 +76,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarSeparator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
             <Avatar className="h-9 w-9">
-              <AvatarFallback>{getInitials(user.userName)}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground">{getInitials(user.userName)}</AvatarFallback>
             </Avatar>
             <div className="group-data-[collapsible=icon]:hidden">
               <p className="text-sm font-medium leading-none text-sidebar-foreground">{user.userName}</p>
