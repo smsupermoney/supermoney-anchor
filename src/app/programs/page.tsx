@@ -1,6 +1,6 @@
 
 import { unstable_noStore as noStore } from 'next/cache';
-import { getPrograms } from "@/lib/data";
+import { getPrograms, getUsers } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,10 +8,12 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
-import { PlusCircle, Upload, UploadCloud } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/page-header";
 import { getSession } from "@/lib/session";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import type { User } from '@/types';
 
 export default async function ProgramsPage() {
     noStore();
@@ -19,7 +21,10 @@ export default async function ProgramsPage() {
     const isAdmin = session?.roleType === 'Admin';
     const anchorId = isAdmin ? undefined : session?.externalId;
 
-    const { programs } = await getPrograms(anchorId);
+    const [{ programs }, allUsers] = await Promise.all([
+      getPrograms(anchorId),
+      isAdmin ? getUsers() : Promise.resolve([] as User[])
+    ]);
     
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
     
@@ -30,6 +35,56 @@ export default async function ProgramsPage() {
         'Flexi Loans': 'Flexi Loans',
         'Supermoney Finance': 'Supermoney Finance'
     };
+    
+    const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
+
+  if (isAdmin) {
+    return (
+        <>
+            <PageHeader title="Lender Programs" />
+            <Card className="mt-4">
+                <CardHeader>
+                    <CardTitle>All Programs</CardTitle>
+                    <CardDescription>A list of all financing programs in the system.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Lender Name</TableHead>
+                                <TableHead>Lender Type</TableHead>
+                                <TableHead>Linked Anchor Names</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {programs.length > 0 ? programs.map((program) => (
+                                <TableRow key={program.id}>
+                                    <TableCell className="font-medium">{program.lenderName}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'}>
+                                            {program.lenderType}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1">
+                                            {program.anchorIds.map(id => (
+                                                <span key={id} className="text-xs">{anchorUserMap.get(id) || id}</span>
+                                            ))}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="text-center">No programs found.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </>
+    );
+  }
 
   return (
     <>
@@ -103,3 +158,5 @@ export default async function ProgramsPage() {
     </>
   );
 }
+
+  

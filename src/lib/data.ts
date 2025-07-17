@@ -8,6 +8,12 @@ import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // Functions to fetch data from Firestore
 
+export async function getUsers(): Promise<User[]> {
+  const usersCol = collection(db, 'users');
+  const userSnapshot = await getDocs(query(usersCol));
+  return userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+}
+
 export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   const invoicesCol = collection(db, 'invoices');
   let q = query(invoicesCol);
@@ -314,3 +320,6 @@ export const dealerLeads: DealerLead[] = [
 ];
 
 
+
+
+  
