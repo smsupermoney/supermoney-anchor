@@ -8,7 +8,6 @@ export const anchorNavigationLinks = [
   { href: '/retailers', label: 'Dealers', icon: Users },
   { href: '/invoices', label: 'Invoices', icon: FileText },
   { href: '/leads', label: 'Leads', icon: PlusCircle },
-  { href: '/risk-assessment', label: 'Risk Assessment', icon: ShieldCheck },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
