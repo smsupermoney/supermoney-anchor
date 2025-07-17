@@ -53,25 +53,18 @@ export async function authenticate(
     return 'An unexpected error occurred.';
   }
 
-  switch (userRole) {
-    case 'Admin':
-      redirect('/add-program');
-      break;
-    case 'SuperMoney User':
-      redirect('/add-invoice');
-      break;
-    case 'Anchor':
-    default:
-      redirect('/dashboard');
-      break;
+  if (userRole === 'SuperMoney User') {
+    redirect('/add-invoice');
+  } else {
+    redirect('/dashboard');
   }
 }
 
 export async function logout() {
   const session = await getIronSession<User>(cookies(), sessionOptions);
   
-  if (session.emailAddress) {
-      await clearUserAuthToken(session.emailAddress);
+  if (session.id) {
+      await clearUserAuthToken(session.id);
   }
   
   session.destroy();

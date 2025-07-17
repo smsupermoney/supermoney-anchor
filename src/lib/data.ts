@@ -1,7 +1,8 @@
 
+
 import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus } from '@/types';
 import { db } from './firebase';
-import { collection, getDocs, query, where, documentId, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // --- API FUNCTIONS ---
@@ -139,15 +140,18 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   return { id: userDoc.id, ...userDoc.data() } as User;
 }
 
-export async function clearUserAuthToken(email: string): Promise<void> {
-  const user = await getUserByEmail(email);
-  if (user) {
-    const userRef = doc(db, 'users', user.id);
-    await updateDoc(userRef, {
-      authToken: '',
-      expiryTime: 0,
-    });
-  }
+export async function clearUserAuthToken(userId: string): Promise<void> {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+        await updateDoc(userRef, {
+            authToken: '',
+            expiryTime: 0,
+        });
+    } else {
+        console.warn(`Attempted to clear auth token for non-existent user: ${userId}`);
+    }
 }
 
 
