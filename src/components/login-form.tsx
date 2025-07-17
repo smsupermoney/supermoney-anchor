@@ -10,10 +10,12 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
+  CardFooter
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SupermoneyLogo from '@/components/supermoney-logo';
+import SavexLogo from '@/components/savex-logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
@@ -38,7 +40,7 @@ export default function LoginForm() {
   return (
     <Card className="w-full max-w-sm shadow-2xl">
       <CardHeader className="text-center space-y-4 pt-8">
-        <SupermoneyLogo className="mx-auto" />
+        <SavexLogo className="mx-auto" />
         <CardDescription>
           Enter your credentials to access your account
         </CardDescription>
@@ -76,6 +78,10 @@ export default function LoginForm() {
           <LoginButton />
         </form>
       </CardContent>
+      <CardFooter className="flex flex-col items-center space-y-2">
+        <SupermoneyLogo className="mx-auto" />
+      </CardFooter>
+
     </Card>
   );
 }

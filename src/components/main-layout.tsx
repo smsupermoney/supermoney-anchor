@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Crown, LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import SupermoneyLogo from './supermoney-logo';
+import SavexLogo from './savex-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
 
@@ -17,7 +17,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const isMounted = useMounted();
   const { user, loading } = useAuth();
-  
+
   if (!isMounted || loading) {
     return (
       <div className="flex min-h-screen w-full">
@@ -36,8 +36,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
 
   if (!user) {
-     // This handles the redirect case where there's no user, so we show the login page.
-     return <>{children}</>;
+    // This handles the redirect case where there's no user, so we show the login page.
+    return <>{children}</>;
   }
 
   const getVisibleLinks = () => {
@@ -45,14 +45,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       return adminNavigationLinks;
     }
     // For Anchor role, filter based on subRole if it exists
-    return enterpriseAnchorNavigationLinks.filter(link => 
+    return enterpriseAnchorNavigationLinks.filter(link =>
       !link.subRole || (user.userSubRole && link.subRole.includes(user.userSubRole))
     );
   };
-  
+
   const navigationLinks = getVisibleLinks();
 
-  const subscribedOnboardingLinks = dealerOnboardingNavigationLinks.filter(link => 
+  const subscribedOnboardingLinks = dealerOnboardingNavigationLinks.filter(link =>
     user.userSubRole && link.subRole.includes(user.userSubRole)
   );
 
@@ -62,7 +62,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <Sidebar variant="sidebar">
         <SidebarHeader>
           <div className="p-2 flex justify-center">
-            <SupermoneyLogo className="group-data-[collapsible=icon]:hidden" />
+            <SavexLogo className="group-data-[collapsible=icon]:hidden" />
           </div>
           <SidebarSeparator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
@@ -94,36 +94,36 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-            </SidebarMenu>
-            
-            <SidebarSeparator className="my-2" />
-            
-            <SidebarMenu>
-              {user?.userSubRole === 'Not Subscribed' && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip={{children: 'Subscribe'}} isActive={pathname === '/subscribe'}>
-                    <Link href="/subscribe">
-                      <Crown />
-                      <span>Subscribe to enterprise</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
-              {user?.userSubRole && user.userSubRole !== 'Not Subscribed' && subscribedOnboardingLinks.map((link) => (
-                <SidebarMenuItem key={link.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith(link.href)}
-                    tooltip={{ children: link.label }}
-                  >
-                    <Link href={link.href}>
-                      <link.icon />
-                      <span>{link.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+          </SidebarMenu>
+
+          <SidebarSeparator className="my-2" />
+
+          <SidebarMenu>
+            {user?.userSubRole === 'Not Subscribed' && (
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={{ children: 'Subscribe' }} isActive={pathname === '/subscribe'}>
+                  <Link href="/subscribe">
+                    <Crown />
+                    <span>Subscribe to enterprise</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
+            {user?.userSubRole && user.userSubRole !== 'Not Subscribed' && subscribedOnboardingLinks.map((link) => (
+              <SidebarMenuItem key={link.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith(link.href)}
+                  tooltip={{ children: link.label }}
+                >
+                  <Link href={link.href}>
+                    <link.icon />
+                    <span>{link.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
 
         </SidebarContent>
         <SidebarFooter>

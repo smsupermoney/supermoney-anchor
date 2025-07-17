@@ -10,7 +10,7 @@ export default function SupermoneyLogo({
 
   return (
     <img
-      src="/assets/images/logo.png" // path from public/
+      src="/assets/images/supermoney-logo.png" // path from public/
       alt="Logo"
       style={{ width: '150px', height: 'auto', margin: 'auto' }}
     />
