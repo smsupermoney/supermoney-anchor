@@ -26,6 +26,7 @@ export const adminNavigationLinks = [
   { href: '/retailers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
   { href: '/leads', label: 'View Leads', icon: FileText },
+  { href: '/view-users', label: 'View Users', icon: Users },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
