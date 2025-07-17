@@ -53,7 +53,9 @@ export async function authenticate(
     return 'An unexpected error occurred.';
   }
 
-  if (userRole === 'SuperMoney User') {
+  if (userRole === 'Admin') {
+    redirect('/add-program');
+  } else if (userRole === 'SuperMoney User') {
     redirect('/add-invoice');
   } else {
     redirect('/dashboard');
