@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import * as React from 'react';
@@ -16,8 +15,8 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from '@/context/auth-context';
 import type { DealerLead } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import SiteVisitDialog from '@/components/site-visit-dialog';
 import CreditCheckDialog from '@/components/credit-check-dialog';
 import ApproveLimitDialog from '@/components/approve-limit-dialog';
@@ -134,8 +133,8 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                         <CardContent className="space-y-4">
                             {canValidateLead && (
                                 <div className="flex gap-4">
-                                    <Button><Check className="mr-2 h-4 w-4" />Approve</Button>
-                                    <Button variant="destructive"><X className="mr-2 h-4 w-4" />Reject</Button>
+                                    <Button><ThumbsUp className="mr-2 h-4 w-4" />Approve</Button>
+                                    <Button variant="destructive"><ThumbsDown className="mr-2 h-4 w-4" />Reject</Button>
                                 </div>
                             )}
                             {canManageDocs && <p className="text-sm text-muted-foreground">Please upload required documents below.</p>}
@@ -150,7 +149,12 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                                     <Button variant="destructive"><ThumbsDown className="mr-2 h-4 w-4" />Reject</Button>
                                 </div>
                             )}
-                            {canActivateDealer && <Button><Check className="mr-2 h-4 w-4" />Generate Code & Activate Dealer</Button>}
+                            {canActivateDealer && (
+                                <div className="flex gap-4">
+                                    <Button><ThumbsUp className="mr-2 h-4 w-4" />Approve</Button>
+                                    <Button variant="destructive"><ThumbsDown className="mr-2 h-4 w-4" />Reject</Button>
+                                </div>
+                            )}
 
                             {!canValidateLead && !canManageDocs && !canVerifyDocs && !canDoSiteVisit && !canApproveLimit && !canActivateDealer && (
                                 <p className="text-sm text-muted-foreground">No actions available for you at this stage.</p>
