@@ -104,7 +104,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   <SidebarMenuButton asChild tooltip={{children: 'Subscribe'}} isActive={pathname === '/subscribe'}>
                     <Link href="/subscribe">
                       <Crown />
-                      <span>Subscribe to Dealer Onboarding</span>
+                      <span>Subscribe to enterprise</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
