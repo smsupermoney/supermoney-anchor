@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -21,6 +22,7 @@ const ExtractInvoiceDataInputSchema = z.object({
 export type ExtractInvoiceDataInput = z.infer<typeof ExtractInvoiceDataInputSchema>;
 
 const ExtractInvoiceDataOutputSchema = z.object({
+  invoiceNumber: z.string().describe('The unique invoice number or ID.'),
   dealerName: z.string().describe('The name of the dealer or buyer.'),
   documentType: z.string().describe('The type of document (e.g., "Invoice", "E-Way Bill", "Purchase Order").'),
   amount: z.number().describe('The total amount on the invoice.'),
@@ -43,7 +45,7 @@ const prompt = ai.definePrompt({
 
   Document: {{media url=documentDataUri}}
 
-  Extract the dealer name (who the bill is for), the document type (e.g., Invoice, E-Way Bill), the total amount, and the payment due date.
+  Extract the invoice number, dealer name (who the bill is for), the document type (e.g., Invoice, E-Way Bill), the total amount, and the payment due date.
   Format the due date as YYYY-MM-DD.
   `,
 });

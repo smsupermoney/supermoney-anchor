@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, Phone, Calendar } from "lucide-react";
+import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, Phone, Calendar, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
@@ -148,7 +148,7 @@ export default function AddRepaymentDialog({ children, onAddRepayment }: AddRepa
     
     try {
         onAddRepayment({
-            invoiceId: uploadedFile.extractedData.dealerName, // Using dealer name as a proxy for Invoice ID
+            invoiceId: uploadedFile.extractedData.invoiceNumber,
             invoiceAmount: Number(formData.invoiceAmount),
             dueDate: formData.dueDate,
             contactNumber: formData.contactNumber,
@@ -156,7 +156,7 @@ export default function AddRepaymentDialog({ children, onAddRepayment }: AddRepa
 
         toast({
             title: "Repayment Link Sent!",
-            description: `The repayment link for invoice has been sent.`,
+            description: `The repayment link for invoice #${uploadedFile.extractedData.invoiceNumber} has been sent.`,
         });
         setOpen(false);
     } catch (error) {
@@ -239,7 +239,7 @@ export default function AddRepaymentDialog({ children, onAddRepayment }: AddRepa
           {uploadedFile && !uploadedFile.isLoading && uploadedFile.extractedData && (
             <div className="space-y-4">
                 <div className="text-center bg-secondary p-2 rounded-md">
-                    <p className="text-sm text-muted-foreground">Invoice For</p>
+                    <p className="text-sm text-muted-foreground">Invoice #{uploadedFile.extractedData.invoiceNumber}</p>
                     <p className="font-semibold text-lg">{uploadedFile.extractedData.dealerName}</p>
                 </div>
                 <div className="space-y-2">

@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee } from 'lucide-react';
 import type { UserSubRole } from '@/types';
 
 export const anchorNavigationLinks = [
@@ -79,7 +79,7 @@ export const dealerOnboardingNavigationLinks: { href: string; label: string; ico
   {
     href: '/collection-dashboard',
     label: 'Collection Dashboard',
-    icon: DollarSign,
+    icon: IndianRupee,
     subRole: ['onboarding_ops', 'field_inspector', 'legal_compliance', 'regional_manager', 'dealer_admin']
   }
 ];
