@@ -143,6 +143,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
               <TableHeader>
                 <TableRow>
                   <TableHead>Dealer Name</TableHead>
+                  {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lenders</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Invoices</TableHead>
@@ -164,6 +165,18 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
+                    {isAdmin && (
+                        <TableCell>
+                            <TooltipProvider>
+                                <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="truncate max-w-[150px]">{dealer.anchorName || 'N/A'}</div>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{dealer.anchorName || 'N/A'}</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </TableCell>
+                    )}
                     <TableCell>
                       <TooltipProvider>
                         <Tooltip>

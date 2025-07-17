@@ -3,6 +3,8 @@
 export type Dealer = {
   id: string;
   name: string;
+  anchorId: string;
+  anchorName?: string;
   status: 'Active' | 'Inactive' | 'Pending';
   lenders: string[];
   invoicesSubmitted: number;
@@ -19,6 +21,7 @@ export type Invoice = {
   dealerId: string; // Link to Dealer
   programId: string; // Link to Program
   anchorId: string; // Link to Anchor/User
+  anchorName?: string;
   dealerName: string;
   amount: number;
   date: string;

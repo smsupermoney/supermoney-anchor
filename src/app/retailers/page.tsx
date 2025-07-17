@@ -1,8 +1,10 @@
 
 import { unstable_noStore as noStore } from 'next/cache';
-import { getDealers } from "@/lib/data";
+import { getDealers, getUsers } from "@/lib/data";
 import RetailersClientPage from "./client-page";
 import { getSession } from "@/lib/session";
+import type { User } from '@/types';
+
 
 export default async function DealersPage() {
   noStore();
@@ -10,7 +12,17 @@ export default async function DealersPage() {
   const isAdmin = session?.roleType === 'Admin';
   const anchorId = isAdmin ? undefined : session?.externalId;
   
-  const dealers = await getDealers(anchorId);
+  let dealers = await getDealers(anchorId);
+
+  if (isAdmin) {
+    const allUsers = await getUsers();
+    const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
+    dealers = dealers.map(dealer => ({
+      ...dealer,
+      anchorName: anchorUserMap.get(dealer.anchorId) || dealer.anchorId
+    }));
+  }
+
 
   return <RetailersClientPage initialDealers={dealers} isAdmin={isAdmin} />;
 }

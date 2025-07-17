@@ -37,6 +37,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Combobox } from "@/components/ui/combobox";
 
 type InvoicesClientPageProps = {
   initialInvoices: Invoice[];
@@ -80,6 +81,11 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
   });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
+  const dealerOptions = useMemo(() => {
+    const uniqueNames = new Set(initialInvoices.map(i => i.dealerName));
+    return Array.from(uniqueNames).map(name => ({ value: name, label: name }));
+  }, [initialInvoices]);
+
   useEffect(() => {
     const lender = searchParams.get('lender');
     const overdue = searchParams.get('overdue');
@@ -156,11 +162,14 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
               onChange={(e) => handleFilterChange("invoiceNumber", e.target.value)}
               className="h-9 max-w-40"
             />
-            <Input
-              placeholder="Filter Dealer"
-              value={filters.dealerName}
-              onChange={(e) => handleFilterChange("dealerName", e.target.value)}
-              className="h-9 max-w-40"
+            <Combobox
+                options={dealerOptions}
+                value={filters.dealerName}
+                onChange={(value) => handleFilterChange("dealerName", value)}
+                placeholder="Filter by dealer..."
+                searchPlaceholder="Search dealer..."
+                emptyMessage="No dealer found."
+                className="max-w-48"
             />
             <Input
               placeholder="Filter Lender"
@@ -289,6 +298,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                 <TableRow>
                   <TableHead>Invoice #</TableHead>
                   <TableHead>Dealer</TableHead>
+                  {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Due Date</TableHead>
@@ -320,6 +330,18 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
+                    {isAdmin && (
+                        <TableCell>
+                            <TooltipProvider>
+                                <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="truncate max-w-[120px]">{invoice.anchorName || 'N/A'}</div>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{invoice.anchorName || 'N/A'}</p></TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </TableCell>
+                    )}
                     <TableCell>
                       <TooltipProvider>
                         <Tooltip>
