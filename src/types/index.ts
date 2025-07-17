@@ -1,5 +1,7 @@
 
 
+export type UserRole = "Anchor" | "Dealer" | "Admin";
+
 export type Dealer = {
   id: string;
   name: string;
@@ -85,7 +87,7 @@ export type User = {
     password?: string;
     phoneNumber: string;
     emailAddress: string;
-    roleType: "Anchor" | "Dealer" | "Admin";
+    roleType: UserRole;
     userSubRole?: UserSubRole;
     lastLoginTime: string;
     lastLoginIp: string;

@@ -20,7 +20,7 @@ export const adminNavigationLinks = [
   { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
   { href: '/add-dealer-limit', label: 'Add Dealer Limit', icon: Link2 },
   { href: '/add-invoice', label: 'Add Invoice', icon: PlusCircle },
-  { href: '/add-anchor', label: 'Add Anchor', icon: UserPlus },
+  { href: '/add-anchor', label: 'Add User', icon: UserPlus },
   { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/retailers', label: 'View Dealers', icon: Users },

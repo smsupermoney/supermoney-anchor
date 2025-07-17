@@ -17,26 +17,37 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { addAnchor } from "./actions";
+import { addUser } from "./actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { UserRole, UserSubRole } from "@/types";
+
+const allUserSubRoles: UserSubRole[] = [
+    "Manager", "Viewer", "Field Sales", "AP/AR Approver", "Executive", "Business Lead", "Auditor",
+    "Super Admin", "Not Subscribed", "sales_person", "sales_manager", "onboarding_ops",
+    "field_inspector", "legal_compliance", "regional_manager", "dealer_admin"
+];
+
 
 const formSchema = z.object({
-  externalId: z.string().min(1, "Anchor ID is required."),
+  externalId: z.string().min(1, "External ID is required."),
   userName: z.string().min(1, "User name is required."),
   emailAddress: z.string().email("Invalid email address."),
   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits."),
   password: z.string().min(6, "Password must be at least 6 characters."),
+  roleType: z.enum(["Admin", "Anchor", "Dealer"]),
+  userSubRole: z.string().optional(),
 });
 
-type AnchorFormValues = z.infer<typeof formSchema>;
+type UserFormValues = z.infer<typeof formSchema>;
 
-export default function AddAnchorForm() {
+export default function AddUserForm() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
   
-  const form = useForm<AnchorFormValues>({
+  const form = useForm<UserFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       externalId: "",
@@ -44,14 +55,15 @@ export default function AddAnchorForm() {
       emailAddress: "",
       phoneNumber: "",
       password: "",
+      roleType: "Anchor",
     },
   });
 
-  const onSubmit = async (values: AnchorFormValues) => {
+  const onSubmit = async (values: UserFormValues) => {
     setIsSubmitting(true);
     setError(null);
     try {
-      const result = await addAnchor(values);
+      const result = await addUser(values);
       if (result.error) {
         setError(result.error);
       } else {
@@ -90,11 +102,11 @@ export default function AddAnchorForm() {
             name="externalId"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Anchor ID</FormLabel>
+                <FormLabel>External ID</FormLabel>
                 <FormControl>
                     <Input placeholder="e.g., ANC001" {...field} />
                 </FormControl>
-                <FormDescription>A unique identifier for this anchor.</FormDescription>
+                <FormDescription>A unique identifier for this user (e.g., Anchor ID, Dealer ID).</FormDescription>
                 <FormMessage />
                 </FormItem>
             )}
@@ -106,7 +118,7 @@ export default function AddAnchorForm() {
                 <FormItem>
                 <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                    <Input type="email" placeholder="contact@stark-industries.com" {...field} />
+                    <Input type="email" placeholder="contact@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
@@ -138,6 +150,52 @@ export default function AddAnchorForm() {
                 </FormItem>
             )}
             />
+             <FormField
+                control={form.control}
+                name="roleType"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        <SelectItem value="Anchor">Anchor</SelectItem>
+                        <SelectItem value="Admin">Admin</SelectItem>
+                        <SelectItem value="Dealer">Dealer</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="userSubRole"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Sub Role (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a sub role" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                         {allUserSubRoles.map(subRole => (
+                            <SelectItem key={subRole} value={subRole}>
+                                {subRole}
+                            </SelectItem>
+                         ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+             />
         </div>
         {error && (
             <Alert variant="destructive">
@@ -148,7 +206,7 @@ export default function AddAnchorForm() {
         )}
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Anchor"}
+            {isSubmitting ? "Adding..." : "Add User"}
           </Button>
         </div>
       </form>
