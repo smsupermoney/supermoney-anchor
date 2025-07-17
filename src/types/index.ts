@@ -2,6 +2,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
@@ -150,4 +151,19 @@ export type DealerLead = {
     requestedLimit?: number;
     approvedLimit?: number;
     creditCheckScore?: number;
+};
+
+
+// --- Collection Module Types ---
+export type RepaymentStatus = 'Link Sent' | 'Partially Paid' | 'Paid' | 'Failed';
+
+export type Repayment = {
+    id: string;
+    invoiceId: string;
+    invoiceAmount: number;
+    dueDate: string;
+    contactNumber: string;
+    amountRepaid: number;
+    status: RepaymentStatus;
+    link: string;
 };
