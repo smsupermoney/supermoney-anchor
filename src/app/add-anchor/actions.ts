@@ -16,7 +16,7 @@ const formSchema = z.object({
   emailAddress: z.string().email("Invalid email address."),
   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  roleType: z.enum(["Admin", "Anchor", "Dealer"]),
+  roleType: z.enum(["Anchor", "SuperMoney User"]),
   userSubRole: z.string().optional(),
 });
 

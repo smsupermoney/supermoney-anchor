@@ -35,7 +35,7 @@ const formSchema = z.object({
   emailAddress: z.string().email("Invalid email address."),
   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  roleType: z.enum(["Admin", "Anchor", "Dealer"]),
+  roleType: z.enum(["Anchor", "SuperMoney User"]),
   userSubRole: z.string().optional(),
 });
 
@@ -163,8 +163,7 @@ export default function AddUserForm() {
                         </FormControl>
                         <SelectContent>
                         <SelectItem value="Anchor">Anchor</SelectItem>
-                        <SelectItem value="Admin">Admin</SelectItem>
-                        <SelectItem value="Dealer">Dealer</SelectItem>
+                        <SelectItem value="SuperMoney User">SuperMoney User</SelectItem>
                         </SelectContent>
                     </Select>
                     <FormMessage />
