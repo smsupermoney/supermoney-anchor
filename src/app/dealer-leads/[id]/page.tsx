@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import * as React from 'react';
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ProgressTracker from "@/components/progress-tracker";
 import { dealerLeads, dealerOnboardingStatuses } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone, X } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone, X, ThumbsUp, ThumbsDown, Eye } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,9 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
     const canDoSiteVisit = userSubRole === 'field_inspector' && lead.status === 'Documents Verified';
     const canApproveLimit = (userSubRole === 'regional_manager' || userSubRole === 'legal_compliance') && lead.status === 'Site Visit Done';
     const canActivateDealer = userSubRole === 'dealer_admin' && lead.status === 'Business Limit Approved';
+    
+    const canApproveRejectDocs = userSubRole !== 'sales_manager' && userSubRole !== 'sales_person';
+
 
     const handleAddComment = () => {
         if (newComment.trim() && user) {
@@ -124,8 +128,22 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {canVerifyDocs && doc.status !== 'Verified' && <Button variant="ghost" size="sm">Verify</Button>}
-                                                <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/>Download</Button>
+                                                {canApproveRejectDocs && doc.status !== 'Verified' && (
+                                                    <>
+                                                        <Button variant="outline" size="sm" className='h-8'>
+                                                            <ThumbsUp className="mr-2 h-4 w-4 text-green-500" /> Approve
+                                                        </Button>
+                                                        <Button variant="outline" size="sm" className='h-8'>
+                                                            <ThumbsDown className="mr-2 h-4 w-4 text-red-500" /> Reject
+                                                        </Button>
+                                                    </>
+                                                )}
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <Download className="h-4 w-4"/>
+                                                </Button>
                                             </div>
                                         </div>
                                     ))}
@@ -255,3 +273,5 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
         </>
     );
 }
+
+    
