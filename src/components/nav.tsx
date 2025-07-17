@@ -30,6 +30,15 @@ export const adminNavigationLinks = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
+export const superMoneyUserNavigationLinks = adminNavigationLinks.filter(
+  link => ![
+    '/add-program', 
+    '/add-dealer', 
+    '/add-dealer-limit', 
+    '/view-users'
+  ].includes(link.href)
+);
+
 export const dealerOnboardingNavigationLinks: { href: string; label: string; icon: React.ElementType; subRole: UserSubRole[] }[] = [
   {
     href: '/onboarding-dashboard',

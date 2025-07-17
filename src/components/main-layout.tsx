@@ -3,7 +3,7 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger, SidebarSeparator } from '@/components/ui/sidebar';
-import { adminNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from './nav';
+import { adminNavigationLinks, superMoneyUserNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from './nav';
 import Link from 'next/link';
 import { Crown, LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
@@ -45,6 +45,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     if (user.roleType === 'Admin') {
       return adminNavigationLinks;
     }
+    if (user.roleType === 'SuperMoney User') {
+      return superMoneyUserNavigationLinks;
+    }
     // For Anchor role, filter based on subRole if it exists
     return enterpriseAnchorNavigationLinks.filter(link =>
       !link.subRole || (user.userSubRole && link.subRole.includes(user.userSubRole))
@@ -58,6 +61,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   );
 
   const getInitials = (name: string) => {
+    if (!name) return '';
     const words = name.split(' ');
     if (words.length > 1) {
       return (words[0][0] + words[1][0]).toUpperCase();

@@ -1,6 +1,7 @@
 
 
-export type UserRole = "Anchor" | "SuperMoney User";
+
+export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
   id: string;
