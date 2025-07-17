@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ProgressTracker from "@/components/progress-tracker";
 import { dealerLeads, dealerOnboardingStatuses } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone, X, ThumbsUp, ThumbsDown, Eye } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone, X, ThumbsUp, ThumbsDown, Eye, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,17 +19,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import SiteVisitDialog from '@/components/site-visit-dialog';
+import CreditCheckDialog from '@/components/credit-check-dialog';
 
 export default function DealerLeadDetailPage({ params }: { params: { id: string } }) {
     const { user } = useAuth();
     
-    // Find the initial lead data
     const resolvedParams = React.use(params);
     const initialLead = React.useMemo(() => dealerLeads.find(l => l.id === resolvedParams.id), [resolvedParams.id]);
 
     const [lead, setLead] = React.useState<DealerLead | undefined>(initialLead);
     const [newComment, setNewComment] = React.useState("");
     const [isSiteVisitDialogOpen, setIsSiteVisitDialogOpen] = React.useState(false);
+    const [isCreditCheckDialogOpen, setIsCreditCheckDialogOpen] = React.useState(false);
 
     if (!lead) {
         notFound();
@@ -64,8 +65,6 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
     };
     
     const handleSiteVisitSubmit = (data: { notes: string; images: File[] }) => {
-        // In a real app, you would upload the images and save the report data.
-        // For this POC, we'll just update the local state to reflect the change.
         console.log("Site Visit Report Submitted:", data);
         setLead(prevLead => {
             if (!prevLead) return;
@@ -74,11 +73,20 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                 status: 'Site Visit Done',
                 siteVisitReport: {
                     notes: data.notes,
-                    images: data.images.map(f => URL.createObjectURL(f)) // Create blob URLs for preview
+                    images: data.images.map(f => URL.createObjectURL(f)) 
                 }
             };
         });
         setIsSiteVisitDialogOpen(false);
+    };
+    
+    const handleCreditCheckComplete = (score: number) => {
+        setLead(prev => prev ? { ...prev, creditCheckScore: score } : undefined);
+    };
+    
+    const formatCurrency = (amount?: number) => {
+        if (typeof amount !== 'number') return "N/A";
+        return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
     };
 
 
@@ -119,7 +127,15 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                             {canManageDocs && <p className="text-sm text-muted-foreground">Please upload required documents below.</p>}
                             {canVerifyDocs && <Button><Check className="mr-2 h-4 w-4" />Mark All Documents as Verified</Button>}
                             {canDoSiteVisit && <Button onClick={() => setIsSiteVisitDialogOpen(true)}><Send className="mr-2 h-4 w-4" />Submit Site Visit Report</Button>}
-                            {canApproveLimit && <Button><Check className="mr-2 h-4 w-4" />Approve Limit & Send for Activation</Button>}
+                            {canApproveLimit && (
+                                <div className="flex gap-4">
+                                    <Button onClick={() => setIsCreditCheckDialogOpen(true)} variant="outline">
+                                        <ShieldCheck className="mr-2 h-4 w-4" />Credit Check
+                                    </Button>
+                                    <Button><ThumbsUp className="mr-2 h-4 w-4" />Approve</Button>
+                                    <Button variant="destructive"><ThumbsDown className="mr-2 h-4 w-4" />Reject</Button>
+                                </div>
+                            )}
                             {canActivateDealer && <Button><Check className="mr-2 h-4 w-4" />Generate Code & Activate Dealer</Button>}
 
                             {!canValidateLead && !canManageDocs && !canVerifyDocs && !canDoSiteVisit && !canApproveLimit && !canActivateDealer && (
@@ -288,6 +304,31 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                             </div>
                         </CardContent>
                     </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Financial Details</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Requested Limit</span>
+                                <span className="font-medium">{formatCurrency(lead.requestedLimit)}</span>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Approved Limit</span>
+                                <span className="font-medium text-green-600">{formatCurrency(lead.approvedLimit)}</span>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Credit Check Score</span>
+                                {lead.creditCheckScore ? (
+                                    <span className="font-bold text-lg">{lead.creditCheckScore} <span className='text-xs text-muted-foreground'>/ 10</span></span>
+                                ) : (
+                                    <Badge variant="outline">Not Done</Badge>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
 
@@ -298,8 +339,14 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                     onSubmit={handleSiteVisitSubmit}
                 />
             )}
+            
+            {isCreditCheckDialogOpen && (
+                <CreditCheckDialog
+                    open={isCreditCheckDialogOpen}
+                    onOpenChange={setIsCreditCheckDialogOpen}
+                    onCreditCheckComplete={handleCreditCheckComplete}
+                />
+            )}
         </>
     );
 }
-
-    

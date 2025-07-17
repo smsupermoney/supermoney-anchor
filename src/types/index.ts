@@ -1,6 +1,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
@@ -146,4 +147,7 @@ export type DealerLead = {
     paymentTerms?: string;
     dealerCode?: string;
     comments?: Comment[];
+    requestedLimit?: number;
+    approvedLimit?: number;
+    creditCheckScore?: number;
 };

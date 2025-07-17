@@ -1,5 +1,6 @@
 
 
+
 import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus } from '@/types';
 import { db } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
@@ -194,6 +195,7 @@ export const dealerLeads: DealerLead[] = [
         status: 'Lead Created',
         createdBy: 'Sales Person',
         createdAt: '2024-07-20',
+        requestedLimit: 1000000,
         comments: [
           { user: 'Sales Person', comment: 'New lead, looks promising.', timestamp: '2024-07-20 10:00 AM' }
         ]
@@ -211,6 +213,7 @@ export const dealerLeads: DealerLead[] = [
         status: 'Lead Verified',
         createdBy: 'Sales Person',
         createdAt: '2024-07-19',
+        requestedLimit: 750000,
         comments: [
             { user: 'Sales Person', comment: 'Initial contact made.', timestamp: '2024-07-19 02:15 PM' },
             { user: 'Sales Manager', comment: 'Lead has been verified. Please proceed with document collection.', timestamp: '2024-07-20 11:00 AM' }
@@ -229,6 +232,7 @@ export const dealerLeads: DealerLead[] = [
         status: 'Documents Collected',
         createdBy: 'Sales Person',
         createdAt: '2024-07-21',
+        requestedLimit: 500000,
         documents: [
             { name: 'GST Certificate', url: '#', status: 'Pending' },
             { name: 'PAN Card', url: '#', status: 'Pending' },
@@ -251,6 +255,7 @@ export const dealerLeads: DealerLead[] = [
         status: 'Documents Verified',
         createdBy: 'Sales Person',
         createdAt: '2024-07-18',
+        requestedLimit: 800000,
         documents: [
             { name: 'GST Certificate', url: '#', status: 'Verified' },
             { name: 'PAN Card', url: '#', status: 'Verified' },
@@ -272,6 +277,7 @@ export const dealerLeads: DealerLead[] = [
         status: 'Site Visit Done',
         createdBy: 'Sales Person',
         createdAt: '2024-07-15',
+        requestedLimit: 2000000,
         documents: [
             { name: 'GST Certificate', url: '#', status: 'Verified' },
             { name: 'PAN Card', url: '#', status: 'Verified' },
@@ -296,12 +302,15 @@ export const dealerLeads: DealerLead[] = [
         location: 'Pune, MH',
         region: 'West',
         status: 'Business Limit Approved',
-        businessLimit: 500000,
+        requestedLimit: 500000,
+        approvedLimit: 450000,
+        creditCheckScore: 8,
+        businessLimit: 450000, // This seems redundant if approvedLimit is present. Kept for compatibility.
         paymentTerms: 'Net 30',
         createdBy: 'Sales Person',
         createdAt: '2024-07-12',
         comments: [
-            { user: 'Regional Manager', comment: 'Approved a limit of 5 Lacs with Net 30 terms. Ready for activation.', timestamp: '2024-07-23 11:00 AM'}
+            { user: 'Regional Manager', comment: 'Approved a limit of 4.5 Lacs with Net 30 terms. Ready for activation.', timestamp: '2024-07-23 11:00 AM'}
         ]
     },
     // Completed
@@ -315,6 +324,9 @@ export const dealerLeads: DealerLead[] = [
         location: 'Chennai, TN',
         region: 'South',
         status: 'Dealer Activated',
+        requestedLimit: 300000,
+        approvedLimit: 250000,
+        creditCheckScore: 7,
         businessLimit: 250000,
         paymentTerms: 'Net 45',
         dealerCode: 'DEALER-CH-00123',
