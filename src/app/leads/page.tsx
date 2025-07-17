@@ -14,19 +14,7 @@ export default async function LeadsPage() {
   const isAdmin = session?.roleType === 'Admin';
   return (
     <>
-      <PageHeader title="Leads">
-        {isAdmin ? (
-          <div className="flex gap-2">
-            <Button variant="outline"><Upload className="mr-2 h-4 w-4"/>Upload Excel</Button>
-            <Button><PlusCircle className="mr-2 h-4 w-4"/>Add Lead</Button>
-          </div>
-        ) : (
-          <Button>
-            <PlusCircle className="mr-2" />
-            Add Lead
-          </Button>
-        )}
-      </PageHeader>
+      <PageHeader title="Leads" />
       <Card>
         <CardHeader>
             <CardTitle>All Leads</CardTitle>

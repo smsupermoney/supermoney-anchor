@@ -88,27 +88,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
 
   return (
     <>
-      <PageHeader title="Dealers">
-        {isAdmin ? (
-          <div className="flex gap-2">
-            <Button variant="outline"><Upload className="mr-2 h-4 w-4"/>Upload Excel</Button>
-            <Button><PlusCircle className="mr-2 h-4 w-4"/>Add Dealer</Button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <UploadInvoiceDialog>
-              <Button variant="outline">
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Raise Invoice
-              </Button>
-            </UploadInvoiceDialog>
-            <Button>
-              <PlusCircle className="mr-2" />
-              Add Dealer
-            </Button>
-          </div>
-        )}
-      </PageHeader>
+      <PageHeader title="Dealers" />
       <Card className="mt-6">
         <CardHeader>
             <CardTitle>All Dealers</CardTitle>

@@ -146,21 +146,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
 
   return (
     <>
-      <PageHeader title="Invoices">
-        {isAdmin ? (
-            <div className="flex gap-2">
-                <Button variant="outline"><Upload className="mr-2 h-4 w-4"/>Upload Excel</Button>
-                <Button><PlusCircle className="mr-2 h-4 w-4"/>Add Invoice</Button>
-            </div>
-        ) : (
-            <UploadInvoiceDialog>
-            <Button>
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Raise Invoice
-            </Button>
-            </UploadInvoiceDialog>
-        )}
-      </PageHeader>
+      <PageHeader title="Invoices" />
       <Card className="mt-4">
         <CardContent className="pt-6 grid gap-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -368,7 +354,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="truncate max-w-[100px] ml-auto">{formatCurrency(invoice.amount)}</div>
+                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(invoice.amount)}</div>
                           </TooltipTrigger>
                           <TooltipContent><p>{formatCurrency(invoice.amount)}</p></TooltipContent>
                         </Tooltip>

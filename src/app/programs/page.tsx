@@ -33,20 +33,7 @@ export default async function ProgramsPage() {
 
   return (
     <>
-      <PageHeader title="Lender Programs">
-        {isAdmin && (
-            <div className="flex gap-2">
-                <Button variant="outline">
-                    <Upload className="mr-2 h-4 w-4"/>
-                    Upload Excel
-                </Button>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4"/>
-                    Add Program
-                </Button>
-            </div>
-        )}
-      </PageHeader>
+      <PageHeader title="Lender Programs" />
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
         {programs.map((program) => {
           const utilizationPercentage = (program.totalLimit && program.totalLimit > 0) ? ((program.usedLimit || 0) / program.totalLimit) * 100 : 0;
