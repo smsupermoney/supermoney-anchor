@@ -16,7 +16,7 @@ const features = [
 export default function SubscribePage() {
     return (
         <>
-            <PageHeader title="Subscribe to enterprise" />
+            <PageHeader title="Subscribe to premium" />
             <div className="mt-6 flex justify-center">
                 <Card className="w-full max-w-2xl shadow-lg">
                     <CardHeader className="text-center bg-muted/30 p-8 rounded-t-lg">

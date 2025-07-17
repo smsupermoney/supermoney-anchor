@@ -102,10 +102,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarMenu>
             {user?.userSubRole === 'Not Subscribed' && (
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={{ children: 'Subscribe to enterprise' }} isActive={pathname === '/subscribe'}>
+                <SidebarMenuButton asChild tooltip={{ children: 'Subscribe to premium' }} isActive={pathname === '/subscribe'}>
                   <Link href="/subscribe">
                     <Crown />
-                    <span>Subscribe to enterprise</span>
+                    <span>Subscribe to premium</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
