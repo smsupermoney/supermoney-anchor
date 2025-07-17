@@ -24,8 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { UserRole, UserSubRole } from "@/types";
 
 const allUserSubRoles: UserSubRole[] = [
-    "Manager", "Viewer", "Field Sales", "AP/AR Approver", "Executive", "Business Lead", "Auditor",
-    "Super Admin", "Not Subscribed", "sales_person", "sales_manager", "onboarding_ops",
+    "Not Subscribed", "sales_person", "sales_manager", "onboarding_ops",
     "field_inspector", "legal_compliance", "regional_manager", "dealer_admin"
 ];
 
