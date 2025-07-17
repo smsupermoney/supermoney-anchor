@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ProgressTracker from "@/components/progress-tracker";
 import { dealerLeads, dealerOnboardingStatuses } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -86,7 +86,12 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                             <CardDescription>Perform the required action for this stage of onboarding.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {canValidateLead && <Button><Check className="mr-2 h-4 w-4" />Validate & Move to Next Step</Button>}
+                            {canValidateLead && (
+                                <div className="flex gap-4">
+                                    <Button><Check className="mr-2 h-4 w-4" />Approve</Button>
+                                    <Button variant="destructive"><X className="mr-2 h-4 w-4" />Reject</Button>
+                                </div>
+                            )}
                             {canManageDocs && <p className="text-sm text-muted-foreground">Please upload required documents below.</p>}
                             {canVerifyDocs && <Button><Check className="mr-2 h-4 w-4" />Mark All Documents as Verified</Button>}
                             {canDoSiteVisit && <Button><Send className="mr-2 h-4 w-4" />Submit Site Visit Report</Button>}
