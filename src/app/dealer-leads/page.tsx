@@ -60,7 +60,7 @@ export default async function DealerLeadsPage() {
                     </TableCell>
                     <TableCell>
                         <div>{lead.contactPerson}</div>
-                        <div className="text-xs text-muted-foreground">{lead.contactEmail}</div>
+                        <div className="text-xs text-muted-foreground">{lead.contactPhone}</div>
                     </TableCell>
                     <TableCell>{lead.location}</TableCell>
                     <TableCell>
@@ -78,3 +78,4 @@ export default async function DealerLeadsPage() {
     </>
   );
 }
+

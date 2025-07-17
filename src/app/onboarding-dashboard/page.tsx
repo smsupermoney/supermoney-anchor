@@ -133,7 +133,7 @@ export default async function OnboardingDashboardPage() {
                         </TableCell>
                          <TableCell>
                             <div>{lead.contactPerson}</div>
-                            <div className="text-xs text-muted-foreground">{lead.contactEmail}</div>
+                            <div className="text-xs text-muted-foreground">{lead.contactPhone}</div>
                         </TableCell>
                         <TableCell>
                         <Badge variant="secondary">{lead.region}</Badge>
