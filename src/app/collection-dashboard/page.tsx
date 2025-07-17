@@ -6,16 +6,22 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { PlusCircle } from "lucide-react";
-import type { Repayment, RepaymentStatus } from "@/types";
+import { PlusCircle, MoreVertical } from "lucide-react";
+import type { Repayment } from "@/types";
 import AddRepaymentDialog from "@/components/add-repayment-dialog";
 import StatusBadge from "@/components/status-badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function CollectionDashboardPage() {
     const [repayments, setRepayments] = useState<Repayment[]>([]);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const { toast } = useToast();
 
     const formatCurrency = (amount?: number) => {
         if (typeof amount !== 'number') return "N/A";
@@ -32,6 +38,15 @@ export default function CollectionDashboardPage() {
         };
         setRepayments(prev => [...prev, newRepayment]);
     };
+
+    const handleResendLink = (invoiceId: string) => {
+        toast({ title: "Link Resent", description: `A new repayment link for invoice #${invoiceId} has been sent.` });
+    };
+
+    const handleAmountPaid = (repaymentId: string) => {
+        // Placeholder for a future dialog to enter paid amount
+        toast({ title: "Action Required", description: "Functionality to update paid amount will be added." });
+    }
 
     return (
         <>
@@ -62,7 +77,7 @@ export default function CollectionDashboardPage() {
                                     <TableHead>Amount Repaid</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Link</TableHead>
-                                    <TableHead>Action</TableHead>
+                                    <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -74,14 +89,28 @@ export default function CollectionDashboardPage() {
                                             <TableCell>{repayment.dueDate}</TableCell>
                                             <TableCell>{repayment.contactNumber}</TableCell>
                                             <TableCell>{formatCurrency(repayment.amountRepaid)}</TableCell>
-                                            <TableCell><StatusBadge status={repayment.status as any} /></TableCell>
+                                            <TableCell><StatusBadge status={repayment.status} /></TableCell>
                                             <TableCell>
                                                 <Button variant="link" asChild className="p-0 h-auto">
                                                     <a href={repayment.link} target="_blank" rel="noopener noreferrer">View Link</a>
                                                 </Button>
                                             </TableCell>
-                                            <TableCell>
-                                                <Button variant="outline" size="sm">Follow Up</Button>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => handleResendLink(repayment.invoiceId)}>
+                                                            Resend Link
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleAmountPaid(repayment.id)}>
+                                                            Amount Paid
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </TableCell>
                                         </TableRow>
                                     ))
