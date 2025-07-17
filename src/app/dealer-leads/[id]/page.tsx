@@ -22,7 +22,8 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
     const { user } = useAuth();
     
     // Find the initial lead data
-    const initialLead = React.useMemo(() => dealerLeads.find(l => l.id === params.id), [params.id]);
+    const resolvedParams = React.use(params);
+    const initialLead = React.useMemo(() => dealerLeads.find(l => l.id === resolvedParams.id), [resolvedParams.id]);
 
     const [lead, setLead] = React.useState<DealerLead | undefined>(initialLead);
     const [newComment, setNewComment] = React.useState("");
