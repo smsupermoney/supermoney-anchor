@@ -43,6 +43,7 @@ export default async function DealerLeadsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Dealer Name</TableHead>
+                  <TableHead>Contact Person</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Region</TableHead>
                   <TableHead>Created At</TableHead>
@@ -51,11 +52,15 @@ export default async function DealerLeadsPage() {
               </TableHeader>
               <TableBody>
                 {leads.map((lead) => (
-                  <TableRow key={lead.id} className="cursor-pointer">
+                  <TableRow key={lead.id} className="cursor-pointer hover:bg-muted">
                     <TableCell className="font-medium">
                       <Link href={`/dealer-leads/${lead.id}`} className="text-primary hover:underline">
                         {lead.dealerName}
                       </Link>
+                    </TableCell>
+                    <TableCell>
+                        <div>{lead.contactPerson}</div>
+                        <div className="text-xs text-muted-foreground">{lead.contactEmail}</div>
                     </TableCell>
                     <TableCell>{lead.location}</TableCell>
                     <TableCell>

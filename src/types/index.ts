@@ -126,6 +126,8 @@ export type DealerLead = {
     id: string;
     dealerName: string;
     contactPerson: string;
+    contactEmail: string;
+    contactPhone: string;
     businessType: string;
     location: string;
     region: string;

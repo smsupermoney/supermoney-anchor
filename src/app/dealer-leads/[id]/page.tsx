@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ProgressTracker from "@/components/progress-tracker";
 import { dealerLeads, dealerOnboardingStatuses } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal } from "lucide-react";
+import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -207,6 +207,16 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Contact Person</span>
                                 <span className="font-medium">{lead.contactPerson}</span>
+                            </div>
+                            <Separator />
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground flex items-center gap-2"><Mail className="h-3 w-3"/> Email</span>
+                                <span className="font-medium">{lead.contactEmail}</span>
+                            </div>
+                             <Separator />
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground flex items-center gap-2"><Phone className="h-3 w-3"/> Phone</span>
+                                <span className="font-medium">{lead.contactPhone}</span>
                             </div>
                              <Separator />
                             <div className="flex justify-between">

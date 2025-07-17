@@ -46,7 +46,7 @@ const getRoleBasedStats = (leads: DealerLead[], userSubRole: UserSubRole | undef
 
     switch (userSubRole) {
         case 'sales_person':
-            stats.push({ title: "My Created Leads", value: leads.filter(l => l.createdBy === 'sales_person_1').length, icon: Building });
+            stats.push({ title: "My Created Leads", value: leads.filter(l => l.createdBy === 'Sales Person').length, icon: Building });
             stats.push({ title: "Pending My Action", value: getActionableLeads(leads, userSubRole).length, icon: ArrowRight });
             break;
         case 'sales_manager':
@@ -116,7 +116,7 @@ export default async function OnboardingDashboardPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Dealer Name</TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead>Contact Person</TableHead>
                   <TableHead>Region</TableHead>
                   <TableHead>Created At</TableHead>
                   <TableHead>Current Status</TableHead>
@@ -131,7 +131,10 @@ export default async function OnboardingDashboardPage() {
                             {lead.dealerName}
                         </Link>
                         </TableCell>
-                        <TableCell>{lead.location}</TableCell>
+                         <TableCell>
+                            <div>{lead.contactPerson}</div>
+                            <div className="text-xs text-muted-foreground">{lead.contactEmail}</div>
+                        </TableCell>
                         <TableCell>
                         <Badge variant="secondary">{lead.region}</Badge>
                         </TableCell>
