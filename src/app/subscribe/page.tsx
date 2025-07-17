@@ -11,18 +11,20 @@ const features = [
     "Real-time progress tracking and reporting",
     "Automated notifications and escalations",
     "Seamless integration with existing systems",
+    "Track external lender dealers, Limits and Invoices",
+    "External Dealer Payments tracking"
 ];
 
 export default function SubscribePage() {
     return (
         <>
-            <PageHeader title="Subscribe to premium" />
+            <PageHeader title="Subscribe to Premium" />
             <div className="mt-6 flex justify-center">
                 <Card className="w-full max-w-2xl shadow-lg">
                     <CardHeader className="text-center bg-muted/30 p-8 rounded-t-lg">
                         <CardTitle className="text-3xl font-bold text-primary">Unlock Your Growth Potential</CardTitle>
                         <CardDescription className="text-md text-muted-foreground pt-2">
-                            Streamline your dealer network expansion with our powerful, automated onboarding solution.
+                            Streamline your dealer network expansion with our premium enterprise solutions.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-8 space-y-8">
