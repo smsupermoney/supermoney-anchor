@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export default function SupermoneyLogo({
@@ -12,7 +13,7 @@ export default function SupermoneyLogo({
     <img
       src="/assets/images/supermoney-logo.png" // path from public/
       alt="Logo"
-      style={{ width: '150px', height: 'auto', margin: 'auto' }}
+      style={{ width: '150px', height: 'auto' }}
     />
   );
 }
