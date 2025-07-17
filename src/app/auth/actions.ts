@@ -7,13 +7,13 @@ import { getUserByEmail, clearUserAuthToken } from '@/lib/data';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/lib/session';
 import { cookies } from 'next/headers';
-import type { User } from '@/types';
+import type { User, UserRole } from '@/types';
 
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
-  let userRole: "Admin" | "Anchor" | "Dealer" | undefined;
+  let userRole: UserRole | undefined;
   try {
     const { email, password } = z
       .object({
@@ -53,10 +53,17 @@ export async function authenticate(
     return 'An unexpected error occurred.';
   }
 
-  if (userRole === 'Admin') {
-    redirect('/add-program');
-  } else {
-    redirect('/dashboard');
+  switch (userRole) {
+    case 'Admin':
+      redirect('/add-program');
+      break;
+    case 'SuperMoney User':
+      redirect('/add-invoice');
+      break;
+    case 'Anchor':
+    default:
+      redirect('/dashboard');
+      break;
   }
 }
 
