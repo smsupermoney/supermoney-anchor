@@ -18,6 +18,7 @@ import type { DealerLead } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import SiteVisitDialog from '@/components/site-visit-dialog';
 
 export default function DealerLeadDetailPage({ params }: { params: { id: string } }) {
     const { user } = useAuth();
@@ -28,6 +29,7 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
 
     const [lead, setLead] = React.useState<DealerLead | undefined>(initialLead);
     const [newComment, setNewComment] = React.useState("");
+    const [isSiteVisitDialogOpen, setIsSiteVisitDialogOpen] = React.useState(false);
 
     if (!lead) {
         notFound();
@@ -59,6 +61,24 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
             });
             setNewComment("");
         }
+    };
+    
+    const handleSiteVisitSubmit = (data: { notes: string; images: File[] }) => {
+        // In a real app, you would upload the images and save the report data.
+        // For this POC, we'll just update the local state to reflect the change.
+        console.log("Site Visit Report Submitted:", data);
+        setLead(prevLead => {
+            if (!prevLead) return;
+            return {
+                ...prevLead,
+                status: 'Site Visit Done',
+                siteVisitReport: {
+                    notes: data.notes,
+                    images: data.images.map(f => URL.createObjectURL(f)) // Create blob URLs for preview
+                }
+            };
+        });
+        setIsSiteVisitDialogOpen(false);
     };
 
 
@@ -98,7 +118,7 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                             )}
                             {canManageDocs && <p className="text-sm text-muted-foreground">Please upload required documents below.</p>}
                             {canVerifyDocs && <Button><Check className="mr-2 h-4 w-4" />Mark All Documents as Verified</Button>}
-                            {canDoSiteVisit && <Button><Send className="mr-2 h-4 w-4" />Submit Site Visit Report</Button>}
+                            {canDoSiteVisit && <Button onClick={() => setIsSiteVisitDialogOpen(true)}><Send className="mr-2 h-4 w-4" />Submit Site Visit Report</Button>}
                             {canApproveLimit && <Button><Check className="mr-2 h-4 w-4" />Approve Limit & Send for Activation</Button>}
                             {canActivateDealer && <Button><Check className="mr-2 h-4 w-4" />Generate Code & Activate Dealer</Button>}
 
@@ -270,6 +290,14 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                     </Card>
                 </div>
             </div>
+
+            {isSiteVisitDialogOpen && (
+                <SiteVisitDialog
+                    open={isSiteVisitDialogOpen}
+                    onOpenChange={setIsSiteVisitDialogOpen}
+                    onSubmit={handleSiteVisitSubmit}
+                />
+            )}
         </>
     );
 }
