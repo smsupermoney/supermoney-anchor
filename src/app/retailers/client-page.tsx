@@ -6,7 +6,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, Upload, UploadCloud, X as XIcon } from "lucide-react";
+import { X as XIcon } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/select";
 import type { Dealer } from "@/types";
 import DealerDetailDialog from "@/components/dealer-detail-dialog";
-import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import { useSearchParams } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Combobox } from "@/components/ui/combobox";
 
 type RetailersClientPageProps = {
   initialDealers: Dealer[];
@@ -50,6 +50,11 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
 
   const [filters, setFilters] = useState({...initialFilters, lender: lenderQuery || ""});
   const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
+  
+  const dealerOptions = useMemo(() => {
+      const uniqueNames = new Set(initialDealers.map(d => d.name));
+      return Array.from(uniqueNames).map(name => ({ value: name, label: name }));
+  }, [initialDealers]);
 
   useEffect(() => {
     const lender = searchParams.get('lender');
@@ -95,11 +100,14 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Input
-              placeholder="Filter by name..."
-              value={filters.name}
-              onChange={(e) => handleFilterChange("name", e.target.value)}
-              className="h-9 max-w-40"
+            <Combobox
+                options={dealerOptions}
+                value={filters.name}
+                onChange={(value) => handleFilterChange("name", value)}
+                placeholder="Filter by name..."
+                searchPlaceholder="Search dealer..."
+                emptyMessage="No dealer found."
+                className="max-w-48"
             />
             <Input
               placeholder="Filter by lender..."
