@@ -146,6 +146,22 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             {children}
           </div>
         </main>
+         <footer className="border-t bg-background px-4 py-3 text-xs text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div className="text-center sm:text-left">
+                    <p className="font-semibold text-foreground">COPYRIGHT © 2025</p>
+                    <p><a href="#" className="text-primary hover:underline">Supermoney (GetClarity Fintech Services Pvt Ltd)</a> All rights reserved.</p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center gap-x-4 gap-y-1 text-center sm:text-right">
+                    <a href="#" className="hover:text-primary hover:underline">Linkedin</a>
+                    <div className="flex items-center gap-4">
+                        <a href="#" className="hover:text-primary hover:underline">Privacy Policy</a>
+                        <a href="#" className="hover:text-primary hover:underline">Disclaimer</a>
+                        <a href="#" className="hover:text-primary hover:underline">Terms and Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
       </SidebarInset>
     </SidebarProvider>
   );
