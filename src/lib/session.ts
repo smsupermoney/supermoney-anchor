@@ -3,7 +3,6 @@ import { unsealData } from 'iron-session';
 import { cookies } from 'next/headers';
 import type { IronSessionOptions } from 'iron-session';
 import type { User } from '@/types';
-import { unstable_noStore as noStore } from 'next/cache';
 
 export const sessionOptions: IronSessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD as string,
@@ -14,7 +13,6 @@ export const sessionOptions: IronSessionOptions = {
 };
 
 export async function getSession(): Promise<User | null> {
-  noStore();
   const cookieStore = cookies();
   const encryptedSession = cookieStore.get(sessionOptions.cookieName)?.value;
 
