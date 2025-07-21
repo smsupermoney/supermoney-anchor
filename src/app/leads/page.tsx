@@ -3,24 +3,14 @@ import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getSession } from "@/lib/session";
-import { collection, getDocs } from "firebase/firestore";
-import { db2 } from "@/lib/firebase";
+import { getAnchorLeads } from "@/lib/data";
 import { unstable_noStore as noStore } from 'next/cache';
-import type { AnchorLead } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/status-badge";
-
-async function getAnchorLeads(): Promise<AnchorLead[]> {
-    const anchorCol = collection(db2, 'anchors');
-    const anchorSnapshot = await getDocs(anchorCol);
-    return anchorSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AnchorLead));
-}
-
 
 export default async function LeadsPage() {
   noStore();
   const session = await getSession();
-  const isAdmin = session?.roleType === 'Admin';
   
   const anchorLeads = await getAnchorLeads();
 
@@ -29,7 +19,7 @@ export default async function LeadsPage() {
       <PageHeader title="Leads" />
       <Card>
         <CardHeader>
-            <CardTitle>All Leads</CardTitle>
+            <CardTitle>All Anchor Leads</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="relative w-full overflow-auto">
@@ -40,6 +30,7 @@ export default async function LeadsPage() {
                   <TableHead>Address</TableHead>
                   <TableHead>Annual Turnover</TableHead>
                   <TableHead>Industry</TableHead>
+                  <TableHead>GSTIN</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -52,6 +43,7 @@ export default async function LeadsPage() {
                         <Badge variant="secondary">{lead.annualTurnover}</Badge>
                     </TableCell>
                     <TableCell>{lead.industry}</TableCell>
+                    <TableCell className="font-mono text-xs">{lead.gstin || 'N/A'}</TableCell>
                     <TableCell>
                         <StatusBadge status={lead.status as any} />
                     </TableCell>

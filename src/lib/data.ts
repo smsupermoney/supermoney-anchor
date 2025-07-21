@@ -1,16 +1,18 @@
 
-
-
-
-
-import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus } from '@/types';
-import { db1 } from './firebase';
+import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus, AnchorLead } from '@/types';
+import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // --- API FUNCTIONS ---
 
 // Functions to fetch data from Firestore
+
+export async function getAnchorLeads(): Promise<AnchorLead[]> {
+    const anchorCol = collection(db2, 'anchors');
+    const anchorSnapshot = await getDocs(anchorCol);
+    return anchorSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AnchorLead));
+}
 
 export async function getUsers(): Promise<User[]> {
   const usersCol = collection(db1, 'users');
@@ -336,9 +338,3 @@ export const dealerLeads: DealerLead[] = [
         createdAt: '2024-07-10',
     },
 ];
-
-
-
-
-  
-

@@ -4,7 +4,6 @@
 import { useMemo, useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { leads } from "@/lib/data";
 import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail, ArrowRight, CalendarClock } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
-import type { Invoice, Program, Dealer } from "@/types";
+import type { Invoice, Program, Dealer, AnchorLead } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays, startOfDay, addDays } from "date-fns";
@@ -24,9 +23,10 @@ type DashboardClientProps = {
   initialPrograms: Program[];
   initialInvoices: Invoice[];
   dealers: Dealer[];
+  anchorLeads: AnchorLead[];
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices, dealers }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, dealers, anchorLeads }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [programs] = useState(initialPrograms);
   const [invoices] = useState(initialInvoices);
@@ -66,11 +66,11 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const dealersInOverdue = new Set(overdueInvoices.map(i => i.dealerName)).size;
   
   // Lead Summary Calculations
-  const leadsLast7Days = leads.filter(l => new Date(l.createdAt) >= sevenDaysAgo && new Date(l.createdAt) <= today);
-  const totalPendingLeads = leads.filter(l => !['PSD Completed', 'Dropped'].includes(l.status)).length;
-  const convertedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'PSD Completed').length;
-  const needsAttentionLeads = leads.filter(l => ['KYC', 'Credit', 'Operations'].includes(l.status)).length;
-  const rejectedLeadsLast7Days = leads.filter(l => l.status === 'Dropped').length;
+  const leadsLast7Days = anchorLeads.filter(l => new Date(l.createdAt) >= sevenDaysAgo && new Date(l.createdAt) <= today);
+  const totalPendingLeads = anchorLeads.filter(l => !['PSD Completed', 'Dropped', 'Active'].includes(l.status)).length;
+  const convertedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'Active' || l.status === 'PSD Completed').length;
+  const needsAttentionLeads = anchorLeads.filter(l => ['KYC', 'Credit', 'Operations'].includes(l.status)).length;
+  const rejectedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'Dropped').length;
 
   const disbursedAmountLast7Days = invoicesLast7Days
     .filter(i => i.status === 'Disbursed')
