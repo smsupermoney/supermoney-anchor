@@ -8,13 +8,18 @@ import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // Functions to fetch data from Firestore
 
-export async function getMomentumDealerLeads(): Promise<MomentumDealerLead[]> {
+export async function getMomentumDealerLeads(anchorId?: string): Promise<MomentumDealerLead[]> {
     if (!db2) {
       console.warn("Database 'db2' is not configured. Returning empty array for Momentum leads.");
       return [];
     }
-    const dealersCol = collection(db2, 'dealers');
-    const dealerSnapshot = await getDocs(dealersCol);
+    let dealerQuery = query(collection(db2, 'dealers'));
+
+    if (anchorId) {
+        dealerQuery = query(collection(db2, 'dealers'), where('anchorId', '==', anchorId));
+    }
+    
+    const dealerSnapshot = await getDocs(dealerQuery);
     return dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MomentumDealerLead));
 }
 

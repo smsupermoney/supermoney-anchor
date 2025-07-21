@@ -12,7 +12,7 @@ export default async function Dashboard() {
   const [{ programs, invoices }, dealers, momentumLeads] = await Promise.all([
     getPrograms(anchorId),
     getDealers(anchorId),
-    getMomentumDealerLeads(),
+    getMomentumDealerLeads(anchorId),
   ]);
   
   return (

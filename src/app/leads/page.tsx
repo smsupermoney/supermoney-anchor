@@ -11,8 +11,9 @@ import StatusBadge from "@/components/status-badge";
 export default async function LeadsPage() {
   noStore();
   const session = await getSession();
+  const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
   
-  const momentumLeads = await getMomentumDealerLeads();
+  const momentumLeads = await getMomentumDealerLeads(anchorId);
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-IN');
