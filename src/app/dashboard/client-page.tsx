@@ -383,6 +383,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                     <TableHeader>
                     <TableRow>
                         <TableHead>Invoice #</TableHead>
+                        <TableHead>UTR #</TableHead>
                         <TableHead>Dealer</TableHead>
                         <TableHead>Lender</TableHead>
                         <TableHead>Date</TableHead>
@@ -401,6 +402,16 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                                             <div className="truncate max-w-[100px]">{invoice.invoiceNumber}</div>
                                         </TooltipTrigger>
                                         <TooltipContent><p>{invoice.invoiceNumber}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </TableCell>
+                            <TableCell className="p-2">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="truncate max-w-[120px]">{invoice.utrNumber || '-'}</div>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{invoice.utrNumber || 'N/A'}</p></TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
                             </TableCell>
