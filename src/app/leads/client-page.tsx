@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -7,16 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/status-badge";
 import type { MomentumDealerLead } from "@/types";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { X as XIcon } from "lucide-react";
+import { X as XIcon, ChevronDown } from "lucide-react";
 import { spokeStatuses } from "@/lib/data";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 
 type LeadsClientPageProps = {
     initialLeads: MomentumDealerLead[];
@@ -29,7 +32,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     city: "",
     zone: "",
     leadSource: "",
-    status: "",
+    status: [] as string[],
   };
   const [filters, setFilters] = useState(initialFilters);
   
@@ -47,8 +50,17 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     return 'View Details';
   };
 
-  const handleFilterChange = (filterName: keyof typeof filters, value: string) => {
+  const handleFilterChange = (filterName: keyof Omit<typeof filters, 'status'>, value: string) => {
     setFilters((prev) => ({ ...prev, [filterName]: value }));
+  };
+
+  const handleStatusFilterChange = (status: string) => {
+    setFilters((prev) => {
+      const newStatuses = prev.status.includes(status)
+        ? prev.status.filter((s) => s !== status)
+        : [...prev.status, status];
+      return { ...prev, status: newStatuses };
+    });
   };
 
   const clearFilters = () => {
@@ -56,17 +68,21 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   };
   
   const hasActiveFilters = useMemo(() => {
-    return Object.values(filters).some(val => val !== "");
+    return Object.values(filters).some(val => Array.isArray(val) ? val.length > 0 : val !== "");
   }, [filters]);
 
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
+      const statusCondition =
+        filters.status.length === 0 ||
+        filters.status.some(s => s.toLowerCase() === lead.status.toLowerCase());
+
       return (
         lead.name.toLowerCase().includes(filters.name.toLowerCase()) &&
         lead.city.toLowerCase().includes(filters.city.toLowerCase()) &&
         lead.zone.toLowerCase().includes(filters.zone.toLowerCase()) &&
         lead.leadSource.toLowerCase().includes(filters.leadSource.toLowerCase()) &&
-        (filters.status === "" || lead.status === filters.status)
+        statusCondition
       );
     });
   }, [filters, leads]);
@@ -103,22 +119,53 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
               onChange={(e) => handleFilterChange("leadSource", e.target.value)}
               className="h-9 max-w-40"
             />
-            <Select
-              value={filters.status}
-              onValueChange={(value) => handleFilterChange("status", value === "all" ? "" : value)}
-            >
-              <SelectTrigger className="h-9 max-w-48 data-[placeholder]:text-muted-foreground">
-                <SelectValue placeholder="Filter by status..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="h-9 max-w-60">
+                  Status
+                  {filters.status.length > 0 && (
+                    <>
+                      <Separator orientation="vertical" className="mx-2 h-4" />
+                      <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+                        {filters.status.length}
+                      </Badge>
+                      <div className="hidden space-x-1 lg:flex">
+                        {filters.status.length > 2 ? (
+                          <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                            {filters.status.length} selected
+                          </Badge>
+                        ) : (
+                          filters.status.map((status) => (
+                            <Badge
+                              variant="secondary"
+                              key={status}
+                              className="rounded-sm px-1 font-normal"
+                            >
+                              {status}
+                            </Badge>
+                          ))
+                        )}
+                      </div>
+                    </>
+                  )}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="start">
+                <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 {spokeStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
+                  <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={filters.status.includes(status)}
+                    onCheckedChange={() => handleStatusFilterChange(status)}
+                    onSelect={(e) => e.preventDefault()} // prevent menu from closing
+                  >
                     {status}
-                  </SelectItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
              {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearFilters}>
