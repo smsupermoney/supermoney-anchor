@@ -69,6 +69,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const totalLeads = momentumLeads.length;
   const newLeadsLast7Days = momentumLeads.filter(l => new Date(l.createdAt) >= sevenDaysAgo && new Date(l.createdAt) <= today).length;
   const followUpLeads = momentumLeads.filter(l => l.status === 'Follow up').length;
+  const onboardingLeads = momentumLeads.filter(l => l.status === 'Onboarding').length;
+  const disbursedLeads = momentumLeads.filter(l => l.status === 'Disbursed').length;
+  const rejectedLeads = momentumLeads.filter(l => l.status === 'Rejected').length;
+
 
   const disbursedAmountLast7Days = invoicesLast7Days
     .filter(i => i.status === 'Disbursed')
@@ -237,22 +241,34 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
             <Card className="h-full">
                 <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                     <CardTitle className="text-sm font-semibold">Lead Summary</CardTitle>
-                    <Users className="w-4 h-4 text-muted-foreground" />
+                    <Target className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-y-2">
-                        <div className="flex flex-col items-center">
+                    <div className="grid grid-cols-3 gap-2">
+                        <Link href="/leads" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
                             <span className="text-lg font-bold">{totalLeads}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" /> Total Leads</span>
-                        </div>
-                        <div className="flex flex-col items-center">
+                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><Users className="w-3 h-3" /> Total Leads</span>
+                        </Link>
+                         <Link href="/leads" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
                             <span className="text-lg font-bold">{newLeadsLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> New (7d)</span>
-                        </div>
-                        <div className="flex flex-col items-center">
+                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><UserCheck className="w-3 h-3" /> New (7d)</span>
+                        </Link>
+                        <Link href="/leads?status=Follow+up" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
                             <span className="text-lg font-bold">{followUpLeads}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Follow Up</span>
-                        </div>
+                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><Activity className="w-3 h-3" /> Follow Up</span>
+                        </Link>
+                         <Link href="/leads?status=Onboarding" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
+                            <span className="text-lg font-bold">{onboardingLeads}</span>
+                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><Users className="w-3 h-3" /> Onboarding</span>
+                        </Link>
+                        <Link href="/leads?status=Disbursed" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
+                            <span className="text-lg font-bold">{disbursedLeads}</span>
+                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><HandCoins className="w-3 h-3" /> Disbursed</span>
+                        </Link>
+                        <Link href="/leads?status=Rejected" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
+                            <span className="text-lg font-bold">{rejectedLeads}</span>
+                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><UserX className="w-3 h-3" /> Rejected</span>
+                        </Link>
                     </div>
                 </CardContent>
             </Card>
