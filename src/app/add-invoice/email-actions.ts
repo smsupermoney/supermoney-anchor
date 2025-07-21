@@ -7,6 +7,7 @@ import { type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-f
 type EmailData = {
     fileName: string;
     extractedData?: ExtractInvoiceDataOutput;
+    disburseAmount?: number;
     error?: string;
     fileContent?: string; // Base64 data URI
 };
@@ -50,7 +51,8 @@ function generateEmailBody(data: EmailData[]): string {
             html += `
                 <tr><td style="width: 30%;"><strong>Dealer Name</strong></td><td>${item.extractedData.dealerName || 'Not Detected'}</td></tr>
                 <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
-                <tr><td><strong>Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
+                <tr><td><strong>Invoice Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
+                <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>
                 <tr><td><strong>Due Date</strong></td><td>${item.extractedData.dueDate || 'Not Detected'}</td></tr>
             `;
         } else if (item.error) {

@@ -12,12 +12,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, File as FileIcon, X, Loader2, Wand2 } from "lucide-react";
+import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
 import { Card, CardContent } from "./ui/card";
 import { sendInvoiceEmail } from "@/app/add-invoice/email-actions";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
@@ -28,6 +30,7 @@ type UploadedFile = {
   file: File;
   preview: string;
   extractedData?: ExtractInvoiceDataOutput;
+  disburseAmount?: string;
   isLoading: boolean;
   error?: string;
 };
@@ -66,7 +69,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
       const result = await extractInvoiceData({ documentDataUri });
       
       setUploadedFiles(prev => prev.map((f, i) => 
-        i === index ? { ...f, extractedData: result, isLoading: false } : f
+        i === index ? { ...f, extractedData: result, isLoading: false, disburseAmount: result.amount.toString() } : f
       ));
 
     } catch (error) {
@@ -91,6 +94,12 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
         handleAIExtraction(newFile.file, uploadedFiles.length + i);
       });
     }
+  };
+
+  const handleDisburseAmountChange = (index: number, value: string) => {
+    setUploadedFiles(prev => prev.map((f, i) => 
+        i === index ? { ...f, disburseAmount: value } : f
+    ));
   };
 
   const removeFile = (index: number) => {
@@ -141,8 +150,9 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
       const emailDataPromises = uploadedFiles.map(async (upFile) => ({
           fileName: upFile.file.name,
           extractedData: upFile.extractedData,
+          disburseAmount: upFile.disburseAmount ? Number(upFile.disburseAmount) : undefined,
           error: upFile.error,
-          fileContent: await fileToDataUri(upFile.file), // Pass file content as data URI
+          fileContent: await fileToDataUri(upFile.file),
       }));
       
       const emailData = await Promise.all(emailDataPromises);
@@ -181,7 +191,7 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Raise Invoice with AI</DialogTitle>
           <DialogDescription>
@@ -223,9 +233,9 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
                   <Card key={index}>
                     <CardContent className="p-3">
                       <div className="flex items-start justify-between">
-                         <div className="flex items-start gap-3">
+                         <div className="flex items-start gap-3 flex-grow">
                             <FileIcon className="w-5 h-5 mt-1 shrink-0 text-muted-foreground" />
-                            <div className="text-sm">
+                            <div className="text-sm flex-grow">
                                 <p className="font-semibold truncate max-w-48" title={upFile.file.name}>{upFile.file.name}</p>
                                 {upFile.isLoading ? (
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
@@ -235,12 +245,28 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
                                 ) : upFile.error ? (
                                     <p className="text-xs text-destructive mt-1">{upFile.error}</p>
                                 ) : (
+                                  <>
                                     <div className="grid grid-cols-2 gap-x-4 text-xs text-muted-foreground mt-2">
                                         <p><span className="font-medium text-foreground">Dealer:</span> {upFile.extractedData?.dealerName || 'N/A'}</p>
-                                        <p><span className="font-medium text-foreground">Amount:</span> {formatCurrency(upFile.extractedData?.amount)}</p>
+                                        <p><span className="font-medium text-foreground">Inv. Amount:</span> {formatCurrency(upFile.extractedData?.amount)}</p>
                                         <p><span className="font-medium text-foreground">Type:</span> {upFile.extractedData?.documentType || 'N/A'}</p>
                                         <p><span className="font-medium text-foreground">Due Date:</span> {upFile.extractedData?.dueDate || 'N/A'}</p>
                                     </div>
+                                    <div className="mt-2">
+                                      <Label htmlFor={`disburse-amount-${index}`} className="text-xs font-medium">Disburse Amount</Label>
+                                      <div className="relative">
+                                          <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground"/>
+                                          <Input 
+                                            id={`disburse-amount-${index}`}
+                                            type="number"
+                                            className="h-8 pl-6 text-xs"
+                                            value={upFile.disburseAmount}
+                                            onChange={(e) => handleDisburseAmountChange(index, e.target.value)}
+                                            placeholder="Enter amount"
+                                          />
+                                      </div>
+                                    </div>
+                                  </>
                                 )}
                             </div>
                          </div>
