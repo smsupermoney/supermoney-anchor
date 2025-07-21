@@ -77,6 +77,10 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
                                 <span className="text-muted-foreground">Lender</span>
                                 <span className="font-medium">{invoice.lender}</span>
                             </div>
+                             <div className="flex justify-between">
+                                <span className="text-muted-foreground">UTR #</span>
+                                <span className="font-medium">{invoice.utrNumber || 'N/A'}</span>
+                            </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Invoice Date</span>
                                 <span className="font-medium">{invoice.date}</span>

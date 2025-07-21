@@ -297,6 +297,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
               <TableHeader>
                 <TableRow>
                   <TableHead>Invoice #</TableHead>
+                  <TableHead>UTR #</TableHead>
                   <TableHead>Dealer</TableHead>
                   {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
@@ -317,6 +318,16 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                             <div className="truncate max-w-[100px]">{invoice.invoiceNumber}</div>
                           </TooltipTrigger>
                           <TooltipContent><p>{invoice.invoiceNumber}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px]">{invoice.utrNumber || '-'}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.utrNumber || 'N/A'}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>

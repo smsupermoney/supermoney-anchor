@@ -3,6 +3,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
@@ -32,6 +33,7 @@ export type Invoice = {
   date: string;
   dueDate: string;
   eWayBillNumber: string;
+  utrNumber?: string;
   documentUrl?: string;
   status: InvoiceStatus;
   lender: string;

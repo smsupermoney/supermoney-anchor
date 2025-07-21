@@ -230,6 +230,7 @@ export const dummyInvoices = [
     "date": "2024-07-01",
     "dueDate": "2024-07-15",
     "eWayBillNumber": "EWB112233",
+    "utrNumber": "UTR123456789012",
     "status": "Disbursed",
     "lender": "Supermoney Finance",
     "overdueAmount": 150000,
@@ -260,6 +261,7 @@ export const dummyInvoices = [
     "date": "2024-07-10",
     "dueDate": "2024-08-09",
     "eWayBillNumber": "EWB223344",
+    "utrNumber": "UTR234567890123",
     "status": "Sent to Lender",
     "lender": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
     "overdueAmount": 0,
@@ -290,6 +292,7 @@ export const dummyInvoices = [
     "date": "2024-06-25",
     "dueDate": "2024-07-10",
     "eWayBillNumber": "EWB334456",
+    "utrNumber": "UTR345678901234",
     "status": "Disbursed",
     "lender": "ADITYA BIRLA CAPITAL LTD",
     "overdueAmount": 250000,
@@ -353,6 +356,7 @@ export const sampleInvoices = [
         date: "2024-01-01",
         dueDate: "2024-02-01",
         eWayBillNumber: "EWB_SAMPLE_123",
+        utrNumber: "UTR_SAMPLE_123",
         status: "Initiated",
         lender: "Sample Finance Inc.",
         overdueAmount: 0,
@@ -360,4 +364,5 @@ export const sampleInvoices = [
 ];
 
     
+
 
