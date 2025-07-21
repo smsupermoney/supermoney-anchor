@@ -12,9 +12,10 @@ import { AlertCircle, Upload, File as FileIcon, X } from "lucide-react";
 
 type UploadExcelFormProps = {
     action: (formData: FormData) => Promise<{ message?: string; error?: string }>;
+    onSuccess?: () => void;
 };
 
-export default function UploadExcelForm({ action }: UploadExcelFormProps) {
+export default function UploadExcelForm({ action, onSuccess }: UploadExcelFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -46,7 +47,6 @@ export default function UploadExcelForm({ action }: UploadExcelFormProps) {
         }
         
         const formData = new FormData(event.currentTarget);
-        // The file is already in the formData due to the input element
         
         setError(null);
         setIsSubmitting(true);
@@ -62,6 +62,9 @@ export default function UploadExcelForm({ action }: UploadExcelFormProps) {
                 });
                 formRef.current?.reset();
                 clearFile();
+                if (onSuccess) {
+                    onSuccess();
+                }
             }
         } catch (e) {
             setError("An unexpected error occurred. Please check the console for more details.");
@@ -83,7 +86,7 @@ export default function UploadExcelForm({ action }: UploadExcelFormProps) {
                         disabled={isSubmitting}
                         ref={fileInputRef}
                         onChange={handleFileChange}
-                        className="sr-only" // Hide the default input
+                        className="sr-only"
                     />
                     <Label 
                         htmlFor="excel-file" 
