@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail, ArrowRight, CalendarClock } from "lucide-react";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail, ArrowRight, CalendarClock, Activity } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
-import type { Invoice, Program, Dealer, AnchorLead } from "@/types";
+import type { Invoice, Program, Dealer, MomentumDealerLead } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays, startOfDay, addDays } from "date-fns";
@@ -23,10 +23,10 @@ type DashboardClientProps = {
   initialPrograms: Program[];
   initialInvoices: Invoice[];
   dealers: Dealer[];
-  anchorLeads: AnchorLead[];
+  momentumLeads: MomentumDealerLead[];
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices, dealers, anchorLeads }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, dealers, momentumLeads }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [programs] = useState(initialPrograms);
   const [invoices] = useState(initialInvoices);
@@ -65,12 +65,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const overdueInvoicesCount = overdueInvoices.length;
   const dealersInOverdue = new Set(overdueInvoices.map(i => i.dealerName)).size;
   
-  // Lead Summary Calculations
-  const leadsLast7Days = anchorLeads.filter(l => new Date(l.createdAt) >= sevenDaysAgo && new Date(l.createdAt) <= today);
-  const totalPendingLeads = anchorLeads.filter(l => !['PSD Completed', 'Dropped', 'Active'].includes(l.status)).length;
-  const convertedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'Active' || l.status === 'PSD Completed').length;
-  const needsAttentionLeads = anchorLeads.filter(l => ['KYC', 'Credit', 'Operations'].includes(l.status)).length;
-  const rejectedLeadsLast7Days = leadsLast7Days.filter(l => l.status === 'Dropped').length;
+  // Lead Summary Calculations from momentumLeads
+  const totalLeads = momentumLeads.length;
+  const newLeadsLast7Days = momentumLeads.filter(l => new Date(l.createdAt) >= sevenDaysAgo && new Date(l.createdAt) <= today).length;
+  const followUpLeads = momentumLeads.filter(l => l.status === 'Follow up').length;
 
   const disbursedAmountLast7Days = invoicesLast7Days
     .filter(i => i.status === 'Disbursed')
@@ -244,20 +242,16 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                 <CardContent className="p-3 pt-0">
                     <div className="grid grid-cols-2 gap-y-2">
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">{totalPendingLeads}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                            <span className="text-lg font-bold">{totalLeads}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" /> Total Leads</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">{convertedLeadsLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> Converted (7d)</span>
+                            <span className="text-lg font-bold">{newLeadsLast7Days}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCheck className="w-3 h-3" /> New (7d)</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">{needsAttentionLeads}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">{rejectedLeadsLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
+                            <span className="text-lg font-bold">{followUpLeads}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3" /> Follow Up</span>
                         </div>
                     </div>
                 </CardContent>

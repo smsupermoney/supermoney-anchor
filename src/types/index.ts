@@ -5,6 +5,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
@@ -196,3 +197,26 @@ export type AnchorLead = {
   status: string;
   vendorIds: string[];
 };
+
+export type MomentumDealerLead = {
+  id: string;
+  anchorId: string;
+  assignedTo: string;
+  city: string;
+  createdAt: string; // ISO date string
+  dealValue: number;
+  initialLeadDate: string; // ISO date string
+  leadDate: string; // ISO date string
+  leadId: string;
+  leadSource: string;
+  leadType: string;
+  lenderId: string;
+  name: string;
+  product: string;
+  remarks: any[];
+  spoc: string;
+  state: string;
+  status: string;
+  updatedAt: string; // ISO date string
+  zone: string;
+}

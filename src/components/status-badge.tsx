@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { InvoiceStatus, LeadStatus, Retailer, DealerOnboardingStatus, RepaymentStatus } from "@/types";
 
-type Status = Retailer['status'] | InvoiceStatus | LeadStatus | DealerOnboardingStatus | RepaymentStatus;
+type Status = Retailer['status'] | InvoiceStatus | LeadStatus | DealerOnboardingStatus | RepaymentStatus | string;
 
 type StatusBadgeProps = {
   status: Status;
@@ -31,6 +31,7 @@ const statusColors: Record<Status, string> = {
   'Operations': 'bg-teal-100 text-teal-800 border-teal-200',
   'PSD Completed': 'bg-green-100 text-green-800 border-green-200',
   'Dropped': 'bg-red-100 text-red-800 border-red-200',
+  'Follow up': 'bg-blue-100 text-blue-800 border-blue-200',
   
   // Dealer Onboarding Status
   'Lead Verified': 'bg-purple-100 text-purple-800 border-purple-200',

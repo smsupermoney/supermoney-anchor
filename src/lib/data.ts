@@ -1,5 +1,5 @@
 
-import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus, AnchorLead } from '@/types';
+import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus, MomentumDealerLead } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
@@ -8,10 +8,14 @@ import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
 // Functions to fetch data from Firestore
 
-export async function getAnchorLeads(): Promise<AnchorLead[]> {
-    const anchorCol = collection(db2, 'anchors');
-    const anchorSnapshot = await getDocs(anchorCol);
-    return anchorSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AnchorLead));
+export async function getMomentumDealerLeads(): Promise<MomentumDealerLead[]> {
+    if (!db2) {
+      console.warn("Database 'db2' is not configured. Returning empty array for Momentum leads.");
+      return [];
+    }
+    const dealersCol = collection(db2, 'dealers');
+    const dealerSnapshot = await getDocs(dealersCol);
+    return dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MomentumDealerLead));
 }
 
 export async function getUsers(): Promise<User[]> {

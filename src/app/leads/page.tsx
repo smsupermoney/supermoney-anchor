@@ -3,7 +3,7 @@ import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getSession } from "@/lib/session";
-import { getAnchorLeads } from "@/lib/data";
+import { getMomentumDealerLeads } from "@/lib/data";
 import { unstable_noStore as noStore } from 'next/cache';
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/status-badge";
@@ -12,14 +12,17 @@ export default async function LeadsPage() {
   noStore();
   const session = await getSession();
   
-  const anchorLeads = await getAnchorLeads();
+  const momentumLeads = await getMomentumDealerLeads();
+  
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-IN');
 
   return (
     <>
       <PageHeader title="Leads" />
       <Card>
         <CardHeader>
-            <CardTitle>All Anchor Leads</CardTitle>
+            <CardTitle>All Momentum Leads</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="relative w-full overflow-auto">
@@ -27,23 +30,25 @@ export default async function LeadsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Annual Turnover</TableHead>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>GSTIN</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>Zone</TableHead>
+                  <TableHead>Lead Source</TableHead>
+                  <TableHead>Deal Value</TableHead>
+                  <TableHead>Lead Date</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {anchorLeads.map((lead) => (
+                {momentumLeads.map((lead) => (
                   <TableRow key={lead.id}>
                     <TableCell className="font-medium">{lead.name}</TableCell>
-                    <TableCell>{lead.address}</TableCell>
+                    <TableCell>{lead.city}</TableCell>
+                    <TableCell>{lead.zone}</TableCell>
+                    <TableCell>{lead.leadSource}</TableCell>
                     <TableCell>
-                        <Badge variant="secondary">{lead.annualTurnover}</Badge>
+                        <Badge variant="secondary">{formatCurrency(lead.dealValue * 100000)}</Badge>
                     </TableCell>
-                    <TableCell>{lead.industry}</TableCell>
-                    <TableCell className="font-mono text-xs">{lead.gstin || 'N/A'}</TableCell>
+                    <TableCell>{formatDate(lead.leadDate)}</TableCell>
                     <TableCell>
                         <StatusBadge status={lead.status as any} />
                     </TableCell>
@@ -57,4 +62,3 @@ export default async function LeadsPage() {
     </>
   );
 }
-
