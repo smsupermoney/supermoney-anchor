@@ -1,3 +1,4 @@
+
 # Supermoney Anchor Platform - Supply Chain Finance
 
 This project is a comprehensive, enterprise-grade web application designed to manage the complexities of supply chain financing. Built with a modern technology stack, it serves as a central hub for "Anchors" (large corporations), their "Dealers" (retailers/suppliers), and internal administrative users to manage financing programs, invoices, and a complete dealer onboarding workflow.
@@ -49,63 +50,75 @@ A complete, state-driven workflow for bringing new dealers onto the platform:
 - **File Handling**: `xlsx` for Excel file processing
 - **Email**: Nodemailer for sending transactional emails
 
-## Getting Started
+## Getting Started Locally
 
 ### 1. Prerequisites
 - Node.js (v20 or later)
-- An active Firebase project
-- A Google AI (Gemini) API Key
+- An active Firebase project with Firestore enabled.
+- A Google AI (Gemini) API Key.
 
-### 2. Environment Variables
+### 2. Create the Environment File
+The most common reason for login issues on a local machine is a missing or incorrect `.env` file. This file stores all the necessary credentials for the application to work.
 
-Create a `.env` file in the root of the project and populate it with your credentials. This file is crucial for the application to connect to external services.
+**Create a file named `.env` in the root of your project directory.** Copy and paste the following content into it, then fill in the values with your actual credentials.
 
 ```env
-# Firebase Credentials (from your Firebase project settings)
-NEXT_PUBLIC_FIREBASE_API_KEY="your-api-key"
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-auth-domain"
+# ------------------------------------------------------------------
+# IMPORTANT: Fill these values with your own project credentials.
+# ------------------------------------------------------------------
+
+# Firebase Credentials (get these from your Firebase project settings)
+# Go to Project Settings > General > Your apps > SDK setup and configuration
+NEXT_PUBLIC_FIREBASE_API_KEY="your-firebase-api-key"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-project-id.firebaseapp.com"
 NEXT_PUBLIC_FIREBASE_PROJECT_ID="your-project-id"
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your-storage-bucket"
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-messaging-sender-id"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your-project-id.appspot.com"
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-sender-id"
 NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
 
 # Google AI (Gemini) API Key (from Google AI Studio)
 SECRET_GEMINI_API_KEY="your-gemini-api-key"
 
-# Email (SMTP) Credentials (for sending emails)
+# Email (SMTP) Credentials (optional, for sending emails)
+# If you don't need email functionality, you can leave these blank.
 SMTP_HOST="smtp.example.com"
 SMTP_PORT="587"
 SMTP_USER="your-email@example.com"
 SMTP_PASS="your-email-password-or-app-password"
 
-# Session Secret (a long, random string for encrypting sessions)
-SECRET_COOKIE_PASSWORD="complex_password_at_least_32_characters_long_for_session_encryption"
+# Session Secret (CRITICAL FOR LOGIN)
+# This MUST be a random string of at least 32 characters.
+# You can generate one here: https://1password.com/password-generator/
+SECRET_COOKIE_PASSWORD="generate-a-strong-random-password-of-at-least-32-characters"
 ```
 
 ### 3. Install Dependencies
-
 ```bash
 npm install
 ```
 
-### 4. Run the Development Server
+### 4. Seed the Database
+The project includes dummy data in `src/lib/dummy-data.ts`. To log in, you must add this data to your Firestore database. The easiest way is to use the bulk-add features within the application itself after you've set it up.
 
-The application consists of two main parts: the Next.js web server and the Genkit AI server.
+**Initial Login Credentials:**
+- **Email:** `admin@supermoney.in`
+- **Password:** `password`
 
-First, start the Next.js development server:
+Log in as the admin, then navigate to the "Add X (Bulk)" pages to upload the sample data.
+
+### 5. Run the Development Servers
+The application requires two separate processes to run concurrently.
+
+**Terminal 1: Start the Next.js Web Server**
 ```bash
 npm run dev
 ```
 This will start the web application, typically on `http://localhost:9002`.
 
-Next, in a separate terminal, start the Genkit development server:
+**Terminal 2: Start the Genkit AI Server**
 ```bash
 npm run genkit:dev
 ```
 This starts the local Genkit service that the Next.js app communicates with for all AI-related tasks.
 
-### 5. Seeding the Database
-
-The project includes dummy data in `src/lib/dummy-data.ts`. To get started quickly, you can manually add this data to your Firestore collections (`users`, `programs`, `dealers`, `invoices`, `dealerProgramLimits`).
-
-Alternatively, you can use the "Add X (Bulk)" pages within the application (when logged in as an Admin) to upload the sample Excel files provided in the project or your own data.
+After completing these steps, you should be able to open `http://localhost:9002` in your browser and log in successfully.
