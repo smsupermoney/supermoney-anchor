@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -91,7 +90,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Momentum Leads</CardTitle>
+        <CardTitle>All Leads</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
