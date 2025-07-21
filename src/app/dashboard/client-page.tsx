@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { leads } from "@/lib/data";
@@ -497,3 +497,6 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
   );
 }
 
+
+
+    
