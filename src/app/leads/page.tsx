@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/status-badge";
 
 async function getAnchorLeads(): Promise<AnchorLead[]> {
-    const anchorCol = collection(db2, 'anchor');
+    const anchorCol = collection(db2, 'anchors');
     const anchorSnapshot = await getDocs(anchorCol);
     return anchorSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AnchorLead));
 }
