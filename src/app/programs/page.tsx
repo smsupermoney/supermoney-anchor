@@ -1,6 +1,6 @@
 
 import { unstable_noStore as noStore } from 'next/cache';
-import { getPrograms, getUsers } from "@/lib/data";
+import { getPrograms, getUsers, getDealers } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import Link from "next/link";
 import PageHeader from "@/components/page-header";
 import { getSession } from "@/lib/session";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { User } from '@/types';
+import type { User, Dealer } from '@/types';
 
 export default async function ProgramsPage() {
     noStore();
@@ -21,9 +21,10 @@ export default async function ProgramsPage() {
     const isAdmin = session?.roleType === 'Admin';
     const anchorId = isAdmin ? undefined : session?.externalId;
 
-    const [{ programs }, allUsers] = await Promise.all([
+    const [{ programs }, allUsers, dealers] = await Promise.all([
       getPrograms(anchorId),
-      isAdmin ? getUsers() : Promise.resolve([] as User[])
+      isAdmin ? getUsers() : Promise.resolve([] as User[]),
+      getDealers(anchorId)
     ]);
     
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
@@ -144,7 +145,7 @@ export default async function ProgramsPage() {
                 </div>
               </CardContent>
               <CardFooter className="p-3 pt-0">
-                  <UploadInvoiceDialog defaultLender={program.lenderName}>
+                  <UploadInvoiceDialog dealers={dealers} defaultLender={program.lenderName}>
                     <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
                       <UploadCloud className="mr-2 h-4 w-4" />
                       Raise Invoice
@@ -158,5 +159,3 @@ export default async function ProgramsPage() {
     </>
   );
 }
-
-  

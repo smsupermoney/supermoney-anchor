@@ -13,7 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
-import type { Invoice, Program } from "@/types";
+import type { Invoice, Program, Dealer } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays, startOfDay, addDays } from "date-fns";
@@ -23,9 +23,10 @@ import AiChat from "@/components/ai-chat";
 type DashboardClientProps = {
   initialPrograms: Program[];
   initialInvoices: Invoice[];
+  dealers: Dealer[];
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, dealers }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [programs] = useState(initialPrograms);
   const [invoices] = useState(initialInvoices);
@@ -105,7 +106,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
   return (
     <div className="flex flex-col h-full gap-4">
       <PageHeader title="Dashboard">
-        <UploadInvoiceDialog>
+        <UploadInvoiceDialog dealers={dealers}>
             <Button size="sm">
             <UploadCloud className="mr-2 h-4 w-4" />
             Raise Invoice
@@ -355,7 +356,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                                     </div>
                                     </CardContent>
                                     <CardFooter className="p-3 pt-0">
-                                    <UploadInvoiceDialog>
+                                    <UploadInvoiceDialog dealers={dealers} defaultLender={program.lenderName}>
                                         <Button variant="outline" size="sm" className="w-full hover:bg-primary hover:text-primary-foreground">
                                         <UploadCloud className="mr-2 h-4 w-4" />
                                         Raise Invoice
@@ -496,7 +497,3 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
     </div>
   );
 }
-
-
-
-    

@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee } from "lucide-react";
+import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
@@ -20,10 +20,12 @@ import { Card, CardContent } from "./ui/card";
 import { sendInvoiceEmail } from "@/app/add-invoice/email-actions";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import type { Dealer } from "@/types";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
   defaultLender?: string;
+  dealers: Dealer[];
 };
 
 type UploadedFile = {
@@ -33,9 +35,10 @@ type UploadedFile = {
   disburseAmount?: string;
   isLoading: boolean;
   error?: string;
+  overdueAmount?: number;
 };
 
-export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogProps) {
+export default function UploadInvoiceDialog({ children, dealers }: UploadInvoiceDialogProps) {
   const [open, setOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -67,9 +70,13 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
     try {
       const documentDataUri = await fileToDataUri(file);
       const result = await extractInvoiceData({ documentDataUri });
+
+      // Check for overdue amount
+      const dealer = dealers.find(d => d.name.toLowerCase() === result.dealerName.toLowerCase());
+      const overdueAmount = dealer?.overdueAmount;
       
       setUploadedFiles(prev => prev.map((f, i) => 
-        i === index ? { ...f, extractedData: result, isLoading: false, disburseAmount: result.amount.toString() } : f
+        i === index ? { ...f, extractedData: result, isLoading: false, disburseAmount: result.amount.toString(), overdueAmount: overdueAmount } : f
       ));
 
     } catch (error) {
@@ -266,6 +273,12 @@ export default function UploadInvoiceDialog({ children }: UploadInvoiceDialogPro
                                           />
                                       </div>
                                     </div>
+                                    {upFile.overdueAmount && upFile.overdueAmount > 0 && (
+                                      <div className="mt-2 text-xs flex items-center gap-2 text-destructive font-medium border border-destructive/20 bg-destructive/10 p-2 rounded-md">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        <span>This dealer has an overdue amount of {formatCurrency(upFile.overdueAmount)}.</span>
+                                      </div>
+                                    )}
                                   </>
                                 )}
                             </div>
