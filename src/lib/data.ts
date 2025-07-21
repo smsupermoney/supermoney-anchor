@@ -1,4 +1,3 @@
-
 import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus, MomentumDealerLead } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
@@ -170,6 +169,13 @@ export async function clearUserAuthToken(userId: string): Promise<void> {
 
 
 // --- STATIC DATA ---
+
+export const spokeStatuses = [
+    'New', 'Partial Docs', 'Follow Up', 'Already Onboarded', 'Disbursed', 
+    'Not reachable', 'Active', 'Unassigned Lead', 'Rejected', 'Not Interested', 
+    'Onboarding', 'Approved PF Collected', 'Awaiting Sanction', 'Closed', 
+    'Limit Live', 'Login Pending', 'On Hold', 'Queries Raised', 'Relook'
+] as const;
 
 export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];
 
