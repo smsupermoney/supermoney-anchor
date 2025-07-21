@@ -5,7 +5,7 @@ import { useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { leads } from "@/lib/data";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail, ArrowRight } from "lucide-react";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail, ArrowRight, CalendarClock } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import type { Invoice, Program } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
-import { subDays, startOfDay } from "date-fns";
+import { subDays, startOfDay, addDays } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AiChat from "@/components/ai-chat";
 
@@ -82,6 +82,24 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
     'Flexi Loans': 'Flexi Loans',
     'Supermoney Finance': 'Supermoney Finance'
   };
+
+  const upcomingPayments = useMemo(() => {
+    const today = new Date();
+    const upcomingInvoices = invoices.filter(i => new Date(i.dueDate) >= today && i.status !== 'Disbursed' && i.overdueAmount === 0);
+
+    const calcTotal = (days: number) => {
+        const endDate = addDays(today, days);
+        return upcomingInvoices
+            .filter(i => new Date(i.dueDate) <= endDate)
+            .reduce((sum, i) => sum + i.amount, 0);
+    };
+
+    return {
+        next7Days: calcTotal(7),
+        next15Days: calcTotal(15),
+        next30Days: calcTotal(30),
+    };
+  }, [invoices]);
 
 
   return (
@@ -153,43 +171,62 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
             </CardContent>
         </Card>
         
-        {/* Overdue and Invoice Summary Column */}
+        {/* Summary Column */}
         <div className="flex flex-col gap-4">
             <Link href="/invoices?overdue=yes">
-              <Card className="h-full hover:bg-secondary transition-colors">
+              <Card className="flex-1 hover:bg-secondary transition-colors">
                   <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                       <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
                       <AlertTriangle className="w-4 h-4 text-destructive" />
                   </CardHeader>
                   <CardContent className="p-3 pt-0">
                       <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
-                      <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices from {dealersInOverdue} dealers</p>
+                      <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices</p>
                   </CardContent>
               </Card>
             </Link>
-            
-            <Card className="h-full">
+            <Card className="flex-1">
                 <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Invoice Summary <span className="text-xs font-normal text-muted-foreground">(Last 7 Days)</span></CardTitle>
+                    <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
+                    <CalendarClock className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0 text-xs space-y-2">
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Next 7 days</span>
+                        <span className="font-semibold">{formatCurrency(upcomingPayments.next7Days)}</span>
+                    </div>
+                     <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Next 15 days</span>
+                        <span className="font-semibold">{formatCurrency(upcomingPayments.next15Days)}</span>
+                    </div>
+                     <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Next 30 days</span>
+                        <span className="font-semibold">{formatCurrency(upcomingPayments.next30Days)}</span>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="flex-1">
+                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                    <CardTitle className="text-sm font-semibold">Invoice Summary (7d)</CardTitle>
                     <FileText className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
-                    <div className="grid grid-cols-2 gap-y-2">
-                        <Link href="/invoices" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
+                    <div className="grid grid-cols-2 gap-y-2 text-center">
+                        <Link href="/invoices" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold">{totalLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><FileText className="w-3 h-3" /> Total</span>
+                            <span className="text-xs text-muted-foreground flex items-center justify-center gap-1"><FileText className="w-3 h-3" /> Total</span>
                         </Link>
-                        <Link href="/invoices?status=Disbursed" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices?status=Disbursed" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold">{disbursedLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
+                            <span className="text-xs text-muted-foreground flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
                         </Link>
-                        <Link href="/invoices?status=Initiated,Approved,Sent to Lender" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices?status=Initiated,Approved,Sent to Lender" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold">{pendingLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
+                            <span className="text-xs text-muted-foreground flex items-center justify-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                         </Link>
-                        <Link href="/invoices?status=Rejected" className="flex flex-col items-center hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices?status=Rejected" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="text-lg font-bold">{rejectedLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
+                            <span className="text-xs text-muted-foreground flex items-center justify-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
                         </Link>
                     </div>
                 </CardContent>
@@ -218,7 +255,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Needs Attention</span>
                         </div>
                         <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold">{rejectedLast7Days}</span>
+                            <span className="text-lg font-bold">{rejectedLeadsLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1"><UserX className="w-3 h-3" /> Rejected (7d)</span>
                         </div>
                     </div>
@@ -459,3 +496,4 @@ export default function DashboardClient({ initialPrograms, initialInvoices }: Da
     </div>
   );
 }
+
