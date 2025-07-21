@@ -1,7 +1,7 @@
 
 "use server";
 
-import { db } from "@/lib/firebase";
+import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
 import type { User } from "@/types";
 
@@ -24,13 +24,13 @@ export async function addUsersFromJson(jsonString: string): Promise<ActionResult
   }
 
   try {
-    const batch = writeBatch(db);
+    const batch = writeBatch(db1);
 
     usersArray.forEach((user) => {
       if (!user.id) {
         throw new Error("Each user object in the JSON must have an 'id' field.");
       }
-      const docRef = doc(db, "users", user.id);
+      const docRef = doc(db1, "users", user.id);
       
       const userData = { ...user };
       

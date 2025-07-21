@@ -1,7 +1,7 @@
 
 "use server";
 
-import { db } from "@/lib/firebase";
+import { db1 } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { z } from "zod";
 
@@ -38,7 +38,7 @@ export async function addUser(data: UserFormValues): Promise<ActionResult> {
   };
 
   try {
-    const docRef = await addDoc(collection(db, "users"), userData);
+    const docRef = await addDoc(collection(db1, "users"), userData);
     console.log("Document written with ID: ", docRef.id);
     return { message: `User "${userData.userName}" added successfully.` };
   } catch (error) {

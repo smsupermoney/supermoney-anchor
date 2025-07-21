@@ -4,6 +4,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
@@ -168,4 +169,30 @@ export type Repayment = {
     amountRepaid: number;
     status: RepaymentStatus;
     link: string;
+};
+
+// --- Supermoney Momentum Anchor Lead Type ---
+export type AnchorLead = {
+  id: string;
+  address: string;
+  annualTurnover: string;
+  contacts: {
+    designation: string;
+    email: string;
+    id: string;
+    isPrimary: boolean;
+    name: string;
+    phone: string;
+  }[];
+  createdAt: string;
+  createdBy: string;
+  dealerIds: string[];
+  gstin: string;
+  industry: string;
+  leadId: string;
+  leadScore: number;
+  leadScoreReason: string;
+  name: string;
+  status: string;
+  vendorIds: string[];
 };

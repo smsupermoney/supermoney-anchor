@@ -1,17 +1,29 @@
 
 import PageHeader from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { leads, leadStatuses } from "@/lib/data";
-import { PlusCircle, Upload } from "lucide-react";
-import StatusBadge from "@/components/status-badge";
-import ProgressTracker from "@/components/progress-tracker";
 import { getSession } from "@/lib/session";
+import { collection, getDocs } from "firebase/firestore";
+import { db2 } from "@/lib/firebase";
+import { unstable_noStore as noStore } from 'next/cache';
+import type { AnchorLead } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import StatusBadge from "@/components/status-badge";
+
+async function getAnchorLeads(): Promise<AnchorLead[]> {
+    const anchorCol = collection(db2, 'anchor');
+    const anchorSnapshot = await getDocs(anchorCol);
+    return anchorSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AnchorLead));
+}
+
 
 export default async function LeadsPage() {
+  noStore();
   const session = await getSession();
   const isAdmin = session?.roleType === 'Admin';
+  
+  const anchorLeads = await getAnchorLeads();
+
   return (
     <>
       <PageHeader title="Leads" />
@@ -24,20 +36,24 @@ export default async function LeadsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Dealer Name</TableHead>
-                  <TableHead>Contact Person</TableHead>
-                  <TableHead>Current Status</TableHead>
-                  <TableHead>Onboarding Progress</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead>Annual Turnover</TableHead>
+                  <TableHead>Industry</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leads.map((lead) => (
+                {anchorLeads.map((lead) => (
                   <TableRow key={lead.id}>
-                    <TableCell className="font-medium">{lead.dealerName}</TableCell>
-                    <TableCell>{lead.contactPerson} <span className="text-muted-foreground">({lead.contactEmail})</span></TableCell>
-                    <TableCell><StatusBadge status={lead.status} /></TableCell>
+                    <TableCell className="font-medium">{lead.name}</TableCell>
+                    <TableCell>{lead.address}</TableCell>
                     <TableCell>
-                      <ProgressTracker steps={leadStatuses.filter(s => s !== 'Dropped')} currentStep={lead.status} className="w-full min-w-[600px]" />
+                        <Badge variant="secondary">{lead.annualTurnover}</Badge>
+                    </TableCell>
+                    <TableCell>{lead.industry}</TableCell>
+                    <TableCell>
+                        <StatusBadge status={lead.status as any} />
                     </TableCell>
                   </TableRow>
                 ))}

@@ -1,7 +1,7 @@
 
 "use server";
 
-import { db } from "@/lib/firebase";
+import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
 import * as xlsx from 'xlsx';
 
@@ -27,11 +27,11 @@ export async function addDealerProgramLimits(formData: FormData): Promise<Action
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(db1);
 
     limitsArray.forEach((limit: any) => {
         // Use the provided 'id' for the document ID, or let Firestore auto-generate one
-        const docRef = limit.id ? doc(db, "dealerProgramLimits", limit.id.toString()) : doc(collection(db, "dealerProgramLimits"));
+        const docRef = limit.id ? doc(db1, "dealerProgramLimits", limit.id.toString()) : doc(collection(db1, "dealerProgramLimits"));
         
         const limitData = {...limit};
         if (limitData.id) {

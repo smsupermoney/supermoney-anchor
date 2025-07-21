@@ -1,8 +1,10 @@
 
 
 
+
+
 import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus } from '@/types';
-import { db } from './firebase';
+import { db1 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 
@@ -11,13 +13,13 @@ import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
 // Functions to fetch data from Firestore
 
 export async function getUsers(): Promise<User[]> {
-  const usersCol = collection(db, 'users');
+  const usersCol = collection(db1, 'users');
   const userSnapshot = await getDocs(query(usersCol));
   return userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
 }
 
 export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
-  const invoicesCol = collection(db, 'invoices');
+  const invoicesCol = collection(db1, 'invoices');
   let q = query(invoicesCol);
 
   if (anchorId) {
@@ -29,7 +31,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
 }
 
 export async function getDealers(anchorId?: string): Promise<Dealer[]> {
-  const dealersCol = collection(db, 'dealers');
+  const dealersCol = collection(db1, 'dealers');
   let dealerQuery = query(dealersCol);
 
   if (anchorId) {
@@ -63,7 +65,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
 }
 
 export async function getDealerProgramLimits(programIds?: string[]): Promise<DealerProgramLimit[]> {
-    const limitsCol = collection(db, 'dealerProgramLimits');
+    const limitsCol = collection(db1, 'dealerProgramLimits');
     
     if (!programIds) { // Admin case - fetch all
         const limitsSnapshot = await getDocs(query(limitsCol));
@@ -81,7 +83,7 @@ export async function getDealerProgramLimits(programIds?: string[]): Promise<Dea
 
 export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
   // 1. Fetch programs. If anchorId is provided, filter by it.
-  const programsCol = collection(db, 'programs');
+  const programsCol = collection(db1, 'programs');
   let programQuery = query(programsCol);
   if (anchorId) {
     programQuery = query(programsCol, where('anchorIds', 'array-contains', anchorId));
@@ -129,7 +131,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
 
 export async function getUserByEmail(email: string): Promise<User | null> {
-  const usersRef = collection(db, 'users');
+  const usersRef = collection(db1, 'users');
   const q = query(usersRef, where('emailAddress', '==', email));
   const querySnapshot = await getDocs(q);
   
@@ -142,7 +144,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function clearUserAuthToken(userId: string): Promise<void> {
-    const userRef = doc(db, 'users', userId);
+    const userRef = doc(db1, 'users', userId);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
@@ -339,3 +341,4 @@ export const dealerLeads: DealerLead[] = [
 
 
   
+

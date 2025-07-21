@@ -1,7 +1,7 @@
 
 "use server";
 
-import { db } from "@/lib/firebase";
+import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
 import * as xlsx from 'xlsx';
 
@@ -27,10 +27,10 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(db1);
 
     dealersArray.forEach((dealer: any) => {
-        const docRef = dealer.id ? doc(db, "dealers", dealer.id.toString()) : doc(collection(db, "dealers"));
+        const docRef = dealer.id ? doc(db1, "dealers", dealer.id.toString()) : doc(collection(db1, "dealers"));
         
         const dealerData = {...dealer};
         if (dealerData.id) {
