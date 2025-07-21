@@ -7,6 +7,7 @@ import { getMomentumDealerLeads } from "@/lib/data";
 import { unstable_noStore as noStore } from 'next/cache';
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/status-badge";
+import type { MomentumDealerLead } from "@/types";
 
 export default async function LeadsPage() {
   noStore();
@@ -17,6 +18,20 @@ export default async function LeadsPage() {
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-IN');
+
+  const getLatestRemark = (lead: MomentumDealerLead) => {
+    if (!lead.remarks || lead.remarks.length === 0) {
+      return 'N/A';
+    }
+    // Assuming the last remark in the array is the most recent one
+    const latestRemark = lead.remarks[lead.remarks.length - 1];
+    
+    // Check for common remark structures, as the type is `any[]`
+    if (typeof latestRemark === 'object' && latestRemark !== null) {
+      return latestRemark.remark || latestRemark.text || 'View Details';
+    }
+    return 'View Details';
+  };
 
   return (
     <>
@@ -37,6 +52,7 @@ export default async function LeadsPage() {
                   <TableHead>Deal Value</TableHead>
                   <TableHead>Lead Date</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Latest Remark</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -53,6 +69,7 @@ export default async function LeadsPage() {
                     <TableCell>
                         <StatusBadge status={lead.status as any} />
                     </TableCell>
+                    <TableCell className="text-muted-foreground">{getLatestRemark(lead)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
