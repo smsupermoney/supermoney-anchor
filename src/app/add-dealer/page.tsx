@@ -15,7 +15,7 @@ export default function AddDealerPage() {
           <CardTitle>Bulk Import Dealers</CardTitle>
           <CardDescription className="flex justify-between items-center">
             <span>
-              Upload an Excel file with dealer data. The first sheet should contain a header row and rows with dealer information.
+              Upload an Excel file with dealer data. The dealerId must be unique.
             </span>
              <DownloadSampleExcel data={sampleDealers} fileName="sample-dealers.xlsx" />
           </CardDescription>

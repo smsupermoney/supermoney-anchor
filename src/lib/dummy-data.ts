@@ -330,9 +330,12 @@ export const samplePrograms = [
 
 export const sampleDealers = [
     {
-        id: "DLR_SAMPLE_1",
+        dealerId: "DLR_SAMPLE_1",
+        programId: "PROG_SAMPLE_1",
+        lenderName: "Sample Finance Inc.",
+        product: "SCF",
+        tradeName: "Sample Dealer Electronics",
         anchorId: "ANC001",
-        name: "Sample Dealer Electronics",
         status: "Active"
     }
 ];
@@ -381,6 +384,3 @@ export const sampleMomentumLeads = [
     }
 ];
     
-
-
-
