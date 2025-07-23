@@ -1,5 +1,5 @@
 
-import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus, MomentumDealerLead } from '@/types';
+import type { User, DealerLead, DealerOnboardingStatus, MomentumDealerLead } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
 import type { Dealer, Invoice, Program, DealerProgramLimit } from '@/types';
@@ -75,77 +75,105 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
   });
 }
 
-export async function getDealerProgramLimits(programIds?: string[]): Promise<DealerProgramLimit[]> {
+export async function getDealerProgramLimits(programIds?: string[], dealerIds?: string[]): Promise<DealerProgramLimit[]> {
     const limitsCol = collection(db1, 'dealerProgramLimits');
-    
-    if (!programIds) { // Admin case - fetch all
-        const limitsSnapshot = await getDocs(query(limitsCol));
-        return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
+    let q = query(limitsCol);
+
+    const conditions = [];
+    if (programIds && programIds.length > 0) {
+        conditions.push(where('programId', 'in', programIds));
     }
-    
-    if (programIds.length === 0) {
-        return [];
+    if (dealerIds && dealerIds.length > 0) {
+        conditions.push(where('dealerId', 'in', dealerIds));
     }
 
-    const limitsSnapshot = await getDocs(query(limitsCol, where('programId', 'in', programIds)));
+    if (conditions.length > 0) {
+      q = query(limitsCol, ...conditions);
+    }
+    
+    const limitsSnapshot = await getDocs(q);
     return limitsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DealerProgramLimit));
 }
 
 
 export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
-  // 1. Fetch all programs and all dealers.
+  // 1. Fetch all base programs definitions.
   const programsCol = collection(db1, 'programs');
   const programSnapshot = await getDocs(query(programsCol));
-  let allPrograms = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+  const allPrograms = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+  const programMap = new Map(allPrograms.map(p => [p.id, p]));
+
+  // 2. Fetch relevant dealers for the given anchorId.
+  const anchorDealers = await getDealers(anchorId);
+  const anchorDealerIds = anchorDealers.map(d => d.id);
+
+  // 3. Determine the unique set of programs these dealers are associated with.
+  const relevantProgramIds = Array.from(new Set(anchorDealers.map(d => d.programId).filter(Boolean))) as string[];
   
-  const dealers = await getDealers(undefined); // Fetch all dealers to link them to programs
-
-  // If we are filtering by anchor, we first need to find which programs are relevant to them.
-  let relevantProgramIds: Set<string> | null = null;
-  if (anchorId) {
-    const anchorDealers = dealers.filter(d => d.anchorId === anchorId);
-    relevantProgramIds = new Set(anchorDealers.map(d => d.programId).filter(Boolean) as string[]);
-  }
-
-  // Filter programs if an anchorId is provided
-  let programList = relevantProgramIds ? allPrograms.filter(p => relevantProgramIds!.has(p.id)) : allPrograms;
-  const programIds = programList.map(p => p.id);
-
-  // 2. Fetch related data (limits and invoices) scoped by the programs and/or anchor.
+  // 4. Fetch limits and invoices scoped to the relevant dealers and programs.
   const [dealerProgramLimits, anchorInvoices] = await Promise.all([
-      getDealerProgramLimits(programIds.length > 0 ? programIds : undefined),
+      getDealerProgramLimits(relevantProgramIds, anchorDealerIds),
       getInvoices(anchorId),
   ]);
-  
-  // 3. Calculate aggregates for each program using ONLY the correctly scoped data.
-  programList.forEach(program => {
-    // Initialize aggregates
-    program.totalLimit = 0;
-    program.usedLimit = 0;
-    program.totalDealers = 0;
 
-    const relevantLimits = dealerProgramLimits.filter(l => l.programId === program.id);
-    const dealerIdsInProgram = new Set<string>();
-    
-    relevantLimits.forEach(limit => {
-      program.totalLimit! += limit.creditLimit;
-      program.usedLimit! += limit.usedLimit;
-      dealerIdsInProgram.add(limit.dealerId);
-    });
-    program.totalDealers = dealerIdsInProgram.size;
+  // 5. Aggregate data for each relevant program.
+  const programAggregates: Record<string, Program> = {};
 
-    // Filter invoices for the current program being processed
-    const programInvoices = anchorInvoices.filter(i => i.programId === program.id);
+  dealerProgramLimits.forEach(limit => {
+    if (!programAggregates[limit.programId]) {
+      const baseProgram = programMap.get(limit.programId);
+      programAggregates[limit.programId] = {
+        ...baseProgram!,
+        totalLimit: 0,
+        usedLimit: 0,
+        totalDealers: 0,
+        invoicesCount: 0,
+        disbursedAmount: 0,
+        overdueCount: 0,
+        pendingInvoicesCount: 0,
+      };
+    }
     
-    program.invoicesCount = programInvoices.length;
-    program.disbursedAmount = programInvoices
-        .filter(i => i.status === 'Disbursed')
-        .reduce((sum, i) => sum + i.amount, 0);
-    program.overdueCount = programInvoices.filter(i => i.overdueAmount > 0).length;
-    program.pendingInvoicesCount = programInvoices.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
+    const prog = programAggregates[limit.programId];
+    prog.totalLimit! += limit.creditLimit;
+    prog.usedLimit! += limit.usedLimit;
+  });
+
+  // Aggregate invoice data
+  anchorInvoices.forEach(invoice => {
+      if (programAggregates[invoice.programId]) {
+          const prog = programAggregates[invoice.programId];
+          prog.invoicesCount!++;
+          if (invoice.status === 'Disbursed') {
+              prog.disbursedAmount! += invoice.amount;
+          }
+          if (invoice.overdueAmount > 0) {
+              prog.overdueCount!++;
+          }
+          if (['Initiated', 'Approved', 'Sent to Lender'].includes(invoice.status)) {
+              prog.pendingInvoicesCount!++;
+          }
+      }
   });
   
-  return { programs: programList, invoices: anchorInvoices };
+  // Aggregate dealer counts
+  const dealerCountPerProgram: Record<string, Set<string>> = {};
+  anchorDealers.forEach(dealer => {
+      if (dealer.programId) {
+          if (!dealerCountPerProgram[dealer.programId]) {
+              dealerCountPerProgram[dealer.programId] = new Set();
+          }
+          dealerCountPerProgram[dealer.programId].add(dealer.id);
+      }
+  });
+
+  Object.keys(programAggregates).forEach(programId => {
+      programAggregates[programId].totalDealers = dealerCountPerProgram[programId]?.size || 0;
+  });
+  
+  const finalProgramList = Object.values(programAggregates);
+
+  return { programs: finalProgramList, invoices: anchorInvoices };
 }
 
 

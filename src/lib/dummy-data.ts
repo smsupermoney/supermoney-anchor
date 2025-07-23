@@ -152,8 +152,6 @@ export const dummyUsers = [
 ];
 
 // --- DUMMY PROGRAMS ---
-// Aggregate fields like totalLimit, usedLimit, etc., are removed.
-// They will be calculated at runtime based on dealerProgramLimits and invoices.
 export const dummyPrograms = [
   {
     "id": "PROG001",
@@ -178,60 +176,45 @@ export const dummyPrograms = [
 // --- DUMMY DEALER-PROGRAM LIMIT MAPPING ---
 // This collection is crucial for calculating program and dealer aggregates.
 export const dummyDealerProgramLimits = [
-  { "id": "DPL001", "dealerId": "DLR001", "programId": "PROG001", "creditLimit": 2000000, "usedLimit": 750000 },
-  { "id": "DPL002", "dealerId": "DLR002", "programId": "PROG001", "creditLimit": 1000000, "usedLimit": 500000 },
-  { "id": "DPL003", "dealerId": "DLR002", "programId": "PROG002", "creditLimit": 2000000, "usedLimit": 0 },
-  { "id": "DPL004", "dealerId": "DLR003", "programId": "PROG002", "creditLimit": 5000000, "usedLimit": 4500000 },
-  { "id": "DPL005", "dealerId": "DLR004", "programId": "PROG003", "creditLimit": 3000000, "usedLimit": 750000 },
-  { "id": "DPL006", "dealerId": "DLR004", "programId": "PROG002", "creditLimit": 1000000, "usedLimit": 100000 },
+  { "id": "DPL001", "applicationId": "APP001", "dealerId": "DLR001", "programId": "PROG001", "creditLimit": 2000000, "usedLimit": 750000, "availableAmount": 1250000, "principalOverdue": 150000 },
+  { "id": "DPL002", "applicationId": "APP002", "dealerId": "DLR002", "programId": "PROG001", "creditLimit": 1000000, "usedLimit": 500000, "availableAmount": 500000, "principalOverdue": 0 },
+  { "id": "DPL003", "applicationId": "APP003", "dealerId": "DLR002", "programId": "PROG002", "creditLimit": 2000000, "usedLimit": 0, "availableAmount": 2000000, "principalOverdue": 0 },
+  { "id": "DPL004", "applicationId": "APP004", "dealerId": "DLR003", "programId": "PROG002", "creditLimit": 5000000, "usedLimit": 4500000, "availableAmount": 500000, "principalOverdue": 0 },
+  { "id": "DPL005", "applicationId": "APP005", "dealerId": "DLR004", "programId": "PROG003", "creditLimit": 3000000, "usedLimit": 750000, "availableAmount": 2250000, "principalOverdue": 250000 },
+  { "id": "DPL006", "applicationId": "APP006", "dealerId": "DLR004", "programId": "PROG002", "creditLimit": 1000000, "usedLimit": 100000, "availableAmount": 900000, "principalOverdue": 0 },
 ];
 
 // --- DUMMY DEALERS ---
-// Aggregate fields are removed. Lenders are derived from their program participation.
+// This will be created/updated by the new bulk dealer upload.
+// The data here is mostly for reference. The `id` here is the `customerId`.
 export const dummyDealers = [
   {
-    "dealerId": "DLR001",
-    "programId": "PROG001",
-    "lenderName": "Supermoney Finance",
-    "product": "SCF",
-    "tradeName": "Star Electronics",
-    "anchorId": "ANC001",
-    "status": "Active",
+    "id": "DLR001",
     "name": "Star Electronics",
-    "id": "DLR001"
-  },
-  {
-    "dealerId": "DLR002",
+    "anchorId": "ANC001",
     "programId": "PROG001",
-    "lenderName": "Supermoney Finance",
-    "product": "SCF",
-    "tradeName": "Future Gadgets",
-    "anchorId": "ANC001",
-    "status": "Active",
+    "status": "Active"
+  },
+  {
+    "id": "DLR002",
     "name": "Future Gadgets",
-    "id": "DLR002"
-  },
-  {
-    "dealerId": "DLR003",
-    "programId": "PROG002",
-    "lenderName": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
-    "product": "Term Loan",
-    "tradeName": "Innovative Tech",
     "anchorId": "ANC001",
-    "status": "Inactive",
-    "name": "Innovative Tech",
-    "id": "DLR003"
+    "programId": "PROG001",
+    "status": "Active"
   },
   {
-    "dealerId": "DLR004",
-    "programId": "PROG003",
-    "lenderName": "ADITYA BIRLA CAPITAL LTD",
-    "product": "SCF",
-    "tradeName": "Gotham Goods",
-    "anchorId": "ANC002",
-    "status": "Active",
+    "id": "DLR003",
+    "name": "Innovative Tech",
+    "anchorId": "ANC001",
+    "programId": "PROG002",
+    "status": "Inactive"
+  },
+  {
+    "id": "DLR004",
     "name": "Gotham Goods",
-    "id": "DLR004"
+    "anchorId": "ANC002",
+    "programId": "PROG003",
+    "status": "Active"
   }
 ];
 
@@ -350,23 +333,15 @@ export const samplePrograms = [
 
 export const sampleDealers = [
     {
-        dealerId: "DLR_SAMPLE_1",
+        applicationId: "APP_SAMPLE_1",
+        customerId: "DLR_SAMPLE_1",
         programId: "PROG_SAMPLE_1",
-        lenderName: "Sample Finance Inc.",
-        product: "SCF",
-        tradeName: "Sample Dealer Electronics",
         anchorId: "ANC001",
-        status: "Active"
-    }
-];
-
-export const sampleDealerLimits = [
-    {
-        id: "DPL_SAMPLE_1",
-        dealerId: "DLR_SAMPLE_1",
-        programId: "PROG_SAMPLE_1",
-        creditLimit: 500000,
-        usedLimit: 0,
+        dealerName: "Sample Electronics",
+        limitAmount: 500000,
+        utilisationAmount: 100000,
+        availableAmount: 400000,
+        principalOverdue: 0
     }
 ];
 

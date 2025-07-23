@@ -18,7 +18,6 @@ export const enterpriseAnchorNavigationLinks = [
 export const adminNavigationLinks = [
   { href: '/add-program', label: 'Add Program', icon: PlusCircle },
   { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
-  { href: '/add-dealer-limit', label: 'Add Dealer Limit', icon: Link2 },
   { href: '/add-invoice', label: 'Add Invoice', icon: PlusCircle },
   { href: '/add-anchor', label: 'Add User', icon: UserPlus },
   { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
@@ -34,7 +33,6 @@ export const superMoneyUserNavigationLinks = adminNavigationLinks.filter(
   link => ![
     '/add-program', 
     '/add-dealer', 
-    '/add-dealer-limit', 
     '/view-users'
   ].includes(link.href)
 );

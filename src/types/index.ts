@@ -2,7 +2,7 @@
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
-  id: string;
+  id: string; // This is the dealerId (e.g. DLR001)
   name: string;
   anchorId: string;
   anchorName?: string;
@@ -40,7 +40,7 @@ export type Invoice = {
 };
 
 export type Program = {
-  id: string;
+  id: string; // This is the programId (e.g. PROG001)
   programId: string; // The business key
   lenderName: string;
   lenderType: 'Supermoney' | 'External';
@@ -51,7 +51,6 @@ export type Program = {
   totalDealers?: number;
   overdueCount?: number;
   pendingInvoicesCount?: number;
-  anchorIds?: string[]; // Kept for potential future use or backward compatibility if needed
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
@@ -101,11 +100,14 @@ export type User = {
 };
 
 export type DealerProgramLimit = {
-  id: string;
+  id: string; // The auto-generated Firestore ID
+  applicationId: string; // The unique key for the limit entry
   dealerId: string;
   programId: string;
-  creditLimit: number;
-  usedLimit: number;
+  creditLimit: number; // Mapped from limitAmount
+  usedLimit: number; // Mapped from utilisationAmount
+  availableAmount: number;
+  principalOverdue: number;
 };
 
 // --- Dealer Onboarding Module Types ---

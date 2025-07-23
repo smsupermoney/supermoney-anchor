@@ -2,7 +2,7 @@
 "use server";
 
 import { db1 } from "@/lib/firebase";
-import { collection, writeBatch, doc, getDocs } from "firebase/firestore";
+import { collection, writeBatch, doc, getDocs, query, where, documentId } from "firebase/firestore";
 import * as xlsx from 'xlsx';
 
 type ActionResult = {
@@ -21,60 +21,79 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
     const workbook = xlsx.read(bytes, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const dealersArray = xlsx.utils.sheet_to_json(sheet);
+    const dataArray = xlsx.utils.sheet_to_json(sheet);
 
-    if (!Array.isArray(dealersArray) || dealersArray.length === 0) {
+    if (!Array.isArray(dataArray) || dataArray.length === 0) {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing dealer IDs to prevent duplicates
-    const dealersRef = collection(db1, "dealers");
-    const existingDealersSnapshot = await getDocs(dealersRef);
-    const existingDealerIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
+    // Fetch existing application IDs to prevent duplicates in dealerProgramLimits
+    const limitsRef = collection(db1, "dealerProgramLimits");
+    const existingLimitsSnapshot = await getDocs(query(limitsRef));
+    const existingApplicationIds = new Set(existingLimitsSnapshot.docs.map(doc => doc.data().applicationId));
 
     const batch = writeBatch(db1);
-    let newDealersCount = 0;
-    let skippedDealersCount = 0;
+    let newEntriesCount = 0;
+    let skippedEntriesCount = 0;
 
-    dealersArray.forEach((dealer: any) => {
-        const dealerId = dealer.dealerId?.toString();
-        if (!dealerId) {
-            console.warn("Skipping a row because dealerId is missing.", dealer);
-            skippedDealersCount++;
+    dataArray.forEach((row: any) => {
+        const applicationId = row.applicationId?.toString();
+        if (!applicationId) {
+            console.warn("Skipping a row because applicationId is missing.", row);
+            skippedEntriesCount++;
             return;
         }
 
-        if (existingDealerIds.has(dealerId)) {
-            console.warn(`Skipping duplicate dealerId: ${dealerId}`);
-            skippedDealersCount++;
+        if (existingApplicationIds.has(applicationId)) {
+            console.warn(`Skipping duplicate applicationId: ${applicationId}`);
+            skippedEntriesCount++;
             return;
         }
-
-        const docRef = doc(db1, "dealers", dealerId);
-
-        // Map excel columns to firestore fields
-        const dealerData = {
-          programId: dealer.programId || '',
-          lenderName: dealer.lenderName || '',
-          product: dealer.product || '',
-          tradeName: dealer.tradeName || '',
-          anchorId: dealer.anchorId || '',
-          status: dealer.status || 'Pending',
-          // Use tradeName for name field if it exists, otherwise default to empty
-          name: dealer.tradeName || ''
-        };
         
-        batch.set(docRef, dealerData);
-        newDealersCount++;
+        const dealerId = row.customerId?.toString();
+        const programId = row.programId?.toString();
+
+        if (!dealerId || !programId) {
+            console.warn("Skipping a row because customerId or programId is missing.", row);
+            skippedEntriesCount++;
+            return;
+        }
+
+        // 1. Prepare data for the 'dealers' collection
+        const dealerRef = doc(db1, "dealers", dealerId);
+        const dealerData = {
+          id: dealerId,
+          name: row.dealerName || '',
+          anchorId: row.anchorId || '',
+          programId: programId,
+          status: 'Active', // Default status
+        };
+        // Use `set` with merge:true to create or update the dealer info without overwriting unrelated fields
+        batch.set(dealerRef, dealerData, { merge: true });
+
+        // 2. Prepare data for the 'dealerProgramLimits' collection
+        const limitRef = doc(collection(db1, "dealerProgramLimits")); // Auto-generate ID for this doc
+        const limitData = {
+          applicationId: applicationId,
+          dealerId: dealerId,
+          programId: programId,
+          creditLimit: Number(row.limitAmount) || 0,
+          usedLimit: Number(row.utilisationAmount) || 0,
+          availableAmount: Number(row.availableAmount) || 0,
+          principalOverdue: Number(row.principalOverdue) || 0
+        };
+        batch.set(limitRef, limitData);
+
+        newEntriesCount++;
     });
     
-    if (newDealersCount > 0) {
+    if (newEntriesCount > 0) {
       await batch.commit();
     }
 
-    let message = `${newDealersCount} new dealer(s) added successfully.`;
-    if (skippedDealersCount > 0) {
-      message += ` ${skippedDealersCount} dealer(s) were skipped due to missing IDs or being duplicates.`;
+    let message = `${newEntriesCount} new dealer limit(s) added successfully.`;
+    if (skippedEntriesCount > 0) {
+      message += ` ${skippedEntriesCount} entries were skipped due to missing or duplicate Application IDs.`;
     }
 
     return { message };

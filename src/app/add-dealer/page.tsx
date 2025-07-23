@@ -12,10 +12,10 @@ export default function AddDealerPage() {
       <PageHeader title="Add New Dealers (Bulk)" />
       <Card className="mt-4">
         <CardHeader>
-          <CardTitle>Bulk Import Dealers</CardTitle>
+          <CardTitle>Bulk Import Dealers & Limits</CardTitle>
           <CardDescription className="flex justify-between items-center">
             <span>
-              Upload an Excel file with dealer data. The dealerId must be unique.
+              Upload an Excel file with dealer and limit data. The applicationId must be unique.
             </span>
              <DownloadSampleExcel data={sampleDealers} fileName="sample-dealers.xlsx" />
           </CardDescription>
