@@ -157,19 +157,19 @@ export const dummyUsers = [
 export const dummyPrograms = [
   {
     "id": "PROG001",
-    "anchorIds": ["ANC001"],
+    "programId": "PROG001",
     "lenderName": "Supermoney Finance",
     "lenderType": "Supermoney",
   },
   {
     "id": "PROG002",
-    "anchorIds": ["ANC001", "ANC002"],
+    "programId": "PROG002",
     "lenderName": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
     "lenderType": "External",
   },
   {
     "id": "PROG003",
-    "anchorIds": ["ANC002"],
+    "programId": "PROG003",
     "lenderName": "ADITYA BIRLA CAPITAL LTD",
     "lenderType": "External",
   },
@@ -190,30 +190,51 @@ export const dummyDealerProgramLimits = [
 // Aggregate fields are removed. Lenders are derived from their program participation.
 export const dummyDealers = [
   {
-    "id": "DLR001",
+    "dealerId": "DLR001",
+    "programId": "PROG001",
+    "lenderName": "Supermoney Finance",
+    "product": "SCF",
+    "tradeName": "Star Electronics",
     "anchorId": "ANC001",
+    "status": "Active",
     "name": "Star Electronics",
-    "status": "Active",
+    "id": "DLR001"
   },
   {
-    "id": "DLR002",
+    "dealerId": "DLR002",
+    "programId": "PROG001",
+    "lenderName": "Supermoney Finance",
+    "product": "SCF",
+    "tradeName": "Future Gadgets",
     "anchorId": "ANC001",
+    "status": "Active",
     "name": "Future Gadgets",
-    "status": "Active",
+    "id": "DLR002"
   },
   {
-    "id": "DLR003",
+    "dealerId": "DLR003",
+    "programId": "PROG002",
+    "lenderName": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
+    "product": "Term Loan",
+    "tradeName": "Innovative Tech",
     "anchorId": "ANC001",
-    "name": "Innovative Tech",
     "status": "Inactive",
+    "name": "Innovative Tech",
+    "id": "DLR003"
   },
   {
-    "id": "DLR004",
+    "dealerId": "DLR004",
+    "programId": "PROG003",
+    "lenderName": "ADITYA BIRLA CAPITAL LTD",
+    "product": "SCF",
+    "tradeName": "Gotham Goods",
     "anchorId": "ANC002",
-    "name": "Gotham Goods",
     "status": "Active",
-  },
+    "name": "Gotham Goods",
+    "id": "DLR004"
+  }
 ];
+
 
 
 // --- DUMMY INVOICES ---
@@ -321,8 +342,7 @@ export const dummyInvoices = [
 
 export const samplePrograms = [
     {
-        id: "PROG_SAMPLE_1",
-        anchorIds: "ANC001,ANC002",
+        programId: "PROG_SAMPLE_1",
         lenderName: "Sample Finance Inc.",
         lenderType: "External",
     }

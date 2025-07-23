@@ -1,11 +1,4 @@
 
-
-
-
-
-
-
-
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
@@ -19,6 +12,10 @@ export type Dealer = {
   amountDisbursed: number;
   overdueCount: number;
   overdueAmount: number;
+  programId?: string; // New field from dealer import
+  lenderName?: string;
+  product?: string;
+  tradeName?: string;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';
@@ -44,7 +41,7 @@ export type Invoice = {
 
 export type Program = {
   id: string;
-  anchorIds: string[];
+  programId: string; // The business key
   lenderName: string;
   lenderType: 'Supermoney' | 'External';
   totalLimit?: number;
@@ -54,6 +51,7 @@ export type Program = {
   totalDealers?: number;
   overdueCount?: number;
   pendingInvoicesCount?: number;
+  anchorIds?: string[]; // Kept for potential future use or backward compatibility if needed
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
@@ -170,32 +168,6 @@ export type Repayment = {
     amountRepaid: number;
     status: RepaymentStatus;
     link: string;
-};
-
-// --- Supermoney Momentum Anchor Lead Type ---
-export type AnchorLead = {
-  id: string;
-  address: string;
-  annualTurnover: string;
-  contacts: {
-    designation: string;
-    email: string;
-    id: string;
-    isPrimary: boolean;
-    name: string;
-    phone: string;
-  }[];
-  createdAt: string;
-  createdBy: string;
-  dealerIds: string[];
-  gstin: string;
-  industry: string;
-  leadId: string;
-  leadScore: number;
-  leadScoreReason: string;
-  name: string;
-  status: string;
-  vendorIds: string[];
 };
 
 export type MomentumDealerLead = {

@@ -1,3 +1,4 @@
+
 import type { Lead, LeadStatus, User, DealerLead, DealerOnboardingStatus, MomentumDealerLead } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
@@ -92,14 +93,22 @@ export async function getDealerProgramLimits(programIds?: string[]): Promise<Dea
 
 
 export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
-  // 1. Fetch programs. If anchorId is provided, filter by it.
+  // 1. Fetch all programs and all dealers.
   const programsCol = collection(db1, 'programs');
-  let programQuery = query(programsCol);
+  const programSnapshot = await getDocs(query(programsCol));
+  let allPrograms = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+  
+  const dealers = await getDealers(undefined); // Fetch all dealers to link them to programs
+
+  // If we are filtering by anchor, we first need to find which programs are relevant to them.
+  let relevantProgramIds: Set<string> | null = null;
   if (anchorId) {
-    programQuery = query(programsCol, where('anchorIds', 'array-contains', anchorId));
+    const anchorDealers = dealers.filter(d => d.anchorId === anchorId);
+    relevantProgramIds = new Set(anchorDealers.map(d => d.programId).filter(Boolean) as string[]);
   }
-  const programSnapshot = await getDocs(programQuery);
-  let programList = programSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Program));
+
+  // Filter programs if an anchorId is provided
+  let programList = relevantProgramIds ? allPrograms.filter(p => relevantProgramIds!.has(p.id)) : allPrograms;
   const programIds = programList.map(p => p.id);
 
   // 2. Fetch related data (limits and invoices) scoped by the programs and/or anchor.

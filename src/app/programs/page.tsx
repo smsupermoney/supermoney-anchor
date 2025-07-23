@@ -40,6 +40,15 @@ export default async function ProgramsPage() {
     const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
 
   if (isAdmin) {
+    // Admin view: Show all programs and the anchors associated with them.
+    // This requires reversing the logic slightly to map anchors to programs.
+    const allDealers = await getDealers(undefined);
+    const programsWithAnchors = programs.map(program => {
+        const relevantDealerAnchorIds = new Set(allDealers.filter(d => d.programId === program.id).map(d => d.anchorId));
+        const anchorNames = Array.from(relevantDealerAnchorIds).map(id => anchorUserMap.get(id) || id);
+        return { ...program, anchorNames };
+    });
+
     return (
         <>
             <PageHeader title="Lender Programs" />
@@ -52,14 +61,16 @@ export default async function ProgramsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Program ID</TableHead>
                                 <TableHead>Lender Name</TableHead>
                                 <TableHead>Lender Type</TableHead>
                                 <TableHead>Linked Anchor Names</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {programs.length > 0 ? programs.map((program) => (
+                            {programsWithAnchors.length > 0 ? programsWithAnchors.map((program) => (
                                 <TableRow key={program.id}>
+                                    <TableCell className="font-mono text-xs">{program.programId}</TableCell>
                                     <TableCell className="font-medium">{program.lenderName}</TableCell>
                                     <TableCell>
                                         <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'}>
@@ -68,15 +79,15 @@ export default async function ProgramsPage() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex flex-col gap-1">
-                                            {program.anchorIds.map(id => (
-                                                <span key={id} className="text-xs">{anchorUserMap.get(id) || id}</span>
-                                            ))}
+                                            {program.anchorNames.length > 0 ? program.anchorNames.map(name => (
+                                                <span key={name} className="text-xs">{name}</span>
+                                            )) : <span className="text-xs text-muted-foreground">No anchors linked</span>}
                                         </div>
                                     </TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="text-center">No programs found.</TableCell>
+                                    <TableCell colSpan={4} className="text-center">No programs found.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -87,6 +98,7 @@ export default async function ProgramsPage() {
     );
   }
 
+  // Anchor view
   return (
     <>
       <PageHeader title="Lender Programs" />

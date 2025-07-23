@@ -15,7 +15,7 @@ export default function AddProgramPage() {
           <CardTitle>Bulk Import Programs</CardTitle>
           <CardDescription className="flex justify-between items-center">
             <span>
-              Upload an Excel file with program data. The first sheet should contain a header row and rows with program information.
+              Upload an Excel file with program data. The programId must be unique.
             </span>
             <DownloadSampleExcel data={samplePrograms} fileName="sample-programs.xlsx" />
           </CardDescription>
