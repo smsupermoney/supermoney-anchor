@@ -8,7 +8,7 @@
  * 2.  Select your project.
  * 3.  In the left-hand menu, go to "Build" > "Firestore Database".
  *
- * 4.  For each collection (users, programs, dealers, invoices, dealerProgramLimits):
+ * 4.  For each collection (users, programs, dealers, invoices, dealerLimits):
  *     a. Click "+ Start collection".
  *     b. For the "Collection ID", enter the name (e.g., "users").
  *     c. Instead of adding documents one by one, Firestore will create the first one for you. Click "Next".
@@ -173,49 +173,28 @@ export const dummyPrograms = [
   },
 ];
 
-// --- DUMMY DEALER-PROGRAM LIMIT MAPPING ---
-// This collection is crucial for calculating program and dealer aggregates.
-export const dummyDealerProgramLimits = [
-  { "id": "DPL001", "applicationId": "APP001", "dealerId": "DLR001", "programId": "PROG001", "creditLimit": 2000000, "usedLimit": 750000, "availableAmount": 1250000, "principalOverdue": 150000 },
-  { "id": "DPL002", "applicationId": "APP002", "dealerId": "DLR002", "programId": "PROG001", "creditLimit": 1000000, "usedLimit": 500000, "availableAmount": 500000, "principalOverdue": 0 },
-  { "id": "DPL003", "applicationId": "APP003", "dealerId": "DLR002", "programId": "PROG002", "creditLimit": 2000000, "usedLimit": 0, "availableAmount": 2000000, "principalOverdue": 0 },
-  { "id": "DPL004", "applicationId": "APP004", "dealerId": "DLR003", "programId": "PROG002", "creditLimit": 5000000, "usedLimit": 4500000, "availableAmount": 500000, "principalOverdue": 0 },
-  { "id": "DPL005", "applicationId": "APP005", "dealerId": "DLR004", "programId": "PROG003", "creditLimit": 3000000, "usedLimit": 750000, "availableAmount": 2250000, "principalOverdue": 250000 },
-  { "id": "DPL006", "applicationId": "APP006", "dealerId": "DLR004", "programId": "PROG002", "creditLimit": 1000000, "usedLimit": 100000, "availableAmount": 900000, "principalOverdue": 0 },
+// --- DUMMY DEALER-LIMIT MAPPING ---
+// This collection `dealerLimits` is crucial for calculating program and dealer aggregates.
+// The document ID should be the `applicationId`.
+export const dummyDealerLimits = [
+  { "id": "APP001", "applicationId": "APP001", "limitAmount": 2000000, "utilisationAmount": 750000, "availableAmount": 1250000, "principalOverdue": 150000 },
+  { "id": "APP002", "applicationId": "APP002", "limitAmount": 1000000, "utilisationAmount": 500000, "availableAmount": 500000, "principalOverdue": 0 },
+  { "id": "APP003", "applicationId": "APP003", "limitAmount": 2000000, "utilisationAmount": 0, "availableAmount": 2000000, "principalOverdue": 0 },
+  { "id": "APP004", "applicationId": "APP004", "limitAmount": 5000000, "utilisationAmount": 4500000, "availableAmount": 500000, "principalOverdue": 0 },
+  { "id": "APP005", "applicationId": "APP005", "limitAmount": 3000000, "utilisationAmount": 750000, "availableAmount": 2250000, "principalOverdue": 250000 },
+  { "id": "APP006", "applicationId": "APP006", "limitAmount": 1000000, "utilisationAmount": 100000, "availableAmount": 900000, "principalOverdue": 0 },
 ];
 
 // --- DUMMY DEALERS ---
-// This will be created/updated by the new bulk dealer upload.
-// The data here is mostly for reference. The `id` here is the `customerId`.
-export const dummyDealers = [
-  {
-    "id": "DLR001",
-    "name": "Star Electronics",
-    "anchorId": "ANC001",
-    "programId": "PROG001",
-    "status": "Active"
-  },
-  {
-    "id": "DLR002",
-    "name": "Future Gadgets",
-    "anchorId": "ANC001",
-    "programId": "PROG001",
-    "status": "Active"
-  },
-  {
-    "id": "DLR003",
-    "name": "Innovative Tech",
-    "anchorId": "ANC001",
-    "programId": "PROG002",
-    "status": "Inactive"
-  },
-  {
-    "id": "DLR004",
-    "name": "Gotham Goods",
-    "anchorId": "ANC002",
-    "programId": "PROG003",
-    "status": "Active"
-  }
+// This collection `dealers` holds dealer identity info. 
+// The document ID should be the `customerId`.
+export const dummyDealersData = [
+  { "id": "DLR001", "dealerId": "DLR001", "applicationId": "APP001", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Star Electronics", "status": "Active" },
+  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP002", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active" },
+  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP003", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active" },
+  { "id": "DLR003", "dealerId": "DLR003", "applicationId": "APP004", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Innovative Tech", "status": "Pending" },
+  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP005", "programId": "PROG003", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Inactive" },
+  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP006", "programId": "PROG002", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Active" }
 ];
 
 
@@ -338,6 +317,7 @@ export const sampleDealers = [
         programId: "PROG_SAMPLE_1",
         anchorId: "ANC001",
         dealerName: "Sample Electronics",
+        status: "Active",
         limitAmount: 500000,
         utilisationAmount: 100000,
         availableAmount: 400000,

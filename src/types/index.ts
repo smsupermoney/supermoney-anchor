@@ -12,10 +12,7 @@ export type Dealer = {
   amountDisbursed: number;
   overdueCount: number;
   overdueAmount: number;
-  programId?: string; // New field from dealer import
-  lenderName?: string;
-  product?: string;
-  tradeName?: string;
+  programId?: string; 
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';
@@ -99,13 +96,10 @@ export type User = {
     expiryTime?: number;
 };
 
-export type DealerProgramLimit = {
-  id: string; // The auto-generated Firestore ID
-  applicationId: string; // The unique key for the limit entry
-  dealerId: string;
-  programId: string;
-  creditLimit: number; // Mapped from limitAmount
-  usedLimit: number; // Mapped from utilisationAmount
+export type DealerLimit = {
+  applicationId: string;
+  limitAmount: number;
+  utilisationAmount: number;
   availableAmount: number;
   principalOverdue: number;
 };
