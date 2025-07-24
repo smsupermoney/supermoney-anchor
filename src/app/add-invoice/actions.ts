@@ -2,37 +2,14 @@
 "use server";
 
 import { db1 } from "@/lib/firebase";
-import { collection, writeBatch, doc } from "firebase/firestore";
+import { collection, writeBatch, doc, getDocs, query } from "firebase/firestore";
 import * as xlsx from 'xlsx';
+import type { Invoice, InvoiceStatus } from "@/types";
 
 type ActionResult = {
   message?: string;
   error?: string;
 };
-
-// Helper to convert Excel serial date to JS Date
-function excelSerialDateToJSDate(serial: number): Date {
-  const utc_days  = Math.floor(serial - 25569);
-  const utc_value = utc_days * 86400;                                        
-  const date_info = new Date(utc_value * 1000);
-
-  const fractional_day = serial - Math.floor(serial) + 0.0000001;
-
-  let total_seconds = Math.floor(86400 * fractional_day);
-
-  const seconds = total_seconds % 60;
-  total_seconds -= seconds;
-
-  const hours = Math.floor(total_seconds / (60 * 60));
-  const minutes = Math.floor(total_seconds / 60) % 60;
-
-  return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
-}
-
-// Helper to format date to YYYY-MM-DD
-function formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
-}
 
 export async function addInvoices(formData: FormData): Promise<ActionResult> {
   const file = formData.get('excel-file') as File;
@@ -52,29 +29,59 @@ export async function addInvoices(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    const batch = writeBatch(db1);
+    // Fetch existing invoice numbers to prevent duplicates
+    const invoicesRef = collection(db1, "invoices");
+    const existingInvoicesSnapshot = await getDocs(query(invoicesRef));
+    const existingInvoiceNumbers = new Set(existingInvoicesSnapshot.docs.map(doc => doc.id));
 
-    invoicesArray.forEach((invoice: any) => {
-        const docRef = invoice.id ? doc(db1, "invoices", invoice.id.toString()) : doc(collection(db1, "invoices"));
-        
-        const invoiceData = {...invoice};
-        if (invoiceData.id) {
-            delete invoiceData.id;
+    const batch = writeBatch(db1);
+    let newEntriesCount = 0;
+    let skippedEntriesCount = 0;
+
+    invoicesArray.forEach((row: any) => {
+        let invoiceNumber = row.invoiceNumber?.toString();
+
+        if (invoiceNumber && existingInvoiceNumbers.has(invoiceNumber)) {
+            console.warn(`Skipping duplicate invoiceNumber: ${invoiceNumber}`);
+            skippedEntriesCount++;
+            return;
         }
 
-        // Ensure numeric fields are numbers
-        if (invoiceData.amount) invoiceData.amount = Number(invoiceData.amount);
-        if (invoiceData.overdueAmount) invoiceData.overdueAmount = Number(invoiceData.overdueAmount);
+        // If invoiceNumber is empty, generate a unique one
+        if (!invoiceNumber) {
+            invoiceNumber = doc(collection(db1, "invoices")).id;
+        }
 
-        // Dates will likely be parsed as strings from sheet_to_json with raw:false
-        // No special handling needed if they are already in YYYY-MM-DD format in excel
+        const docRef = doc(db1, "invoices", invoiceNumber);
+
+        // Map excel columns to our Invoice type
+        const invoiceData: Partial<Invoice> = {
+            invoiceNumber: invoiceNumber,
+            programId: row.programId?.toString() || '',
+            dealerId: row.dealerId?.toString() || '',
+            date: row.date || new Date().toISOString().split('T')[0],
+            dueDate: row.dueDate || new Date().toISOString().split('T')[0],
+            amount: Number(row.invoiceAmount) || 0,
+            disbursementSentAmount: Number(row.disbursementSentAmount) || 0,
+            status: (row.status || 'Initiated') as InvoiceStatus,
+            remarks: row.remarks || '',
+            utrNo: row.utrNo?.toString() || ''
+        };
         
         batch.set(docRef, invoiceData);
+        newEntriesCount++;
     });
     
-    await batch.commit();
+    if (newEntriesCount > 0) {
+        await batch.commit();
+    }
 
-    return { message: `${invoicesArray.length} invoice(s) added successfully from the Excel file.` };
+    let message = `${newEntriesCount} new invoice(s) added successfully.`;
+    if (skippedEntriesCount > 0) {
+        message += ` ${skippedEntriesCount} invoice(s) were skipped due to duplicate invoice numbers.`;
+    }
+
+    return { message };
   } catch (error) {
     console.error("Error processing Excel file or writing to Firestore:", error);
     if (error instanceof Error) {

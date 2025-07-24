@@ -38,7 +38,18 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   }
 
   const invoiceSnapshot = await getDocs(q);
-  return invoiceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+  // Fetch dealers to map dealerName to invoices
+  const dealers = await getDealers(anchorId);
+  const dealerMap = new Map(dealers.map(d => [d.id, d.name]));
+
+  return invoiceSnapshot.docs.map(doc => {
+    const data = doc.data() as Omit<Invoice, 'id'>;
+    return { 
+        id: doc.id, 
+        ...data,
+        dealerName: dealerMap.get(data.dealerId) || 'Unknown Dealer'
+    } as Invoice;
+  });
 }
 
 export async function getDealers(anchorId?: string): Promise<Dealer[]> {

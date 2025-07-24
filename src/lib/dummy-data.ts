@@ -327,20 +327,16 @@ export const sampleDealers = [
 
 export const sampleInvoices = [
     {
-        id: "INV_SAMPLE_1",
-        dealerId: "DLR_SAMPLE_1",
-        anchorId: "ANC001",
-        programId: "PROG_SAMPLE_1",
         invoiceNumber: "SAMPLE-2024-001",
-        dealerName: "Sample Dealer Electronics",
-        amount: 50000,
+        programId: "PROG_SAMPLE_1",
+        dealerId: "DLR_SAMPLE_1",
         date: "2024-01-01",
         dueDate: "2024-02-01",
-        eWayBillNumber: "EWB_SAMPLE_123",
-        utrNumber: "UTR_SAMPLE_123",
+        invoiceAmount: 50000,
+        disbursementSentAmount: 48000,
         status: "Initiated",
-        lender: "Sample Finance Inc.",
-        overdueAmount: 0,
+        remarks: "Sample remark",
+        utrNo: "UTR_SAMPLE_123",
     }
 ];
 

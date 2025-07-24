@@ -1,4 +1,5 @@
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
@@ -20,21 +21,23 @@ export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbu
 export type Invoice = {
   id: string;
   invoiceNumber: string;
-  dealerId: string; // Link to Dealer
-  programId: string; // Link to Program
-  anchorId: string; // Link to Anchor/User
-  anchorName?: string;
-  dealerName: string;
-  amount: number;
+  programId: string;
+  dealerId: string;
+  anchorId: string;
   date: string;
   dueDate: string;
-  eWayBillNumber: string;
-  utrNumber?: string;
-  documentUrl?: string;
+  amount: number;
+  disbursementSentAmount: number;
   status: InvoiceStatus;
-  lender: string;
-  overdueAmount: number;
+  remarks: string;
+  utrNo: string;
+  // Fields below are dynamically added and not in DB
+  dealerName?: string; 
+  lender?: string;
+  overdueAmount?: number;
+  anchorName?: string;
 };
+
 
 export type Program = {
   id: string; // This is the programId (e.g. PROG001)

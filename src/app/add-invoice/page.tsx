@@ -16,7 +16,7 @@ export default function AddInvoicePage() {
           <CardTitle>Bulk Import Invoices</CardTitle>
           <CardDescription className="flex justify-between items-center">
             <span>
-                Upload an Excel file with invoice data. The first sheet should contain a header row and rows with invoice information.
+                Upload an Excel file with invoice data. If invoiceNumber is a duplicate it will be skipped. If empty, a unique ID will be generated.
             </span>
             <DownloadSampleExcel data={sampleInvoices} fileName="sample-invoices.xlsx" />
           </CardDescription>
