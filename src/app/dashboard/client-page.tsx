@@ -24,9 +24,10 @@ type DashboardClientProps = {
   initialInvoices: Invoice[];
   dealers: Dealer[];
   momentumLeads: MomentumDealerLead[];
+  totalOverdueAmount: number;
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices, dealers, momentumLeads }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, dealers, momentumLeads, totalOverdueAmount }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [programs] = useState(initialPrograms);
   const [invoices] = useState(initialInvoices);
@@ -60,10 +61,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const pendingLast7Days = invoicesLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   const rejectedLast7Days = invoicesLast7Days.filter(i => i.status === 'Rejected').length;
 
-  const overdueInvoices = invoices.filter((i) => (i.overdueAmount ?? 0) > 0);
-  const totalOverdueAmount = overdueInvoices.reduce((sum, i) => sum + (i.overdueAmount ?? 0), 0);
-  const overdueInvoicesCount = overdueInvoices.length;
-  const dealersInOverdue = new Set(overdueInvoices.map(i => i.dealerName)).size;
+  const overdueInvoicesCount = invoices.filter((i) => (i.overdueAmount ?? 0) > 0).length;
   
   // Lead Summary Calculations from momentumLeads
   const totalLeads = momentumLeads.length;

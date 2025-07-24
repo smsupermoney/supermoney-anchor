@@ -43,28 +43,28 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     }
   }
 
-  const [invoiceSnapshot, allDealersSnapshot, programSnapshot] = await Promise.all([
+  const [invoiceSnapshot, allDealersSnapshot, programSnapshot, limitsSnapshot] = await Promise.all([
     getDocs(q),
     getDocs(collection(db1, 'dealers')),
-    getDocs(collection(db1, 'programs'))
+    getDocs(collection(db1, 'programs')),
+    getDocs(collection(db1, 'dealerLimits'))
   ]);
   
-  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.data().dealerId, d.data().dealerName]));
+  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.data().dealerId, {name: d.data().dealerName, applicationId: d.data().applicationId}]));
   const programMap = new Map(programSnapshot.docs.map(p => [p.data().programId, p.data().lenderName]));
-
+  const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
 
   return invoiceSnapshot.docs.map(doc => {
     const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
-    const now = new Date();
-    const dueDate = new Date(data.dueDate);
-    const overdueAmount = dueDate < now && data.status !== 'Disbursed' ? data.amount : 0;
+    const dealerInfo = dealerMap.get(data.dealerId);
+    const limit = dealerInfo ? limitsMap.get(dealerInfo.applicationId) : undefined;
     
     return { 
         id: doc.id, 
         ...data,
-        dealerName: dealerMap.get(data.dealerId) || 'Unknown Dealer',
+        dealerName: dealerInfo?.name || 'Unknown Dealer',
         lender: programMap.get(data.programId) || 'Unknown Lender',
-        overdueAmount: overdueAmount
+        overdueAmount: limit?.principalOverdue || 0
     } as Invoice;
   });
 }
@@ -92,9 +92,9 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     const dealerList = dealerSnapshot.docs.map(doc => {
         const dealerData = doc.data();
         const dealerId = dealerData.dealerId;
+        const limitData = limitsMap.get(dealerData.applicationId);
+        
         const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
-        const overdueInvoices = dealerInvoices.filter(i => (i.overdueAmount ?? 0) > 0);
-        const disbursedAmount = dealerInvoices.filter(i => i.status === 'Disbursed').reduce((sum, i) => sum + i.amount, 0);
         
         return {
             id: dealerId,
@@ -102,9 +102,9 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
             invoicesSubmitted: dealerInvoices.length,
-            amountDisbursed: disbursedAmount,
-            overdueCount: overdueInvoices.length,
-            overdueAmount: overdueInvoices.reduce((sum, i) => sum + (i.overdueAmount ?? 0), 0),
+            amountDisbursed: limitData?.utilisationAmount || 0,
+            overdueCount: (limitData?.principalOverdue ?? 0) > 0 ? 1 : 0, // Simplified: if any overdue, count is 1. Can be refined.
+            overdueAmount: limitData?.principalOverdue || 0,
             lenders: Array.from(new Set(dealerInvoices.map(i => i.lender).filter(Boolean))) as string[],
             status: dealerData.status, // Use status from the document
         } as Dealer;
@@ -126,7 +126,7 @@ export async function getDealerLimits(applicationIds?: string[]): Promise<Dealer
 }
 
 
-export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[]}> {
+export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[], totalOverdueAmount: number}> {
     // 1. Fetch base programs, all dealers, and all limits
     const [programSnapshot, dealerSnapshot, limitsSnapshot] = await Promise.all([
         getDocs(collection(db1, 'programs')),
@@ -146,6 +146,8 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
     // 4. Aggregate data for each program based on the relevant dealers
     const programAggregates: Record<string, Program> = {};
+
+    let totalOverdueAmount = 0;
 
     relevantDealers.forEach(dealer => {
         const programId = dealer.programId;
@@ -172,6 +174,15 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
         const prog = programAggregates[programId];
         prog.totalLimit! += limit.limitAmount;
         prog.usedLimit! += limit.utilisationAmount;
+        prog.overdueCount! += limit.principalOverdue > 0 ? 1 : 0; // Each dealer can have 1 overdue status per program limit
+    });
+    
+    // Sum total overdue amount across all relevant dealers for the anchor
+    relevantDealers.forEach(dealer => {
+        const limit = limitsMap.get(dealer.applicationId);
+        if (limit) {
+            totalOverdueAmount += limit.principalOverdue;
+        }
     });
     
     // Aggregate invoice data for the programs that are relevant to the anchor
@@ -180,7 +191,6 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
             const prog = programAggregates[invoice.programId];
             prog.invoicesCount!++;
             if (invoice.status === 'Disbursed') prog.disbursedAmount! += invoice.amount;
-            if ((invoice.overdueAmount ?? 0) > 0) prog.overdueCount!++;
             if (['Initiated', 'Approved', 'Sent to Lender'].includes(invoice.status)) prog.pendingInvoicesCount!++;
         }
     });
@@ -202,7 +212,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
     const finalProgramList = Object.values(programAggregates);
 
-    return { programs: finalProgramList, invoices: anchorInvoices };
+    return { programs: finalProgramList, invoices: anchorInvoices, totalOverdueAmount };
 }
 
 

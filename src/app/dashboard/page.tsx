@@ -9,7 +9,7 @@ export default async function Dashboard() {
   const session = await getSession();
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
   
-  const [{ programs, invoices }, dealers, momentumLeads] = await Promise.all([
+  const [{ programs, invoices, totalOverdueAmount }, dealers, momentumLeads] = await Promise.all([
     getPrograms(anchorId),
     getDealers(anchorId),
     getMomentumDealerLeads(anchorId),
@@ -21,6 +21,7 @@ export default async function Dashboard() {
       initialInvoices={invoices}
       dealers={dealers}
       momentumLeads={momentumLeads}
+      totalOverdueAmount={totalOverdueAmount}
     />
   );
 }

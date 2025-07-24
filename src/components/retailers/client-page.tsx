@@ -146,9 +146,8 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lenders</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Invoices</TableHead>
+                  <TableHead className="text-right">Total Limit</TableHead>
                   <TableHead className="text-right">Amount Disbursed</TableHead>
-                  <TableHead className="text-right">Overdue</TableHead>
                   <TableHead className="text-right">Overdue Amount</TableHead>
                 </TableRow>
               </TableHeader>
@@ -197,7 +196,16 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell className="text-right">{dealer.invoicesSubmitted}</TableCell>
+                    <TableCell className="text-right">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.totalLimit ?? 0)}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{formatCurrency(dealer.totalLimit ?? 0)}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="text-right">
                        <TooltipProvider>
                         <Tooltip>
@@ -208,8 +216,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell className="text-right">{dealer.overdueCount}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right text-destructive">
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
