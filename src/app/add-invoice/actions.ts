@@ -58,6 +58,7 @@ export async function addInvoices(formData: FormData): Promise<ActionResult> {
         const invoiceData: Partial<Invoice> = {
             invoiceNumber: invoiceNumber,
             programId: row.programId?.toString() || '',
+            anchorId: row.anchorId?.toString() || '',
             dealerId: row.dealerId?.toString() || '',
             date: row.date || new Date().toISOString().split('T')[0],
             dueDate: row.dueDate || new Date().toISOString().split('T')[0],

@@ -323,6 +323,7 @@ export const sampleInvoices = [
     {
         invoiceNumber: "SAMPLE-2024-001",
         programId: "PROG_SAMPLE_1",
+        anchorId: "ANC001",
         dealerId: "DLR_SAMPLE_1",
         date: "2024-01-01",
         dueDate: "2024-02-01",
