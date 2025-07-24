@@ -1,8 +1,7 @@
+
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig1 = {
@@ -23,14 +22,22 @@ const firebaseConfig2 = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID_2
 };
 
+let app1: FirebaseApp;
+let db1: Firestore;
 
-// Initialize Firebase
-const apps = getApps();
-const app1 = apps.find(app => app.name === 'app1') || initializeApp(firebaseConfig1, 'app1');
-const db1 = getFirestore(app1);
+let app2: FirebaseApp;
+let db2: Firestore;
 
 
-const app2 = apps.find(app => app.name === 'app2') || initializeApp(firebaseConfig2, 'app2');
-const db2 = getFirestore(app2);
+if (getApps().length === 0) {
+    app1 = initializeApp(firebaseConfig1, 'app1');
+    app2 = initializeApp(firebaseConfig2, 'app2');
+} else {
+    app1 = getApp('app1');
+    app2 = getApp('app2');
+}
 
-export { db1,db2 };
+db1 = getFirestore(app1);
+db2 = getFirestore(app2);
+
+export { db1, db2 };
