@@ -22,22 +22,31 @@ const firebaseConfig2 = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID_2
 };
 
-let app1: FirebaseApp;
-let db1: Firestore;
+function initializeAppSafely(config: object, appName: string): FirebaseApp {
+    try {
+        return getApp(appName);
+    } catch (e) {
+        return initializeApp(config, appName);
+    }
+}
+
+const app1: FirebaseApp = initializeAppSafely(firebaseConfig1, 'app1');
+const db1: Firestore = getFirestore(app1);
 
 let app2: FirebaseApp;
 let db2: Firestore;
 
-
-if (getApps().length === 0) {
-    app1 = initializeApp(firebaseConfig1, 'app1');
-    app2 = initializeApp(firebaseConfig2, 'app2');
+if (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_2) {
+    app2 = initializeAppSafely(firebaseConfig2, 'app2');
+    db2 = getFirestore(app2);
 } else {
-    app1 = getApp('app1');
-    app2 = getApp('app2');
+    // If the second project is not configured, we can point db2 to db1
+    // or handle it as an unconfigured service.
+    // For now, let's make it point to db1 to avoid crashes in functions that use it.
+    console.warn("Firebase project 'db2' is not configured. Falling back to 'db1'.");
+    app2 = app1;
+    db2 = db1;
 }
 
-db1 = getFirestore(app1);
-db2 = getFirestore(app2);
 
 export { db1, db2 };
