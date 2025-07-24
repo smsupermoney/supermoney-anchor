@@ -8,7 +8,7 @@ export type Dealer = {
   anchorId: string;
   anchorName?: string;
   status: 'Active' | 'Inactive' | 'Pending';
-  lenders: string[];
+  lenderName: string;
   invoicesSubmitted: number;
   amountDisbursed: number;
   overdueCount: number;

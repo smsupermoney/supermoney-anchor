@@ -77,10 +77,11 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         dealerQuery = query(dealersCol, where('anchorId', '==', anchorId));
     }
     
-    const [dealerSnapshot, limitsSnapshot, invoicesSnapshot] = await Promise.all([
+    const [dealerSnapshot, limitsSnapshot, invoicesSnapshot, programSnapshot] = await Promise.all([
         getDocs(dealerQuery),
         getDocs(collection(db1, 'dealerLimits')), // Fetch all limits
-        getInvoices(anchorId) // Fetch invoices scoped to the anchor
+        getInvoices(anchorId), // Fetch invoices scoped to the anchor
+        getDocs(collection(db1, 'programs')),
     ]);
 
     if (dealerSnapshot.empty) {
@@ -88,7 +89,8 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     }
     
     const limitsMap = new Map(limitsSnapshot.docs.map(doc => [doc.id, doc.data() as DealerLimit]));
-    
+    const programMap = new Map(programSnapshot.docs.map(p => [p.id, p.data().lenderName]));
+
     const dealerList = dealerSnapshot.docs.map(doc => {
         const dealerData = doc.data();
         const dealerId = dealerData.dealerId;
@@ -105,8 +107,9 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             amountDisbursed: limitData?.utilisationAmount || 0,
             overdueCount: (limitData?.principalOverdue ?? 0) > 0 ? 1 : 0, // Simplified: if any overdue, count is 1. Can be refined.
             overdueAmount: limitData?.principalOverdue || 0,
-            lenders: Array.from(new Set(dealerInvoices.map(i => i.lender).filter(Boolean))) as string[],
+            lenderName: programMap.get(dealerData.programId) || 'N/A',
             status: dealerData.status, // Use status from the document
+            totalLimit: limitData?.limitAmount || 0,
         } as Dealer;
     });
 

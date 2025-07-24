@@ -80,7 +80,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
 
   const filteredDealers = useMemo(() => {
     return dealers.filter((dealer) => {
-      const lenderMatch = filters.lender === "" || dealer.lenders.some(l => l.toLowerCase().includes(filters.lender.toLowerCase()));
+      const lenderMatch = filters.lender === "" || (dealer.lenderName ?? "").toLowerCase().includes(filters.lender.toLowerCase());
       return (
         dealer.name.toLowerCase().includes(filters.name.toLowerCase()) &&
         lenderMatch &&
@@ -144,7 +144,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                 <TableRow>
                   <TableHead>Dealer Name</TableHead>
                   {isAdmin && <TableHead>Anchor</TableHead>}
-                  <TableHead>Lenders</TableHead>
+                  <TableHead>Lender</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Total Limit</TableHead>
                   <TableHead className="text-right">Amount Disbursed</TableHead>
@@ -180,9 +180,9 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="truncate max-w-[200px]">{dealer.lenders.join(', ')}</div>
+                            <div className="truncate max-w-[200px]">{dealer.lenderName}</div>
                           </TooltipTrigger>
-                           <TooltipContent><p>{dealer.lenders.map(l => lenderFullNameMapping[l] || l).join(', ')}</p></TooltipContent>
+                           <TooltipContent><p>{lenderFullNameMapping[dealer.lenderName] || dealer.lenderName}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
