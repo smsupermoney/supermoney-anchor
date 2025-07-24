@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -78,13 +79,13 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     return leads.filter((lead) => {
       const statusCondition =
         filters.status.length === 0 ||
-        filters.status.some(s => s.toLowerCase() === lead.status.toLowerCase());
+        filters.status.some(s => s.toLowerCase() === (lead.status || '').toLowerCase());
 
       return (
-        lead.name.toLowerCase().includes(filters.name.toLowerCase()) &&
-        lead.city.toLowerCase().includes(filters.city.toLowerCase()) &&
-        lead.zone.toLowerCase().includes(filters.zone.toLowerCase()) &&
-        lead.leadSource.toLowerCase().includes(filters.leadSource.toLowerCase()) &&
+        (lead.name || '').toLowerCase().includes(filters.name.toLowerCase()) &&
+        (lead.city || '').toLowerCase().includes(filters.city.toLowerCase()) &&
+        (lead.zone || '').toLowerCase().includes(filters.zone.toLowerCase()) &&
+        (lead.leadSource || '').toLowerCase().includes(filters.leadSource.toLowerCase()) &&
         statusCondition
       );
     });
