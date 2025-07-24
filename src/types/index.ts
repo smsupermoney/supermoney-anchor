@@ -14,7 +14,8 @@ export type Dealer = {
   overdueCount: number;
   overdueAmount: number;
   programId?: string; 
-  totalLimit?: number; // Added for dealer-level view
+  totalLimit: number;
+  availableLimit: number;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';
@@ -192,3 +193,5 @@ export type MomentumDealerLead = {
   updatedAt: string; // ISO date string
   zone: string;
 }
+
+    

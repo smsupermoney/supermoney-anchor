@@ -148,6 +148,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Total Limit</TableHead>
                   <TableHead className="text-right">Amount Disbursed</TableHead>
+                  <TableHead className="text-right">Available Limit</TableHead>
                   <TableHead className="text-right">Overdue Amount</TableHead>
                 </TableRow>
               </TableHeader>
@@ -216,6 +217,16 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
+                    <TableCell className="text-right">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.availableLimit)}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{formatCurrency(dealer.availableLimit)}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="text-right text-destructive">
                        <TooltipProvider>
                         <Tooltip>
@@ -245,3 +256,5 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
     </>
   );
 }
+
+    
