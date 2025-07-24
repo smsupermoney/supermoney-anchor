@@ -34,16 +34,22 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   let q = query(invoicesCol);
 
   if (anchorId) {
-    q = query(invoicesCol, where('anchorId', '==', anchorId));
+    const dealersForAnchor = await getDocs(query(collection(db1, 'dealers'), where('anchorId', '==', anchorId)));
+    const dealerIds = dealersForAnchor.docs.map(d => d.data().dealerId);
+    if (dealerIds.length > 0) {
+        q = query(invoicesCol, where('dealerId', 'in', dealerIds));
+    } else {
+        return []; // No dealers for this anchor, so no invoices
+    }
   }
 
   const invoiceSnapshot = await getDocs(q);
   // Fetch dealers to map dealerName to invoices
-  const dealers = await getDealers(anchorId);
-  const dealerMap = new Map(dealers.map(d => [d.id, d.name]));
+  const allDealersSnapshot = await getDocs(collection(db1, 'dealers'));
+  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.data().dealerId, d.data().dealerName]));
 
   return invoiceSnapshot.docs.map(doc => {
-    const data = doc.data() as Omit<Invoice, 'id'>;
+    const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
     return { 
         id: doc.id, 
         ...data,
@@ -402,3 +408,5 @@ export const dealerLeads: DealerLead[] = [
         createdAt: '2024-07-10',
     },
 ];
+
+    
