@@ -9,10 +9,12 @@ export default async function InvoicesPage() {
   noStore();
   const session = await getSession();
   const isAdmin = session?.roleType === 'Admin';
+  // Pass anchorId if the user is not an admin, otherwise pass undefined.
   const anchorId = isAdmin ? undefined : session?.externalId;
 
   let invoices = await getInvoices(anchorId);
 
+  // If the user is an admin, enrich the invoices with anchor names.
   if (isAdmin) {
     const allUsers = await getUsers();
     const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
@@ -24,3 +26,5 @@ export default async function InvoicesPage() {
 
   return <InvoicesClientPage initialInvoices={invoices} isAdmin={isAdmin} />;
 }
+
+    
