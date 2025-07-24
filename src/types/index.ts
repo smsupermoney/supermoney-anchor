@@ -32,8 +32,8 @@ export type Invoice = {
   remarks: string;
   utrNo: string;
   // Fields below are dynamically added and not in DB
-  dealerName?: string; 
-  lender?: string;
+  dealerName: string; 
+  lender: string;
   overdueAmount?: number;
   anchorName?: string;
 };

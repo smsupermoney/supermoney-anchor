@@ -60,8 +60,8 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const pendingLast7Days = invoicesLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   const rejectedLast7Days = invoicesLast7Days.filter(i => i.status === 'Rejected').length;
 
-  const overdueInvoices = invoices.filter((i) => i.overdueAmount > 0);
-  const totalOverdueAmount = overdueInvoices.reduce((sum, i) => sum + i.overdueAmount, 0);
+  const overdueInvoices = invoices.filter((i) => (i.overdueAmount ?? 0) > 0);
+  const totalOverdueAmount = overdueInvoices.reduce((sum, i) => sum + (i.overdueAmount ?? 0), 0);
   const overdueInvoicesCount = overdueInvoices.length;
   const dealersInOverdue = new Set(overdueInvoices.map(i => i.dealerName)).size;
   
@@ -88,7 +88,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
 
   const upcomingPayments = useMemo(() => {
     const today = new Date();
-    const upcomingInvoices = invoices.filter(i => new Date(i.dueDate) >= today && i.status !== 'Disbursed' && i.overdueAmount === 0);
+    const upcomingInvoices = invoices.filter(i => new Date(i.dueDate) >= today && i.status !== 'Disbursed' && (i.overdueAmount ?? 0) === 0);
 
     const calcTotal = (days: number) => {
         const endDate = addDays(today, days);
@@ -419,9 +419,9 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <div className="truncate max-w-[120px]">{invoice.utrNumber || '-'}</div>
+                                            <div className="truncate max-w-[120px]">{invoice.utrNo || '-'}</div>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>{invoice.utrNumber || 'N/A'}</p></TooltipContent>
+                                        <TooltipContent><p>{invoice.utrNo || 'N/A'}</p></TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
                             </TableCell>
@@ -429,7 +429,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                             <Link href={`/invoices?dealerName=${encodeURIComponent(invoice.dealerName)}`} className="hover:underline truncate max-w-[120px] block" onClick={(e) => e.stopPropagation()}>
+                                             <Link href={`/invoices?dealerName=${encodeURIComponent(invoice.dealerName ?? '')}`} className="hover:underline truncate max-w-[120px] block" onClick={(e) => e.stopPropagation()}>
                                                 {invoice.dealerName}
                                             </Link>
                                         </TooltipTrigger>
@@ -441,11 +441,11 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Link href={`/invoices?lender=${encodeURIComponent(invoice.lender)}`} className="hover:underline truncate max-w-[120px] block" onClick={(e) => e.stopPropagation()}>
+                                            <Link href={`/invoices?lender=${encodeURIComponent(invoice.lender ?? '')}`} className="hover:underline truncate max-w-[120px] block" onClick={(e) => e.stopPropagation()}>
                                                 {invoice.lender}
                                             </Link>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>{lenderFullNameMapping[invoice.lender] || invoice.lender}</p></TooltipContent>
+                                        <TooltipContent><p>{lenderFullNameMapping[invoice.lender ?? ''] || invoice.lender}</p></TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
                             </TableCell>
@@ -473,9 +473,9 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <div className="truncate max-w-[100px]">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</div>
+                                            <div className="truncate max-w-[100px]">{invoice.overdueAmount && invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</div>
                                         </TooltipTrigger>
-                                        <TooltipContent><p>{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</p></TooltipContent>
+                                        <TooltipContent><p>{invoice.overdueAmount && invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : '-'}</p></TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
                             </TableCell>

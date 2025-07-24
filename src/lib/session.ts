@@ -37,7 +37,7 @@ export async function getSession(): Promise<User | null> {
       emailAddress: sessionData.emailAddress,
       roleType: sessionData.roleType,
       userSubRole: sessionData.userSubRole, // Include sub-role
-      phoneNumber: sessionData.phoneNumber,
+      phoneNumber: sessionData.phoneNumber ?? '',
       lastLoginIp: sessionData.lastLoginIp,
       lastLoginTime: sessionData.lastLoginTime
     };

@@ -75,11 +75,11 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
                         <div className="space-y-2 text-xs">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Lender</span>
-                                <span className="font-medium">{invoice.lender}</span>
+                                <span className="font-medium">{invoice.lender || 'N/A'}</span>
                             </div>
                              <div className="flex justify-between">
                                 <span className="text-muted-foreground">UTR #</span>
-                                <span className="font-medium">{invoice.utrNumber || 'N/A'}</span>
+                                <span className="font-medium">{invoice.utrNo || 'N/A'}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Invoice Date</span>
@@ -90,12 +90,8 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
                                 <span className="font-medium">{invoice.dueDate}</span>
                             </div>
                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">E-Way Bill #</span>
-                                <span className="font-medium">{invoice.eWayBillNumber}</span>
-                            </div>
-                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Overdue Amount</span>
-                                <span className="font-medium text-destructive">{invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}</span>
+                                <span className="font-medium text-destructive">{invoice.overdueAmount && invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}</span>
                             </div>
                         </div>
                     </CardContent>
