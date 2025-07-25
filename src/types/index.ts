@@ -3,7 +3,7 @@
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
-  id: string; // This is the dealerId (e.g. DLR001)
+  id: string; // This is the dealerId (e.g. APP001)
   name: string;
   anchorId: string;
   anchorName?: string;
@@ -102,6 +102,7 @@ export type User = {
 };
 
 export type DealerLimit = {
+  dealerId: string;
   applicationId: string;
   limitAmount: number;
   utilisationAmount: number;
@@ -193,5 +194,3 @@ export type MomentumDealerLead = {
   updatedAt: string; // ISO date string
   zone: string;
 }
-
-    

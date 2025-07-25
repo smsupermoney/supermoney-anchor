@@ -33,8 +33,6 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   const invoicesCol = collection(db1, 'invoices');
   let invoiceQuery = query(invoicesCol);
 
-  // If anchorId is provided, filter invoices by that anchorId.
-  // Otherwise (for Admin), fetch all invoices.
   if (anchorId) {
     invoiceQuery = query(invoicesCol, where('anchorId', '==', anchorId));
   }
@@ -46,14 +44,14 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     getDocs(collection(db1, 'dealerLimits'))
   ]);
   
-  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.data().dealerId, {name: d.data().dealerName, applicationId: d.data().applicationId, anchorId: d.data().anchorId}]));
+  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.id, {name: d.data().dealerName, anchorId: d.data().anchorId}]));
   const programMap = new Map(programSnapshot.docs.map(p => [p.data().programId, p.data().lenderName]));
   const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
 
   return invoiceSnapshot.docs.map(doc => {
     const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
     const dealerInfo = dealerMap.get(data.dealerId);
-    const limit = dealerInfo ? limitsMap.get(dealerInfo.applicationId) : undefined;
+    const limit = limitsMap.get(data.dealerId);
     
     return { 
         id: doc.id, 
@@ -91,7 +89,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     const dealerList = dealerSnapshot.docs.map(doc => {
         const dealerData = doc.data();
         const dealerId = dealerData.dealerId;
-        const limitData = limitsMap.get(dealerData.applicationId);
+        const limitData = limitsMap.get(dealerId);
         
         const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
         
@@ -115,12 +113,12 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
 }
 
 
-export async function getDealerLimits(applicationIds?: string[]): Promise<DealerLimit[]> {
-    if (!applicationIds || applicationIds.length === 0) {
+export async function getDealerLimits(dealerIds?: string[]): Promise<DealerLimit[]> {
+    if (!dealerIds || dealerIds.length === 0) {
         return [];
     }
     const limitsCol = collection(db1, 'dealerLimits');
-    const q = query(limitsCol, where(documentId(), 'in', applicationIds));
+    const q = query(limitsCol, where(documentId(), 'in', dealerIds));
     
     const limitsSnapshot = await getDocs(q);
     return limitsSnapshot.docs.map(doc => doc.data() as DealerLimit);
@@ -135,7 +133,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     ]);
     
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, { id: p.id, ...p.data() } as Program]));
-    const allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string, applicationId: string });
+    const allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string });
     const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
 
     const relevantDealers = anchorId ? allDealers.filter(d => d.anchorId === anchorId) : allDealers;
@@ -148,7 +146,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
     relevantDealers.forEach(dealer => {
         const programId = dealer.programId;
-        const limit = limitsMap.get(dealer.applicationId);
+        const limit = limitsMap.get(dealer.dealerId);
 
         if (!programId || !limit) return; 
 
@@ -175,7 +173,7 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     });
     
     relevantDealers.forEach(dealer => {
-        const limit = limitsMap.get(dealer.applicationId);
+        const limit = limitsMap.get(dealer.dealerId);
         if (limit) {
             totalOverdueAmount += limit.principalOverdue;
         }
@@ -427,3 +425,4 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+

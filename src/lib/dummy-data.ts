@@ -306,8 +306,8 @@ export const samplePrograms = [
 
 export const sampleDealers = [
     {
-        applicationId: "APP_SAMPLE_1",
-        customerId: "DLR_SAMPLE_1",
+        applicationId: "DEALER_001",
+        customerId: "CUST_001",
         programId: "PROG_SAMPLE_1",
         anchorId: "ANC001",
         dealerName: "Sample Electronics",
@@ -324,7 +324,7 @@ export const sampleInvoices = [
         invoiceNumber: "SAMPLE-2024-001",
         programId: "PROG_SAMPLE_1",
         anchorId: "ANC001",
-        dealerId: "DLR_SAMPLE_1",
+        dealerId: "DEALER_001",
         date: "2024-01-01",
         dueDate: "2024-02-01",
         invoiceAmount: 50000,

@@ -15,7 +15,7 @@ export default function AddDealerPage() {
           <CardTitle>Bulk Import Dealers & Limits</CardTitle>
           <CardDescription className="flex justify-between items-center">
             <span>
-              Upload an Excel file with dealer and limit data. The applicationId must be unique.
+              Upload an Excel file with dealer and limit data. The applicationId must be unique and will be used as the Dealer ID.
             </span>
              <DownloadSampleExcel data={sampleDealers} fileName="sample-dealers.xlsx" />
           </CardDescription>

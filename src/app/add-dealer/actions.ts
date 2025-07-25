@@ -27,25 +27,26 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing application IDs to prevent duplicates in dealerLimits
-    const limitsRef = collection(db1, "dealerLimits");
-    const existingLimitsSnapshot = await getDocs(query(limitsRef));
-    const existingApplicationIds = new Set(existingLimitsSnapshot.docs.map(doc => doc.id));
+    // Fetch existing dealer IDs to prevent duplicates in both collections
+    const dealersRef = collection(db1, "dealers");
+    const existingDealersSnapshot = await getDocs(query(dealersRef));
+    const existingDealerIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
 
     const batch = writeBatch(db1);
     let newEntriesCount = 0;
     let skippedEntriesCount = 0;
 
     dataArray.forEach((row: any) => {
-        const applicationId = row.applicationId?.toString();
-        if (!applicationId) {
+        // Use applicationId from Excel as the primary dealerId
+        const dealerId = row.applicationId?.toString();
+        if (!dealerId) {
             console.warn("Skipping a row because applicationId is missing.", row);
             skippedEntriesCount++;
             return;
         }
 
-        if (existingApplicationIds.has(applicationId)) {
-            console.warn(`Skipping duplicate applicationId: ${applicationId}`);
+        if (existingDealerIds.has(dealerId)) {
+            console.warn(`Skipping duplicate dealerId (from applicationId): ${dealerId}`);
             skippedEntriesCount++;
             return;
         }
@@ -60,24 +61,25 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         }
 
         // 1. Prepare data for the 'dealers' collection
-        // The document ID is the customerId to avoid duplicate dealer identity entries
-        const dealerRef = doc(db1, "dealers", customerId);
+        // The document ID is now the dealerId (from Excel's applicationId)
+        const dealerRef = doc(db1, "dealers", dealerId);
         const dealerData = {
-          dealerId: customerId, // Storing as a field for easier querying
-          applicationId: applicationId,
+          dealerId: dealerId,
+          customerId: customerId, // Store customerId from Excel as a field
+          applicationId: dealerId, // Keep applicationId field for consistency if needed elsewhere
           programId: programId,
           anchorId: row.anchorId || '',
           dealerName: row.dealerName || '',
-          status: row.status || 'Pending', // Add status field
+          status: row.status || 'Pending',
         };
-        // Use `set` with merge:true to create or update the dealer info 
-        batch.set(dealerRef, dealerData, { merge: true });
+        batch.set(dealerRef, dealerData);
 
         // 2. Prepare data for the 'dealerLimits' collection
-        // The document ID is the applicationId
-        const limitRef = doc(db1, "dealerLimits", applicationId); 
+        // The document ID is also the dealerId (from Excel's applicationId)
+        const limitRef = doc(db1, "dealerLimits", dealerId); 
         const limitData = {
-          applicationId: applicationId,
+          dealerId: dealerId, // Store the dealerId in the document
+          applicationId: dealerId, // The original applicationId from Excel
           limitAmount: Number(row.limitAmount) || 0,
           utilisationAmount: Number(row.utilisationAmount) || 0,
           availableAmount: Number(row.availableAmount) || 0,
