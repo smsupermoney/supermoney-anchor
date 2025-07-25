@@ -44,17 +44,15 @@ export async function addInvoices(formData: FormData): Promise<ActionResult> {
     let skippedEntriesCount = 0;
 
     invoicesArray.forEach((row: any) => {
-        let invoiceNumber = row.invoiceNumber?.toString();
+        let invoiceNumber = row.invoiceNumber?.toString().trim();
 
-        if (invoiceNumber && existingInvoiceNumbers.has(invoiceNumber)) {
+        // Check for empty, null, or "Not Applicable" invoice numbers
+        if (!invoiceNumber || invoiceNumber.toLowerCase() === 'not applicable') {
+            invoiceNumber = doc(collection(db1, "invoices")).id; // Generate a unique ID
+        } else if (existingInvoiceNumbers.has(invoiceNumber)) {
             console.warn(`Skipping duplicate invoiceNumber: ${invoiceNumber}`);
             skippedEntriesCount++;
-            return;
-        }
-
-        // If invoiceNumber is empty, generate a unique one
-        if (!invoiceNumber) {
-            invoiceNumber = doc(collection(db1, "invoices")).id;
+            return; // Skip to the next row
         }
 
         const docRef = doc(db1, "invoices", invoiceNumber);
