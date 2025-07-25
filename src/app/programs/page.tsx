@@ -1,4 +1,6 @@
 
+"use server"
+
 import { unstable_noStore as noStore } from 'next/cache';
 import { getPrograms, getUsers, getDealers } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +14,8 @@ import { UploadCloud } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/page-header";
 import { getSession } from "@/lib/session";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { User, Dealer } from '@/types';
+import ProgramsTable from './programs-table';
 
 export default async function ProgramsPage() {
     noStore();
@@ -40,8 +42,6 @@ export default async function ProgramsPage() {
     const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
 
   if (isAdmin) {
-    // Admin view: Show all programs and the anchors associated with them.
-    // This requires reversing the logic slightly to map anchors to programs.
     const allDealers = await getDealers(undefined);
     const programsWithAnchors = programs.map(program => {
         const relevantDealerAnchorIds = new Set(allDealers.filter(d => d.programId === program.id).map(d => d.anchorId));
@@ -58,40 +58,7 @@ export default async function ProgramsPage() {
                     <CardDescription>A list of all financing programs in the system.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Program ID</TableHead>
-                                <TableHead>Lender Name</TableHead>
-                                <TableHead>Lender Type</TableHead>
-                                <TableHead>Linked Anchor Names</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {programsWithAnchors.length > 0 ? programsWithAnchors.map((program) => (
-                                <TableRow key={program.id}>
-                                    <TableCell className="font-mono text-xs">{program.programId}</TableCell>
-                                    <TableCell className="font-medium">{program.lenderName}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'}>
-                                            {program.lenderType}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col gap-1">
-                                            {program.anchorNames.length > 0 ? program.anchorNames.map(name => (
-                                                <span key={name} className="text-xs">{name}</span>
-                                            )) : <span className="text-xs text-muted-foreground">No anchors linked</span>}
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="text-center">No programs found.</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                   <ProgramsTable programs={programsWithAnchors} />
                 </CardContent>
             </Card>
         </>

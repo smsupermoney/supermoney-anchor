@@ -21,6 +21,7 @@ import DealerDetailDialog from "@/components/dealer-detail-dialog";
 import { useSearchParams } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Combobox } from "@/components/ui/combobox";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 type RetailersClientPageProps = {
   initialDealers: Dealer[];
@@ -50,6 +51,8 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
 
   const [filters, setFilters] = useState({...initialFilters, lender: lenderQuery || ""});
   const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageSize = 10;
   
   const dealerOptions = useMemo(() => {
       const uniqueNames = new Set(initialDealers.map(d => d.name));
@@ -62,6 +65,11 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
       setFilters(prev => ({ ...prev, lender: lender }));
     }
   }, [searchParams]);
+  
+  useEffect(() => {
+    setPageIndex(0);
+  }, [filters]);
+
 
   const handleFilterChange = (
     filterName: keyof typeof filters,
@@ -89,6 +97,13 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
     });
   }, [filters, dealers]);
   
+  const pageCount = Math.ceil(filteredDealers.length / pageSize);
+  const paginatedDealers = useMemo(() => {
+      const start = pageIndex * pageSize;
+      const end = start + pageSize;
+      return filteredDealers.slice(start, end);
+  }, [filteredDealers, pageIndex, pageSize]);
+
   const dealerStatuses = ["Active", "Inactive", "Pending"];
 
   return (
@@ -138,7 +153,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
               </Button>
             )}
           </div>
-          <div className="relative w-full overflow-auto">
+          <div className="relative w-full overflow-auto border rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -153,7 +168,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDealers.map((dealer) => (
+                {paginatedDealers.map((dealer) => (
                   <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
                     <TableCell className="font-medium">
                       <TooltipProvider>
@@ -217,7 +232,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell className="text-right">
+                     <TableCell className="text-right">
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -242,6 +257,13 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
               </TableBody>
             </Table>
           </div>
+           <DataTablePagination
+              pageIndex={pageIndex}
+              pageCount={pageCount}
+              setPageIndex={setPageIndex}
+              hasNextPage={pageIndex < pageCount - 1}
+              hasPreviousPage={pageIndex > 0}
+            />
         </CardContent>
       </Card>
       {selectedDealer && (
@@ -256,5 +278,3 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
     </>
   );
 }
-
-    

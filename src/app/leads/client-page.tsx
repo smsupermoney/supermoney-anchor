@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/page-header";
 import AddLeadDialog from "@/components/add-lead-dialog";
 import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 type LeadsClientPageProps = {
     initialLeads: MomentumDealerLead[];
@@ -38,6 +39,8 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     status: [] as string[],
   };
   const [filters, setFilters] = useState(initialFilters);
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageSize = 10;
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-IN');
@@ -90,6 +93,17 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
       );
     });
   }, [filters, leads]);
+  
+  const pageCount = Math.ceil(filteredLeads.length / pageSize);
+  const paginatedLeads = useMemo(() => {
+    const start = pageIndex * pageSize;
+    const end = start + pageSize;
+    return filteredLeads.slice(start, end);
+  }, [filteredLeads, pageIndex, pageSize]);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [filters]);
 
 
   return (
@@ -196,7 +210,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         </Button>
                         )}
                     </div>
-                    <div className="relative w-full overflow-auto">
+                    <div className="relative w-full overflow-auto border rounded-md">
                     <Table>
                         <TableHeader>
                         <TableRow>
@@ -211,7 +225,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         </TableRow>
                         </TableHeader>
                         <TableBody>
-                        {filteredLeads.map((lead) => (
+                        {paginatedLeads.map((lead) => (
                             <TableRow key={lead.id}>
                             <TableCell className="font-medium">{lead.name}</TableCell>
                             <TableCell>{lead.city}</TableCell>
@@ -230,6 +244,13 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         </TableBody>
                     </Table>
                     </div>
+                     <DataTablePagination
+                        pageIndex={pageIndex}
+                        pageCount={pageCount}
+                        setPageIndex={setPageIndex}
+                        hasNextPage={pageIndex < pageCount - 1}
+                        hasPreviousPage={pageIndex > 0}
+                    />
                 </CardContent>
             </Card>
         </div>

@@ -14,8 +14,7 @@ import {
 } from "@/components/ui/table";
 import { invoiceStatuses } from "@/lib/data";
 import StatusBadge from "@/components/status-badge";
-import { Upload, UploadCloud, Calendar as CalendarIcon, X as XIcon, ChevronDown, PlusCircle } from "lucide-react";
-import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
+import { Calendar as CalendarIcon, X as XIcon, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
@@ -38,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Combobox } from "@/components/ui/combobox";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 type InvoicesClientPageProps = {
   initialInvoices: Invoice[];
@@ -80,6 +80,8 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
     return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || "", status: statusArray, dealerName: dealerNameQuery || ""};
   });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageSize = 10;
   
   const dealerOptions = useMemo(() => {
     const uniqueNames = new Set(initialInvoices.map(i => i.dealerName));
@@ -128,8 +130,8 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
 
       const overdueCondition =
         filters.overdue === "" ||
-        (filters.overdue === "yes" && invoice.overdueAmount > 0) ||
-        (filters.overdue === "no" && invoice.overdueAmount === 0);
+        (filters.overdue === "yes" && (invoice.overdueAmount ?? 0) > 0) ||
+        (filters.overdue === "no" && (invoice.overdueAmount ?? 0) === 0);
 
       const statusCondition =
         filters.status.length === 0 || filters.status.includes(invoice.status);
@@ -149,6 +151,18 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
       );
     });
   }, [filters, date, invoices]);
+  
+  const pageCount = Math.ceil(filteredInvoices.length / pageSize);
+  const paginatedInvoices = useMemo(() => {
+      const start = pageIndex * pageSize;
+      const end = start + pageSize;
+      return filteredInvoices.slice(start, end);
+  }, [filteredInvoices, pageIndex, pageSize]);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [filters, date]);
+
 
   return (
     <>
@@ -292,7 +306,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
               </Button>
             )}
           </div>
-          <div className="relative w-full overflow-auto">
+          <div className="relative w-full overflow-auto border rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -309,7 +323,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredInvoices.map((invoice) => (
+                {paginatedInvoices.map((invoice) => (
                   <TableRow key={invoice.id} onClick={() => setSelectedInvoice(invoice)} className="cursor-pointer">
                     <TableCell className="font-medium text-primary">
                       <TooltipProvider>
@@ -418,6 +432,13 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
               </TableBody>
             </Table>
           </div>
+           <DataTablePagination
+              pageIndex={pageIndex}
+              pageCount={pageCount}
+              setPageIndex={setPageIndex}
+              hasNextPage={pageIndex < pageCount - 1}
+              hasPreviousPage={pageIndex > 0}
+            />
         </CardContent>
       </Card>
       {selectedInvoice && (

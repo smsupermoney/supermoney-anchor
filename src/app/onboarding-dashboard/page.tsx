@@ -5,13 +5,11 @@ import { getSession } from "@/lib/session";
 import { dealerLeads } from "@/lib/data";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import StatusBadge from "@/components/status-badge";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import type { DealerLead, UserSubRole } from "@/types";
 import { ArrowRight, Building, CheckSquare, HandCoins, MapPin, UserCheck, Users, PlusCircle, BadgePercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import OnboardingDashboardTable from "./onboarding-dashboard-table";
 
 const getActionableLeads = (leads: DealerLead[], userSubRole: UserSubRole | undefined): DealerLead[] => {
   if (!userSubRole) return [];
@@ -111,47 +109,7 @@ export default async function OnboardingDashboardPage() {
           <CardTitle>My Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative w-full overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Dealer Name</TableHead>
-                  <TableHead>Contact Person</TableHead>
-                  <TableHead>Region</TableHead>
-                  <TableHead>Created At</TableHead>
-                  <TableHead>Current Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {actionableLeads.length > 0 ? (
-                    actionableLeads.map((lead) => (
-                    <TableRow key={lead.id} className="cursor-pointer hover:bg-muted">
-                        <TableCell className="font-medium">
-                        <Link href={`/dealer-leads/${lead.id}`} className="text-primary hover:underline block">
-                            {lead.dealerName}
-                        </Link>
-                        </TableCell>
-                         <TableCell>
-                            <div>{lead.contactPerson}</div>
-                            <div className="text-xs text-muted-foreground">{lead.contactPhone}</div>
-                        </TableCell>
-                        <TableCell>
-                        <Badge variant="secondary">{lead.region}</Badge>
-                        </TableCell>
-                        <TableCell>{lead.createdAt}</TableCell>
-                        <TableCell><StatusBadge status={lead.status} /></TableCell>
-                    </TableRow>
-                    ))
-                ) : (
-                    <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
-                            No actions required at this time.
-                        </TableCell>
-                    </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <OnboardingDashboardTable leads={actionableLeads} />
         </CardContent>
       </Card>
     </>

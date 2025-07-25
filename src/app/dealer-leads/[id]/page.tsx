@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import SiteVisitDialog from '@/components/site-visit-dialog';
 import CreditCheckDialog from '@/components/credit-check-dialog';
 import ApproveLimitDialog from '@/components/approve-limit-dialog';
+import { DataTablePagination } from '@/components/ui/data-table-pagination';
 
 export default function DealerLeadDetailPage({ params }: { params: { id: string } }) {
     const { user } = useAuth();
@@ -32,6 +33,18 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
     const [isSiteVisitDialogOpen, setIsSiteVisitDialogOpen] = React.useState(false);
     const [isCreditCheckDialogOpen, setIsCreditCheckDialogOpen] = React.useState(false);
     const [isApproveLimitDialogOpen, setIsApproveLimitDialogOpen] = React.useState(false);
+    
+    const [pageIndex, setPageIndex] = React.useState(0);
+    const pageSize = 5;
+
+    const pageCount = lead?.comments ? Math.ceil(lead.comments.length / pageSize) : 0;
+    const paginatedComments = React.useMemo(() => {
+        if (!lead?.comments) return [];
+        const start = pageIndex * pageSize;
+        const end = start + pageSize;
+        return lead.comments.slice(start, end);
+    }, [lead?.comments, pageIndex, pageSize]);
+
 
     if (!lead) {
         notFound();
@@ -231,7 +244,7 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                <div className='max-h-60 overflow-y-auto border rounded-md'>
+                                <div className='border rounded-md'>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -241,8 +254,8 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {lead.comments && lead.comments.length > 0 ? (
-                                            lead.comments.map((comment, index) => (
+                                        {paginatedComments && paginatedComments.length > 0 ? (
+                                            paginatedComments.map((comment, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell className='font-medium'>{comment.user}</TableCell>
                                                     <TableCell className='text-muted-foreground'>{comment.comment}</TableCell>
@@ -257,6 +270,15 @@ export default function DealerLeadDetailPage({ params }: { params: { id: string 
                                     </TableBody>
                                 </Table>
                                 </div>
+                                {pageCount > 1 && (
+                                     <DataTablePagination
+                                        pageIndex={pageIndex}
+                                        pageCount={pageCount}
+                                        setPageIndex={setPageIndex}
+                                        hasNextPage={pageIndex < pageCount - 1}
+                                        hasPreviousPage={pageIndex > 0}
+                                    />
+                                )}
                                 <div className='space-y-2'>
                                     <Textarea 
                                         placeholder="Add your comment..." 

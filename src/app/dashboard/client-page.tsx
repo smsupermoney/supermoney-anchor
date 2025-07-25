@@ -18,6 +18,7 @@ import Link from "next/link";
 import { subDays, startOfDay, addDays } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AiChat from "@/components/ai-chat";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 type DashboardClientProps = {
   initialPrograms: Program[];
@@ -31,6 +32,9 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [programs] = useState(initialPrograms);
   const [invoices] = useState(initialInvoices);
+  
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageSize = 5; // Smaller page size for dashboard view
 
 
   const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
@@ -101,6 +105,14 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
         next30Days: calcTotal(30),
     };
   }, [invoices]);
+  
+  const recentInvoicesPageData = useMemo(() => {
+    const start = pageIndex * pageSize;
+    const end = start + pageSize;
+    return invoices.slice(start, end);
+  }, [invoices, pageIndex, pageSize]);
+
+  const pageCount = Math.ceil(invoices.length / pageSize);
 
 
   return (
@@ -401,7 +413,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {invoices.slice(0, 10).map((invoice) => (
+                    {recentInvoicesPageData.map((invoice) => (
                         <TableRow key={invoice.id} className="h-10 cursor-pointer" onClick={() => setSelectedInvoice(invoice)}>
                             <TableCell className="p-2 font-medium text-primary">
                                 <TooltipProvider>
@@ -493,7 +505,14 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                 </Table>
                 </div>
             </CardContent>
-             <CardFooter className="p-3 justify-center border-t">
+             <CardFooter className="p-3 justify-between border-t items-center">
+                 <DataTablePagination
+                    pageIndex={pageIndex}
+                    pageCount={pageCount}
+                    setPageIndex={setPageIndex}
+                    hasNextPage={pageIndex < pageCount - 1}
+                    hasPreviousPage={pageIndex > 0}
+                />
                 <Button asChild variant="ghost" size="sm">
                     <Link href="/invoices">
                         View All Invoices
