@@ -23,7 +23,12 @@ export async function addInvoices(formData: FormData): Promise<ActionResult> {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     // Use { raw: false } to get formatted text for dates
-    const invoicesArray = xlsx.utils.sheet_to_json(sheet, { raw: false });
+    const rawDataArray = xlsx.utils.sheet_to_json(sheet, { raw: false });
+
+    // Filter out empty rows that might be read by the xlsx library
+    const invoicesArray = rawDataArray.filter((row: any) => 
+        Object.values(row).some(cell => cell !== null && cell !== '')
+    );
 
     if (!Array.isArray(invoicesArray) || invoicesArray.length === 0) {
       return { error: "The Excel file is empty or not in the correct format." };

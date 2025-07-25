@@ -33,28 +33,11 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   const invoicesCol = collection(db1, 'invoices');
   let invoiceQuery = query(invoicesCol);
 
+  // If anchorId is provided, filter invoices by that anchorId.
+  // Otherwise (for Admin), fetch all invoices.
   if (anchorId) {
-    // First, find all dealers associated with the given anchorId
-    const dealersRef = collection(db1, 'dealers');
-    const dealersQuery = query(dealersRef, where('anchorId', '==', anchorId));
-    const dealersSnapshot = await getDocs(dealersQuery);
-    
-    if (dealersSnapshot.empty) {
-      return []; // No dealers for this anchor, so no invoices
-    }
-    
-    // Get the list of dealer IDs
-    const dealerIds = dealersSnapshot.docs.map(doc => doc.data().dealerId);
-    
-    // If there are no dealer IDs, return an empty array to avoid an error with the 'in' query.
-    if (dealerIds.length === 0) {
-        return [];
-    }
-
-    // Then, query for invoices where the dealerId is in the list of found dealer IDs
-    invoiceQuery = query(invoicesCol, where('dealerId', 'in', dealerIds));
+    invoiceQuery = query(invoicesCol, where('anchorId', '==', anchorId));
   }
-  // If no anchorId is provided (for Admin), the initial query fetching all invoices is used.
 
   const [invoiceSnapshot, allDealersSnapshot, programSnapshot, limitsSnapshot] = await Promise.all([
     getDocs(invoiceQuery),
@@ -76,7 +59,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
         id: doc.id, 
         ...data,
         dealerName: dealerInfo?.name || 'Unknown Dealer',
-        anchorId: dealerInfo?.anchorId || '',
+        anchorId: dealerInfo?.anchorId || data.anchorId || '',
         lender: programMap.get(data.programId) || 'Unknown Lender',
         overdueAmount: limit?.principalOverdue || 0
     } as Invoice;
