@@ -7,12 +7,17 @@ import { getSession } from '@/lib/session';
 export default async function Dashboard() {
   noStore();
   const session = await getSession();
+  
+  // ID for programs, dealers, invoices
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
+  
+  // Separate ID specifically for leads, as per recent changes
+  const leadAnchorId = session?.roleType === 'Admin' ? undefined : session?.leadExternalId;
   
   const [{ programs, invoices, totalOverdueAmount }, dealers, momentumLeads] = await Promise.all([
     getPrograms(anchorId),
     getDealers(anchorId),
-    getMomentumDealerLeads(anchorId),
+    getMomentumDealerLeads(leadAnchorId), // Use the correct ID for fetching leads
   ]);
   
   return (
