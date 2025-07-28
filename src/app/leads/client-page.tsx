@@ -24,6 +24,7 @@ import PageHeader from "@/components/page-header";
 import AddLeadDialog from "@/components/add-lead-dialog";
 import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type LeadsClientPageProps = {
     initialLeads: MomentumDealerLead[];
@@ -35,7 +36,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     name: "",
     city: "",
     zone: "",
-    leadSource: "",
+    spoc: "",
     status: [] as string[],
   };
   const [filters, setFilters] = useState(initialFilters);
@@ -43,7 +44,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   const pageSize = 10;
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-IN');
+  const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN') : 'N/A';
 
   const getLatestRemark = (lead: MomentumDealerLead) => {
     if (!lead.remarks || lead.remarks.length === 0) {
@@ -51,7 +52,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     }
     const latestRemark = lead.remarks[lead.remarks.length - 1];
     if (typeof latestRemark === 'object' && latestRemark !== null) {
-        // You might need to adjust this based on the actual remark structure
         return (latestRemark as any).remark || (latestRemark as any).text || 'View Details';
     }
     return 'View Details';
@@ -88,7 +88,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
         (lead.name || '').toLowerCase().includes(filters.name.toLowerCase()) &&
         (lead.city || '').toLowerCase().includes(filters.city.toLowerCase()) &&
         (lead.zone || '').toLowerCase().includes(filters.zone.toLowerCase()) &&
-        (lead.leadSource || '').toLowerCase().includes(filters.leadSource.toLowerCase()) &&
+        (lead.spoc || '').toLowerCase().includes(filters.spoc.toLowerCase()) &&
         statusCondition
       );
     });
@@ -150,9 +150,9 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         className="h-9 max-w-40"
                         />
                         <Input
-                        placeholder="Filter by source..."
-                        value={filters.leadSource}
-                        onChange={(e) => handleFilterChange("leadSource", e.target.value)}
+                        placeholder="Filter by SPOC..."
+                        value={filters.spoc}
+                        onChange={(e) => handleFilterChange("spoc", e.target.value)}
                         className="h-9 max-w-40"
                         />
                         <DropdownMenu>
@@ -214,20 +214,40 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                     <Table>
                         <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
+                            <TableHead>Lead Name</TableHead>
+                            <TableHead>SPOC</TableHead>
+                            <TableHead>Contact</TableHead>
                             <TableHead>City</TableHead>
                             <TableHead>Zone</TableHead>
                             <TableHead>Lead Source</TableHead>
                             <TableHead>Deal Value</TableHead>
                             <TableHead>Lead Date</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead>Priority</TableHead>
+                            <TableHead>TAT</TableHead>
                             <TableHead>Latest Remark</TableHead>
                         </TableRow>
                         </TableHeader>
                         <TableBody>
                         {paginatedLeads.map((lead) => (
                             <TableRow key={lead.id}>
-                            <TableCell className="font-medium">{lead.name}</TableCell>
+                            <TableCell className="font-medium">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <span className="block max-w-[120px] truncate">{lead.name}</span>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{lead.name}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </TableCell>
+                            <TableCell>{lead.spoc}</TableCell>
+                             <TableCell>
+                                <div className="max-w-[150px] truncate">
+                                    <p>{lead.contactNumber || 'N/A'}</p>
+                                    <p className="text-muted-foreground truncate">{lead.email || 'N/A'}</p>
+                                </div>
+                            </TableCell>
                             <TableCell>{lead.city}</TableCell>
                             <TableCell>{lead.zone}</TableCell>
                             <TableCell>{lead.leadSource}</TableCell>
@@ -238,7 +258,18 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                             <TableCell>
                                 <StatusBadge status={lead.status as any} />
                             </TableCell>
-                            <TableCell className="text-muted-foreground truncate max-w-xs">{getLatestRemark(lead)}</TableCell>
+                            <TableCell>{lead.priority || 'N/A'}</TableCell>
+                            <TableCell>{lead.tat || 'N/A'}</TableCell>
+                            <TableCell className="text-muted-foreground">
+                                 <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <span className="block max-w-[150px] truncate">{getLatestRemark(lead)}</span>
+                                        </TooltipTrigger>
+                                        <TooltipContent><p>{getLatestRemark(lead)}</p></TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </TableCell>
                             </TableRow>
                         ))}
                         </TableBody>

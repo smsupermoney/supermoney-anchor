@@ -338,15 +338,18 @@ export const sampleInvoices = [
 export const sampleMomentumLeads = [
     {
         name: "Sample Lead Inc.",
+        spoc: "John Doe",
+        contactNumber: "9988776655",
+        email: "john.doe@example.com",
         city: "Mumbai",
         zone: "West",
         state: "Maharashtra",
         leadSource: "Website",
-        leadType: "Fresh",
-        product: "Supply Chain Finance",
         dealValue: 1.5,
+        leadDate: "2024-07-28",
         status: "New",
-        spoc: "John Doe",
+        priority: "High",
+        tat: "2 Days"
     }
 ];
     

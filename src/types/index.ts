@@ -194,4 +194,8 @@ export type MomentumDealerLead = {
   status: string;
   updatedAt: string; // ISO date string
   zone: string;
+  contactNumber?: string;
+  email?: string;
+  priority?: string;
+  tat?: string;
 }
