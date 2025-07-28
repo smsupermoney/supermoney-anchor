@@ -242,7 +242,7 @@ export const spokeStatuses = [
     'New', 'Partial Docs', 'Follow Up', 'Already Onboarded', 'Disbursed', 
     'Not reachable', 'Active', 'Unassigned Lead', 'Rejected', 'Not Interested', 
     'Onboarding', 'Approved PF Collected', 'Awaiting Sanction', 'Closed', 
-    'Limit Live', 'Login Pending', 'On Hold', 'Queries Raised', 'Relook'
+    'Limit Live', 'On Hold', 'Queries Raised', 'Relook'
 ] as const;
 
 export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];
