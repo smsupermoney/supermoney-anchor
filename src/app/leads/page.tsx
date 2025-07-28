@@ -8,8 +8,9 @@ export default async function LeadsPage() {
   noStore();
   const session = await getSession();
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
+  const userName = session?.roleType === 'Admin' ? undefined : session?.userName;
   
-  const momentumLeads = await getMomentumDealerLeads(anchorId);
+  const momentumLeads = await getMomentumDealerLeads(anchorId, userName);
   
   return (
     <>

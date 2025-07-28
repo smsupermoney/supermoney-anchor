@@ -8,15 +8,24 @@ import type { Dealer, Invoice, Program } from '@/types';
 
 // Functions to fetch data from Firestore
 
-export async function getMomentumDealerLeads(anchorId?: string): Promise<MomentumDealerLead[]> {
+export async function getMomentumDealerLeads(anchorId?: string, userName?: string): Promise<MomentumDealerLead[]> {
     if (!db2) {
       console.warn("Database 'db2' is not configured. Returning empty array for Momentum leads.");
       return [];
     }
-    let dealerQuery = query(collection(db2, 'dealers'));
-
+    let conditions = [];
     if (anchorId) {
-        dealerQuery = query(collection(db2, 'dealers'), where('anchorId', '==', anchorId));
+        conditions.push(where('anchorId', '==', anchorId));
+    }
+    if (userName) {
+        conditions.push(where('spoc', '==', userName));
+    }
+
+    let dealerQuery;
+    if (conditions.length > 0) {
+        dealerQuery = query(collection(db2, 'dealers'), ...conditions);
+    } else {
+        dealerQuery = query(collection(db2, 'dealers'));
     }
     
     const dealerSnapshot = await getDocs(dealerQuery);
@@ -31,10 +40,13 @@ export async function getUsers(): Promise<User[]> {
 
 export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   const invoicesCol = collection(db1, 'invoices');
-  let invoiceQuery = query(invoicesCol);
+  let invoiceQuery;
 
   if (anchorId) {
     invoiceQuery = query(invoicesCol, where('anchorId', '==', anchorId));
+  } else {
+    // Admin case: fetch all invoices
+    invoiceQuery = query(invoicesCol);
   }
 
   const [invoiceSnapshot, allDealersSnapshot, programSnapshot, limitsSnapshot] = await Promise.all([
@@ -425,4 +437,5 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
