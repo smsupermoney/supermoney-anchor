@@ -8,22 +8,15 @@ import type { Dealer, Invoice, Program } from '@/types';
 
 // Functions to fetch data from Firestore
 
-export async function getMomentumDealerLeads(anchorId?: string, userName?: string): Promise<MomentumDealerLead[]> {
+export async function getMomentumDealerLeads(anchorId?: string): Promise<MomentumDealerLead[]> {
     if (!db2) {
       console.warn("Database 'db2' is not configured. Returning empty array for Momentum leads.");
       return [];
     }
-    let conditions = [];
-    if (anchorId) {
-        conditions.push(where('anchorId', '==', anchorId));
-    }
-    if (userName) {
-        conditions.push(where('spoc', '==', userName));
-    }
-
+    
     let dealerQuery;
-    if (conditions.length > 0) {
-        dealerQuery = query(collection(db2, 'dealers'), ...conditions);
+    if (anchorId) {
+        dealerQuery = query(collection(db2, 'dealers'), where('anchorId', '==', anchorId));
     } else {
         dealerQuery = query(collection(db2, 'dealers'));
     }
@@ -437,5 +430,6 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 
