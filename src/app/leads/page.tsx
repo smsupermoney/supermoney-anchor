@@ -7,7 +7,9 @@ import LeadsClientPage from './client-page';
 export default async function LeadsPage() {
   noStore();
   const session = await getSession();
-  const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
+  
+  // If user is an anchor, use their leadExternalId to filter. Otherwise, fetch all leads.
+  const anchorId = session?.roleType === 'Anchor' ? session?.leadExternalId : undefined;
   
   const momentumLeads = await getMomentumDealerLeads(anchorId);
   

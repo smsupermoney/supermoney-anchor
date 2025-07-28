@@ -99,6 +99,7 @@ export type User = {
     lastLoginIp: string;
     authToken?: string;
     expiryTime?: number;
+    leadExternalId?: string;
 };
 
 export type DealerLimit = {

@@ -39,7 +39,8 @@ export async function getSession(): Promise<User | null> {
       userSubRole: sessionData.userSubRole, // Include sub-role
       phoneNumber: sessionData.phoneNumber ?? '',
       lastLoginIp: sessionData.lastLoginIp,
-      lastLoginTime: sessionData.lastLoginTime
+      lastLoginTime: sessionData.lastLoginTime,
+      leadExternalId: sessionData.leadExternalId,
     };
 
   } catch (error) {

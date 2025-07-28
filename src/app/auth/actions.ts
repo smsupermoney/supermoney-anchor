@@ -41,6 +41,7 @@ export async function authenticate(
     session.emailAddress = user.emailAddress;
     session.externalId = user.externalId;
     session.userSubRole = user.userSubRole;
+    session.leadExternalId = user.leadExternalId;
     await session.save();
 
     userRole = user.roleType;
