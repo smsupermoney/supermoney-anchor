@@ -10,14 +10,16 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { getProgramSummaryTool, getInvoiceSummaryTool, getDealerSummaryTool } from '../tools/data-tools';
 
 const AskAiInputSchema = z.object({
-  question: z.string().describe('The user\'s question.'),
+  question: z.string().describe("The user's question."),
+  anchorId: z.string().optional().describe("The ID of the anchor user asking the question. This is used to scope data."),
 });
 export type AskAiInput = z.infer<typeof AskAiInputSchema>;
 
 const AskAiOutputSchema = z.object({
-  answer: z.string().describe('The AI\'s answer to the question.'),
+  answer: z.string().describe("The AI's answer to the question."),
 });
 export type AskAiOutput = z.infer<typeof AskAiOutputSchema>;
 
@@ -29,13 +31,16 @@ const prompt = ai.definePrompt({
   name: 'askAiPrompt',
   input: {schema: AskAiInputSchema},
   output: {schema: AskAiOutputSchema},
+  tools: [getProgramSummaryTool, getInvoiceSummaryTool, getDealerSummaryTool],
   prompt: `You are a helpful AI assistant for a supply chain financing platform. Your name is Supermoney Assistant.
 
-  A user has asked a question. Provide a concise and helpful answer. If the question is about data (e.g., "how many invoices are overdue?"), you can use placeholder data but clearly state that it's an example.
+  A user has asked a question. Provide a concise and helpful answer.
+  If the question is about data (e.g., "how many invoices are overdue?", "what is my total credit limit?", "how many dealers do I have?"), you MUST use the provided tools to get real-time information.
+  When calling a tool, you must pass the anchorId provided in the input.
 
   User Question: {{{question}}}
 
-  Answer the question as the Supermoney Assistant.
+  Answer the question as the Supermoney Assistant. Format numbers and currency in a readable way (e.g., ₹1,23,456).
   `,
 });
 

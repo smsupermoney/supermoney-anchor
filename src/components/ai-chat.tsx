@@ -8,6 +8,7 @@ import { Bot, Send, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { askAi } from "@/ai/flows/ask-ai-flow";
 import { Skeleton } from "./ui/skeleton";
+import { useAuth } from "@/context/auth-context";
 
 type Message = {
   role: "user" | "assistant";
@@ -19,6 +20,7 @@ export default function AiChat() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,9 @@ export default function AiChat() {
     setIsLoading(true);
 
     try {
-      const response = await askAi({ question: input });
+      // Pass the user's anchorId to the AI flow
+      const anchorId = user?.roleType === 'Anchor' ? user.externalId : undefined;
+      const response = await askAi({ question: input, anchorId });
       const assistantMessage: Message = { role: "assistant", content: response.answer };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
@@ -69,7 +73,7 @@ export default function AiChat() {
             {messages.length === 0 && (
                 <div className="text-center text-sm text-muted-foreground py-8">
                     <p>Ask me anything about your program!</p>
-                    <p className="text-xs">e.g., "How many dealers are overdue?"</p>
+                    <p className="text-xs">e.g., "How many invoices are overdue?"</p>
                 </div>
             )}
             {messages.map((message, index) => (
