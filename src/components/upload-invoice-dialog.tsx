@@ -36,6 +36,8 @@ type UploadedFile = {
   isLoading: boolean;
   error?: string;
   overdueAmount?: number;
+  applicationId?: string;
+  customerId?: string;
 };
 
 export default function UploadInvoiceDialog({ children, dealers }: UploadInvoiceDialogProps) {
@@ -71,12 +73,22 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const documentDataUri = await fileToDataUri(file);
       const result = await extractInvoiceData({ documentDataUri });
 
-      // Check for overdue amount
+      // Find dealer to get IDs
       const dealer = dealers.find(d => d.name.toLowerCase() === result.dealerName.toLowerCase());
       const overdueAmount = dealer?.overdueAmount;
+      const applicationId = dealer?.applicationId;
+      const customerId = dealer?.customerId;
       
       setUploadedFiles(prev => prev.map((f, i) => 
-        i === index ? { ...f, extractedData: result, isLoading: false, disburseAmount: result.amount.toString(), overdueAmount: overdueAmount } : f
+        i === index ? { 
+            ...f, 
+            extractedData: result, 
+            isLoading: false, 
+            disburseAmount: result.amount.toString(), 
+            overdueAmount: overdueAmount,
+            applicationId,
+            customerId
+        } : f
       ));
 
     } catch (error) {
@@ -160,6 +172,8 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           disburseAmount: upFile.disburseAmount ? Number(upFile.disburseAmount) : undefined,
           error: upFile.error,
           fileContent: await fileToDataUri(upFile.file),
+          applicationId: upFile.applicationId,
+          customerId: upFile.customerId,
       }));
       
       const emailData = await Promise.all(emailDataPromises);

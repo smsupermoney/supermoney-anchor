@@ -10,6 +10,8 @@ type EmailData = {
     disburseAmount?: number;
     error?: string;
     fileContent?: string; // Base64 data URI
+    applicationId?: string;
+    customerId?: string;
 };
 
 type ActionResult = {
@@ -50,6 +52,8 @@ function generateEmailBody(data: EmailData[]): string {
         if (item.extractedData) {
             html += `
                 <tr><td style="width: 30%;"><strong>Dealer Name</strong></td><td>${item.extractedData.dealerName || 'Not Detected'}</td></tr>
+                <tr><td style="width: 30%;"><strong>Application ID</strong></td><td>${item.applicationId || 'Not Found'}</td></tr>
+                <tr><td style="width: 30%;"><strong>Customer ID</strong></td><td>${item.customerId || 'Not Found'}</td></tr>
                 <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
                 <tr><td><strong>Invoice Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
                 <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>

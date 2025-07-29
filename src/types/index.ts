@@ -3,7 +3,7 @@
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 export type Dealer = {
-  id: string; // This is the dealerId (e.g. APP001)
+  id: string; // This is the dealerId (e.g. DLR001)
   name: string;
   anchorId: string;
   anchorName?: string;
@@ -16,6 +16,8 @@ export type Dealer = {
   programId?: string; 
   totalLimit: number;
   availableLimit: number;
+  applicationId: string;
+  customerId: string;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';

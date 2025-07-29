@@ -104,6 +104,8 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             name: dealerData.dealerName,
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
+            applicationId: dealerData.applicationId,
+            customerId: dealerData.customerId,
             invoicesSubmitted: dealerInvoices.length,
             amountDisbursed: limitData?.utilisationAmount || 0,
             overdueCount: (limitData?.principalOverdue ?? 0) > 0 ? 1 : 0, 
@@ -431,6 +433,7 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 
 
