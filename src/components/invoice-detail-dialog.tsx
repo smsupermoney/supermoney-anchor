@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { invoiceStatuses } from "@/lib/data";
-import { Download, Printer } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import type { Invoice } from "@/types";
+import Link from "next/link";
 
 type InvoiceDetailDialogProps = {
   invoice: Invoice;
@@ -26,10 +28,12 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
         <DialogHeader className="p-6 pb-0">
             <DialogTitle>
                 <PageHeader title={`Invoice ${invoice.invoiceNumber}`}>
-                    <div className="flex gap-2 pr-8">
-                        <Button variant="outline"><Printer className="mr-2 h-4 w-4" /> Print</Button>
-                        <Button><Download className="mr-2 h-4 w-4" /> Download</Button>
-                    </div>
+                    {invoice.invoiceImage && (
+                        <div className="flex gap-2 pr-8">
+                            <Button asChild variant="outline"><Link href={invoice.invoiceImage} target="_blank"><Eye className="mr-2 h-4 w-4" /> View Document</Link></Button>
+                            <Button asChild><Link href={invoice.invoiceImage} download><Download className="mr-2 h-4 w-4" /> Download</Link></Button>
+                        </div>
+                    )}
                 </PageHeader>
             </DialogTitle>
         </DialogHeader>
@@ -43,17 +47,23 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
                         <ProgressTracker steps={invoiceStatuses.filter(s => s !== 'Rejected')} currentStep={invoice.status} />
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Uploaded Documents</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between p-3 bg-secondary rounded-md">
-                            <p className="font-medium">E-Way Bill</p>
-                            <Button variant="outline" size="sm">View Document</Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                {invoice.invoiceImage && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Uploaded Document</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-between p-3 bg-secondary rounded-md">
+                                <p className="font-medium truncate">Invoice Document</p>
+                                <Button asChild variant="outline" size="sm">
+                                    <Link href={invoice.invoiceImage} target="_blank" rel="noopener noreferrer">
+                                        View Document
+                                    </Link>
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
             <div className="md:col-span-1">
                 <Card>

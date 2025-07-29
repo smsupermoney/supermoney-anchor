@@ -33,6 +33,7 @@ export type Invoice = {
   status: InvoiceStatus;
   remarks: string;
   utrNo: string;
+  invoiceImage?: string; // URL to the invoice image
   // Fields below are dynamically added and not in DB
   dealerName: string; 
   lender: string;
@@ -187,15 +188,15 @@ export type MomentumDealerLead = {
   leadType: string;
   lenderId: string;
   name: string;
+  priority?: string;
   product: string;
   remarks: any[];
   spoc: string;
   state: string;
   status: string;
+  tat?: string;
   updatedAt: string; // ISO date string
   zone: string;
   contactNumber?: string;
   email?: string;
-  priority?: string;
-  tat?: string;
 }
