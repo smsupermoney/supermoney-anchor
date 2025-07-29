@@ -19,6 +19,7 @@ import { subDays, startOfDay, addDays } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AiChat from "@/components/ai-chat";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import RequestLimitDialog from "@/components/request-limit-dialog";
 
 type DashboardClientProps = {
   initialPrograms: Program[];
@@ -288,10 +289,12 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                     <HelpCircle className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent className="p-3 pt-0 flex flex-col gap-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start text-left">
-                        <HandCoins className="mr-2 h-4 w-4" />
-                        Request for additional limit
-                    </Button>
+                    <RequestLimitDialog dealers={dealers}>
+                        <Button variant="outline" size="sm" className="w-full justify-start text-left">
+                            <HandCoins className="mr-2 h-4 w-4" />
+                            Request for additional limit
+                        </Button>
+                    </RequestLimitDialog>
                     <Button variant="outline" size="sm" className="w-full justify-start text-left" asChild>
                         <Link href="/leads">
                             <PlusCircle className="mr-2 h-4 w-4" />
