@@ -82,7 +82,7 @@ export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult>
 
     const mailOptions = {
         from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-        to: "nitin.chorge@supermoney.in",
+        to: "ashwathi@supermoney.in",
         subject: "New Invoice Submission",
         html: generateEmailBody(data),
         attachments: attachments,
