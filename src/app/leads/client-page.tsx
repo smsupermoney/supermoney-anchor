@@ -36,7 +36,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     name: "",
     city: "",
     zone: "",
-    spoc: "",
+    contactNumber: "",
     status: [] as string[],
   };
   const [filters, setFilters] = useState(initialFilters);
@@ -88,7 +88,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
         (lead.name || '').toLowerCase().includes(filters.name.toLowerCase()) &&
         (lead.city || '').toLowerCase().includes(filters.city.toLowerCase()) &&
         (lead.zone || '').toLowerCase().includes(filters.zone.toLowerCase()) &&
-        (lead.spoc || '').toLowerCase().includes(filters.spoc.toLowerCase()) &&
+        (lead.contactNumber || '').toLowerCase().includes(filters.contactNumber.toLowerCase()) &&
         statusCondition
       );
     });
@@ -150,9 +150,9 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         className="h-9 max-w-40"
                         />
                         <Input
-                        placeholder="Filter by SPOC..."
-                        value={filters.spoc}
-                        onChange={(e) => handleFilterChange("spoc", e.target.value)}
+                        placeholder="Filter by contact..."
+                        value={filters.contactNumber}
+                        onChange={(e) => handleFilterChange("contactNumber", e.target.value)}
                         className="h-9 max-w-40"
                         />
                         <DropdownMenu>
