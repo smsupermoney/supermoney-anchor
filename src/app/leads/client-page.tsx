@@ -25,6 +25,7 @@ import AddLeadDialog from "@/components/add-lead-dialog";
 import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSearchParams } from "next/navigation";
 
 type LeadsClientPageProps = {
     initialLeads: MomentumDealerLead[];
@@ -32,6 +33,8 @@ type LeadsClientPageProps = {
 
 export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
   const [leads, setLeads] = useState(initialLeads);
+  const searchParams = useSearchParams();
+
   const initialFilters = {
     name: "",
     city: "",
@@ -39,7 +42,13 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     contactNumber: "",
     status: [] as string[],
   };
-  const [filters, setFilters] = useState(initialFilters);
+
+  const [filters, setFilters] = useState(() => {
+    const statusQuery = searchParams.get('status');
+    const statusArray = statusQuery ? statusQuery.split(',') : [];
+    return {...initialFilters, status: statusArray};
+  });
+  
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
   
@@ -100,6 +109,12 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     const end = start + pageSize;
     return filteredLeads.slice(start, end);
   }, [filteredLeads, pageIndex, pageSize]);
+  
+  useEffect(() => {
+    const statusQuery = searchParams.get('status');
+    const statusArray = statusQuery ? statusQuery.split(',') : [];
+    setFilters(prev => ({...prev, status: statusArray}));
+  }, [searchParams]);
 
   useEffect(() => {
     setPageIndex(0);
