@@ -157,6 +157,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Dealer ID</TableHead>
                   <TableHead>Dealer Name</TableHead>
                   {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
@@ -170,6 +171,16 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
               <TableBody>
                 {paginatedDealers.map((dealer) => (
                   <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
+                    <TableCell className="font-mono text-xs">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[100px]">{dealer.id}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{dealer.id}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell className="font-medium">
                       <TooltipProvider>
                         <Tooltip>

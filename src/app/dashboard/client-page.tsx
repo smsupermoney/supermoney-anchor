@@ -260,7 +260,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                             <span className="text-lg font-bold">{totalLeads}</span>
                             <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><Users className="w-3 h-3" /> Total Leads</span>
                         </Link>
-                         <Link href="/leads" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
+                         <Link href="/leads?status=New" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
                             <span className="text-lg font-bold">{newLeadsLast7Days}</span>
                             <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><UserCheck className="w-3 h-3" /> New (7d)</span>
                         </Link>
