@@ -70,7 +70,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   
   // Lead Summary Calculations from momentumLeads
   const totalLeads = momentumLeads.length;
-  const newLeadsLast7Days = momentumLeads.filter(l => new Date(l.createdAt) >= sevenDaysAgo && new Date(l.createdAt) <= today).length;
+  const newLeadsCount = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'new').length;
   const followUpLeads = momentumLeads.filter(l => l.status === 'Follow up').length;
   const onboardingLeads = momentumLeads.filter(l => l.status === 'Onboarding').length;
   const disbursedLeads = momentumLeads.filter(l => l.status === 'Disbursed').length;
@@ -261,8 +261,8 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                             <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><Users className="w-3 h-3" /> Total Leads</span>
                         </Link>
                          <Link href="/leads?status=New" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
-                            <span className="text-lg font-bold">{newLeadsLast7Days}</span>
-                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><UserCheck className="w-3 h-3" /> New (7d)</span>
+                            <span className="text-lg font-bold">{newLeadsCount}</span>
+                            <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><UserCheck className="w-3 h-3" /> New</span>
                         </Link>
                         <Link href="/leads?status=Follow+up" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
                             <span className="text-lg font-bold">{followUpLeads}</span>
@@ -538,3 +538,5 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
     </div>
   );
 }
+
+    
