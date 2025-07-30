@@ -116,7 +116,7 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
               render={({ field }) => (
                 <FormItem className="flex flex-col mt-2">
                   <FormLabel>Anchor</FormLabel>
-                   <Popover>
+                  <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
@@ -127,13 +127,11 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          <span className="truncate">
-                            {field.value
-                                ? anchorOptions.find(
-                                    (option) => option.value === field.value
-                                )?.label
-                                : "Select an Anchor..."}
-                            </span>
+                          {field.value
+                            ? anchorOptions.find(
+                                (option) => option.value === field.value
+                              )?.label
+                            : "Select an Anchor..."}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
