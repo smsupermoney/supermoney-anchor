@@ -116,7 +116,7 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
               render={({ field }) => (
                 <FormItem className="flex flex-col mt-2">
                   <FormLabel>Anchor</FormLabel>
-                  <Popover>
+                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
