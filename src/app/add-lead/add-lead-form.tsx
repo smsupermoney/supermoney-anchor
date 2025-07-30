@@ -195,5 +195,3 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
     </Form>
   );
 }
-
-    

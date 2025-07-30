@@ -20,7 +20,6 @@ import type { Dealer } from "@/types";
 import DealerDetailDialog from "@/components/dealer-detail-dialog";
 import { useSearchParams } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Combobox } from "@/components/ui/combobox";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 type RetailersClientPageProps = {
@@ -115,14 +114,11 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Combobox
-                options={dealerOptions}
-                value={filters.name}
-                onChange={(value) => handleFilterChange("name", value)}
+            <Input
                 placeholder="Filter by name..."
-                searchPlaceholder="Search dealer..."
-                emptyMessage="No dealer found."
-                className="max-w-48"
+                value={filters.name}
+                onChange={(e) => handleFilterChange("name", e.target.value)}
+                className="h-9 max-w-48"
             />
             <Input
               placeholder="Filter by lender..."

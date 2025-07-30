@@ -36,7 +36,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Combobox } from "@/components/ui/combobox";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 
 type InvoicesClientPageProps = {
@@ -176,14 +175,11 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
               onChange={(e) => handleFilterChange("invoiceNumber", e.target.value)}
               className="h-9 max-w-40"
             />
-            <Combobox
-                options={dealerOptions}
-                value={filters.dealerName}
-                onChange={(value) => handleFilterChange("dealerName", value)}
+            <Input
                 placeholder="Filter by dealer..."
-                searchPlaceholder="Search dealer..."
-                emptyMessage="No dealer found."
-                className="max-w-48"
+                value={filters.dealerName}
+                onChange={(e) => handleFilterChange("dealerName", e.target.value)}
+                className="h-9 max-w-48"
             />
             <Input
               placeholder="Filter Lender"
