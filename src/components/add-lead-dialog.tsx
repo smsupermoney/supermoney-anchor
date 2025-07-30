@@ -40,7 +40,7 @@ const formSchema = z.object({
   city: z.string().min(1, "City is required."),
   zone: z.string().min(1, "Zone is required."),
   state: z.string().min(1, "State is required."),
-  anchorId: z.string(), // Anchor ID will be pre-filled, so no validation needed here.
+  anchorId: z.string(),
   product: z.string().min(1, "Product is required."),
   leadSource: z.string().min(1, "Lead Source is required."),
   leadType: z.string().min(1, "Lead Type is required."),
@@ -85,7 +85,9 @@ export default function AddLeadDialog({ children }: AddLeadDialogProps) {
   });
   
   React.useEffect(() => {
-    if (user?.externalId) {
+    if (user?.leadExternalId) {
+        form.setValue('anchorId', user.leadExternalId);
+    } else if (user?.externalId) {
         form.setValue('anchorId', user.externalId);
     }
   }, [user, form]);
@@ -159,4 +161,3 @@ export default function AddLeadDialog({ children }: AddLeadDialogProps) {
     </Dialog>
   );
 }
-

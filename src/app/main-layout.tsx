@@ -3,15 +3,15 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger, SidebarSeparator } from '@/components/ui/sidebar';
-import { adminNavigationLinks, superMoneyUserNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from './nav';
+import { adminNavigationLinks, superMoneyUserNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from '@/components/nav';
 import Link from 'next/link';
 import { Crown, LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import SavexLogo from './savex-logo';
+import SavexLogo from '@/components/savex-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
-import SupermoneyLogo from './supermoney-logo';
+import SupermoneyLogo from '@/components/supermoney-logo';
 
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
