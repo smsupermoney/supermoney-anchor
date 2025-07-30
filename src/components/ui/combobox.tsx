@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -39,6 +40,7 @@ export function Combobox({
     className 
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
+  const selectedLabel = options.find((option) => option.value.toLowerCase() === value.toLowerCase())?.label;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -49,9 +51,9 @@ export function Combobox({
           aria-expanded={open}
           className={cn("w-[200px] justify-between h-9 font-normal", className)}
         >
-          {value
-            ? options.find((option) => option.value.toLowerCase() === value.toLowerCase())?.label
-            : placeholder}
+            <span className="truncate">
+              {value ? selectedLabel : placeholder}
+            </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
