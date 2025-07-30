@@ -18,10 +18,12 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { addLead } from "./actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Check, ChevronsUpDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { spokeStatuses } from "@/lib/data";
-import { Combobox } from "@/components/ui/combobox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required."),
@@ -114,17 +116,58 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
               render={({ field }) => (
                 <FormItem className="flex flex-col mt-2">
                   <FormLabel>Anchor</FormLabel>
-                    <FormControl>
-                        <Combobox
-                        options={anchorOptions}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Select an Anchor..."
-                        searchPlaceholder="Search Anchors..."
-                        emptyMessage="No Anchors found."
-                        className="w-full"
-                        />
-                    </FormControl>
+                   <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between h-9 font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          <span className="truncate">
+                            {field.value
+                                ? anchorOptions.find(
+                                    (option) => option.value === field.value
+                                )?.label
+                                : "Select an Anchor..."}
+                            </span>
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search Anchors..." />
+                        <CommandEmpty>No Anchors found.</CommandEmpty>
+                        <CommandList>
+                            <CommandGroup>
+                            {anchorOptions.map((option) => (
+                                <CommandItem
+                                value={option.label}
+                                key={option.value}
+                                onSelect={() => {
+                                    form.setValue("anchorId", option.value)
+                                }}
+                                >
+                                <Check
+                                    className={cn(
+                                    "mr-2 h-4 w-4",
+                                    option.value === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                />
+                                {option.label}
+                                </CommandItem>
+                            ))}
+                            </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
