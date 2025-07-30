@@ -108,7 +108,7 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
             <FormField control={form.control} name="city" render={({ field }) => ( <FormItem> <FormLabel>City</FormLabel> <FormControl> <Input placeholder="e.g., Mumbai" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField control={form.control} name="state" render={({ field }) => ( <FormItem> <FormLabel>State</FormLabel> <FormControl> <Input placeholder="e.g., Maharashtra" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField control={form.control} name="zone" render={({ field }) => ( <FormItem> <FormLabel>Zone</FormLabel> <FormControl> <Input placeholder="e.g., West" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-            <FormField control={form.control} name="anchorId" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>Anchor</FormLabel> <Combobox options={anchorOptions} value={field.value} onChange={field.onChange} placeholder="Select an Anchor..." searchPlaceholder="Search Anchors..." emptyMessage="No Anchors found." className="w-full" /> <FormMessage /> </FormItem> )}/>
+            <FormField control={form.control} name="anchorId" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>Anchor</FormLabel> <FormControl> <Combobox options={anchorOptions} value={field.value} onChange={field.onChange} placeholder="Select an Anchor..." searchPlaceholder="Search Anchors..." emptyMessage="No Anchors found." className="w-full" /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField control={form.control} name="product" render={({ field }) => ( <FormItem> <FormLabel>Product</FormLabel> <FormControl> <Input placeholder="e.g., Primary" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField control={form.control} name="leadSource" render={({ field }) => ( <FormItem> <FormLabel>Lead Source</FormLabel> <FormControl> <Input placeholder="e.g., Connector" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField control={form.control} name="leadType" render={({ field }) => ( <FormItem> <FormLabel>Lead Type</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Select a lead type" /> </SelectTrigger> </FormControl> <SelectContent> <SelectItem value="Fresh">Fresh</SelectItem> <SelectItem value="Re-engaged">Re-engaged</SelectItem> </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
@@ -132,4 +132,3 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
     </Form>
   );
 }
-
