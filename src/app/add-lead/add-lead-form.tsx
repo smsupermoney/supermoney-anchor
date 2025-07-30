@@ -138,11 +138,11 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                       <Command>
                         <CommandInput placeholder="Search Anchors..." />
-                        <CommandEmpty>No Anchors found.</CommandEmpty>
                         <CommandList>
+                            <CommandEmpty>No Anchors found.</CommandEmpty>
                             <CommandGroup>
                             {anchorOptions.map((option) => (
                                 <CommandItem
@@ -195,3 +195,5 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
     </Form>
   );
 }
+
+    
