@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/page-header";
-import AddLeadDialog from "@/components/add-lead-dialog";
 import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -131,12 +130,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         Bulk Lead Upload
                     </Button>
                 </BulkLeadUploadDialog>
-                <AddLeadDialog>
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4"/>
-                        Add Lead
-                    </Button>
-                </AddLeadDialog>
             </div>
         </PageHeader>
         <div className='mt-4'>

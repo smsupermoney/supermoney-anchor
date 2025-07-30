@@ -20,7 +20,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import AiChat from "@/components/ai-chat";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import RequestLimitDialog from "@/components/request-limit-dialog";
-import AddLeadDialog from "@/components/add-lead-dialog";
 
 type DashboardClientProps = {
   initialPrograms: Program[];
@@ -296,12 +295,6 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                             Request for additional limit
                         </Button>
                     </RequestLimitDialog>
-                    <AddLeadDialog>
-                        <Button variant="outline" size="sm" className="w-full justify-start text-left">
-                           <PlusCircle className="mr-2 h-4 w-4" />
-                            Add new lead
-                        </Button>
-                    </AddLeadDialog>
                     <Separator />
                     <div className="text-xs text-muted-foreground text-center px-1">
                         Have any query? <a href="mailto:nitin.chorge@supermoney.in" className="text-primary hover:underline font-medium">Send us an email</a>
