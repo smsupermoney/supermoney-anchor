@@ -111,64 +111,64 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
             <FormField control={form.control} name="state" render={({ field }) => ( <FormItem> <FormLabel>State</FormLabel> <FormControl> <Input placeholder="e.g., Maharashtra" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField control={form.control} name="zone" render={({ field }) => ( <FormItem> <FormLabel>Zone</FormLabel> <FormControl> <Input placeholder="e.g., West" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField
-              control={form.control}
-              name="anchorId"
-              render={({ field }) => (
-                <FormItem className="flex flex-col mt-2">
-                  <FormLabel>Anchor</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "w-full justify-between h-9 font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value
-                            ? anchorOptions.find(
-                                (option) => option.value === field.value
-                              )?.label
-                            : "Select an Anchor..."}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                      <Command>
-                        <CommandInput placeholder="Search Anchors..." />
-                        <CommandList>
-                            <CommandEmpty>No Anchors found.</CommandEmpty>
-                            <CommandGroup>
-                            {anchorOptions.map((option) => (
-                                <CommandItem
-                                value={option.label}
-                                key={option.value}
-                                onSelect={() => {
-                                    form.setValue("anchorId", option.value)
-                                }}
-                                >
-                                <Check
-                                    className={cn(
-                                    "mr-2 h-4 w-4",
-                                    option.value === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                />
-                                {option.label}
-                                </CommandItem>
-                            ))}
-                            </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
+                control={form.control}
+                name="anchorId"
+                render={({ field }) => (
+                    <FormItem className="flex flex-col mt-2">
+                    <FormLabel>Anchor</FormLabel>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                        <FormControl>
+                            <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                                "w-full justify-between font-normal",
+                                !field.value && "text-muted-foreground"
+                            )}
+                            >
+                            {field.value
+                                ? anchorOptions.find(
+                                    (option) => option.value === field.value
+                                )?.label
+                                : "Select an Anchor"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command>
+                            <CommandInput placeholder="Search anchor..." />
+                            <CommandList>
+                                <CommandEmpty>No anchor found.</CommandEmpty>
+                                <CommandGroup>
+                                    {anchorOptions.map((option) => (
+                                    <CommandItem
+                                        value={option.label}
+                                        key={option.value}
+                                        onSelect={() => {
+                                        form.setValue("anchorId", option.value)
+                                        }}
+                                    >
+                                        <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            option.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                        />
+                                        {option.label}
+                                    </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                        </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                    </FormItem>
+                )}
             />
             <FormField control={form.control} name="product" render={({ field }) => ( <FormItem> <FormLabel>Product</FormLabel> <FormControl> <Input placeholder="e.g., Primary" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             <FormField control={form.control} name="leadSource" render={({ field }) => ( <FormItem> <FormLabel>Lead Source</FormLabel> <FormControl> <Input placeholder="e.g., Connector" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
