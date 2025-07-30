@@ -30,7 +30,10 @@ type ComboboxProps = {
     className?: string;
 }
 
-export function Combobox({ 
+export const Combobox = React.forwardRef<
+    HTMLButtonElement,
+    ComboboxProps
+>(({ 
     options, 
     value, 
     onChange, 
@@ -38,7 +41,7 @@ export function Combobox({
     searchPlaceholder = "Search...",
     emptyMessage = "No options found.",
     className 
-}: ComboboxProps) {
+}, ref) => {
   const [open, setOpen] = React.useState(false)
   const selectedLabel = options.find((option) => option.value.toLowerCase() === value.toLowerCase())?.label;
 
@@ -50,6 +53,7 @@ export function Combobox({
           role="combobox"
           aria-expanded={open}
           className={cn("w-[200px] justify-between h-9 font-normal", className)}
+          ref={ref}
         >
             <span className="truncate">
               {value ? selectedLabel : placeholder}
@@ -87,4 +91,5 @@ export function Combobox({
       </PopoverContent>
     </Popover>
   )
-}
+});
+Combobox.displayName = "Combobox";
