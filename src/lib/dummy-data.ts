@@ -337,19 +337,24 @@ export const sampleInvoices = [
 
 export const sampleMomentumLeads = [
     {
-        name: "Sample Lead Inc.",
-        spoc: "John Doe",
-        contactNumber: "9988776655",
-        email: "john.doe@example.com",
-        city: "Mumbai",
-        zone: "West",
-        state: "Maharashtra",
-        leadSource: "Website",
-        dealValue: 1.5,
-        leadDate: "2024-07-28",
-        status: "New",
-        priority: "High",
-        tat: "2 Days"
+        "Name": "Prime Auto",
+        "Contact Number": "9881234567",
+        "Email": "contact@primeauto.com",
+        "City": "Mumbai",
+        "State": "Maharashtra",
+        "Zone": "West",
+        "Anchor Name": "Reliance Retail",
+        "Product": "Primary",
+        "Lead Source": "Connector",
+        "Lead Type": "Fresh",
+        "Priority": "High",
+        "Lead Date": "2024-07-28",
+        "Status": "New",
+        "Assigned To": "asm@supermoney.in",
+        "Deal Value (Lacs)": 0.5,
+        "Lender": "HDFC Bank",
+        "Remarks": "Initial discussion",
+        "SPOC": "Ramesh Patel",
+        "Initial Lead TAT": "2"
     }
 ];
-    

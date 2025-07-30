@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, Mail, ArrowRight, CalendarClock, Activity } from "lucide-react";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, ArrowRight, CalendarClock, Activity } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import AiChat from "@/components/ai-chat";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import RequestLimitDialog from "@/components/request-limit-dialog";
+import AddLeadDialog from "@/components/add-lead-dialog";
 
 type DashboardClientProps = {
   initialPrograms: Program[];
@@ -264,7 +265,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                             <span className="text-lg font-bold">{newLeadsCount}</span>
                             <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><UserCheck className="w-3 h-3" /> New</span>
                         </Link>
-                        <Link href="/leads?status=Follow+up" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
+                        <Link href="/leads?status=Follow up" className="flex flex-col items-center p-2 rounded-md hover:bg-secondary transition-colors">
                             <span className="text-lg font-bold">{followUpLeads}</span>
                             <span className="text-xs text-muted-foreground flex items-center text-center gap-1"><Activity className="w-3 h-3" /> Follow Up</span>
                         </Link>
@@ -295,12 +296,12 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                             Request for additional limit
                         </Button>
                     </RequestLimitDialog>
-                    <Button variant="outline" size="sm" className="w-full justify-start text-left" asChild>
-                        <Link href="/leads">
-                            <PlusCircle className="mr-2 h-4 w-4" />
+                    <AddLeadDialog>
+                        <Button variant="outline" size="sm" className="w-full justify-start text-left">
+                           <PlusCircle className="mr-2 h-4 w-4" />
                             Add new lead
-                        </Link>
-                    </Button>
+                        </Button>
+                    </AddLeadDialog>
                     <Separator />
                     <div className="text-xs text-muted-foreground text-center px-1">
                         Have any query? <a href="mailto:nitin.chorge@supermoney.in" className="text-primary hover:underline font-medium">Send us an email</a>
@@ -538,5 +539,3 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
     </div>
   );
 }
-
-    
