@@ -31,8 +31,7 @@ export const adminNavigationLinks = [
 
 export const superMoneyUserNavigationLinks = adminNavigationLinks.filter(
   link => ![
-    '/add-program', 
-    '/add-dealer', 
+    '/add-anchor', 
     '/view-users'
   ].includes(link.href)
 );
