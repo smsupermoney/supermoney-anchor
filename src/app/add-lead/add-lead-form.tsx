@@ -114,17 +114,17 @@ export default function AddLeadForm({ anchorOptions, onSuccess }: AddLeadFormPro
               render={({ field }) => (
                 <FormItem className="flex flex-col mt-2">
                   <FormLabel>Anchor</FormLabel>
-                  <FormControl>
-                    <Combobox
-                      options={anchorOptions}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Select an Anchor..."
-                      searchPlaceholder="Search Anchors..."
-                      emptyMessage="No Anchors found."
-                      className="w-full"
-                    />
-                  </FormControl>
+                    <FormControl>
+                        <Combobox
+                        options={anchorOptions}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select an Anchor..."
+                        searchPlaceholder="Search Anchors..."
+                        emptyMessage="No Anchors found."
+                        className="w-full"
+                        />
+                    </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
