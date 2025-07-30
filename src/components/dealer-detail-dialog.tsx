@@ -25,7 +25,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
             <StatusBadge status={dealer.status} />
           </DialogTitle>
           <DialogDescription>
-            Dealer ID: {dealer.id}
+            <span className="font-semibold">Dealer ID:</span> {dealer.id}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
