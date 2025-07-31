@@ -1,7 +1,7 @@
 
 "use server";
 
-import { db2 } from "@/lib/firebase";
+import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
 import * as xlsx from 'xlsx';
 import { getSession } from "@/lib/session";
@@ -36,13 +36,15 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    const batch = writeBatch(db2);
+    const dealerBatch = writeBatch(db1);
+    const vendorBatch = writeBatch(db1);
+    let dealerCount = 0;
+    let vendorCount = 0;
 
     leadsArray.forEach((lead: any) => {
+        const leadCategory = (lead['Lead Category'] || '').toLowerCase();
+
         // Let Firestore auto-generate the document ID for new leads
-        const docRef = doc(collection(db2, "dealers"));
-        
-        // Ensure required fields and defaults are set
         const leadData = {
             ...lead,
             anchorId: lead.anchorId || anchorId, // Use anchorId from file, or logged-in user's
@@ -55,12 +57,25 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
             remarks: [], // Start with empty remarks
         };
         
-        batch.set(docRef, leadData);
+        if (leadCategory === 'dealer') {
+            const docRef = doc(collection(db1, "dealers"));
+            dealerBatch.set(docRef, leadData);
+            dealerCount++;
+        } else if (leadCategory === 'vendor') {
+            const docRef = doc(collection(db1, "vendors"));
+            vendorBatch.set(docRef, leadData);
+            vendorCount++;
+        }
     });
     
-    await batch.commit();
+    if (dealerCount > 0) {
+        await dealerBatch.commit();
+    }
+    if (vendorCount > 0) {
+        await vendorBatch.commit();
+    }
 
-    return { message: `${leadsArray.length} lead(s) added successfully from the Excel file.` };
+    return { message: `${dealerCount} Dealer lead(s) and ${vendorCount} Vendor lead(s) added successfully.` };
   } catch (error) {
     console.error("Error processing Excel file or writing to Firestore:", error);
     if (error instanceof Error) {

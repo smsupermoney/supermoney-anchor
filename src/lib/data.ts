@@ -1,4 +1,5 @@
 
+
 import type { User, DealerLead, DealerOnboardingStatus, MomentumDealerLead, DealerLimit } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc, type Timestamp } from 'firebase/firestore';
@@ -28,24 +29,28 @@ const processDocumentDates = (data: Record<string, any>): Record<string, any> =>
 // Functions to fetch data from Firestore
 
 export async function getMomentumDealerLeads(anchorId?: string): Promise<MomentumDealerLead[]> {
-    if (!db2) {
-      console.warn("Database 'db2' is not configured. Returning empty array for Momentum leads.");
-      return [];
-    }
-    
-    let dealerQuery;
-    if (anchorId) {
-        dealerQuery = query(collection(db2, 'dealers'), where('anchorId', '==', anchorId));
-    } else {
-        dealerQuery = query(collection(db2, 'dealers'));
-    }
-    
-    const dealerSnapshot = await getDocs(dealerQuery);
-    return dealerSnapshot.docs.map(doc => {
-        const data = doc.data();
-        const processedData = processDocumentDates(data);
-        return { id: doc.id, ...processedData } as MomentumDealerLead;
-    });
+    const fetchLeads = async (collectionName: 'dealers' | 'vendors', category: 'Dealer' | 'Vendor') => {
+        let leadsQuery;
+        const leadsCol = collection(db1, collectionName);
+        if (anchorId) {
+            leadsQuery = query(leadsCol, where('anchorId', '==', anchorId));
+        } else {
+            leadsQuery = query(leadsCol);
+        }
+        const snapshot = await getDocs(leadsQuery);
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            const processedData = processDocumentDates(data);
+            return { id: doc.id, ...processedData, leadCategory: category } as MomentumDealerLead;
+        });
+    };
+
+    const [dealerLeads, vendorLeads] = await Promise.all([
+        fetchLeads('dealers', 'Dealer'),
+        fetchLeads('vendors', 'Vendor')
+    ]);
+
+    return [...dealerLeads, ...vendorLeads];
 }
 
 export async function getUsers(): Promise<User[]> {

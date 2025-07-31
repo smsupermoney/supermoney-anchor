@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -25,6 +26,7 @@ import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSearchParams } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type LeadsClientPageProps = {
     initialLeads: MomentumDealerLead[];
@@ -40,6 +42,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     zone: "",
     contactNumber: "",
     status: [] as string[],
+    leadCategory: "",
   };
 
   const [filters, setFilters] = useState(() => {
@@ -92,12 +95,15 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
         filters.status.length === 0 ||
         filters.status.some(s => s.toLowerCase() === (lead.status || '').toLowerCase());
 
+      const categoryCondition = filters.leadCategory === "" || lead.leadCategory.toLowerCase() === filters.leadCategory.toLowerCase();
+
       return (
         (lead.name || '').toLowerCase().includes(filters.name.toLowerCase()) &&
         (lead.city || '').toLowerCase().includes(filters.city.toLowerCase()) &&
         (lead.zone || '').toLowerCase().includes(filters.zone.toLowerCase()) &&
         (lead.contactNumber || '').toLowerCase().includes(filters.contactNumber.toLowerCase()) &&
-        statusCondition
+        statusCondition &&
+        categoryCondition
       );
     });
   }, [filters, leads]);
@@ -163,6 +169,19 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         onChange={(e) => handleFilterChange("contactNumber", e.target.value)}
                         className="h-9 max-w-40"
                         />
+                         <Select
+                            value={filters.leadCategory}
+                            onValueChange={(value) => handleFilterChange("leadCategory", value === "all" ? "" : value)}
+                            >
+                            <SelectTrigger className="h-9 max-w-40 data-[placeholder]:text-muted-foreground">
+                                <SelectValue placeholder="Filter by Category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Categories</SelectItem>
+                                <SelectItem value="Dealer">Dealer</SelectItem>
+                                <SelectItem value="Vendor">Vendor</SelectItem>
+                            </SelectContent>
+                        </Select>
                         <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" className="h-9 max-w-60">
@@ -223,6 +242,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         <TableHeader>
                         <TableRow>
                             <TableHead>Lead Name</TableHead>
+                            <TableHead>Lead Category</TableHead>
                             <TableHead>SPOC</TableHead>
                             <TableHead>Contact</TableHead>
                             <TableHead>City</TableHead>
@@ -248,6 +268,11 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                         <TooltipContent><p>{lead.name}</p></TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
+                            </TableCell>
+                            <TableCell>
+                                <Badge variant={lead.leadCategory === 'Dealer' ? 'default' : 'secondary'}>
+                                    {lead.leadCategory}
+                                </Badge>
                             </TableCell>
                             <TableCell>{lead.spoc}</TableCell>
                              <TableCell>

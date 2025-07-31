@@ -203,4 +203,5 @@ export type MomentumDealerLead = {
   zone: string;
   contactNumber?: string;
   email?: string;
+  leadCategory: 'Dealer' | 'Vendor';
 }

@@ -338,6 +338,7 @@ export const sampleInvoices = [
 export const sampleMomentumLeads = [
     {
         "Name": "Prime Auto",
+        "Lead Category": "Dealer",
         "Contact Number": "9881234567",
         "Email": "contact@primeauto.com",
         "City": "Mumbai",
