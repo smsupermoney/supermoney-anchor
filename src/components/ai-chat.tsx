@@ -69,7 +69,7 @@ export default function AiChat() {
         </div>
       </CardHeader>
       <CardContent className="flex-1 p-0">
-        <ScrollArea className="h-full p-3" ref={scrollAreaRef}>
+        <ScrollArea className="h-[250px] p-3" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.length === 0 && (
                 <div className="text-center text-sm text-muted-foreground py-8">
@@ -136,4 +136,3 @@ export default function AiChat() {
     </Card>
   );
 }
-
