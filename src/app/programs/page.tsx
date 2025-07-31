@@ -119,7 +119,7 @@ export default async function ProgramsPage() {
                   </Link>
                   <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}&overdue=yes`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Overdue Invoices</p>
-                      <p className="font-semibold text-xs">{program.overdueCount}</p>
+                      <p className="font-semibold text-xs text-destructive">{program.overdueCount}</p>
                   </Link>
                 </div>
               </CardContent>
