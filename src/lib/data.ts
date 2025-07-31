@@ -65,21 +65,25 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     invoiceQuery = query(invoicesCol);
   }
 
-  const [invoiceSnapshot, allDealersSnapshot, programSnapshot, limitsSnapshot] = await Promise.all([
+  const [invoiceSnapshot, allDealersSnapshot, programSnapshot] = await Promise.all([
     getDocs(invoiceQuery),
     getDocs(collection(db1, 'dealers')),
     getDocs(collection(db1, 'programs')),
-    getDocs(collection(db1, 'dealerLimits'))
   ]);
   
   const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.id, {name: d.data().dealerName, anchorId: d.data().anchorId}]));
   const programMap = new Map(programSnapshot.docs.map(p => [p.data().programId, p.data().lenderName]));
-  const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to the beginning of today
 
   return invoiceSnapshot.docs.map(doc => {
     const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
     const dealerInfo = dealerMap.get(data.dealerId);
-    const limit = limitsMap.get(data.dealerId);
+    
+    const dueDate = new Date(data.dueDate);
+    const isOverdue = dueDate < today && data.status !== 'Disbursed';
+    const overdueAmount = isOverdue ? data.amount : 0;
     
     return { 
         id: doc.id, 
@@ -87,7 +91,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
         dealerName: dealerInfo?.name || 'Unknown Dealer',
         anchorId: dealerInfo?.anchorId || data.anchorId || '',
         lender: programMap.get(data.programId) || 'Unknown Lender',
-        overdueAmount: limit?.principalOverdue || 0,
+        overdueAmount: overdueAmount,
         invoiceImage: data.invoiceImage || ''
     } as Invoice;
   });
@@ -121,6 +125,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         const limitData = limitsMap.get(dealerId);
         
         const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
+        const dealerOverdueInvoices = dealerInvoices.filter(i => (i.overdueAmount ?? 0) > 0);
         
         return {
             id: dealerId,
@@ -131,8 +136,8 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             customerId: dealerData.customerId,
             invoicesSubmitted: dealerInvoices.length,
             amountDisbursed: limitData?.utilisationAmount || 0,
-            overdueCount: (limitData?.principalOverdue ?? 0) > 0 ? 1 : 0, 
-            overdueAmount: limitData?.principalOverdue || 0,
+            overdueCount: dealerOverdueInvoices.length, 
+            overdueAmount: dealerOverdueInvoices.reduce((sum, inv) => sum + (inv.overdueAmount ?? 0), 0),
             lenderName: programMap.get(dealerData.programId) || 'N/A',
             status: dealerData.status, 
             totalLimit: limitData?.limitAmount || 0,
@@ -463,3 +468,6 @@ export const dealerLeads: DealerLead[] = [
 
     
 
+
+
+    
