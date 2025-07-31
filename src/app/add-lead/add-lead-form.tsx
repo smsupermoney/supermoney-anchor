@@ -7,12 +7,11 @@ import UploadExcelForm from "@/app/add-program/upload-excel-form";
 import { sampleMomentumLeads } from "@/lib/dummy-data";
 
 export default function AddLeadForm() {
+    // This component might be repurposed for a single lead entry form in the future.
+    // For now, it's not directly used as bulk upload is handled via a dialog.
     return (
         <div className="space-y-4">
-            <div className="flex justify-end">
-                <DownloadSampleExcel data={sampleMomentumLeads} fileName="sample-momentum-leads.xlsx" />
-            </div>
-            <UploadExcelForm action={addMomentumLeads} />
+           <p className="text-muted-foreground">Single lead creation form will be here.</p>
         </div>
     );
 }

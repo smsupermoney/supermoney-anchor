@@ -17,16 +17,17 @@ export default async function AddLeadPage() {
 
   return (
     <>
-      <PageHeader title="Add New Leads (Bulk)" />
+      <PageHeader title="Add New Lead" />
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>Bulk Import Leads</CardTitle>
+                <CardTitle>Lead Details</CardTitle>
                 <CardDescription>
-                    Upload an Excel file with lead data based on the provided template.
+                    Enter the details for the new lead. For bulk uploads, please use the 'Bulk Lead Upload' button on the All Leads page.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <AddLeadForm />
+                {/* A form for single lead creation would go here */}
+                <p className="text-muted-foreground">The single lead creation form is under development.</p>
             </CardContent>
         </Card>
     </>

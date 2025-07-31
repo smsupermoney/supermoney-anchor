@@ -132,6 +132,12 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
         <PageHeader title="All Leads">
             <div className="flex items-center gap-2">
                  <BulkLeadUploadDialog />
+                 <Button asChild>
+                    <Link href="/add-lead">
+                        <PlusCircle className="mr-2 h-4 w-4"/>
+                        Add Lead
+                    </Link>
+                </Button>
             </div>
         </PageHeader>
         <div className='mt-4'>
