@@ -137,7 +137,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             invoicesSubmitted: dealerInvoices.length,
             amountDisbursed: limitData?.utilisationAmount || 0,
             overdueCount: dealerOverdueInvoices.length, 
-            overdueAmount: dealerOverdueInvoices.reduce((sum, inv) => sum + (inv.overdueAmount ?? 0), 0),
+            overdueAmount: limitData?.principalOverdue || 0,
             lenderName: programMap.get(dealerData.programId) || 'N/A',
             status: dealerData.status, 
             totalLimit: limitData?.limitAmount || 0,
@@ -196,6 +196,9 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
 
     // Aggregate limits and dealer counts from relevant dealers
     const dealerCountPerProgram: Record<string, Set<string>> = {};
+    let totalOverdueAmount = 0;
+    const processedDealersForOverdue = new Set<string>();
+
     relevantDealers.forEach(dealer => {
         const programId = dealer.programId;
         const limit = limitsMap.get(dealer.dealerId);
@@ -210,6 +213,12 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
                 dealerCountPerProgram[programId] = new Set();
             }
             dealerCountPerProgram[programId].add(dealer.dealerId);
+        }
+        
+        // Sum total overdue amount across all relevant dealers, ensuring each dealer is only counted once.
+        if (!processedDealersForOverdue.has(dealer.dealerId)) {
+            totalOverdueAmount += limit?.principalOverdue || 0;
+            processedDealersForOverdue.add(dealer.dealerId);
         }
     });
 
@@ -238,9 +247,6 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
             }
         }
     });
-    
-    // Calculate total overdue amount for the entire anchor
-    const totalOverdueAmount = allInvoicesSnapshot.reduce((sum, inv) => sum + (inv.overdueAmount ?? 0), 0);
 
     const finalProgramList = Object.values(programAggregates)
         // Filter out programs that have no dealers associated with the current anchor
