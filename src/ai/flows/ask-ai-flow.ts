@@ -12,9 +12,6 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { 
-    getProgramSummaryTool, 
-    getInvoiceSummaryTool, 
-    getDealerSummaryTool,
     getFullProgramDataTool,
     getFullInvoiceDataTool,
     getFullDealerDataTool,
@@ -42,9 +39,6 @@ const prompt = ai.definePrompt({
   input: {schema: AskAiInputSchema},
   output: {schema: AskAiOutputSchema},
   tools: [
-    getProgramSummaryTool, 
-    getInvoiceSummaryTool, 
-    getDealerSummaryTool,
     getFullProgramDataTool,
     getFullInvoiceDataTool,
     getFullDealerDataTool,
@@ -60,12 +54,12 @@ const prompt = ai.definePrompt({
   - For all questions about leads, you MUST use the 'leadAnchorId' when calling the 'getFullLeadDataTool'.
 
   ## Tool Usage Strategy:
-  - For high-level summary questions (e.g., "how many invoices are overdue?", "what is my total credit limit?"), use the simpler 'get...Summary' tools for efficiency.
-  - For more specific or detailed questions (e.g., "list all dealers in the West region", "what is the total amount for invoices from 'Star Electronics'?", "how many leads are in 'Follow Up' status?"), you MUST use the more powerful 'getFull...Data' tools. These tools provide a full JSON dataset that you must analyze to compute the answer.
-  - The 'getFullLeadDataTool' is the ONLY tool that can answer questions about leads.
+  - You have four tools available: 'getFullProgramDataTool', 'getFullInvoiceDataTool', 'getFullDealerDataTool', and 'getFullLeadDataTool'.
+  - To answer the user's question, you MUST call the appropriate tool to get the full dataset.
+  - After receiving the JSON data from the tool, you MUST analyze it to compute the answer. For example, to count "active dealers", you must filter the results from 'getFullDealerDataTool' where the status is 'Active' and then count them.
 
   ## User Interaction Rules:
-  - NEVER describe the tool you are about to use. Just call the tool and give the final answer.
+  - NEVER describe the tool you are about to use. Just call the tool, analyze the result, and give the final answer.
   - NEVER ask the user for an 'anchorId' or 'leadAnchorId'. You have been given this information. Use it.
   - If the user asks a question that seems general (e.g., "Give me the total number of invoices"), assume they mean for their own context and call the appropriate tool using the provided 'anchorId' (or 'leadAnchorId' for leads).
   - If the user asks a question that the tools cannot provide, inform them of this limitation.
@@ -86,6 +80,9 @@ const askAiFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      return { answer: "I'm sorry, I was unable to process that request. Please try again." };
+    }
+    return output;
   }
 );
