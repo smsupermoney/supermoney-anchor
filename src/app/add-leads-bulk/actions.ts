@@ -18,9 +18,9 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
   }
   
   const session = await getSession();
-  const anchorId = session?.externalId;
+  const anchorId = session?.leadExternalId;
 
-  if (!anchorId) {
+  if (!anchorId && session?.roleType !== 'Admin') {
       return { error: "Could not determine the anchor to associate leads with. Please log in again." };
   }
 
@@ -47,7 +47,8 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
 
         const leadData = {
             ...lead,
-            anchorId: lead.anchorId || anchorId,
+            // Use lead's anchorId if present, otherwise default to session's anchorId
+            anchorId: lead.anchorId || anchorId, 
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             leadDate: lead.leadDate ? new Date(lead.leadDate).toISOString() : new Date().toISOString(),
@@ -91,5 +92,7 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
     return { error: "An unknown error occurred during the upload process." };
   }
 }
+
+    
 
     
