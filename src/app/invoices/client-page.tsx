@@ -59,35 +59,39 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
     'Supermoney Finance': 'Supermoney Finance'
   };
   
-  const initialFilters = {
-    invoiceNumber: "",
-    dealerName: "",
-    lender: "",
-    status: [] as InvoiceStatus[],
-    overdue: "",
-  };
-  
   const searchParams = useSearchParams();
-  
-  const [date, setDate] = useState<DateRange | undefined>();
-  const [filters, setFilters] = useState(() => {
-    const lenderQuery = searchParams.get('lender');
-    const overdueQuery = searchParams.get('overdue');
-    const statusQuery = searchParams.get('status');
-    const dealerNameQuery = searchParams.get('dealerName');
-    const statusArray = statusQuery ? statusQuery.split(',') as InvoiceStatus[] : [];
-    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || "", status: statusArray, dealerName: dealerNameQuery || ""};
+
+  const initialFilters = {
+    invoiceNumber: searchParams.get('invoiceNumber') || "",
+    dealerName: searchParams.get('dealerName') || "",
+    lender: searchParams.get('lender') || "",
+    status: searchParams.get('status')?.split(',') as InvoiceStatus[] || [],
+    overdue: searchParams.get('overdue') || "",
+  };
+
+  const [filters, setFilters] = useState(initialFilters);
+  const [date, setDate] = useState<DateRange | undefined>(() => {
+    const dateFromParam = searchParams.get('dateFrom');
+    const dateToParam = searchParams.get('dateTo');
+    if (dateFromParam && dateToParam) {
+        const from = parseISO(dateFromParam);
+        const to = parseISO(dateToParam);
+        if (isValid(from) && isValid(to)) {
+            return { from, to };
+        }
+    }
+    return undefined;
   });
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
   
-  useEffect(() => {
-    const lender = searchParams.get('lender');
-    const overdue = searchParams.get('overdue');
-    const status = searchParams.get('status');
-    const dealerName = searchParams.get('dealerName');
-    const statusArray = status ? status.split(',') as InvoiceStatus[] : [];
+   useEffect(() => {
+    const lender = searchParams.get('lender') || '';
+    const overdue = searchParams.get('overdue') || '';
+    const statusQuery = searchParams.get('status');
+    const dealerName = searchParams.get('dealerName') || '';
+    const statusArray = statusQuery ? statusQuery.split(',') as InvoiceStatus[] : [];
 
     const dateFromParam = searchParams.get('dateFrom');
     const dateToParam = searchParams.get('dateTo');
@@ -99,11 +103,14 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
         if (isValid(from) && isValid(to)) {
             dateRange = { from, to };
         }
+    } else {
+        dateRange = undefined;
     }
+    
     setDate(dateRange);
+    setFilters({ invoiceNumber: filters.invoiceNumber, dealerName, lender, status: statusArray, overdue });
+  }, [searchParams, filters.invoiceNumber]);
 
-    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || "", status: statusArray, dealerName: dealerName || ""}));
-  }, [searchParams]);
 
   const handleStatusFilterChange = (status: InvoiceStatus) => {
     setFilters((prev) => {
@@ -122,7 +129,13 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
   };
 
   const clearFilters = () => {
-    setFilters(initialFilters);
+    setFilters({
+        invoiceNumber: "",
+        dealerName: "",
+        lender: "",
+        status: [],
+        overdue: "",
+    });
     setDate(undefined);
   };
   
