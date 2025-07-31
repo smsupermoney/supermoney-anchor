@@ -43,8 +43,42 @@ type InvoicesClientPageProps = {
   isAdmin: boolean;
 };
 
+// Helper function to parse URL params into a DateRange object
+const getInitialDateRange = (searchParams: URLSearchParams): DateRange | undefined => {
+    const dateFromParam = searchParams.get('dateFrom');
+    const dateToParam = searchParams.get('dateTo');
+    if (dateFromParam && dateToParam) {
+        const from = parseISO(dateFromParam);
+        const to = parseISO(dateToParam);
+        if (isValid(from) && isValid(to)) {
+            return { from, to };
+        }
+    }
+    return undefined;
+};
+
+// Helper function to parse URL params into filter state
+const getInitialFilters = (searchParams: URLSearchParams) => {
+    return {
+      invoiceNumber: searchParams.get('invoiceNumber') || "",
+      dealerName: searchParams.get('dealerName') || "",
+      lender: searchParams.get('lender') || "",
+      status: searchParams.get('status')?.split(',') as InvoiceStatus[] || [],
+      overdue: searchParams.get('overdue') || "",
+    };
+};
+
 export default function InvoicesClientPage({ initialInvoices, isAdmin }: InvoicesClientPageProps) {
-  const [invoices, setInvoices] = useState(initialInvoices);
+  const searchParams = useSearchParams();
+
+  // Initialize state directly from URL search parameters
+  const [filters, setFilters] = useState(() => getInitialFilters(searchParams));
+  const [date, setDate] = useState<DateRange | undefined>(() => getInitialDateRange(searchParams));
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const pageSize = 10;
+  
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -58,43 +92,13 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
     'Flexi Loans': 'Flexi Loans',
     'Supermoney Finance': 'Supermoney Finance'
   };
-  
-  const searchParams = useSearchParams();
 
-  const getInitialDateRange = (): DateRange | undefined => {
-    const dateFromParam = searchParams.get('dateFrom');
-    const dateToParam = searchParams.get('dateTo');
-    if (dateFromParam && dateToParam) {
-        const from = parseISO(dateFromParam);
-        const to = parseISO(dateToParam);
-        if (isValid(from) && isValid(to)) {
-            return { from, to };
-        }
-    }
-    return undefined;
-  };
-
-  const getInitialFilters = () => {
-    return {
-      invoiceNumber: searchParams.get('invoiceNumber') || "",
-      dealerName: searchParams.get('dealerName') || "",
-      lender: searchParams.get('lender') || "",
-      status: searchParams.get('status')?.split(',') as InvoiceStatus[] || [],
-      overdue: searchParams.get('overdue') || "",
-    };
-  };
-
-  const [filters, setFilters] = useState(getInitialFilters);
-  const [date, setDate] = useState<DateRange | undefined>(getInitialDateRange);
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [pageIndex, setPageIndex] = useState(0);
-  const pageSize = 10;
-  
-   useEffect(() => {
-    setFilters(getInitialFilters());
-    setDate(getInitialDateRange());
+  // This effect ensures that if the user navigates (e.g., browser back/forward),
+  // the state is updated to reflect the new URL parameters.
+  useEffect(() => {
+    setFilters(getInitialFilters(searchParams));
+    setDate(getInitialDateRange(searchParams));
   }, [searchParams]);
-
 
   const handleStatusFilterChange = (status: InvoiceStatus) => {
     setFilters((prev) => {
@@ -128,7 +132,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
   }, [filters, date]);
 
   const filteredInvoices = useMemo(() => {
-    return invoices.filter((invoice) => {
+    return initialInvoices.filter((invoice) => {
       const invoiceDate = new Date(invoice.date);
       const isAfterStartDate = !date?.from || invoiceDate >= date.from;
       const isBeforeEndDate = !date?.to || invoiceDate <= date.to;
@@ -155,7 +159,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
         isBeforeEndDate
       );
     });
-  }, [filters, date, invoices]);
+  }, [filters, date, initialInvoices]);
   
   const pageCount = Math.ceil(filteredInvoices.length / pageSize);
   const paginatedInvoices = useMemo(() => {
