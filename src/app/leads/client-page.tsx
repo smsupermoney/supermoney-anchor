@@ -52,7 +52,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   const pageSize = 10;
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
-  const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN') : 'N/A';
+  const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
 
   const getLatestRemark = (lead: MomentumDealerLead) => {
     if (!lead.remarks || lead.remarks.length === 0) {

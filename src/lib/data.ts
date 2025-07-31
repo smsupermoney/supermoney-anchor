@@ -1,10 +1,23 @@
 
 import type { User, DealerLead, DealerOnboardingStatus, MomentumDealerLead, DealerLimit } from '@/types';
 import { db1, db2 } from './firebase';
-import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc, type Timestamp } from 'firebase/firestore';
 import type { Dealer, Invoice, Program } from '@/types';
 
 // --- API FUNCTIONS ---
+
+// Helper to convert Firestore Timestamps to ISO strings
+const processDocumentDates = (data: Record<string, any>): Record<string, any> => {
+    const processedData = { ...data };
+    for (const key in processedData) {
+        if (processedData[key] && typeof processedData[key].toDate === 'function') {
+            // This is a Firestore Timestamp
+            processedData[key] = (processedData[key] as Timestamp).toDate().toISOString();
+        }
+    }
+    return processedData;
+};
+
 
 // Functions to fetch data from Firestore
 
@@ -22,7 +35,11 @@ export async function getMomentumDealerLeads(anchorId?: string): Promise<Momentu
     }
     
     const dealerSnapshot = await getDocs(dealerQuery);
-    return dealerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MomentumDealerLead));
+    return dealerSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const processedData = processDocumentDates(data);
+        return { id: doc.id, ...processedData } as MomentumDealerLead;
+    });
 }
 
 export async function getUsers(): Promise<User[]> {
@@ -433,6 +450,7 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 
 
