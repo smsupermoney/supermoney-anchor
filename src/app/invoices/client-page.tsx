@@ -61,16 +61,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
   
   const searchParams = useSearchParams();
 
-  const initialFilters = {
-    invoiceNumber: searchParams.get('invoiceNumber') || "",
-    dealerName: searchParams.get('dealerName') || "",
-    lender: searchParams.get('lender') || "",
-    status: searchParams.get('status')?.split(',') as InvoiceStatus[] || [],
-    overdue: searchParams.get('overdue') || "",
-  };
-
-  const [filters, setFilters] = useState(initialFilters);
-  const [date, setDate] = useState<DateRange | undefined>(() => {
+  const getInitialDateRange = (): DateRange | undefined => {
     const dateFromParam = searchParams.get('dateFrom');
     const dateToParam = searchParams.get('dateTo');
     if (dateFromParam && dateToParam) {
@@ -81,35 +72,28 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
         }
     }
     return undefined;
-  });
+  };
+
+  const getInitialFilters = () => {
+    return {
+      invoiceNumber: searchParams.get('invoiceNumber') || "",
+      dealerName: searchParams.get('dealerName') || "",
+      lender: searchParams.get('lender') || "",
+      status: searchParams.get('status')?.split(',') as InvoiceStatus[] || [],
+      overdue: searchParams.get('overdue') || "",
+    };
+  };
+
+  const [filters, setFilters] = useState(getInitialFilters);
+  const [date, setDate] = useState<DateRange | undefined>(getInitialDateRange);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
   
    useEffect(() => {
-    const lender = searchParams.get('lender') || '';
-    const overdue = searchParams.get('overdue') || '';
-    const statusQuery = searchParams.get('status');
-    const dealerName = searchParams.get('dealerName') || '';
-    const statusArray = statusQuery ? statusQuery.split(',') as InvoiceStatus[] : [];
-
-    const dateFromParam = searchParams.get('dateFrom');
-    const dateToParam = searchParams.get('dateTo');
-
-    let dateRange: DateRange | undefined;
-    if (dateFromParam && dateToParam) {
-        const from = parseISO(dateFromParam);
-        const to = parseISO(dateToParam);
-        if (isValid(from) && isValid(to)) {
-            dateRange = { from, to };
-        }
-    } else {
-        dateRange = undefined;
-    }
-    
-    setDate(dateRange);
-    setFilters({ invoiceNumber: filters.invoiceNumber, dealerName, lender, status: statusArray, overdue });
-  }, [searchParams, filters.invoiceNumber]);
+    setFilters(getInitialFilters());
+    setDate(getInitialDateRange());
+  }, [searchParams]);
 
 
   const handleStatusFilterChange = (status: InvoiceStatus) => {
