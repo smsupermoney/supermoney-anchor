@@ -10,7 +10,7 @@ import StatusBadge from "@/components/status-badge";
 import type { MomentumDealerLead } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X as XIcon, ChevronDown, PlusCircle, Upload } from "lucide-react";
+import { X as XIcon, ChevronDown, PlusCircle } from "lucide-react";
 import { spokeStatuses } from "@/lib/data";
 import {
   DropdownMenu,
