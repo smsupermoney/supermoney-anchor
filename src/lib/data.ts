@@ -31,7 +31,7 @@ export async function getMomentumDealerLeads(anchorId?: string): Promise<Momentu
     const fetchLeads = async (collectionName: 'dealers' | 'vendors', category: 'Dealer' | 'Vendor') => {
         try {
             let leadsQuery;
-            const leadsCol = collection(db1, collectionName);
+            const leadsCol = collection(db2, collectionName);
             if (anchorId) {
                 leadsQuery = query(leadsCol, where('anchorId', '==', anchorId));
             } else {
@@ -57,7 +57,7 @@ export async function getMomentumDealerLeads(anchorId?: string): Promise<Momentu
         fetchLeads('dealers', 'Dealer'),
         fetchLeads('vendors', 'Vendor')
     ]);
-
+    
     return [...dealerLeads, ...vendorLeads];
 }
 
@@ -493,3 +493,4 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+

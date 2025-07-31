@@ -1,7 +1,7 @@
 
 "use server";
 
-import { db1 } from "@/lib/firebase";
+import { db2 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
 import * as xlsx from 'xlsx';
 import { getSession } from "@/lib/session";
@@ -36,8 +36,8 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    const dealerBatch = writeBatch(db1);
-    const vendorBatch = writeBatch(db1);
+    const dealerBatch = writeBatch(db2);
+    const vendorBatch = writeBatch(db2);
     let dealerCount = 0;
     let vendorCount = 0;
     let skippedCount = 0;
@@ -59,11 +59,11 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
         };
         
         if (leadCategory === 'dealer') {
-            const docRef = doc(collection(db1, "dealers"));
+            const docRef = doc(collection(db2, "dealers"));
             dealerBatch.set(docRef, leadData);
             dealerCount++;
         } else if (leadCategory === 'vendor') {
-            const docRef = doc(collection(db1, "vendors"));
+            const docRef = doc(collection(db2, "vendors"));
             vendorBatch.set(docRef, leadData);
             vendorCount++;
         } else {
@@ -92,7 +92,3 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
     return { error: "An unknown error occurred during the upload process." };
   }
 }
-
-    
-
-    
