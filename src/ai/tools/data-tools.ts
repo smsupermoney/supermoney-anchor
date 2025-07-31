@@ -2,18 +2,19 @@
 'use server';
 
 import { ai } from '@/ai/genkit';
-import { getDealers, getInvoices, getPrograms } from '@/lib/data';
+import { getDealers, getInvoices, getPrograms, getMomentumDealerLeads } from '@/lib/data';
 import { z } from 'zod';
 
 const ToolInputSchema = z.object({
     anchorId: z.string().optional().describe("The anchor ID to filter the data for. If not provided, data for all anchors will be fetched."),
 });
 
-// Tool to get a summary of all programs
+// --- SUMMARY TOOLS (for quick, high-level questions) ---
+
 export const getProgramSummaryTool = ai.defineTool(
     {
         name: 'getProgramSummary',
-        description: 'Get a summary of financing programs, including total credit limits and utilization.',
+        description: 'Get a quick summary of financing programs, including total credit limits and utilization. Use for high-level questions like "what is my total limit?"',
         inputSchema: ToolInputSchema,
         outputSchema: z.object({
             totalPrograms: z.number(),
@@ -36,11 +37,10 @@ export const getProgramSummaryTool = ai.defineTool(
     }
 );
 
-// Tool to get a summary of invoices
 export const getInvoiceSummaryTool = ai.defineTool(
     {
         name: 'getInvoiceSummary',
-        description: 'Get a summary of invoices, including total count, overdue count, and amounts.',
+        description: 'Get a quick summary of invoices, including total count, overdue count, and amounts. Use for high-level questions like "how many invoices are overdue?"',
         inputSchema: ToolInputSchema,
         outputSchema: z.object({
             totalInvoices: z.number(),
@@ -68,12 +68,10 @@ export const getInvoiceSummaryTool = ai.defineTool(
     }
 );
 
-
-// Tool to get a summary of dealers
 export const getDealerSummaryTool = ai.defineTool(
     {
         name: 'getDealerSummary',
-        description: 'Get a summary of dealers, including total count and status breakdown.',
+        description: 'Get a quick summary of dealers, including total count and status breakdown. Use for high-level questions like "how many dealers are active?"',
         inputSchema: ToolInputSchema,
         outputSchema: z.object({
             totalDealers: z.number(),
@@ -90,5 +88,58 @@ export const getDealerSummaryTool = ai.defineTool(
             inactiveDealers: dealers.filter(d => d.status === 'Inactive').length,
             pendingDealers: dealers.filter(d => d.status === 'Pending').length,
         };
+    }
+);
+
+// --- FULL DATA TOOLS (for detailed, specific questions) ---
+
+export const getFullProgramDataTool = ai.defineTool(
+    {
+        name: 'getFullProgramData',
+        description: 'Get the full list of all financing programs. Use this for detailed questions about specific programs that the summary tool cannot answer.',
+        inputSchema: ToolInputSchema,
+        outputSchema: z.any() 
+    },
+    async ({ anchorId }) => {
+        const { programs } = await getPrograms(anchorId);
+        return programs;
+    }
+);
+
+export const getFullInvoiceDataTool = ai.defineTool(
+    {
+        name: 'getFullInvoiceData',
+        description: 'Get the full list of all invoices. Use this for detailed questions about specific invoices, amounts, dealers, or statuses that the summary tool cannot answer.',
+        inputSchema: ToolInputSchema,
+        outputSchema: z.any()
+    },
+    async ({ anchorId }) => {
+        return await getInvoices(anchorId);
+    }
+);
+
+export const getFullDealerDataTool = ai.defineTool(
+    {
+        name: 'getFullDealerData',
+        description: 'Get the full list of all dealers and their financial details. Use this for detailed questions about specific dealers, limits, or regions that the summary tool cannot answer.',
+        inputSchema: ToolInputSchema,
+        outputSchema: z.any()
+    },
+    async ({ anchorId }) => {
+        return await getDealers(anchorId);
+    }
+);
+
+export const getFullLeadDataTool = ai.defineTool(
+    {
+        name: 'getFullLeadData',
+        description: 'Get the full list of all leads. Use this to answer any questions related to leads, such as counts, statuses, or details about specific leads.',
+        inputSchema: z.object({
+            leadAnchorId: z.string().optional().describe("The anchor ID to filter leads for. This is different from the main anchorId."),
+        }),
+        outputSchema: z.any()
+    },
+    async ({ leadAnchorId }) => {
+        return await getMomentumDealerLeads(leadAnchorId);
     }
 );
