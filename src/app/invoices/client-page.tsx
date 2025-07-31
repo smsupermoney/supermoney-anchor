@@ -331,6 +331,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="text-right">Overdue Amount</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Remarks</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -435,6 +436,16 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                             <div><StatusBadge status={invoice.status} /></div>
                           </TooltipTrigger>
                           <TooltipContent><p>{invoice.status}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[150px]">{invoice.remarks || '-'}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.remarks || 'N/A'}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
