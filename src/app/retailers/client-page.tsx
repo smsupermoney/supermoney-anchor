@@ -185,7 +185,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
               <TableBody>
                 {paginatedDealers.map((dealer) => (
                   <TableRow key={dealer.id} onClick={() => setSelectedDealer(dealer)} className="cursor-pointer">
-                    <TableCell className="font-mono text-xs">
+                    <TableCell className="font-medium">
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
