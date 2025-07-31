@@ -73,10 +73,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   // Lead Summary Calculations from momentumLeads
   const totalLeads = momentumLeads.length;
   const newLeadsCount = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'new').length;
-  const followUpLeads = momentumLeads.filter(l => l.status === 'Follow up').length;
-  const onboardingLeads = momentumLeads.filter(l => l.status === 'Onboarding').length;
-  const disbursedLeads = momentumLeads.filter(l => l.status === 'Disbursed').length;
-  const rejectedLeads = momentumLeads.filter(l => l.status === 'Rejected').length;
+  const followUpLeads = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'follow up').length;
+  const onboardingLeads = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'onboarding').length;
+  const disbursedLeads = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'disbursed').length;
+  const rejectedLeads = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'rejected').length;
 
 
   const disbursedAmountLast7Days = invoicesLast7Days

@@ -43,10 +43,15 @@ type InvoicesClientPageProps = {
   isAdmin: boolean;
 };
 
+const sanitizeParam = (str: string | null): string | undefined =>
+  str?.replace(' ', '+');
+
 // Helper function to parse URL params into a DateRange object
 const getInitialDateRange = (searchParams: URLSearchParams): DateRange | undefined => {
-    const dateFromParam = searchParams.get('dateFrom');
-    const dateToParam = searchParams.get('dateTo');
+    const dateFromParam = sanitizeParam(searchParams.get('dateFrom'));
+    const dateToParam = sanitizeParam(searchParams.get('dateTo'));
+    console.log('Parsing:', { dateFromParam, dateToParam });
+    console.log('Date object:', parseISO(dateFromParam ?? ''));
     if (dateFromParam && dateToParam) {
         const from = parseISO(dateFromParam);
         const to = parseISO(dateToParam);
