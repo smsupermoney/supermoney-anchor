@@ -291,6 +291,12 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                     <HelpCircle className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent className="p-3 pt-0 flex flex-col gap-2">
+                    <Button asChild variant="outline" size="sm" className="w-full justify-start text-left">
+                        <Link href="/add-lead">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Lead
+                        </Link>
+                    </Button>
                     <RequestLimitDialog dealers={dealers}>
                         <Button variant="outline" size="sm" className="w-full justify-start text-left">
                             <HandCoins className="mr-2 h-4 w-4" />

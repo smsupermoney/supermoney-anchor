@@ -22,11 +22,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/page-header";
-import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSearchParams } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
+import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
 
 type LeadsClientPageProps = {
     initialLeads: MomentumDealerLead[];
@@ -95,7 +96,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
         filters.status.length === 0 ||
         filters.status.some(s => s.toLowerCase() === (lead.status || '').toLowerCase());
 
-      const categoryCondition = filters.leadCategory === "" || lead.leadCategory.toLowerCase() === filters.leadCategory.toLowerCase();
+      const categoryCondition = filters.leadCategory === "" || (lead.leadCategory || '').toLowerCase() === filters.leadCategory.toLowerCase();
 
       return (
         (lead.name || '').toLowerCase().includes(filters.name.toLowerCase()) &&
@@ -130,12 +131,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     <>
         <PageHeader title="All Leads">
             <div className="flex items-center gap-2">
-                <BulkLeadUploadDialog>
-                    <Button variant="outline">
-                        <Upload className="mr-2 h-4 w-4"/>
-                        Bulk Lead Upload
-                    </Button>
-                </BulkLeadUploadDialog>
+                 <BulkLeadUploadDialog />
             </div>
         </PageHeader>
         <div className='mt-4'>
@@ -270,7 +266,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 </TooltipProvider>
                             </TableCell>
                             <TableCell>
-                                <Badge variant={lead.leadCategory === 'Dealer' ? 'default' : 'secondary'}>
+                                <Badge variant={(lead.leadCategory || '') === 'Dealer' ? 'default' : 'secondary'}>
                                     {lead.leadCategory}
                                 </Badge>
                             </TableCell>
