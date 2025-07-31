@@ -47,7 +47,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                             <span className="text-muted-foreground">Overdue Amount</span>
                             <span className="font-semibold text-destructive">{formatCurrency(dealer.overdueAmount)}</span>
                         </div>
-                        <div className="flex justify-between items-baseline col-span-2">
+                        <div className="flex justify-between items-baseline">
                             <span className="text-muted-foreground">Associated Lender</span>
                             <span className="font-semibold text-right">{dealer.lenderName}</span>
                         </div>
