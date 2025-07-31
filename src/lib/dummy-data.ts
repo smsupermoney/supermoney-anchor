@@ -349,8 +349,6 @@ export const sampleMomentumLeads = [
         "Lead Source": "Connector",
         "Lead Type": "Fresh",
         "Priority": "High",
-        "Lead Date": "2024-07-28",
-        "Status": "New",
         "Assigned To": "asm@supermoney.in",
         "Deal Value (Lacs)": 0.5,
         "Lender": "HDFC Bank",

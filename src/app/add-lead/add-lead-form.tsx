@@ -36,8 +36,6 @@ const leadFormSchema = z.object({
   leadSource: z.string().optional(),
   leadType: z.string().optional(),
   priority: z.string().optional(),
-  leadDate: z.string().optional(),
-  status: z.string().min(1, "Status is required."),
   assignedTo: z.string().optional(),
   dealValue: z.string().optional(),
   lender: z.string().optional(),
@@ -57,7 +55,6 @@ export default function AddLeadForm() {
     resolver: zodResolver(leadFormSchema),
     defaultValues: {
       name: "",
-      status: "New",
     },
   });
 
@@ -73,7 +70,7 @@ export default function AddLeadForm() {
           title: "Success!",
           description: result.message,
         });
-        form.reset({ name: "", status: "New"});
+        form.reset({ name: ""});
       }
     } catch (e) {
       setError("An unexpected error occurred. Please try again.");
@@ -120,31 +117,6 @@ export default function AddLeadForm() {
                     </FormItem>
                 )}
             />
-            <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select a status" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            <SelectItem value="New">New</SelectItem>
-                            <SelectItem value="Follow Up">Follow Up</SelectItem>
-                             <SelectItem value="Onboarding">Onboarding</SelectItem>
-                            <SelectItem value="Not Interested">Not Interested</SelectItem>
-                            <SelectItem value="Rejected">Rejected</SelectItem>
-                            <SelectItem value="Disbursed">Disbursed</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
             <FormField control={form.control} name="spoc" render={({ field }) => (
                 <FormItem><FormLabel>SPOC</FormLabel><FormControl><Input placeholder="Single Point of Contact" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
@@ -183,9 +155,6 @@ export default function AddLeadForm() {
             )}/>
              <FormField control={form.control} name="priority" render={({ field }) => (
                 <FormItem><FormLabel>Priority</FormLabel><FormControl><Input placeholder="e.g., High" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-             <FormField control={form.control} name="leadDate" render={({ field }) => (
-                <FormItem><FormLabel>Lead Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="assignedTo" render={({ field }) => (
                 <FormItem><FormLabel>Assigned To</FormLabel><FormControl><Input placeholder="e.g., user@example.com" {...field} /></FormControl><FormMessage /></FormItem>

@@ -18,9 +18,10 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
   }
   
   const session = await getSession();
-  const anchorId = session?.leadExternalId;
+  // If user is anchor, use their leadExternalId. Otherwise, it will be an empty string.
+  const sessionAnchorId = session?.roleType === 'Anchor' ? session?.leadExternalId : '';
 
-  if (!anchorId && session?.roleType !== 'Admin') {
+  if (!sessionAnchorId && session?.roleType === 'Anchor') {
       return { error: "Could not determine the anchor to associate leads with. Please log in again." };
   }
 
@@ -47,14 +48,15 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
 
         const leadData = {
             ...lead,
-            // Use lead's anchorId if present, otherwise default to session's anchorId
-            anchorId: lead.anchorId || anchorId, 
+            // If anchorId is in Excel, use it. Otherwise, use the session's anchorId.
+            anchorId: lead.anchorId || sessionAnchorId, 
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            leadDate: lead.leadDate ? new Date(lead.leadDate).toISOString() : new Date().toISOString(),
-            initialLeadDate: lead.initialLeadDate ? new Date(lead.initialLeadDate).toISOString() : new Date().toISOString(),
+            // Default leadDate and status
+            leadDate: new Date().toISOString(),
+            status: "New",
+            initialLeadDate: new Date().toISOString(),
             dealValue: lead['Deal Value (Lacs)'] ? Number(lead['Deal Value (Lacs)']) : 0,
-            status: lead.status || "New",
             remarks: [], // Start with empty remarks
         };
         

@@ -19,8 +19,6 @@ const leadFormSchema = z.object({
   leadSource: z.string().optional(),
   leadType: z.string().optional(),
   priority: z.string().optional(),
-  leadDate: z.string().optional(),
-  status: z.string().min(1, "Status is required."),
   assignedTo: z.string().optional(),
   dealValue: z.string().optional(),
   lender: z.string().optional(),
@@ -44,9 +42,9 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   }
   
   const session = await getSession();
-  const anchorId = session?.leadExternalId;
+  const anchorId = session?.roleType === 'Anchor' ? session?.leadExternalId : '';
 
-  if (!anchorId && session?.roleType !== 'Admin') {
+  if (!anchorId && session?.roleType === 'Anchor') {
       return { error: "Could not determine the anchor to associate the lead with." };
   }
   
@@ -59,8 +57,9 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
     remarks: remarks ? [{ remark: remarks, timestamp: new Date().toISOString() }] : [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    leadDate: rest.leadDate ? new Date(rest.leadDate).toISOString() : new Date().toISOString(),
-    initialLeadDate: new Date().toISOString(), // Setting this to now for single creation
+    leadDate: new Date().toISOString(),
+    status: "New",
+    initialLeadDate: new Date().toISOString(),
   };
 
   try {
