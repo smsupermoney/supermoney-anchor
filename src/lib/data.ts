@@ -12,7 +12,13 @@ const processDocumentDates = (data: Record<string, any>): Record<string, any> =>
     for (const key in processedData) {
         if (processedData[key] && typeof processedData[key].toDate === 'function') {
             // This is a Firestore Timestamp
-            processedData[key] = (processedData[key] as Timestamp).toDate().toISOString();
+            const date = (processedData[key] as Timestamp).toDate();
+            // Check if date is valid before converting
+            if (!isNaN(date.getTime())) {
+                processedData[key] = date.toISOString();
+            } else {
+                processedData[key] = null; // or some other placeholder for invalid dates
+            }
         }
     }
     return processedData;
@@ -178,6 +184,8 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
             disbursedAmount: 0,
             overdueCount: 0,
             pendingInvoicesCount: 0,
+            disbursedInvoicesCount: 0,
+            initiatedInvoicesCount: 0,
         };
     });
 
@@ -209,15 +217,19 @@ export async function getPrograms(anchorId?: string): Promise<{programs: Program
     allInvoicesSnapshot.forEach(invoice => {
         if (programAggregates[invoice.programId]) {
             const prog = programAggregates[invoice.programId];
-            prog.invoicesCount!++;
+            prog.invoicesCount!++; // Total invoices for the program
             if ((invoice.overdueAmount ?? 0) > 0) {
                 prog.overdueCount!++;
             }
             if (invoice.status === 'Disbursed') {
                 prog.disbursedAmount! += invoice.amount;
+                prog.disbursedInvoicesCount!++;
             }
             if (['Initiated', 'Approved', 'Sent to Lender'].includes(invoice.status)) {
                 prog.pendingInvoicesCount!++;
+            }
+            if (invoice.status === 'Initiated') {
+                prog.initiatedInvoicesCount!++;
             }
         }
     });
@@ -450,3 +462,4 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+

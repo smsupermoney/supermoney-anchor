@@ -56,6 +56,8 @@ export type Program = {
   totalDealers?: number;
   overdueCount?: number;
   pendingInvoicesCount?: number;
+  disbursedInvoicesCount?: number;
+  initiatedInvoicesCount?: number;
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
