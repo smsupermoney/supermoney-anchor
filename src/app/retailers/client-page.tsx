@@ -43,26 +43,24 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
     name: "",
     lender: "",
     status: "",
+    overdue: "",
   };
 
   const searchParams = useSearchParams();
-  const lenderQuery = searchParams.get('lender');
-
-  const [filters, setFilters] = useState({...initialFilters, lender: lenderQuery || ""});
+  
+  const [filters, setFilters] = useState(() => {
+    const lenderQuery = searchParams.get('lender');
+    const overdueQuery = searchParams.get('overdue');
+    return {...initialFilters, lender: lenderQuery || "", overdue: overdueQuery || ""};
+  });
   const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
   
-  const dealerOptions = useMemo(() => {
-      const uniqueNames = new Set(initialDealers.map(d => d.name));
-      return Array.from(uniqueNames).map(name => ({ value: name, label: name }));
-  }, [initialDealers]);
-
   useEffect(() => {
     const lender = searchParams.get('lender');
-    if (lender) {
-      setFilters(prev => ({ ...prev, lender: lender }));
-    }
+    const overdue = searchParams.get('overdue');
+    setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || ""}));
   }, [searchParams]);
   
   useEffect(() => {
@@ -88,10 +86,17 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
   const filteredDealers = useMemo(() => {
     return dealers.filter((dealer) => {
       const lenderMatch = filters.lender === "" || (dealer.lenderName ?? "").toLowerCase().includes(filters.lender.toLowerCase());
+      
+      const overdueMatch =
+        filters.overdue === "" ||
+        (filters.overdue === "yes" && dealer.overdueAmount > 0) ||
+        (filters.overdue === "no" && dealer.overdueAmount === 0);
+
       return (
         dealer.name.toLowerCase().includes(filters.name.toLowerCase()) &&
         lenderMatch &&
-        (filters.status === "" || dealer.status.toLowerCase() === filters.status.toLowerCase())
+        (filters.status === "" || dealer.status.toLowerCase() === filters.status.toLowerCase()) &&
+        overdueMatch
       );
     });
   }, [filters, dealers]);
@@ -140,6 +145,19 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                     {status}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.overdue}
+              onValueChange={(value) => handleFilterChange("overdue", value === "all" ? "" : value)}
+            >
+              <SelectTrigger className="h-9 w-[150px] data-[placeholder]:text-muted-foreground">
+                <SelectValue placeholder="Filter by Overdue..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Overdue Status</SelectItem>
+                <SelectItem value="yes">Overdue</SelectItem>
+                <SelectItem value="no">Not Overdue</SelectItem>
               </SelectContent>
             </Select>
             {hasActiveFilters && (

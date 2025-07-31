@@ -66,7 +66,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const pendingLast7Days = invoicesLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
   const rejectedLast7Days = invoicesLast7Days.filter(i => i.status === 'Rejected').length;
 
-  const overdueInvoicesCount = invoices.filter((i) => (i.overdueAmount ?? 0) > 0).length;
+  const overdueDealersCount = dealers.filter((d) => d.overdueAmount > 0).length;
   
   // Lead Summary Calculations from momentumLeads
   const totalLeads = momentumLeads.length;
@@ -187,7 +187,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
         
         {/* Summary Column */}
         <div className="flex flex-col gap-4">
-            <Link href="/invoices?overdue=yes">
+            <Link href="/retailers?overdue=yes">
               <Card className="flex-1 hover:bg-secondary transition-colors">
                   <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                       <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
@@ -195,7 +195,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                   </CardHeader>
                   <CardContent className="p-3 pt-0">
                       <p className="text-xl font-bold text-destructive">{formatCurrency(totalOverdueAmount)}</p>
-                      <p className="text-xs text-muted-foreground">Across {overdueInvoicesCount} invoices</p>
+                      <p className="text-xs text-muted-foreground">Across {overdueDealersCount} dealers</p>
                   </CardContent>
               </Card>
             </Link>
