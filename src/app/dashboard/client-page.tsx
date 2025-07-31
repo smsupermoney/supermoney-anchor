@@ -15,7 +15,7 @@ import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import type { Invoice, Program, Dealer, MomentumDealerLead } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
-import { subDays, startOfDay, addDays } from "date-fns";
+import { subDays, startOfDay, addDays, formatISO } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AiChat from "@/components/ai-chat";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
@@ -55,6 +55,8 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
 
   const today = startOfDay(new Date());
   const sevenDaysAgo = subDays(today, 6); // To include today, we go back 6 days
+  
+  const dateFilterParams = `dateFrom=${formatISO(sevenDaysAgo)}&dateTo=${formatISO(today)}`;
 
   const invoicesLast7Days = invoices.filter((i) => {
     const invoiceDate = startOfDay(new Date(i.date));
@@ -226,19 +228,19 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
                     <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-center">
-                        <Link href="/invoices" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href={`/invoices?${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{totalLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><FileText className="w-3 h-3" /> Total</span>
                         </Link>
-                        <Link href="/invoices?status=Disbursed" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href={`/invoices?status=Disbursed&${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{disbursedLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
                         </Link>
-                        <Link href="/invoices?status=Initiated,Approved,Sent to Lender" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href={`/invoices?status=Initiated,Approved,Sent to Lender&${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{pendingLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                         </Link>
-                        <Link href="/invoices?status=Rejected" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href={`/invoices?status=Rejected&${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{rejectedLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
                         </Link>

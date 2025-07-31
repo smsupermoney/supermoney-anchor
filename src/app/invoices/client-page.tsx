@@ -20,7 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import type { Invoice, InvoiceStatus } from "@/types";
@@ -82,17 +82,26 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
   
-  const dealerOptions = useMemo(() => {
-    const uniqueNames = new Set(initialInvoices.map(i => i.dealerName));
-    return Array.from(uniqueNames).map(name => ({ value: name, label: name }));
-  }, [initialInvoices]);
-
   useEffect(() => {
     const lender = searchParams.get('lender');
     const overdue = searchParams.get('overdue');
     const status = searchParams.get('status');
     const dealerName = searchParams.get('dealerName');
     const statusArray = status ? status.split(',') as InvoiceStatus[] : [];
+
+    const dateFromParam = searchParams.get('dateFrom');
+    const dateToParam = searchParams.get('dateTo');
+
+    let dateRange: DateRange | undefined;
+    if (dateFromParam && dateToParam) {
+        const from = parseISO(dateFromParam);
+        const to = parseISO(dateToParam);
+        if (isValid(from) && isValid(to)) {
+            dateRange = { from, to };
+        }
+    }
+    setDate(dateRange);
+
     setFilters(prev => ({...prev, lender: lender || "", overdue: overdue || "", status: statusArray, dealerName: dealerName || ""}));
   }, [searchParams]);
 
