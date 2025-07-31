@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, ArrowRight, CalendarClock, Activity } from "lucide-react";
+import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, ArrowRight, CalendarClock, Activity, MessageSquare } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import AiChat from "@/components/ai-chat";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import RequestLimitDialog from "@/components/request-limit-dialog";
+import SendQueryDialog from "@/components/send-query-dialog";
+import { useAuth } from "@/context/auth-context";
 
 type DashboardClientProps = {
   initialPrograms: Program[];
@@ -33,6 +35,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [programs] = useState(initialPrograms);
   const [invoices] = useState(initialInvoices);
+  const { user } = useAuth();
   
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 5; // Smaller page size for dashboard view
@@ -304,9 +307,12 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
                         </Button>
                     </RequestLimitDialog>
                     <Separator />
-                    <div className="text-xs text-muted-foreground text-center px-1">
-                        Have any query? <a href="mailto:nitin.chorge@supermoney.in" className="text-primary hover:underline font-medium">Send us an email</a>
-                    </div>
+                     <SendQueryDialog>
+                        <Button variant="link" size="sm" className="w-full justify-center text-center text-xs h-auto p-1">
+                            <MessageSquare className="mr-2 h-3 w-3"/>
+                            Have a query? Send us a message
+                        </Button>
+                    </SendQueryDialog>
                 </CardContent>
             </Card>
         </div>
