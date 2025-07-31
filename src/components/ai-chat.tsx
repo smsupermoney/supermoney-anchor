@@ -68,8 +68,8 @@ export default function AiChat() {
             <CardTitle className="text-sm font-semibold">AI Assistant</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="p-0 flex-1 flex flex-col min-h-0">
-        <ScrollArea className="flex-1 p-3" ref={scrollAreaRef}>
+      <CardContent className="flex-1 p-0">
+        <ScrollArea className="h-full p-3" ref={scrollAreaRef}>
           <div className="space-y-4">
             {messages.length === 0 && (
                 <div className="text-center text-sm text-muted-foreground py-8">
