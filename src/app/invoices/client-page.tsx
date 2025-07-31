@@ -261,7 +261,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                   {filters.overdue ? (
                     <>{filters.overdue === 'yes' ? 'Overdue: Yes' : 'Overdue: No'}</>
                   ) : (
-                    <>Overdue?</>
+                    <>Overdue</>
                   )}
                 </Button>
               </PopoverTrigger>
