@@ -23,7 +23,8 @@ import {
 
 const AskAiInputSchema = z.object({
   question: z.string().describe("The user's question."),
-  anchorId: z.string().optional().describe("The ID of the anchor user asking the question. This is used to scope data."),
+  anchorId: z.string().optional().describe("The ID of the anchor user asking the question. This is used to scope data for programs, invoices, and dealers."),
+  leadAnchorId: z.string().optional().describe("The ID of the anchor user for scoping lead data. This might be different from the main anchorId."),
 });
 export type AskAiInput = z.infer<typeof AskAiInputSchema>;
 
@@ -53,18 +54,21 @@ const prompt = ai.definePrompt({
 
   A user has asked a question. Provide a concise and helpful answer by calling the necessary tools and analyzing their output.
 
+  ## User and Tool Context:
+  - You have been provided with 'anchorId' and 'leadAnchorId' from the user's session.
+  - For all questions about programs, invoices, or dealers, you MUST use the 'anchorId' when calling tools.
+  - For all questions about leads, you MUST use the 'leadAnchorId' when calling the 'getFullLeadDataTool'.
+
   ## Tool Usage Strategy:
   - For high-level summary questions (e.g., "how many invoices are overdue?", "what is my total credit limit?"), use the simpler 'get...Summary' tools for efficiency.
   - For more specific or detailed questions (e.g., "list all dealers in the West region", "what is the total amount for invoices from 'Star Electronics'?", "how many leads are in 'Follow Up' status?"), you MUST use the more powerful 'getFull...Data' tools. These tools provide a full JSON dataset that you must analyze to compute the answer.
   - The 'getFullLeadDataTool' is the ONLY tool that can answer questions about leads.
-  - When calling a tool, you must pass the anchorId provided in the input if it's available. The 'getFullLeadDataTool' uses 'leadAnchorId' which corresponds to the user's 'anchorId'.
 
   ## User Interaction Rules:
-  - Do NOT describe the tool you are about to use. Just call the tool and give the final answer.
-  - If the user's question seems general (e.g., "Give me the total number of invoices"), you should call the appropriate tool without an anchorId to get data for all anchors. Do not ask for an anchorId.
-  - If the user asks a question that implies a specific user context (e.g., "what is MY total limit?") and an anchorId IS available in the input, you MUST use that anchorId when calling the tool.
-  - ONLY ask for an anchorId if the user's question implies a specific user context (e.g., "what is MY total limit?") AND the anchorId is NOT provided in the input. In that case, you can ask for it.
-  - If the user asks for information that the tools cannot provide, inform them of this limitation.
+  - NEVER describe the tool you are about to use. Just call the tool and give the final answer.
+  - NEVER ask the user for an 'anchorId' or 'leadAnchorId'. You have been given this information. Use it.
+  - If the user asks a question that seems general (e.g., "Give me the total number of invoices"), assume they mean for their own context and call the appropriate tool using the provided 'anchorId' (or 'leadAnchorId' for leads).
+  - If the user asks a question that the tools cannot provide, inform them of this limitation.
   - Format numbers and currency in a readable way (e.g., ₹1,23,456).
   - Be friendly and professional.
 
@@ -81,13 +85,7 @@ const askAiFlow = ai.defineFlow(
     outputSchema: AskAiOutputSchema,
   },
   async input => {
-    // The 'leadAnchorId' for the lead tool corresponds to the general 'anchorId'
-    const flowInput = {
-        ...input,
-        leadAnchorId: input.anchorId,
-    };
-    const {output} = await prompt(flowInput);
+    const {output} = await prompt(input);
     return output!;
   }
 );
-

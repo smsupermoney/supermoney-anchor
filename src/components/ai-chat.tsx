@@ -33,9 +33,11 @@ export default function AiChat() {
     setIsLoading(true);
 
     try {
-      // Pass the user's anchorId to the AI flow
-      const anchorId = user?.roleType === 'Anchor' ? user.externalId : undefined;
-      const response = await askAi({ question: input, anchorId });
+      // Pass both the user's externalId (for general data) and leadExternalId (for leads)
+      const anchorId = user?.externalId;
+      const leadAnchorId = user?.leadExternalId;
+      
+      const response = await askAi({ question: input, anchorId, leadAnchorId });
       const assistantMessage: Message = { role: "assistant", content: response.answer };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
