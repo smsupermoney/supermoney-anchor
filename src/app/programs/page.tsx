@@ -107,11 +107,11 @@ export default async function ProgramsPage() {
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}&status=Disbursed`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Disbursed Invoices</p>
-                      <p className="font-semibold text-xs">{program.invoicesCount}</p>
+                      <p className="font-semibold text-xs">{program.disbursedInvoicesCount}</p>
                   </Link>
                   <Link href={`/invoices?lender=${encodeURIComponent(program.lenderName)}&status=Initiated`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                     <p className="text-[10px] text-muted-foreground">Initiated Invoices</p>
-                    <p className="font-semibold text-xs">{program.pendingInvoicesCount}</p>
+                    <p className="font-semibold text-xs">{program.initiatedInvoicesCount}</p>
                   </Link>
                   <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Total Dealers</p>
