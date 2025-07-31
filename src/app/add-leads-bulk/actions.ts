@@ -40,19 +40,19 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
     const vendorBatch = writeBatch(db1);
     let dealerCount = 0;
     let vendorCount = 0;
+    let skippedCount = 0;
 
     leadsArray.forEach((lead: any) => {
         const leadCategory = (lead['Lead Category'] || '').toLowerCase();
 
-        // Let Firestore auto-generate the document ID for new leads
         const leadData = {
             ...lead,
-            anchorId: lead.anchorId || anchorId, // Use anchorId from file, or logged-in user's
+            anchorId: lead.anchorId || anchorId,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             leadDate: lead.leadDate ? new Date(lead.leadDate).toISOString() : new Date().toISOString(),
             initialLeadDate: lead.initialLeadDate ? new Date(lead.initialLeadDate).toISOString() : new Date().toISOString(),
-            dealValue: lead.dealValue ? Number(lead.dealValue) : 0,
+            dealValue: lead['Deal Value (Lacs)'] ? Number(lead['Deal Value (Lacs)']) : 0,
             status: lead.status || "New",
             remarks: [], // Start with empty remarks
         };
@@ -65,6 +65,8 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
             const docRef = doc(collection(db1, "vendors"));
             vendorBatch.set(docRef, leadData);
             vendorCount++;
+        } else {
+            skippedCount++;
         }
     });
     
@@ -74,8 +76,13 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
     if (vendorCount > 0) {
         await vendorBatch.commit();
     }
+    
+    let message = `${dealerCount} Dealer lead(s) and ${vendorCount} Vendor lead(s) added successfully.`;
+    if (skippedCount > 0) {
+        message += ` ${skippedCount} rows were skipped due to an invalid 'Lead Category'.`;
+    }
 
-    return { message: `${dealerCount} Dealer lead(s) and ${vendorCount} Vendor lead(s) added successfully.` };
+    return { message };
   } catch (error) {
     console.error("Error processing Excel file or writing to Firestore:", error);
     if (error instanceof Error) {
@@ -84,3 +91,5 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
     return { error: "An unknown error occurred during the upload process." };
   }
 }
+
+    

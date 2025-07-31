@@ -1,5 +1,4 @@
 
-
 import type { User, DealerLead, DealerOnboardingStatus, MomentumDealerLead, DealerLimit } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc, type Timestamp } from 'firebase/firestore';
@@ -30,19 +29,28 @@ const processDocumentDates = (data: Record<string, any>): Record<string, any> =>
 
 export async function getMomentumDealerLeads(anchorId?: string): Promise<MomentumDealerLead[]> {
     const fetchLeads = async (collectionName: 'dealers' | 'vendors', category: 'Dealer' | 'Vendor') => {
-        let leadsQuery;
-        const leadsCol = collection(db1, collectionName);
-        if (anchorId) {
-            leadsQuery = query(leadsCol, where('anchorId', '==', anchorId));
-        } else {
-            leadsQuery = query(leadsCol);
+        try {
+            let leadsQuery;
+            const leadsCol = collection(db1, collectionName);
+            if (anchorId) {
+                leadsQuery = query(leadsCol, where('anchorId', '==', anchorId));
+            } else {
+                leadsQuery = query(leadsCol);
+            }
+            const snapshot = await getDocs(leadsQuery);
+            if (snapshot.empty) {
+                return [];
+            }
+            return snapshot.docs.map(doc => {
+                const data = doc.data();
+                const processedData = processDocumentDates(data);
+                return { id: doc.id, ...processedData, leadCategory: category } as MomentumDealerLead;
+            });
+        } catch (error) {
+            console.error(`Error fetching from ${collectionName}:`, error);
+            // If a collection doesn't exist, it will throw. We can ignore it and return an empty array.
+            return [];
         }
-        const snapshot = await getDocs(leadsQuery);
-        return snapshot.docs.map(doc => {
-            const data = doc.data();
-            const processedData = processDocumentDates(data);
-            return { id: doc.id, ...processedData, leadCategory: category } as MomentumDealerLead;
-        });
     };
 
     const [dealerLeads, vendorLeads] = await Promise.all([
@@ -474,11 +482,13 @@ export const dealerLeads: DealerLead[] = [
         createdAt: '2024-07-10',
     },
 ];
-
     
 
     
 
+
+
+    
 
 
     
