@@ -8,7 +8,7 @@ import { getSession } from "@/lib/session";
 
 const leadFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
-  leadCategory: z.enum(["Dealer", "Vendor"]),
+  leadCategory: z.enum(["Dealer", "Vendor"], { required_error: "Lead Category is required."}),
   contactNumber: z.string().min(10, "Contact number must be at least 10 digits."),
   email: z.string().email("Invalid email address."),
   city: z.string().min(1, "City is required."),
@@ -19,13 +19,15 @@ const leadFormSchema = z.object({
   leadSource: z.string().min(1, "Lead source is required."),
   leadType: z.string().min(1, "Lead type is required."),
   priority: z.string().min(1, "Priority is required."),
-  assignedTo: z.string().optional(),
   dealValue: z.string().min(1, "Deal value is required."),
   lender: z.string().min(1, "Lender is required."),
-  remarks: z.string().optional(),
   spoc: z.string().min(1, "SPOC is required."),
+  // Optional fields
+  assignedTo: z.string().optional(),
   initialLeadTat: z.string().optional(),
+  remarks: z.string().optional(),
 });
+
 
 type LeadFormValues = z.infer<typeof leadFormSchema>;
 
@@ -38,6 +40,7 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   const validatedFields = leadFormSchema.safeParse(data);
 
   if (!validatedFields.success) {
+    console.error("Form validation failed:", validatedFields.error.flatten().fieldErrors);
     return { error: "Invalid data provided. Please check the form." };
   }
   
