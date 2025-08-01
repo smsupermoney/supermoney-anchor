@@ -46,6 +46,27 @@ const leadFormSchema = z.object({
 
 type LeadFormValues = z.infer<typeof leadFormSchema>;
 
+const defaultFormValues: LeadFormValues = {
+    name: "",
+    leadCategory: "Dealer",
+    contactNumber: "",
+    email: "",
+    city: "",
+    state: "",
+    zone: "",
+    anchorName: "",
+    product: "",
+    leadSource: "",
+    leadType: "",
+    priority: "",
+    assignedTo: "",
+    dealValue: "",
+    lender: "",
+    remarks: "",
+    spoc: "",
+    initialLeadTat: "",
+};
+
 export default function AddLeadForm() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -53,9 +74,7 @@ export default function AddLeadForm() {
   
   const form = useForm<LeadFormValues>({
     resolver: zodResolver(leadFormSchema),
-    defaultValues: {
-      name: "",
-    },
+    defaultValues: defaultFormValues,
   });
 
   const onSubmit = async (values: LeadFormValues) => {
@@ -70,7 +89,7 @@ export default function AddLeadForm() {
           title: "Success!",
           description: result.message,
         });
-        form.reset({ name: ""});
+        form.reset(defaultFormValues);
       }
     } catch (e) {
       setError("An unexpected error occurred. Please try again.");
