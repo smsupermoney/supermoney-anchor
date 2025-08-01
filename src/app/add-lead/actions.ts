@@ -42,23 +42,25 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   }
   
   const session = await getSession();
-  const anchorId = session?.roleType === 'Anchor' ? session?.leadExternalId : '';
+  const anchorId = session?.roleType === 'Anchor' ? session?.leadExternalId || '' : '';
 
-  if (!anchorId && session?.roleType === 'Anchor') {
-      return { error: "Could not determine the anchor to associate the lead with." };
+  if (session?.roleType === 'Anchor' && !anchorId) {
+      console.warn("Anchor user is missing leadExternalId.");
+      // Depending on business logic, you might want to return an error here.
+      // For now, we'll proceed with an empty anchorId for this case.
   }
   
   const { leadCategory, dealValue, remarks, ...rest } = validatedFields.data;
   
   const leadData = {
     ...rest,
-    anchorId: rest.anchorName || anchorId,
+    anchorId: anchorId, // Correctly use the session-derived anchorId
     dealValue: dealValue ? Number(dealValue) : 0,
     remarks: remarks ? [{ remark: remarks, timestamp: new Date().toISOString() }] : [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    leadDate: new Date().toISOString(),
     status: "New",
+    leadDate: new Date().toISOString(),
     initialLeadDate: new Date().toISOString(),
   };
 
