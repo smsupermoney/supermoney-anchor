@@ -42,17 +42,19 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   }
   
   const session = await getSession();
-  const anchorId = session?.roleType === 'Anchor' ? session?.leadExternalId || '' : '';
+  
+  // Explicitly set anchorId based on user role from session
+  const anchorId = session?.roleType === 'Anchor' ? session.leadExternalId || '' : '';
 
   if (session?.roleType === 'Anchor' && !anchorId) {
-      console.warn("Anchor user is missing leadExternalId.");
+      console.warn("Anchor user is creating a lead but does not have a leadExternalId in their session.");
   }
   
   const { leadCategory, dealValue, remarks, ...rest } = validatedFields.data;
   
   const leadData = {
     ...rest,
-    anchorId: anchorId,
+    anchorId: anchorId, // Ensure this is correctly assigned
     dealValue: dealValue ? Number(dealValue) : 0,
     remarks: remarks ? [{ remark: remarks, timestamp: new Date().toISOString() }] : [],
     createdAt: new Date().toISOString(),
