@@ -9,21 +9,21 @@ import { getSession } from "@/lib/session";
 const leadFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
   leadCategory: z.enum(["Dealer", "Vendor"]),
-  contactNumber: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zone: z.string().optional(),
-  anchorName: z.string().optional(),
-  product: z.string().optional(),
-  leadSource: z.string().optional(),
-  leadType: z.string().optional(),
-  priority: z.string().optional(),
+  contactNumber: z.string().min(10, "Contact number must be at least 10 digits."),
+  email: z.string().email("Invalid email address."),
+  city: z.string().min(1, "City is required."),
+  state: z.string().min(1, "State is required."),
+  zone: z.string().min(1, "Zone is required."),
+  anchorName: z.string().min(1, "Anchor name is required."),
+  product: z.string().min(1, "Product is required."),
+  leadSource: z.string().min(1, "Lead source is required."),
+  leadType: z.string().min(1, "Lead type is required."),
+  priority: z.string().min(1, "Priority is required."),
   assignedTo: z.string().optional(),
-  dealValue: z.string().optional(),
-  lender: z.string().optional(),
+  dealValue: z.string().min(1, "Deal value is required."),
+  lender: z.string().min(1, "Lender is required."),
   remarks: z.string().optional(),
-  spoc: z.string().optional(),
+  spoc: z.string().min(1, "SPOC is required."),
   initialLeadTat: z.string().optional(),
 });
 
@@ -46,15 +46,13 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
 
   if (session?.roleType === 'Anchor' && !anchorId) {
       console.warn("Anchor user is missing leadExternalId.");
-      // Depending on business logic, you might want to return an error here.
-      // For now, we'll proceed with an empty anchorId for this case.
   }
   
   const { leadCategory, dealValue, remarks, ...rest } = validatedFields.data;
   
   const leadData = {
     ...rest,
-    anchorId: anchorId, // Correctly use the session-derived anchorId
+    anchorId: anchorId,
     dealValue: dealValue ? Number(dealValue) : 0,
     remarks: remarks ? [{ remark: remarks, timestamp: new Date().toISOString() }] : [],
     createdAt: new Date().toISOString(),
