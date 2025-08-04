@@ -21,6 +21,8 @@ type InvoiceDetailDialogProps = {
 
 export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: InvoiceDetailDialogProps) {
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+  
+  const lifecycleSteps = invoiceStatuses.filter(s => s !== 'Rejected');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -44,7 +46,7 @@ export default function InvoiceDetailDialog({ invoice, open, onOpenChange }: Inv
                         <CardTitle>Invoice Lifecycle</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ProgressTracker steps={invoiceStatuses.filter(s => s !== 'Rejected')} currentStep={invoice.status} />
+                        <ProgressTracker steps={lifecycleSteps} currentStep={invoice.status} />
                     </CardContent>
                 </Card>
                 {invoice.invoiceImage && (

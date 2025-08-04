@@ -95,7 +95,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     const dealerInfo = dealerMap.get(data.dealerId);
     
     const dueDate = new Date(data.dueDate);
-    const isOverdue = dueDate < today && data.status !== 'Disbursed';
+    const isOverdue = dueDate < today && data.status !== 'Disbursed' && data.status !== 'Repaid';
     const overdueAmount = isOverdue ? data.amount : 0;
     
     return { 
@@ -315,7 +315,7 @@ export const leads: Lead[] = [
   { id: 'LEAD005', dealerName: 'Value Mart', contactPerson: 'Chris Lee', contactEmail: 'chris.l@valuemart.com', status: 'Dropped', createdAt: '2024-07-05' },
 ];
 
-export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected'];
+export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'];
 
 // --- DEALER ONBOARDING STATIC DATA ---
 export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
@@ -493,4 +493,5 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 

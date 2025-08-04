@@ -20,7 +20,7 @@ export type Dealer = {
   customerId: string;
 };
 
-export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected';
+export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';
 
 export type Invoice = {
   id: string;
@@ -181,16 +181,14 @@ export type Repayment = {
 export type MomentumDealerLead = {
   id: string;
   anchorId: string;
-  assignedTo: string;
   city: string;
   createdAt: string; // ISO date string
   dealValue: number;
   initialLeadDate: string; // ISO date string
   leadDate: string; // ISO date string
-  leadId: string;
   leadSource: string;
   leadType: string;
-  lenderId: string;
+  lender: string;
   name: string;
   priority?: string;
   product: string;
@@ -198,7 +196,6 @@ export type MomentumDealerLead = {
   spoc: string;
   state: string;
   status: string;
-  tat?: string;
   updatedAt: string; // ISO date string
   zone: string;
   contactNumber?: string;
