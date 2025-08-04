@@ -141,7 +141,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
             </div>
         </PageHeader>
         <div className='mt-4'>
-            <Card>
+            <Card className="w-full">
                 <CardHeader>
                     <CardTitle>All Leads</CardTitle>
                 </CardHeader>
