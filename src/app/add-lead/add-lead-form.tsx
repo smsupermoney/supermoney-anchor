@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { addSingleLead } from "./actions";
 import { indianStates } from "@/lib/location-data";
+import { useRouter } from "next/navigation";
 
 const zones = ["North", "South", "East", "West", "Central"];
 const products = ["Primary", "Secondary", "Cross-sell", "Anchor-led"];
@@ -78,6 +79,7 @@ export default function AddLeadForm() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
   
   const form = useForm<LeadFormValues>({
     resolver: zodResolver(leadFormSchema),
@@ -106,6 +108,8 @@ export default function AddLeadForm() {
           description: result.message,
         });
         form.reset(defaultFormValues);
+        // Navigate to the leads page to see the updated list
+        router.push('/leads');
       }
     } catch (e) {
       setError("An unexpected error occurred. Please try again.");

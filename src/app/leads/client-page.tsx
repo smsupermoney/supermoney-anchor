@@ -55,6 +55,11 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
   
+  // Effect to update leads when initialLeads prop changes
+  useEffect(() => {
+    setLeads(initialLeads);
+  }, [initialLeads]);
+  
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
   const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
 
@@ -254,7 +259,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 <TableHead>Lead Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Priority</TableHead>
-                                <TableHead>TAT</TableHead>
                                 <TableHead>Latest Remark</TableHead>
                             </TableRow>
                             </TableHeader>
@@ -294,7 +298,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                     <StatusBadge status={lead.status as any} />
                                 </TableCell>
                                 <TableCell>{lead.priority || 'N/A'}</TableCell>
-                                <TableCell>{lead.tat || 'N/A'}</TableCell>
                                 <TableCell className="text-muted-foreground">
                                      <TooltipProvider>
                                         <Tooltip>
