@@ -72,16 +72,6 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                 </CardContent>
             </Card>
         </div>
-        <DialogFooter className="gap-2 sm:justify-end">
-            <Button variant="outline">
-                <Archive className="mr-2 h-4 w-4" />
-                Archive Dealer
-            </Button>
-            <Button variant="destructive">
-                <Ban className="mr-2 h-4 w-4" />
-                Stop Finance
-            </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
