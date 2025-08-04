@@ -3,10 +3,83 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // This rule allows anyone to read or write to any collection.
-    // This is useful for development but should be secured before production.
+
+    // Helper functions to improve readability
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isRole(role) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleType == role;
+    }
+    
+    function isSubRole(subRole) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userSubRole == subRole;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isAnchorUser() {
+      return isRole('Anchor');
+    }
+    
+    function isAdmin() {
+        return isRole('Admin');
+    }
+    
+    function getUserData() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isRequestingAnchor(anchorId) {
+        return getUserData().externalId == anchorId;
+    }
+
+    // Default Deny: No one can access collections unless explicitly allowed.
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
+    }
+
+    // Users Collection
+    // Users can read their own data.
+    // Admins can read/write any user data.
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isSignedIn() && isAdmin();
+      allow create, update: if isSignedIn() && isAdmin();
+    }
+    
+    // Programs Collection
+    // Authenticated users can read. Admins can write.
+    match /programs/{programId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && isAdmin();
+    }
+    
+    // Dealers Collection
+    // Admins can read all. Anchors can read dealers linked to them.
+    match /dealers/{dealerId} {
+        allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(resource.data.anchorId)));
+        allow write: if isSignedIn() && isAdmin();
+    }
+    
+    // DealerLimits Collection
+    // Admins can read all. Anchors can read limits for their dealers.
+    match /dealerLimits/{limitId} {
+        allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(get(/databases/$(database)/documents/dealers/$(limitId)).data.anchorId)));
+        allow write: if isSignedIn() && isAdmin();
+    }
+
+    // Invoices Collection
+    // Admins can read all. Anchors can read invoices linked to them.
+    // Anchors can create new invoices for themselves.
+    match /invoices/{invoiceId} {
+      allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(resource.data.anchorId)));
+      allow create: if isSignedIn() && (isAnchorUser() && isRequestingAnchor(request.resource.data.anchorId));
+      allow update: if isSignedIn() && isAdmin();
+      // No delete rule defined, so it's denied.
     }
   }
 }
