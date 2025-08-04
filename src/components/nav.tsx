@@ -8,6 +8,7 @@ export const anchorNavigationLinks = [
   { href: '/retailers', label: 'Dealers', icon: Users },
   { href: '/invoices', label: 'Invoices', icon: FileText },
   { href: '/leads', label: 'Leads', icon: PlusCircle },
+  { href: '/reports', label: 'Reports', icon: FileBarChart },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -25,6 +26,7 @@ export const adminNavigationLinks = [
   { href: '/retailers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
   { href: '/leads', label: 'View Leads', icon: FileText },
+  { href: '/reports', label: 'Reports', icon: FileBarChart },
   { href: '/view-users', label: 'View Users', icon: Users },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
