@@ -1,0 +1,127 @@
+
+"use server";
+
+import nodemailer from "nodemailer";
+import * as xlsx from 'xlsx';
+
+type ActionResult = {
+  message?: string;
+  error?: string;
+};
+
+type ExcelInvoice = {
+    'Invoice Number': string;
+    'Dealer Name': string;
+    'Invoice Amount': number;
+    'Disburse Amount': number;
+    'Due Date': string | number;
+};
+
+// Basic validation for environment variables
+const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+const transporter = smtpConfigured ? nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: Number(process.env.SMTP_PORT) === 465,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+}) : null;
+
+const formatCurrency = (amount?: number) => {
+    if (typeof amount !== 'number') return "N/A";
+    return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
+};
+
+const formatDate = (dateValue: string | number) => {
+    if (typeof dateValue === 'number') {
+        // Handle Excel date serial number
+        const date = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
+        return date.toLocaleDateString('en-IN');
+    }
+    return dateValue;
+};
+
+
+function generateEmailBody(data: ExcelInvoice[], fileName: string): string {
+    let html = `
+        <h1>Bulk Invoice Submission</h1>
+        <p>A new set of invoices has been submitted via bulk upload from the file: <strong>${fileName}</strong></p>
+        <hr />
+        <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th>Invoice Number</th>
+                    <th>Dealer Name</th>
+                    <th>Invoice Amount</th>
+                    <th>Disburse Amount</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    data.forEach(item => {
+        html += `
+            <tr>
+                <td>${item['Invoice Number'] || 'N/A'}</td>
+                <td>${item['Dealer Name'] || 'N/A'}</td>
+                <td>${formatCurrency(item['Invoice Amount'])}</td>
+                <td>${formatCurrency(item['Disburse Amount'])}</td>
+                <td>${formatDate(item['Due Date'])}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <br />
+        <p>Please review these submissions in the platform.</p>
+        <p>Thank you.</p>
+    `;
+    return html;
+}
+
+export async function sendBulkInvoiceEmail(formData: FormData): Promise<ActionResult> {
+  const file = formData.get('excel-file') as File;
+  if (!file) {
+    return { error: "No file uploaded." };
+  }
+
+  if (!smtpConfigured || !transporter) {
+    console.error("SMTP environment variables are not configured.");
+    return { error: "Email service is not configured on the server. Please contact the administrator." };
+  }
+
+  try {
+    const bytes = await file.arrayBuffer();
+    const workbook = xlsx.read(bytes, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const dataArray = xlsx.utils.sheet_to_json(sheet) as ExcelInvoice[];
+
+    if (!Array.isArray(dataArray) || dataArray.length === 0) {
+      return { error: "The Excel file is empty or not in the correct format." };
+    }
+
+    const mailOptions = {
+      from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+      to: "nitin.chorge@supermoney.in",
+      subject: `Bulk Invoice Submission from ${file.name}`,
+      html: generateEmailBody(dataArray, file.name),
+    };
+
+    await transporter.sendMail(mailOptions);
+    return { message: `${dataArray.length} invoices from ${file.name} have been submitted successfully.` };
+
+  } catch (error) {
+    console.error("Error processing Excel file or sending email:", error);
+    if (error instanceof Error) {
+        return { error: `Failed to process file: ${error.message}` };
+    }
+    return { error: "An unknown error occurred during the upload process." };
+  }
+}

@@ -22,6 +22,7 @@ import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import RequestLimitDialog from "@/components/request-limit-dialog";
 import SendQueryDialog from "@/components/send-query-dialog";
 import { useAuth } from "@/context/auth-context";
+import BulkInvoiceUploadDialog from "@/components/bulk-invoice-upload-dialog";
 
 type DashboardClientProps = {
   initialPrograms: Program[];
@@ -124,12 +125,15 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   return (
     <div className="flex flex-col h-full gap-4">
       <PageHeader title="Dashboard">
-        <UploadInvoiceDialog dealers={dealers}>
-            <Button size="sm">
-            <UploadCloud className="mr-2 h-4 w-4" />
-            Raise Invoice
-            </Button>
-        </UploadInvoiceDialog>
+        <div className="flex items-center gap-2">
+            <BulkInvoiceUploadDialog />
+            <UploadInvoiceDialog dealers={dealers}>
+                <Button size="sm">
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Raise Invoice
+                </Button>
+            </UploadInvoiceDialog>
+        </div>
       </PageHeader>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
