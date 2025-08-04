@@ -46,7 +46,6 @@ const leadFormSchema = z.object({
   dealValue: z.string().min(1, "Deal value is required."),
   lender: z.string().min(1, "Lender is required."),
   spoc: z.string().min(1, "SPOC is required."),
-  assignedTo: z.string().optional(),
   remarks: z.string().optional(),
 });
 
@@ -68,7 +67,6 @@ const defaultFormValues: LeadFormValues = {
     dealValue: "",
     lender: "",
     spoc: "",
-    assignedTo: "",
     remarks: "",
 };
 
@@ -199,9 +197,6 @@ export default function AddLeadForm() {
                         <SelectContent>{priorities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                     </Select><FormMessage />
                 </FormItem>
-            )}/>
-            <FormField control={form.control} name="assignedTo" render={({ field }) => (
-                <FormItem><FormLabel>Assigned To</FormLabel><FormControl><Input placeholder="e.g., user@example.com" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
              <FormField
               control={form.control}

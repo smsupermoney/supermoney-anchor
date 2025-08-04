@@ -349,7 +349,6 @@ export const sampleMomentumLeads = [
         "Lead Source": "Connector",
         "Lead Type": "New",
         "Priority": "Medium",
-        "Assigned To": "sales_person@savex.in",
         "Deal Value (Lacs)": 0.5,
         "Lender": "Kotak",
         "Remarks": "New Lead. Need follow-up",

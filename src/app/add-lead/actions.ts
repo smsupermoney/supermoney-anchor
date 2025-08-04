@@ -23,7 +23,6 @@ const leadFormSchema = z.object({
   lender: z.string().min(1, "Lender is required."),
   spoc: z.string().min(1, "SPOC is required."),
   // Optional fields
-  assignedTo: z.string().optional(),
   remarks: z.string().optional(),
 });
 
