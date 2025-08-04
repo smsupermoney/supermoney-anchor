@@ -18,12 +18,12 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
   }
   
   const session = await getSession();
-  // If user is anchor, use their leadExternalId. This can be overridden by a value in the Excel sheet.
-  const sessionAnchorId = session?.roleType === 'Anchor' ? session?.leadExternalId || '' : '';
+  const isAnchorUser = session?.roleType === 'Anchor';
+  const sessionAnchorId = isAnchorUser ? session?.leadExternalId || '' : '';
 
-  if (session?.roleType === 'Anchor' && !sessionAnchorId) {
+  if (isAnchorUser && !sessionAnchorId) {
       console.warn("Anchor user is uploading bulk leads but does not have a leadExternalId in their session.");
-      // We will proceed, but leads might not be associated correctly unless anchorId is in the file.
+      // Proceed, but anchorId will be empty.
   }
 
   try {
@@ -47,10 +47,14 @@ export async function addMomentumLeads(formData: FormData): Promise<ActionResult
     leadsArray.forEach((lead: any) => {
         const leadCategory = (lead['Lead Category'] || '').toLowerCase();
 
-        // Logic: Use anchorId from Excel if present. If not, use the session's anchorId.
+        // **Corrected Logic**: 
+        // If the user is an Anchor, always use their session `leadExternalId`.
+        // Otherwise, use the anchorId from the Excel file, or an empty string if not present.
+        const anchorId = isAnchorUser ? sessionAnchorId : (lead.anchorId || '');
+
         const leadData = {
             ...lead,
-            anchorId: lead.anchorId || sessionAnchorId, 
+            anchorId: anchorId, 
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             // Default leadDate and status
