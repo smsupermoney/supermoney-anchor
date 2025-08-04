@@ -239,76 +239,76 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         </Button>
                         )}
                     </div>
-                    <div className="relative w-full overflow-auto border rounded-md">
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <TableHead>Lead Name</TableHead>
-                            <TableHead>Lead Category</TableHead>
-                            <TableHead>SPOC</TableHead>
-                            <TableHead>Contact</TableHead>
-                            <TableHead>City</TableHead>
-                            <TableHead>Zone</TableHead>
-                            <TableHead>Lead Source</TableHead>
-                            <TableHead>Deal Value</TableHead>
-                            <TableHead>Lead Date</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Priority</TableHead>
-                            <TableHead>TAT</TableHead>
-                            <TableHead>Latest Remark</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {paginatedLeads.map((lead) => (
-                            <TableRow key={lead.id}>
-                            <TableCell className="font-medium">
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <span className="block max-w-[120px] truncate">{lead.name}</span>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>{lead.name}</p></TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </TableCell>
-                            <TableCell>
-                                <Badge variant={(lead.leadCategory || '') === 'Dealer' ? 'default' : 'secondary'}>
-                                    {lead.leadCategory}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>{lead.spoc}</TableCell>
-                             <TableCell>
-                                <div className="max-w-[150px] truncate">
-                                    <p>{lead.contactNumber || 'N/A'}</p>
-                                    <p className="text-muted-foreground truncate">{lead.email || 'N/A'}</p>
-                                </div>
-                            </TableCell>
-                            <TableCell>{lead.city}</TableCell>
-                            <TableCell>{lead.zone}</TableCell>
-                            <TableCell>{lead.leadSource}</TableCell>
-                            <TableCell>
-                                <Badge variant="secondary">{formatCurrency(lead.dealValue * 100000)}</Badge>
-                            </TableCell>
-                            <TableCell>{formatDate(lead.leadDate)}</TableCell>
-                            <TableCell>
-                                <StatusBadge status={lead.status as any} />
-                            </TableCell>
-                            <TableCell>{lead.priority || 'N/A'}</TableCell>
-                            <TableCell>{lead.tat || 'N/A'}</TableCell>
-                            <TableCell className="text-muted-foreground">
-                                 <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <span className="block max-w-[150px] truncate">{getLatestRemark(lead)}</span>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>{getLatestRemark(lead)}</p></TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </TableCell>
+                    <div className="relative w-full overflow-x-auto border rounded-md">
+                        <Table>
+                            <TableHeader>
+                            <TableRow>
+                                <TableHead>Lead Name</TableHead>
+                                <TableHead>Lead Category</TableHead>
+                                <TableHead>SPOC</TableHead>
+                                <TableHead>Contact</TableHead>
+                                <TableHead>City</TableHead>
+                                <TableHead>Zone</TableHead>
+                                <TableHead>Lead Source</TableHead>
+                                <TableHead>Deal Value</TableHead>
+                                <TableHead>Lead Date</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Priority</TableHead>
+                                <TableHead>TAT</TableHead>
+                                <TableHead>Latest Remark</TableHead>
                             </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                            {paginatedLeads.map((lead) => (
+                                <TableRow key={lead.id}>
+                                <TableCell className="font-medium">
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span className="block max-w-[120px] truncate">{lead.name}</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>{lead.name}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant={(lead.leadCategory || '') === 'Dealer' ? 'default' : 'secondary'}>
+                                        {lead.leadCategory}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>{lead.spoc}</TableCell>
+                                 <TableCell>
+                                    <div className="max-w-[150px] truncate">
+                                        <p>{lead.contactNumber || 'N/A'}</p>
+                                        <p className="text-muted-foreground truncate">{lead.email || 'N/A'}</p>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{lead.city}</TableCell>
+                                <TableCell>{lead.zone}</TableCell>
+                                <TableCell>{lead.leadSource}</TableCell>
+                                <TableCell>
+                                    <Badge variant="secondary">{formatCurrency(lead.dealValue * 100000)}</Badge>
+                                </TableCell>
+                                <TableCell>{formatDate(lead.leadDate)}</TableCell>
+                                <TableCell>
+                                    <StatusBadge status={lead.status as any} />
+                                </TableCell>
+                                <TableCell>{lead.priority || 'N/A'}</TableCell>
+                                <TableCell>{lead.tat || 'N/A'}</TableCell>
+                                <TableCell className="text-muted-foreground">
+                                     <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span className="block max-w-[150px] truncate">{getLatestRemark(lead)}</span>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>{getLatestRemark(lead)}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </TableCell>
+                                </TableRow>
+                            ))}
+                            </TableBody>
+                        </Table>
                     </div>
                      <DataTablePagination
                         pageIndex={pageIndex}
