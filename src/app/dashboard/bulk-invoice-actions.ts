@@ -3,6 +3,7 @@
 
 import nodemailer from "nodemailer";
 import * as xlsx from 'xlsx';
+import { getSession } from "@/lib/session";
 
 type ActionResult = {
   message?: string;
@@ -45,10 +46,10 @@ const formatDate = (dateValue: string | number) => {
 };
 
 
-function generateEmailBody(data: ExcelInvoice[], fileName: string): string {
+function generateEmailBody(data: ExcelInvoice[], fileName: string, anchorName: string): string {
     let html = `
         <h1>Bulk Invoice Submission</h1>
-        <p>A new set of invoices has been submitted via bulk upload from the file: <strong>${fileName}</strong></p>
+        <p>A new set of invoices has been submitted by <strong>${anchorName}</strong> via bulk upload from the file: <strong>${fileName}</strong></p>
         <hr />
         <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
             <thead>
@@ -95,6 +96,11 @@ export async function sendBulkInvoiceEmail(formData: FormData): Promise<ActionRe
     console.error("SMTP environment variables are not configured.");
     return { error: "Email service is not configured on the server. Please contact the administrator." };
   }
+  
+  const session = await getSession();
+  if (!session) {
+      return { error: "Authentication failed. Please log in again." };
+  }
 
   try {
     const bytes = await file.arrayBuffer();
@@ -110,8 +116,8 @@ export async function sendBulkInvoiceEmail(formData: FormData): Promise<ActionRe
     const mailOptions = {
       from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
       to: "nitin.chorge@supermoney.in",
-      subject: `Bulk Invoice Submission from ${file.name}`,
-      html: generateEmailBody(dataArray, file.name),
+      subject: `Bulk Invoice Submission from ${session.userName} (${file.name})`,
+      html: generateEmailBody(dataArray, file.name, session.userName),
     };
 
     await transporter.sendMail(mailOptions);

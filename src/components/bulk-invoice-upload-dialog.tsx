@@ -43,7 +43,7 @@ export default function BulkInvoiceUploadDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          <UploadExcelForm action={sendBulkInvoiceEmail} onSuccess={handleSuccess} />
+          <UploadExcelForm action={sendBulkInvoiceEmail} onSuccess={handleSuccess} buttonText="Send Invoices" />
         </div>
       </DialogContent>
     </Dialog>

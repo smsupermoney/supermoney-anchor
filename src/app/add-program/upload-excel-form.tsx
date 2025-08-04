@@ -13,9 +13,10 @@ import { AlertCircle, Upload, File as FileIcon, X } from "lucide-react";
 type UploadExcelFormProps = {
     action: (formData: FormData) => Promise<{ message?: string; error?: string }>;
     onSuccess?: () => void;
+    buttonText?: string;
 };
 
-export default function UploadExcelForm({ action, onSuccess }: UploadExcelFormProps) {
+export default function UploadExcelForm({ action, onSuccess, buttonText = "Upload and Add" }: UploadExcelFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -121,7 +122,7 @@ export default function UploadExcelForm({ action, onSuccess }: UploadExcelFormPr
             <div className="flex justify-end">
                 <Button type="submit" disabled={isSubmitting || !selectedFile}>
                     <Upload className="mr-2 h-4 w-4" />
-                    {isSubmitting ? "Uploading..." : "Upload and Add"}
+                    {isSubmitting ? "Uploading..." : buttonText}
                 </Button>
             </div>
         </form>
