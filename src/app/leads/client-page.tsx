@@ -240,7 +240,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                         )}
                     </div>
                     <div className="relative w-full overflow-x-auto border rounded-md">
-                        <Table>
+                        <Table className="min-w-full">
                             <TableHeader>
                             <TableRow>
                                 <TableHead>Lead Name</TableHead>

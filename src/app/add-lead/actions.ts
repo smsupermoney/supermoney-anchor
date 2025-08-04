@@ -9,7 +9,7 @@ import { getSession } from "@/lib/session";
 const leadFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
   leadCategory: z.enum(["Dealer", "Vendor"], { required_error: "Lead Category is required."}),
-  contactNumber: z.string().min(10, "Contact number must be at least 10 digits."),
+  contactNumber: z.string().regex(/^\d{10}$/, "Contact number must be exactly 10 digits."),
   email: z.string().email("Invalid email address."),
   city: z.string().min(1, "City is required."),
   state: z.string().min(1, "State is required."),
@@ -24,7 +24,6 @@ const leadFormSchema = z.object({
   spoc: z.string().min(1, "SPOC is required."),
   // Optional fields
   assignedTo: z.string().optional(),
-  initialLeadTat: z.string().optional(),
   remarks: z.string().optional(),
 });
 
@@ -46,7 +45,6 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   
   const session = await getSession();
   
-  // Explicitly set anchorId based on user role from session
   const anchorId = session?.roleType === 'Anchor' ? session.leadExternalId || '' : '';
 
   if (session?.roleType === 'Anchor' && !anchorId) {

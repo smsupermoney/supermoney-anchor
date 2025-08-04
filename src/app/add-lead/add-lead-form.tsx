@@ -33,7 +33,7 @@ const priorities = ["High", "Medium", "Low"];
 const leadFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
   leadCategory: z.enum(["Dealer", "Vendor"], { required_error: "Lead Category is required." }),
-  contactNumber: z.string().min(10, "Contact number must be at least 10 digits."),
+  contactNumber: z.string().regex(/^\d{10}$/, "Contact number must be exactly 10 digits."),
   email: z.string().email("Invalid email address."),
   city: z.string().min(1, "City is required."),
   state: z.string().min(1, "State is required."),
@@ -47,7 +47,6 @@ const leadFormSchema = z.object({
   lender: z.string().min(1, "Lender is required."),
   spoc: z.string().min(1, "SPOC is required."),
   assignedTo: z.string().optional(),
-  initialLeadTat: z.string().optional(),
   remarks: z.string().optional(),
 });
 
@@ -70,7 +69,6 @@ const defaultFormValues: LeadFormValues = {
     lender: "",
     spoc: "",
     assignedTo: "",
-    initialLeadTat: "",
     remarks: "",
 };
 
@@ -204,9 +202,6 @@ export default function AddLeadForm() {
             )}/>
             <FormField control={form.control} name="assignedTo" render={({ field }) => (
                 <FormItem><FormLabel>Assigned To</FormLabel><FormControl><Input placeholder="e.g., user@example.com" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-            <FormField control={form.control} name="initialLeadTat" render={({ field }) => (
-                <FormItem><FormLabel>Initial Lead TAT</FormLabel><FormControl><Input placeholder="e.g., 2" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
              <FormField
               control={form.control}

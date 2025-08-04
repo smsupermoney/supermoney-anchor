@@ -347,13 +347,12 @@ export const sampleMomentumLeads = [
         "Anchor Name": "Reliance Retail",
         "Product": "Primary",
         "Lead Source": "Connector",
-        "Lead Type": "Fresh",
-        "Priority": "High",
-        "Assigned To": "asm@supermoney.in",
+        "Lead Type": "New",
+        "Priority": "Medium",
+        "Assigned To": "sales_person@savex.in",
         "Deal Value (Lacs)": 0.5,
-        "Lender": "HDFC Bank",
-        "Remarks": "Initial discussion",
-        "SPOC": "Ramesh Patel",
-        "Initial Lead TAT": "2"
+        "Lender": "Kotak",
+        "Remarks": "New Lead. Need follow-up",
+        "SPOC": "Ramesh Patel"
     }
 ];
