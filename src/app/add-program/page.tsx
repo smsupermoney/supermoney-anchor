@@ -1,7 +1,7 @@
 
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import UploadExcelForm from "./upload-excel-form";
+import UploadExcelForm from "@/components/upload-excel-form";
 import { addPrograms } from "./actions";
 import DownloadSampleExcel from "@/components/download-sample-excel";
 import { samplePrograms } from "@/lib/dummy-data";

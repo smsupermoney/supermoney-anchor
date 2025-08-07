@@ -2,7 +2,7 @@
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { addDealers } from "./actions";
-import UploadExcelForm from "../add-program/upload-excel-form";
+import UploadExcelForm from "@/components/upload-excel-form";
 import DownloadSampleExcel from "@/components/download-sample-excel";
 import { sampleDealers } from "@/lib/dummy-data";
 

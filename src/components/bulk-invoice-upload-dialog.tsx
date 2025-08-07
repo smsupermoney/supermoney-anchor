@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
-import UploadExcelForm from "@/app/add-program/upload-excel-form";
+import UploadExcelForm from "@/components/upload-excel-form";
 import DownloadSampleExcel from "./download-sample-excel";
 import { sampleBulkInvoices } from "@/lib/dummy-data";
 import { sendBulkInvoiceEmail } from "@/app/dashboard/bulk-invoice-actions";
