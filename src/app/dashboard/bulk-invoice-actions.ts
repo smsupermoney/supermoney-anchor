@@ -115,7 +115,7 @@ export async function sendBulkInvoiceEmail(formData: FormData): Promise<ActionRe
 
     const mailOptions = {
       from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-      to: "nitin.chorge@supermoney.in",
+      to: "nitin.chorge@supermoney.in,ashwathi@supermoney.in ",
       subject: `Bulk Invoice Submission from ${session.userName} (${file.name})`,
       html: generateEmailBody(dataArray, file.name, session.userName),
     };
