@@ -34,30 +34,27 @@ export async function addInvoices(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing invoice numbers to prevent duplicates
+    // Fetch existing invoice numbers to check for duplicates
     const invoicesRef = collection(db1, "invoices");
     const existingInvoicesSnapshot = await getDocs(query(invoicesRef));
     const existingInvoiceNumbers = new Set(existingInvoicesSnapshot.docs.map(doc => doc.id));
 
     const batch = writeBatch(db1);
     let newEntriesCount = 0;
-    let skippedEntriesCount = 0;
+    let updatedEntriesCount = 0;
 
     invoicesArray.forEach((row: any) => {
         let invoiceNumber = row.invoiceNumber?.toString().trim();
+        let isUpdate = false;
 
-        // Check for empty, null, or "Not Applicable" invoice numbers
         if (!invoiceNumber || invoiceNumber.toLowerCase() === 'not applicable') {
-            invoiceNumber = doc(collection(db1, "invoices")).id; // Generate a unique ID
+            invoiceNumber = doc(collection(db1, "invoices")).id; // Generate a unique ID for new invoices
         } else if (existingInvoiceNumbers.has(invoiceNumber)) {
-            console.warn(`Skipping duplicate invoiceNumber: ${invoiceNumber}`);
-            skippedEntriesCount++;
-            return; // Skip to the next row
+            isUpdate = true;
         }
 
         const docRef = doc(db1, "invoices", invoiceNumber);
 
-        // Map excel columns to our Invoice type
         const invoiceData: Partial<Invoice> = {
             invoiceNumber: invoiceNumber,
             programId: row.programId?.toString() || '',
@@ -72,19 +69,21 @@ export async function addInvoices(formData: FormData): Promise<ActionResult> {
             utrNo: row.utrNo?.toString() || ''
         };
         
-        batch.set(docRef, invoiceData);
-        newEntriesCount++;
+        if (isUpdate) {
+            batch.update(docRef, invoiceData);
+            updatedEntriesCount++;
+        } else {
+            batch.set(docRef, invoiceData);
+            newEntriesCount++;
+        }
     });
     
-    if (newEntriesCount > 0) {
+    if (newEntriesCount > 0 || updatedEntriesCount > 0) {
         await batch.commit();
     }
 
-    let message = `${newEntriesCount} new invoice(s) added successfully.`;
-    if (skippedEntriesCount > 0) {
-        message += ` ${skippedEntriesCount} invoice(s) were skipped due to duplicate invoice numbers.`;
-    }
-
+    let message = `${newEntriesCount} new invoice(s) added and ${updatedEntriesCount} existing invoice(s) updated successfully.`;
+    
     return { message };
   } catch (error) {
     console.error("Error processing Excel file or writing to Firestore:", error);
