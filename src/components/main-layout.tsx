@@ -82,9 +82,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <Avatar className="h-9 w-9">
               <AvatarFallback className="bg-primary text-primary-foreground">{getInitials(user.userName)}</AvatarFallback>
             </Avatar>
-            <div className="group-data-[collapsible=icon]:hidden">
-              <p className="text-sm font-medium leading-none text-sidebar-foreground">{user.userName}</p>
-              <p className="text-xs leading-none text-sidebar-foreground/70">
+            <div className="group-data-[collapsible=icon]:hidden min-w-0">
+              <p className="text-sm font-medium leading-none text-sidebar-foreground truncate">{user.userName}</p>
+              <p className="text-xs leading-none text-sidebar-foreground/70 truncate">
                 {user.emailAddress}
               </p>
             </div>
