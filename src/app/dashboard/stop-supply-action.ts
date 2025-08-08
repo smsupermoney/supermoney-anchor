@@ -25,7 +25,7 @@ const transporter = smtpConfigured ? nodemailer.createTransport({
     },
 }) : null;
 
-function generateEmailBody(dealerName: string, anchorName: string): string {
+function generateDealerEmailBody(dealerName: string, anchorName: string): string {
     return `
         <h1>Supply Suspension Notice</h1>
         <p>Dear ${dealerName},</p>
@@ -38,6 +38,24 @@ function generateEmailBody(dealerName: string, anchorName: string): string {
         <p>The Supermoney Team</p>
     `;
 }
+
+function generateInternalNotificationEmailBody(dealerName: string, anchorName: string, overdueAmount: number): string {
+    const formattedAmount = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(overdueAmount);
+    return `
+        <h1>Internal Alert: Supply Stopped</h1>
+        <p>This is an automated notification to inform you that an anchor has stopped supply for a dealer on the platform.</p>
+        <hr />
+        <h2>Details</h2>
+        <ul>
+            <li><strong>Anchor:</strong> ${anchorName}</li>
+            <li><strong>Dealer:</strong> ${dealerName}</li>
+            <li><strong>Overdue Amount at time of action:</strong> ${formattedAmount}</li>
+        </ul>
+        <br />
+        <p>This action has been logged in the system.</p>
+    `;
+}
+
 
 export async function stopSupplyAction(dealer: { id: string; name: string; email?: string; overdueAmount: number }): Promise<ActionResult> {
     const session = await getSession();
@@ -67,25 +85,40 @@ export async function stopSupplyAction(dealer: { id: string; name: string; email
         // 3. Commit the Firestore changes
         await batch.commit();
         
-        // 4. Send email notification if dealer email exists
-        if (dealer.email && smtpConfigured && transporter) {
-            const mailOptions = {
+        // 4. Send notifications if email is configured
+        if (smtpConfigured && transporter) {
+            // Send email to the dealer
+            if (dealer.email) {
+                const dealerMailOptions = {
+                    from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+                    to: dealer.email,
+                    subject: `Important: Your Supply from ${session.userName} has been stopped`,
+                    html: generateDealerEmailBody(dealer.name, session.userName),
+                };
+                try {
+                    await transporter.sendMail(dealerMailOptions);
+                } catch (emailError) {
+                    console.error("Failed to send 'Stop Supply' email to dealer:", emailError);
+                }
+            } else {
+                 console.warn(`Could not send 'Stop Supply' email to dealer ${dealer.name} (ID: ${dealer.id}) because no email address is on file.`);
+            }
+
+            // Send internal notification email
+            const internalMailOptions = {
                 from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-                to: dealer.email,
-                subject: `Important: Your Supply from ${session.userName} has been stopped`,
-                html: generateEmailBody(dealer.name, session.userName),
+                to: "ashwathi@supermoney.in",
+                subject: `ALERT: Supply Stopped by ${session.userName} for ${dealer.name}`,
+                html: generateInternalNotificationEmailBody(dealer.name, session.userName, dealer.overdueAmount),
             };
              try {
-                await transporter.sendMail(mailOptions);
+                await transporter.sendMail(internalMailOptions);
             } catch (emailError) {
-                console.error("Failed to send 'Stop Supply' email:", emailError);
-                // We don't return an error to the user here, as the primary actions (DB update, log) were successful.
-                // This should be monitored via server logs.
+                console.error("Failed to send internal 'Stop Supply' notification:", emailError);
             }
-        } else if (!dealer.email) {
-            console.warn(`Could not send 'Stop Supply' email to dealer ${dealer.name} (ID: ${dealer.id}) because no email address is on file.`);
-        } else if (!smtpConfigured) {
-            console.warn("Could not send 'Stop Supply' email because SMTP is not configured.");
+
+        } else {
+            console.warn("Could not send 'Stop Supply' notifications because SMTP is not configured.");
         }
 
 
