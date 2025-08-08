@@ -1,6 +1,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -8,7 +9,7 @@ export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 export type Dealer = {
   id: string; // This is the dealerId (e.g. DLR001)
   name: string;
-  email?: string;
+  emailAddress?: string;
   anchorId: string;
   anchorName?: string;
   status: 'Active' | 'Inactive' | 'Pending' | 'Supply Stopped';

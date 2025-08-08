@@ -57,7 +57,7 @@ function generateInternalNotificationEmailBody(dealerName: string, anchorName: s
 }
 
 
-export async function stopSupplyAction(dealer: { id: string; name: string; email?: string; overdueAmount: number }): Promise<ActionResult> {
+export async function stopSupplyAction(dealer: { id: string; name: string; emailAddress?: string; overdueAmount: number }): Promise<ActionResult> {
     const session = await getSession();
     if (!session?.externalId || !session.userName) {
         return { error: "Authentication failed. You must be logged in to perform this action." };
@@ -88,10 +88,10 @@ export async function stopSupplyAction(dealer: { id: string; name: string; email
         // 4. Send notifications if email is configured
         if (smtpConfigured && transporter) {
             // Send email to the dealer
-            if (dealer.email) {
+            if (dealer.emailAddress) {
                 const dealerMailOptions = {
                     from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-                    to: dealer.email,
+                    to: dealer.emailAddress,
                     subject: `Important: Your Supply from ${session.userName} has been stopped`,
                     html: generateDealerEmailBody(dealer.name, session.userName),
                 };
