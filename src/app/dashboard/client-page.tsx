@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { IndianRupee, FileText, Ban, Clock, UploadCloud, CheckCircle, AlertTriangle, Users, Target, UserX, UserCheck, HandCoins, PlusCircle, HelpCircle, ArrowRight, CalendarClock, Activity, MessageSquare } from "lucide-react";
@@ -23,6 +23,7 @@ import RequestLimitDialog from "@/components/request-limit-dialog";
 import SendQueryDialog from "@/components/send-query-dialog";
 import { useAuth } from "@/context/auth-context";
 import BulkInvoiceUploadDialog from "@/components/bulk-invoice-upload-dialog";
+import OverdueNoticeDialog from "@/components/overdue-notice-dialog";
 
 type DashboardClientProps = {
   initialPrograms: Program[];
@@ -40,6 +41,15 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 5; // Smaller page size for dashboard view
+  const [isOverdueNoticeOpen, setOverdueNoticeOpen] = useState(false);
+
+  const overdueDealers = useMemo(() => dealers.filter(d => d.overdueAmount > 0), [dealers]);
+
+  useEffect(() => {
+    if (overdueDealers.length > 0) {
+      setOverdueNoticeOpen(true);
+    }
+  }, [overdueDealers]);
 
 
   const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
@@ -135,6 +145,12 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
             </UploadInvoiceDialog>
         </div>
       </PageHeader>
+      
+      <OverdueNoticeDialog
+        open={isOverdueNoticeOpen}
+        onOpenChange={setOverdueNoticeOpen}
+        overdueDealers={overdueDealers}
+      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Credit Overview */}
