@@ -27,17 +27,21 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing dealer IDs to prevent duplicates in both collections
+    // Fetch existing dealer IDs to prevent duplicates
     const dealersRef = collection(db1, "dealers");
     const existingDealersSnapshot = await getDocs(query(dealersRef));
     const existingDealerIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
+
+    const usersRef = collection(db1, "users");
+    const existingUsersSnapshot = await getDocs(query(usersRef));
+    const existingUserIds = new Set(existingUsersSnapshot.docs.map(doc => doc.id));
+
 
     const batch = writeBatch(db1);
     let newEntriesCount = 0;
     let skippedEntriesCount = 0;
 
     dataArray.forEach((row: any) => {
-        // Use applicationId from Excel as the primary dealerId
         const dealerId = row.applicationId?.toString();
         if (!dealerId) {
             console.warn("Skipping a row because applicationId is missing.", row);
@@ -61,12 +65,11 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         }
 
         // 1. Prepare data for the 'dealers' collection
-        // The document ID is now the dealerId (from Excel's applicationId)
         const dealerRef = doc(db1, "dealers", dealerId);
         const dealerData = {
           dealerId: dealerId,
-          customerId: customerId, // Store customerId from Excel as a field
-          applicationId: dealerId, // Keep applicationId field for consistency if needed elsewhere
+          customerId: customerId,
+          applicationId: dealerId,
           programId: programId,
           anchorId: row.anchorId || '',
           dealerName: row.dealerName || '',
@@ -75,17 +78,37 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         batch.set(dealerRef, dealerData);
 
         // 2. Prepare data for the 'dealerLimits' collection
-        // The document ID is also the dealerId (from Excel's applicationId)
         const limitRef = doc(db1, "dealerLimits", dealerId); 
         const limitData = {
-          dealerId: dealerId, // Store the dealerId in the document
-          applicationId: dealerId, // The original applicationId from Excel
+          dealerId: dealerId,
+          applicationId: dealerId,
           limitAmount: Number(row.limitAmount) || 0,
           utilisationAmount: Number(row.utilisationAmount) || 0,
           availableAmount: Number(row.availableAmount) || 0,
           principalOverdue: Number(row.principalOverdue) || 0,
         };
         batch.set(limitRef, limitData);
+        
+        // 3. Create or update a corresponding user entry for the dealer
+        const userDocId = `DEALER_USER_${dealerId}`;
+        if (!existingUserIds.has(userDocId)) {
+            const userRef = doc(db1, "users", userDocId);
+            const userData = {
+                id: userDocId,
+                externalId: dealerId, // dealerId is the anchor's externalId for this dealer user
+                userName: row.dealerName || '',
+                emailAddress: row.emailAddress || '',
+                phoneNumber: row.phoneNumber || '',
+                roleType: "Anchor", // Dealers are treated as a type of Anchor user in this model
+                userSubRole: "Not Subscribed",
+                password: "password", // Set a default password
+                lastLoginTime: "",
+                lastLoginIp: "",
+                authToken: "",
+                expiryTime: 0,
+            };
+            batch.set(userRef, userData);
+        }
 
         newEntriesCount++;
     });
@@ -94,7 +117,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       await batch.commit();
     }
 
-    let message = `${newEntriesCount} new dealer entries added successfully.`;
+    let message = `${newEntriesCount} new dealer entries (including user accounts) added successfully.`;
     if (skippedEntriesCount > 0) {
       message += ` ${skippedEntriesCount} entries were skipped due to missing required fields or duplicate Application IDs.`;
     }

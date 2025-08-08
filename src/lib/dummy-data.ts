@@ -311,6 +311,8 @@ export const sampleDealers = [
         programId: "PROG_SAMPLE_1",
         anchorId: "ANC001",
         dealerName: "Sample Electronics",
+        emailAddress: "contact@sampleelectronics.com",
+        phoneNumber: "9988776655",
         status: "Active",
         limitAmount: 500000,
         utilisationAmount: 100000,
