@@ -28,15 +28,16 @@ import OverdueNoticeDialog from "@/components/overdue-notice-dialog";
 type DashboardClientProps = {
   initialPrograms: Program[];
   initialInvoices: Invoice[];
-  dealers: Dealer[];
+  initialDealers: Dealer[];
   momentumLeads: MomentumDealerLead[];
   totalOverdueAmount: number;
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices, dealers, momentumLeads, totalOverdueAmount }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, totalOverdueAmount }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [programs] = useState(initialPrograms);
   const [invoices] = useState(initialInvoices);
+  const [dealers, setDealers] = useState(initialDealers);
   const { user } = useAuth();
   
   const [pageIndex, setPageIndex] = useState(0);
@@ -46,10 +47,21 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
   const overdueDealers = useMemo(() => dealers.filter(d => d.overdueAmount > 0), [dealers]);
 
   useEffect(() => {
+    // Only open the dialog if there are overdue dealers AND the dialog isn't already open
     if (overdueDealers.length > 0) {
-      setOverdueNoticeOpen(true);
+      // Small timeout to allow the rest of the page to render first
+      const timer = setTimeout(() => setOverdueNoticeOpen(true), 500);
+      return () => clearTimeout(timer);
     }
-  }, [overdueDealers]);
+  }, []); // Run only on initial mount
+
+  const handleDealerUpdate = (dealerId: string, newStatus: Dealer['status']) => {
+    setDealers(prevDealers =>
+      prevDealers.map(d =>
+        d.id === dealerId ? { ...d, status: newStatus } : d
+      )
+    );
+  };
 
 
   const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
@@ -150,6 +162,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, deal
         open={isOverdueNoticeOpen}
         onOpenChange={setOverdueNoticeOpen}
         overdueDealers={overdueDealers}
+        onDealerUpdate={handleDealerUpdate}
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

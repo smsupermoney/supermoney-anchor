@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -13,26 +14,45 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { Dealer } from "@/types";
-import { AlertTriangle, Ban } from "lucide-react";
+import { AlertTriangle, Ban, Loader2 } from "lucide-react";
+import { stopSupplyAction } from "@/app/dashboard/stop-supply-action";
+import { Badge } from "./ui/badge";
 
 type OverdueNoticeDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   overdueDealers: Dealer[];
+  onDealerUpdate: (dealerId: string, newStatus: Dealer['status']) => void;
 };
 
 export default function OverdueNoticeDialog({
   open,
   onOpenChange,
   overdueDealers,
+  onDealerUpdate,
 }: OverdueNoticeDialogProps) {
   const { toast } = useToast();
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
-  const handleStopSupply = (dealerName: string) => {
-    toast({
-      title: "Action Required",
-      description: `Please initiate the 'Stop Supply' process for ${dealerName} offline.`,
-    });
+  const handleStopSupply = async (dealer: Dealer) => {
+    setLoadingStates(prev => ({...prev, [dealer.id]: true}));
+    
+    const result = await stopSupplyAction(dealer);
+
+    if (result.error) {
+      toast({
+        variant: "destructive",
+        title: "Action Failed",
+        description: result.error,
+      });
+    } else {
+      toast({
+        title: "Action Successful",
+        description: result.message,
+      });
+      onDealerUpdate(dealer.id, 'Supply Stopped');
+    }
+     setLoadingStates(prev => ({...prev, [dealer.id]: false}));
   };
 
   const formatCurrency = (amount: number) =>
@@ -63,13 +83,22 @@ export default function OverdueNoticeDialog({
                     Overdue: {formatCurrency(dealer.overdueAmount)}
                   </p>
                 </div>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleStopSupply(dealer.name)}
-                >
-                  <Ban className="mr-2 h-4 w-4" />
-                  Stop Supply
-                </Button>
+                {dealer.status === 'Supply Stopped' ? (
+                   <Badge variant="destructive">Supply Stopped</Badge>
+                ) : (
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleStopSupply(dealer)}
+                    disabled={loadingStates[dealer.id]}
+                  >
+                    {loadingStates[dealer.id] ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Ban className="mr-2 h-4 w-4" />
+                    )}
+                    Stop Supply
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}

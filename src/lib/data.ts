@@ -118,11 +118,12 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         dealerQuery = query(dealersCol, where('anchorId', '==', anchorId));
     }
     
-    const [dealerSnapshot, limitsSnapshot, invoicesSnapshot, programSnapshot] = await Promise.all([
+    const [dealerSnapshot, limitsSnapshot, invoicesSnapshot, programSnapshot, usersSnapshot] = await Promise.all([
         getDocs(dealerQuery),
         getDocs(collection(db1, 'dealerLimits')),
         getInvoices(anchorId), 
         getDocs(collection(db1, 'programs')),
+        getDocs(collection(db1, 'users')),
     ]);
 
     if (dealerSnapshot.empty) {
@@ -131,6 +132,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     
     const limitsMap = new Map(limitsSnapshot.docs.map(doc => [doc.id, doc.data() as DealerLimit]));
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, p.data().lenderName]));
+    const userEmailMap = new Map(usersSnapshot.docs.map(u => [u.data().externalId, u.data().emailAddress]));
 
     const dealerList = dealerSnapshot.docs.map(doc => {
         const dealerData = doc.data();
@@ -142,6 +144,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         return {
             id: dealerId,
             name: dealerData.dealerName,
+            email: userEmailMap.get(dealerId) || undefined,
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
             applicationId: dealerData.applicationId,
@@ -493,5 +496,6 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 

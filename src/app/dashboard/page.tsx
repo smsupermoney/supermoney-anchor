@@ -24,7 +24,7 @@ export default async function Dashboard() {
     <DashboardClient 
       initialPrograms={programs} 
       initialInvoices={invoices}
-      dealers={dealers}
+      initialDealers={dealers}
       momentumLeads={momentumLeads}
       totalOverdueAmount={totalOverdueAmount}
     />

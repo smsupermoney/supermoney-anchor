@@ -1,5 +1,6 @@
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -7,9 +8,10 @@ export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 export type Dealer = {
   id: string; // This is the dealerId (e.g. DLR001)
   name: string;
+  email?: string;
   anchorId: string;
   anchorName?: string;
-  status: 'Active' | 'Inactive' | 'Pending';
+  status: 'Active' | 'Inactive' | 'Pending' | 'Supply Stopped';
   lenderName: string;
   invoicesSubmitted: number;
   amountDisbursed: number;
@@ -205,3 +207,13 @@ export type MomentumDealerLead = {
   email?: string;
   leadCategory: 'Dealer' | 'Vendor';
 }
+
+export type StopSupplyLog = {
+    id?: string;
+    dealerId: string;
+    dealerName: string;
+    anchorId: string;
+    anchorName: string;
+    overdueAmount: number;
+    createdAt: string; // ISO Date string
+};
