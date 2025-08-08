@@ -41,6 +41,7 @@ export async function getSession(): Promise<User | null> {
       lastLoginIp: sessionData.lastLoginIp,
       lastLoginTime: sessionData.lastLoginTime,
       leadExternalId: sessionData.leadExternalId,
+      logoImage: sessionData.logoImage,
     };
 
   } catch (error) {

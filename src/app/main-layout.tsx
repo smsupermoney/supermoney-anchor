@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Crown, LogOut } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import SavexLogo from '@/components/savex-logo';
+import CompanyLogo from '@/components/company-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
 import SupermoneyLogo from '@/components/supermoney-logo';
@@ -75,7 +75,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <Sidebar variant="sidebar">
         <SidebarHeader>
           <div className="p-2 flex justify-center">
-            <SavexLogo className="group-data-[collapsible=icon]:hidden" />
+            <CompanyLogo url={user.logoImage}/>
           </div>
           <SidebarSeparator className="my-2" />
           <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">

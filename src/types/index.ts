@@ -2,6 +2,8 @@
 
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
+
+
 export type Dealer = {
   id: string; // This is the dealerId (e.g. DLR001)
   name: string;
@@ -105,6 +107,7 @@ export type User = {
     authToken?: string;
     expiryTime?: number;
     leadExternalId?: string;
+    logoImage? : string
 };
 
 export type DealerLimit = {
