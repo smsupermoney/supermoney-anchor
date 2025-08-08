@@ -1,6 +1,6 @@
 import React from 'react';
 
-const defaultLogoUrl = "https://www.supermoney.in/rp-tech-logo.png";
+const defaultLogoUrl = "https://www.supermoney.in/supermoney-powerd-logo.png";
 
 export default function CompanyLogo({
   url
