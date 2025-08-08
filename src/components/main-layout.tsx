@@ -12,6 +12,7 @@ import CompanyLogo from './company-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
 import SupermoneyLogo from './supermoney-logo';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -83,10 +84,24 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <AvatarFallback className="bg-primary text-primary-foreground">{getInitials(user.userName)}</AvatarFallback>
             </Avatar>
             <div className="group-data-[collapsible=icon]:hidden min-w-0">
-              <p className="text-sm font-medium leading-none text-sidebar-foreground truncate">{user.userName}</p>
-              <p className="text-xs leading-none text-sidebar-foreground/70 truncate">
-                {user.emailAddress}
-              </p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="text-sm font-medium leading-none text-sidebar-foreground truncate">{user.userName}</p>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="start">
+                  <p>{user.userName}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="text-xs leading-none text-sidebar-foreground/70 truncate">
+                    {user.emailAddress}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="start">
+                  <p>{user.emailAddress}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </SidebarHeader>
