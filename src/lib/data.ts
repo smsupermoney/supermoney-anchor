@@ -132,7 +132,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     
     const limitsMap = new Map(limitsSnapshot.docs.map(doc => [doc.id, doc.data() as DealerLimit]));
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, p.data().lenderName]));
-    const userEmailMap = new Map(usersSnapshot.docs.map(u => [u.data().externalId, u.data().emailAddress]));
+    const userMap = new Map(usersSnapshot.docs.map(u => [u.data().externalId, u.data()]));
 
     const dealerList = dealerSnapshot.docs.map(doc => {
         const dealerData = doc.data();
@@ -140,11 +140,12 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         const limitData = limitsMap.get(dealerId);
         
         const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
+        const dealerUser = userMap.get(dealerId);
         
         return {
             id: dealerId,
             name: dealerData.dealerName,
-            emailAddress: userEmailMap.get(dealerId),
+            emailAddress: dealerUser?.emailAddress,
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
             applicationId: dealerData.applicationId,
@@ -496,6 +497,7 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 
 
