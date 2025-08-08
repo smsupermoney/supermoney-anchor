@@ -108,7 +108,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
       return filteredDealers.slice(start, end);
   }, [filteredDealers, pageIndex, pageSize]);
 
-  const dealerStatuses = ["Active", "Inactive", "Pending"];
+  const dealerStatuses = ["Active", "Inactive", "Pending", "Supply Stopped"];
 
   return (
     <>
