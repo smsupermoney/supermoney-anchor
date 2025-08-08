@@ -362,6 +362,7 @@ export const sampleBulkInvoices = [
         'Dealer Name': 'Star Electronics',
         'Invoice Amount': 75000,
         'Disburse Amount': 75000,
+        'Invoice Date': '2024-08-01',
         'Due Date': '2024-09-01'
     },
     {
@@ -369,6 +370,7 @@ export const sampleBulkInvoices = [
         'Dealer Name': 'Future Gadgets',
         'Invoice Amount': 125000,
         'Disburse Amount': 120000,
+        'Invoice Date': '2024-08-15',
         'Due Date': '2024-09-15'
     }
 ];

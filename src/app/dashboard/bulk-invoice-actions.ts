@@ -15,6 +15,7 @@ type ExcelInvoice = {
     'Dealer Name': string;
     'Invoice Amount': number;
     'Disburse Amount': number;
+    'Invoice Date': string | number;
     'Due Date': string | number;
 };
 
@@ -58,6 +59,7 @@ function generateEmailBody(data: ExcelInvoice[], fileName: string, anchorName: s
                     <th>Dealer Name</th>
                     <th>Invoice Amount</th>
                     <th>Disburse Amount</th>
+                    <th>Invoice Date</th>
                     <th>Due Date</th>
                 </tr>
             </thead>
@@ -71,6 +73,7 @@ function generateEmailBody(data: ExcelInvoice[], fileName: string, anchorName: s
                 <td>${item['Dealer Name'] || 'N/A'}</td>
                 <td>${formatCurrency(item['Invoice Amount'])}</td>
                 <td>${formatCurrency(item['Disburse Amount'])}</td>
+                <td>${formatDate(item['Invoice Date'])}</td>
                 <td>${formatDate(item['Due Date'])}</td>
             </tr>
         `;
@@ -115,7 +118,7 @@ export async function sendBulkInvoiceEmail(formData: FormData): Promise<ActionRe
 
     const mailOptions = {
       from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-      to: "nitin.chorge@supermoney.in,ashwathi@supermoney.in ",
+      to: "ashwathi@supermoney.in, nitin.chorge@supermoney.in ",
       subject: `Bulk Invoice Submission from ${session.userName} (${file.name})`,
       html: generateEmailBody(dataArray, file.name, session.userName),
     };
