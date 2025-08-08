@@ -189,12 +189,12 @@ export const dummyDealerLimits = [
 // This collection `dealers` holds dealer identity info. 
 // The document ID should be the `customerId`.
 export const dummyDealersData = [
-  { "id": "DLR001", "dealerId": "DLR001", "applicationId": "APP001", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Star Electronics", "status": "Active" },
-  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP002", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active" },
-  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP003", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active" },
-  { "id": "DLR003", "dealerId": "DLR003", "applicationId": "APP004", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Innovative Tech", "status": "Pending" },
-  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP005", "programId": "PROG003", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Inactive" },
-  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP006", "programId": "PROG002", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Active" }
+  { "id": "DLR001", "dealerId": "DLR001", "applicationId": "APP001", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Star Electronics", "status": "Active", "emailAddress":"dummy@gmail.com" },
+  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP002", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active", "emailAddress":"dummy@gmail.com" },
+  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP003", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active", "emailAddress":"dummy@gmail.com" },
+  { "id": "DLR003", "dealerId": "DLR003", "applicationId": "APP004", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Innovative Tech", "status": "Pending", "emailAddress":"dummy@gmail.com" },
+  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP005", "programId": "PROG003", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Inactive", "emailAddress":"dummy@gmail.com" },
+  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP006", "programId": "PROG002", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Active", "emailAddress":"dummy@gmail.com" }
 ];
 
 

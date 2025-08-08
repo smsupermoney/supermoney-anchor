@@ -98,7 +98,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
                 externalId: dealerId, // dealerId is the anchor's externalId for this dealer user
                 userName: row.dealerName || '',
                 emailAddress: row.emailAddress || '',
-                phoneNumber: row.phoneNumber || '',
+                phoneNumber: row.phoneNumber?.toString() || '',
                 roleType: "Anchor", // Dealers are treated as a type of Anchor user in this model
                 userSubRole: "Not Subscribed",
                 password: "password", // Set a default password
