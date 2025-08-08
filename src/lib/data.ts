@@ -145,7 +145,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         return {
             id: dealerId,
             name: dealerData.dealerName,
-            emailAddress: dealerUser?.emailAddress || '',
+            emailAddress: dealerData?.emailAddress || '',
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
             applicationId: dealerData.applicationId,

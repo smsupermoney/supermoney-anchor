@@ -42,7 +42,7 @@ function generateDealerEmailBody(dealerName: string, anchorName: string): string
 function generateInternalNotificationEmailBody(dealerName: string, anchorName: string, overdueAmount: number): string {
     const formattedAmount = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(overdueAmount);
     return `
-        <h1>Internal Alert: Supply Stopped</h1>
+        <h1>Internal Alert: Stop Supply Confirmed</h1>
         <p>This is an automated notification to inform you that an anchor has stopped supply for a dealer on the platform.</p>
         <hr />
         <h2>Details</h2>
@@ -108,7 +108,7 @@ export async function stopSupplyAction(dealer: { id: string; name: string; email
             const internalMailOptions = {
                 from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
                 to: "ashwathi@supermoney.in",
-                subject: `ALERT: Supply Stopped by ${session.userName} for ${dealer.name}`,
+                subject: `ALERT: Stop Supply Confirmed by ${session.userName} for ${dealer.name}`,
                 html: generateInternalNotificationEmailBody(dealer.name, session.userName, dealer.overdueAmount),
             };
              try {
