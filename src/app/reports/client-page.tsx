@@ -1,19 +1,20 @@
 
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import * as xlsx from 'xlsx';
+import { subDays } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Legend, Bar, PieChart, Pie, Cell, TooltipProps } from 'recharts';
 import type { Invoice, Dealer, Program, User } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import StatusBadge from '@/components/status-badge';
-import { NameValue } from 'recharts/types/component/DefaultTooltipContent';
+import type { NameValue } from 'recharts/types/component/DefaultTooltipContent';
 
 const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+const formatCompactCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact', maximumFractionDigits: 1 }).format(amount).replace(/\.0(?=\D)/, '');
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ff4d4d'];
 
@@ -57,7 +58,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     
      const programLimitData = useMemo(() => {
         return initialPrograms.map(p => ({
-            name: p.lenderName,
+            name: p.lenderName.substring(0, 15) + (p.lenderName.length > 15 ? '...' : ''), // Truncate name for chart
             Utilized: p.usedLimit || 0,
             Available: (p.totalLimit || 0) - (p.usedLimit || 0),
         }));
@@ -70,6 +71,21 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
             .slice(0, 5)
             .map(d => ({ name: d.name, Overdue: d.overdueAmount }));
     }, [initialDealers]);
+
+    const dealersWithNoRecentUtilization = useMemo(() => {
+        const sevenDaysAgo = subDays(new Date(), 7);
+        const dealersWithRecentInvoices = new Set(
+            initialInvoices
+                .filter(inv => new Date(inv.date) >= sevenDaysAgo)
+                .map(inv => inv.dealerId)
+        );
+
+        return initialDealers
+            .filter(d => !dealersWithRecentInvoices.has(d.id) && d.availableLimit > 0)
+            .sort((a, b) => b.availableLimit - a.availableLimit)
+            .slice(0, 5) // Show top 5
+            .map(d => ({ name: d.name, "Available Limit": d.availableLimit }));
+    }, [initialInvoices, initialDealers]);
     
     const downloadExcel = (data: any[], sheetName: string, fileName: string) => {
         const worksheet = xlsx.utils.json_to_sheet(data);
@@ -81,11 +97,11 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
             return (
-            <div className="p-2 text-xs bg-background/80 backdrop-blur-sm border rounded-md shadow-lg">
-                <p className="font-bold">{label}</p>
-                {payload.map((entry: any) => (
-                    <p key={entry.name} style={{ color: entry.color }}>
-                        {`${entry.name}: ${entry.dataKey === 'value' ? entry.value : formatCurrency(entry.value)}`}
+            <div className="p-2 text-xs bg-background/90 backdrop-blur-sm border rounded-md shadow-lg">
+                <p className="font-bold mb-1">{label}</p>
+                {payload.map((entry: NameValue<number,string>, index: number) => (
+                    <p key={`item-${index}`} style={{ color: entry.color }}>
+                        {`${entry.name}: ${entry.name?.toLowerCase().includes("limit") || entry.name?.toLowerCase().includes("overdue") || entry.name?.toLowerCase().includes("value") ? formatCurrency(entry.value ?? 0) : entry.value}`}
                     </p>
                 ))}
             </div>
@@ -121,14 +137,23 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                         <CardTitle>Invoice Status Distribution</CardTitle>
                         <CardDescription>A breakdown of all invoices by their current status.</CardDescription>
                     </CardHeader>
-                    <CardContent className="h-72">
+                    <CardContent className="h-[20rem]">
                          <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={invoiceStatusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                                <Pie data={invoiceStatusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} labelLine={false} label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                                    const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
+                                    const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
+                                    return (
+                                        <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="text-xs font-medium">
+                                        {`${(percent * 100).toFixed(0)}%`}
+                                        </text>
+                                    );
+                                }}>
                                     {invoiceStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                 </Pie>
                                 <Tooltip content={<CustomTooltip />} />
-                                <Legend />
+                                <Legend iconSize={10} iconType="circle" />
                             </PieChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -138,14 +163,14 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                         <CardTitle>Top 5 Overdue Dealers</CardTitle>
                          <CardDescription>Dealers with the highest outstanding overdue amounts.</CardDescription>
                     </CardHeader>
-                    <CardContent className="h-72">
+                    <CardContent className="h-[20rem]">
                         <ResponsiveContainer width="100%" height="100%">
                              <BarChart data={topOverdueDealers} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                <XAxis type="number" tickFormatter={(val) => formatCurrency(val as number)} />
-                                <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 10 }}/>
-                                <Tooltip content={<CustomTooltip />} />
+                                <XAxis type="number" tickFormatter={(val) => formatCompactCurrency(val as number)} axisLine={false} tickLine={false} />
+                                <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 12 }} axisLine={false} tickLine={false}/>
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))' }} />
                                 <Legend />
-                                <Bar dataKey="Overdue" fill="#FF8042" />
+                                <Bar dataKey="Overdue" fill="hsl(var(--destructive))" radius={[0, 4, 4, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -157,14 +182,14 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                         <CardTitle>Invoice Value by Program</CardTitle>
                         <CardDescription>Total value of invoices processed under each program.</CardDescription>
                     </CardHeader>
-                    <CardContent className="h-72">
+                    <CardContent className="h-[20rem]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={programInvoiceData}>
-                                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                                <YAxis tickFormatter={(val) => formatCurrency(val as number)} />
-                                <Tooltip content={<CustomTooltip />} />
+                                <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                                <YAxis tickFormatter={(val) => formatCompactCurrency(val as number)} axisLine={false} tickLine={false} />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))' }} />
                                 <Legend />
-                                <Bar dataKey="value" name="Invoice Value" fill="#8884d8" />
+                                <Bar dataKey="value" name="Invoice Value" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} barSize={30} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -174,71 +199,92 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                         <CardTitle>Limit Utilization by Program</CardTitle>
                         <CardDescription>Comparison of utilized vs. available credit limits.</CardDescription>
                     </CardHeader>
-                    <CardContent className="h-72">
+                    <CardContent className="h-[20rem]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={programLimitData}>
-                                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                                <YAxis tickFormatter={(val) => formatCurrency(val as number)}/>
-                                <Tooltip content={<CustomTooltip />} />
+                            <BarChart data={programLimitData} layout="vertical">
+                                <XAxis type="number" hide />
+                                <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))' }} />
                                 <Legend />
-                                <Bar dataKey="Utilized" stackId="a" fill="#00C49F" />
-                                <Bar dataKey="Available" stackId="a" fill="#FFBB28" />
+                                <Bar dataKey="Utilized" stackId="a" fill="hsl(var(--chart-2))" radius={[4, 0, 0, 4]} barSize={20} />
+                                <Bar dataKey="Available" stackId="a" fill="hsl(var(--chart-3))" radius={[0, 4, 4, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
             </div>
-            
-            <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle>Data Export</CardTitle>
-                            <CardDescription>Download raw data for further analysis.</CardDescription>
-                        </div>
-                        <Button variant="outline" onClick={() => downloadExcel(initialInvoices, 'Invoices', 'invoice_report.xlsx')}>
-                            <Download className="mr-2 h-4 w-4" /> Download Invoices
-                        </Button>
-                         <Button variant="outline" onClick={() => downloadExcel(initialDealers, 'Dealers', 'dealer_report.xlsx')}>
-                            <Download className="mr-2 h-4 w-4" /> Download Dealers
-                        </Button>
-                         <Button variant="outline" onClick={() => downloadExcel(initialPrograms, 'Programs', 'program_report.xlsx')}>
-                            <Download className="mr-2 h-4 w-4" /> Download Programs
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="relative w-full overflow-auto border rounded-md max-h-96">
-                        <Table>
-                            <TableHeader className="sticky top-0 bg-background">
-                                <TableRow>
-                                    <TableHead>Invoice #</TableHead>
-                                    <TableHead>Dealer</TableHead>
-                                    <TableHead>Program</TableHead>
-                                    <TableHead>Amount</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Due Date</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                             <TableBody>
-                                {initialInvoices.slice(0, 10).map(invoice => (
-                                    <TableRow key={invoice.id}>
-                                        <TableCell>{invoice.invoiceNumber}</TableCell>
-                                        <TableCell>{invoice.dealerName}</TableCell>
-                                        <TableCell>{initialPrograms.find(p => p.id === invoice.programId)?.lenderName || 'Unknown'}</TableCell>
-                                        <TableCell>{formatCurrency(invoice.amount)}</TableCell>
-                                        <TableCell><StatusBadge status={invoice.status}/></TableCell>
-                                        <TableCell>{invoice.dueDate}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                     <p className="text-xs text-muted-foreground text-center mt-2">Showing first 10 invoices. Use the download button for the full report.</p>
-                </CardContent>
-            </Card>
 
+             <div className="grid gap-6 md:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Dealers with No Utilization (Last 7 Days)</CardTitle>
+                        <CardDescription>Top 5 dealers with no invoices in the past week, sorted by available limit.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[20rem]">
+                        {dealersWithNoRecentUtilization.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={dealersWithNoRecentUtilization}>
+                                    <XAxis dataKey="name" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                                    <YAxis tickFormatter={(val) => formatCompactCurrency(val as number)} axisLine={false} tickLine={false} />
+                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))' }} />
+                                    <Legend />
+                                    <Bar dataKey="Available Limit" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} barSize={30} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                                All dealers have had recent activity.
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <div className="flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <CardTitle>Data Export</CardTitle>
+                                <CardDescription>Download raw data for further analysis.</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                            <Button variant="outline" onClick={() => downloadExcel(initialInvoices, 'Invoices', 'invoice_report.xlsx')}>
+                                <Download className="mr-2 h-4 w-4" /> Download Invoices
+                            </Button>
+                             <Button variant="outline" onClick={() => downloadExcel(initialDealers, 'Dealers', 'dealer_report.xlsx')}>
+                                <Download className="mr-2 h-4 w-4" /> Download Dealers
+                            </Button>
+                             <Button variant="outline" onClick={() => downloadExcel(initialPrograms, 'Programs', 'program_report.xlsx')}>
+                                <Download className="mr-2 h-4 w-4" /> Download Programs
+                            </Button>
+                        </div>
+                        <div className="relative w-full overflow-auto border rounded-md max-h-60 mt-4">
+                            <Table>
+                                <TableHeader className="sticky top-0 bg-background/95 backdrop-blur-sm">
+                                    <TableRow>
+                                        <TableHead>Invoice #</TableHead>
+                                        <TableHead>Dealer</TableHead>
+                                        <TableHead>Amount</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                 <TableBody>
+                                    {initialInvoices.slice(0, 20).map(invoice => (
+                                        <TableRow key={invoice.id}>
+                                            <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
+                                            <TableCell>{invoice.dealerName}</TableCell>
+                                            <TableCell>{formatCurrency(invoice.amount)}</TableCell>
+                                            <TableCell><StatusBadge status={invoice.status}/></TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                         <p className="text-xs text-muted-foreground text-center mt-2">Showing first 20 invoices. Use download for full report.</p>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }
-
