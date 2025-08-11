@@ -169,6 +169,9 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
         const dealerUser = userMap.get(dealerId);
         
+        const limitAmount = limitData?.limitAmount || 0;
+        const utilisationAmount = limitData?.utilisationAmount || 0;
+        
         return {
             id: dealerId,
             name: dealerData.dealerName,
@@ -178,13 +181,13 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             applicationId: dealerData.applicationId,
             customerId: dealerData.customerId,
             invoicesSubmitted: dealerInvoices.length,
-            amountDisbursed: limitData?.utilisationAmount || 0,
+            amountDisbursed: utilisationAmount,
             overdueCount: dealerInvoices.filter(i => (i.overdueAmount ?? 0) > 0).length,
             overdueAmount: limitData?.principalOverdue || 0,
             lenderName: programMap.get(dealerData.programId) || 'N/A',
             status: dealerData.status, 
-            totalLimit: limitData?.limitAmount || 0,
-            availableLimit: limitData?.availableAmount || 0,
+            totalLimit: limitAmount,
+            availableLimit: limitAmount - utilisationAmount,
         } as Dealer;
     });
 
@@ -524,6 +527,7 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 
 
