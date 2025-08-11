@@ -61,6 +61,33 @@ export async function getMomentumDealerLeads(anchorId?: string): Promise<Momentu
     return [...dealerLeads, ...vendorLeads];
 }
 
+export async function getMomentumDealerLeadById(id: string): Promise<MomentumDealerLead | null> {
+    const fetchLead = async (collectionName: 'dealers' | 'vendors', category: 'Dealer' | 'Vendor'): Promise<MomentumDealerLead | null> => {
+        try {
+            const docRef = doc(db2, collectionName, id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const processedData = processDocumentDates(data);
+                return { id: docSnap.id, ...processedData, leadCategory: category } as MomentumDealerLead;
+            }
+            return null;
+        } catch(error) {
+            // console.error(`Error fetching from ${collectionName} with id ${id}:`, error);
+            return null;
+        }
+    }
+
+    // Try fetching from 'dealers' first, then 'vendors'
+    const dealerLead = await fetchLead('dealers', 'Dealer');
+    if (dealerLead) {
+        return dealerLead;
+    }
+    
+    const vendorLead = await fetchLead('vendors', 'Vendor');
+    return vendorLead;
+}
+
 export async function getUsers(): Promise<User[]> {
   const usersCol = collection(db1, 'users');
   const userSnapshot = await getDocs(query(usersCol));
@@ -145,7 +172,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         return {
             id: dealerId,
             name: dealerData.dealerName,
-            emailAddress: dealerData?.emailAddress || '',
+            emailAddress: dealerUser?.emailAddress || '',
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
             applicationId: dealerData.applicationId,
@@ -497,6 +524,7 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 
 

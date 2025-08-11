@@ -269,7 +269,9 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <span className="block max-w-[120px] truncate">{lead.name}</span>
+                                                <Link href={`/leads/${lead.id}`} className="text-primary hover:underline block max-w-[120px] truncate">
+                                                    {lead.name}
+                                                </Link>
                                             </TooltipTrigger>
                                             <TooltipContent><p>{lead.name}</p></TooltipContent>
                                         </Tooltip>
