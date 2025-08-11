@@ -1,25 +1,35 @@
 
+import { unstable_noStore as noStore } from 'next/cache';
 import PageHeader from "@/components/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getSession } from '@/lib/session';
+import { getInvoices, getDealers, getPrograms, getUsers } from '@/lib/data';
+import ReportsClientPage from './client-page';
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  noStore();
+  const session = await getSession();
+  const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
+  const isAdmin = session?.roleType === 'Admin';
+  
+  // Fetch all necessary data. The client component will handle filtering.
+  const [invoices, dealers, { programs }, users] = await Promise.all([
+    getInvoices(anchorId),
+    getDealers(anchorId),
+    getPrograms(anchorId),
+    isAdmin ? getUsers() : Promise.resolve([])
+  ]);
+  
   return (
     <>
-      <PageHeader title="Reports" />
-      <div className="mt-4 flex items-center justify-center">
-        <Card className="w-full max-w-lg">
-          <CardHeader>
-            <CardTitle>Reports Under Construction</CardTitle>
-            <CardDescription>
-              This section is currently being developed.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-muted-foreground">
-              Reports will come here.
-            </p>
-          </CardContent>
-        </Card>
+      <PageHeader title="Reports & Analytics" />
+      <div className="mt-4">
+        <ReportsClientPage
+            initialInvoices={invoices}
+            initialDealers={dealers}
+            initialPrograms={programs}
+            users={users}
+            isAdmin={isAdmin}
+        />
       </div>
     </>
   );
