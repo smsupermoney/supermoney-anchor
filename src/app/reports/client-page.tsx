@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import * as xlsx from 'xlsx';
-import { subDays } from 'date-fns';
+import { subDays, startOfDay } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
@@ -12,6 +12,7 @@ import type { Invoice, Dealer, Program, User } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import StatusBadge from '@/components/status-badge';
 import type { NameValue } from 'recharts/types/component/DefaultTooltipContent';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 const formatCompactCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact', maximumFractionDigits: 1 }).format(amount).replace(/\.0(?=\D)/, '');
@@ -27,36 +28,47 @@ type ReportsClientPageProps = {
 };
 
 export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, users, isAdmin }: ReportsClientPageProps) {
-    
+    const [dateRange, setDateRange] = useState<string>('all');
+
+    const filteredInvoices = useMemo(() => {
+        if (dateRange === 'all') {
+            return initialInvoices;
+        }
+        const days = parseInt(dateRange, 10);
+        const startDate = startOfDay(subDays(new Date(), days));
+        return initialInvoices.filter(inv => new Date(inv.date) >= startDate);
+    }, [initialInvoices, dateRange]);
+
     const summaryStats = useMemo(() => {
-        const totalInvoiceValue = initialInvoices.reduce((sum, inv) => sum + inv.amount, 0);
-        const totalOverdueAmount = initialInvoices.reduce((sum, inv) => sum + (inv.overdueAmount || 0), 0);
+        const totalInvoiceValue = filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+        const totalOverdueAmount = filteredInvoices.reduce((sum, inv) => sum + (inv.overdueAmount || 0), 0);
+        // Active dealers and programs are not time-sensitive, so they are calculated from the initial full list
         const activeDealers = initialDealers.filter(d => d.status === 'Active').length;
         const activePrograms = initialPrograms.length;
         
         return { totalInvoiceValue, totalOverdueAmount, activeDealers, activePrograms };
-    }, [initialInvoices, initialDealers, initialPrograms]);
+    }, [filteredInvoices, initialDealers, initialPrograms]);
     
     const invoiceStatusData = useMemo(() => {
-        const statusCounts = initialInvoices.reduce((acc, inv) => {
+        const statusCounts = filteredInvoices.reduce((acc, inv) => {
             acc[inv.status] = (acc[inv.status] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
         
         return Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
-    }, [initialInvoices]);
+    }, [filteredInvoices]);
 
     const programInvoiceData = useMemo(() => {
-        const programAmounts = initialInvoices.reduce((acc, inv) => {
+        const programAmounts = filteredInvoices.reduce((acc, inv) => {
             const programName = initialPrograms.find(p => p.id === inv.programId)?.lenderName || 'Unknown';
             acc[programName] = (acc[programName] || 0) + inv.amount;
             return acc;
         }, {} as Record<string, number>);
 
         return Object.entries(programAmounts).map(([name, value]) => ({ name, value }));
-    }, [initialInvoices, initialPrograms]);
+    }, [filteredInvoices, initialPrograms]);
     
-     const programLimitData = useMemo(() => {
+    const programLimitData = useMemo(() => {
         return initialPrograms.map(p => ({
             name: p.lenderName.substring(0, 15) + (p.lenderName.length > 15 ? '...' : ''), // Truncate name for chart
             Utilized: p.usedLimit || 0,
@@ -65,6 +77,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     }, [initialPrograms]);
 
     const topOverdueDealers = useMemo(() => {
+        // This is not time-sensitive, it's based on current overdue status
         return initialDealers
             .filter(d => d.overdueAmount > 0)
             .sort((a, b) => b.overdueAmount - a.overdueAmount)
@@ -73,6 +86,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     }, [initialDealers]);
 
     const dealersWithNoRecentUtilization = useMemo(() => {
+        // This chart specifically looks at the last 7 days, regardless of the filter
         const sevenDaysAgo = subDays(new Date(), 7);
         const dealersWithRecentInvoices = new Set(
             initialInvoices
@@ -112,6 +126,20 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     
     return (
         <div className="space-y-6">
+             <div className="flex justify-end">
+                <Select value={dateRange} onValueChange={setDateRange}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select date range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Time</SelectItem>
+                        <SelectItem value="7">Last 7 Days</SelectItem>
+                        <SelectItem value="14">Last 14 Days</SelectItem>
+                        <SelectItem value="21">Last 21 Days</SelectItem>
+                        <SelectItem value="28">Last 28 Days</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader><CardTitle className='text-sm font-medium'>Total Invoice Value</CardTitle></CardHeader>
@@ -135,7 +163,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                 <Card>
                     <CardHeader>
                         <CardTitle>Invoice Status Distribution</CardTitle>
-                        <CardDescription>A breakdown of all invoices by their current status.</CardDescription>
+                        <CardDescription>A breakdown of invoices by status for the selected period.</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[20rem]">
                          <ResponsiveContainer width="100%" height="100%">
@@ -161,7 +189,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                 <Card>
                     <CardHeader>
                         <CardTitle>Top 5 Overdue Dealers</CardTitle>
-                         <CardDescription>Dealers with the highest outstanding overdue amounts.</CardDescription>
+                         <CardDescription>Dealers with the highest outstanding overdue amounts (all time).</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[20rem]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -180,7 +208,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                 <Card>
                     <CardHeader>
                         <CardTitle>Invoice Value by Program</CardTitle>
-                        <CardDescription>Total value of invoices processed under each program.</CardDescription>
+                        <CardDescription>Total value of invoices processed under each program for the selected period.</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[20rem]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -197,7 +225,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                  <Card>
                     <CardHeader>
                         <CardTitle>Limit Utilization by Program</CardTitle>
-                        <CardDescription>Comparison of utilized vs. available credit limits.</CardDescription>
+                        <CardDescription>Comparison of utilized vs. available credit limits (all time).</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[20rem]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -270,7 +298,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                                     </TableRow>
                                 </TableHeader>
                                  <TableBody>
-                                    {initialInvoices.slice(0, 20).map(invoice => (
+                                    {filteredInvoices.slice(0, 20).map(invoice => (
                                         <TableRow key={invoice.id}>
                                             <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
                                             <TableCell>{invoice.dealerName}</TableCell>
@@ -281,7 +309,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                                 </TableBody>
                             </Table>
                         </div>
-                         <p className="text-xs text-muted-foreground text-center mt-2">Showing first 20 invoices. Use download for full report.</p>
+                         <p className="text-xs text-muted-foreground text-center mt-2">Showing first 20 invoices from selection. Use download for full report.</p>
                     </CardContent>
                 </Card>
             </div>
