@@ -2,6 +2,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -13,7 +14,7 @@ export type Dealer = {
   anchorId: string;
   anchorName?: string;
   status: 'Active' | 'Inactive' | 'Pending' | 'Supply Stopped';
-  lenderName: string;
+  lenderName?: string;
   invoicesSubmitted: number;
   amountDisbursed: number;
   overdueCount: number;

@@ -5,50 +5,71 @@ import { db1 } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import type { Dealer } from '@/types';
 
 type ActionResult = {
   message?: string;
   error?: string;
 };
 
-const updateLimitSchema = z.object({
+const updateDetailsSchema = z.object({
   dealerId: z.string().min(1, 'Dealer ID is required.'),
-  newLimit: z.preprocess(
+  totalLimit: z.preprocess(
     (val) => Number(val),
-    z.number().positive('Limit must be a positive number.')
+    z.number().min(0, 'Limit must be a non-negative number.')
   ),
+  utilisationAmount: z.preprocess(
+    (val) => Number(val),
+    z.number().min(0, 'Utilisation must be a non-negative number.')
+  ),
+  principalOverdue: z.preprocess(
+    (val) => Number(val),
+    z.number().min(0, 'Overdue amount must be a non-negative number.')
+  ),
+  status: z.enum(['Active', 'Inactive', 'Pending', 'Supply Stopped']),
 });
 
-export async function updateDealerLimit(
-  dealerId: string,
-  newLimit: number
+export async function updateDealerDetails(
+  data: z.infer<typeof updateDetailsSchema>
 ): Promise<ActionResult> {
-  const validatedFields = updateLimitSchema.safeParse({ dealerId, newLimit });
+  const validatedFields = updateDetailsSchema.safeParse(data);
 
   if (!validatedFields.success) {
+    console.error(validatedFields.error.flatten().fieldErrors);
     return { error: 'Invalid data provided. Please check the form.' };
+  }
+
+  const { dealerId, totalLimit, utilisationAmount, principalOverdue, status } = validatedFields.data;
+
+  if (utilisationAmount > totalLimit) {
+      return { error: 'Utilisation amount cannot be greater than the total limit.' };
   }
 
   try {
     const limitRef = doc(db1, 'dealerLimits', dealerId);
-    const limitDoc = await getDoc(limitRef);
+    const dealerRef = doc(db1, 'dealers', dealerId);
 
-    if (!limitDoc.exists()) {
-      return { error: 'Dealer limit record not found.' };
-    }
-
+    // Prepare updates for dealerLimits collection
     await updateDoc(limitRef, {
-      limitAmount: newLimit,
+      limitAmount: totalLimit,
+      utilisationAmount: utilisationAmount,
+      principalOverdue: principalOverdue,
+      availableAmount: totalLimit - utilisationAmount, // Recalculate available amount
+    });
+
+    // Prepare updates for dealers collection
+    await updateDoc(dealerRef, {
+        status: status,
     });
 
     revalidatePath('/retailers');
     revalidatePath('/dashboard');
 
-    return { message: 'Dealer limit updated successfully.' };
+    return { message: 'Dealer details updated successfully.' };
   } catch (error) {
-    console.error('Error updating dealer limit:', error);
+    console.error('Error updating dealer details:', error);
     if (error instanceof Error) {
-      return { error: `Failed to update limit: ${error.message}` };
+      return { error: `Failed to update details: ${error.message}` };
     }
     return { error: 'An unknown error occurred.' };
   }

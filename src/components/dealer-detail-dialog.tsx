@@ -7,13 +7,15 @@ import StatusBadge from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Archive, Ban, Loader2, Edit, Save, X, IndianRupee } from "lucide-react";
+import { Ban, Loader2, Edit, Save, X, IndianRupee } from "lucide-react";
 import type { Dealer } from "@/types";
 import { stopSupplyAction } from "@/app/dashboard/stop-supply-action";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
-import { updateDealerLimit } from "@/app/retailers/actions";
+import { updateDealerDetails } from "@/app/retailers/actions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Label } from "./ui/label";
 
 type DealerDetailDialogProps = {
   dealer: Dealer;
@@ -21,11 +23,20 @@ type DealerDetailDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+const dealerStatuses: Dealer['status'][] = ["Active", "Inactive", "Pending", "Supply Stopped"];
+
 export default function DealerDetailDialog({ dealer, open, onOpenChange }: DealerDetailDialogProps) {
   const [currentDealer, setCurrentDealer] = useState(dealer);
   const [isStoppingSupply, setIsStoppingSupply] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [newLimit, setNewLimit] = useState(dealer.totalLimit.toString());
+  
+  const [editValues, setEditValues] = useState({
+      totalLimit: dealer.totalLimit.toString(),
+      amountDisbursed: dealer.amountDisbursed.toString(),
+      overdueAmount: dealer.overdueAmount.toString(),
+      status: dealer.status,
+  });
+
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   
@@ -46,37 +57,57 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
         description: result.message,
       });
       // Update local state to reflect the change immediately
-      setCurrentDealer(prev => ({...prev, status: 'Supply Stopped'}));
+      const newStatus = 'Supply Stopped';
+      setCurrentDealer(prev => ({...prev, status: newStatus}));
+      setEditValues(prev => ({...prev, status: newStatus}));
     }
     setIsStoppingSupply(false);
   }
   
-  const handleSaveLimit = async () => {
+  const handleSave = async () => {
       setIsSaving(true);
-      const limitAsNumber = Number(newLimit);
-      if (isNaN(limitAsNumber) || limitAsNumber < 0) {
-          toast({ variant: 'destructive', title: 'Invalid Limit', description: 'Please enter a valid number.' });
-          setIsSaving(false);
-          return;
-      }
+
+      const payload = {
+        dealerId: currentDealer.id,
+        totalLimit: Number(editValues.totalLimit),
+        utilisationAmount: Number(editValues.amountDisbursed),
+        principalOverdue: Number(editValues.overdueAmount),
+        status: editValues.status as Dealer['status'],
+      };
       
-      const result = await updateDealerLimit(currentDealer.id, limitAsNumber);
-       if (result.error) {
+      const result = await updateDealerDetails(payload);
+
+      if (result.error) {
             toast({ variant: 'destructive', title: 'Update Failed', description: result.error });
         } else {
             toast({ title: 'Success', description: result.message });
-            setCurrentDealer(prev => ({ ...prev, totalLimit: limitAsNumber, availableLimit: limitAsNumber - prev.amountDisbursed }));
+            // Update local state with the new values
+            setCurrentDealer(prev => ({ 
+                ...prev,
+                totalLimit: payload.totalLimit,
+                amountDisbursed: payload.utilisationAmount,
+                overdueAmount: payload.principalOverdue,
+                status: payload.status,
+                availableLimit: payload.totalLimit - payload.utilisationAmount, // Recalculate available limit
+             }));
             setIsEditing(false);
         }
         setIsSaving(false);
   };
+  
+  const handleInputChange = (field: keyof typeof editValues, value: string) => {
+      setEditValues(prev => ({ ...prev, [field]: value }));
+  };
 
-
-  // When the dialog is opened, reset the local state to the passed-in prop
   useEffect(() => {
     if (open) {
       setCurrentDealer(dealer);
-      setNewLimit(dealer.totalLimit.toString());
+      setEditValues({
+          totalLimit: dealer.totalLimit.toString(),
+          amountDisbursed: dealer.amountDisbursed.toString(),
+          overdueAmount: dealer.overdueAmount.toString(),
+          status: dealer.status,
+      });
       setIsEditing(false);
     }
   }, [open, dealer]);
@@ -87,7 +118,20 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center pr-10">
             <span>{currentDealer.name}</span>
-            <StatusBadge status={currentDealer.status} />
+             {isEditing ? (
+                 <div className="w-[150px]">
+                    <Select value={editValues.status} onValueChange={(value) => handleInputChange('status', value)}>
+                        <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {dealerStatuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                 </div>
+             ) : (
+                <StatusBadge status={currentDealer.status} />
+             )}
           </DialogTitle>
           <DialogDescription>
             <span className="font-semibold">Dealer ID:</span> {currentDealer.id}
@@ -105,37 +149,46 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                 </CardHeader>
                 <CardContent>
                      <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
-                        <div className="flex justify-between items-baseline">
-                            <span className="text-muted-foreground">Total Limit</span>
+                        <div className="space-y-1">
+                            <Label className="text-muted-foreground">Total Limit</Label>
                             {isEditing ? (
                                 <div className="relative">
                                     <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-                                    <Input 
-                                        type="number" 
-                                        value={newLimit} 
-                                        onChange={(e) => setNewLimit(e.target.value)} 
-                                        className="h-8 pl-6" 
-                                    />
+                                    <Input value={editValues.totalLimit} onChange={(e) => handleInputChange('totalLimit', e.target.value)} className="h-8 pl-6" />
                                 </div>
                             ) : (
-                                <span className="font-semibold">{formatCurrency(currentDealer.totalLimit)}</span>
+                                <p className="font-semibold">{formatCurrency(currentDealer.totalLimit)}</p>
                             )}
                         </div>
-                         <div className="flex justify-between items-baseline">
-                            <span className="text-muted-foreground">Amount Disbursed</span>
-                            <span className="font-semibold">{formatCurrency(currentDealer.amountDisbursed)}</span>
+                        <div className="space-y-1">
+                            <Label className="text-muted-foreground">Amount Disbursed</Label>
+                             {isEditing ? (
+                                <div className="relative">
+                                    <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                                    <Input value={editValues.amountDisbursed} onChange={(e) => handleInputChange('amountDisbursed', e.target.value)} className="h-8 pl-6" />
+                                </div>
+                            ) : (
+                                <p className="font-semibold">{formatCurrency(currentDealer.amountDisbursed)}</p>
+                            )}
                         </div>
-                         <div className="flex justify-between items-baseline">
-                            <span className="text-muted-foreground">Overdue Amount</span>
-                            <span className="font-semibold text-destructive">{formatCurrency(currentDealer.overdueAmount)}</span>
+                        <div className="space-y-1">
+                            <Label className="text-muted-foreground">Overdue Amount</Label>
+                             {isEditing ? (
+                                <div className="relative">
+                                    <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                                    <Input value={editValues.overdueAmount} onChange={(e) => handleInputChange('overdueAmount', e.target.value)} className="h-8 pl-6" />
+                                </div>
+                            ) : (
+                                <p className="font-semibold text-destructive">{formatCurrency(currentDealer.overdueAmount)}</p>
+                            )}
                         </div>
-                         <div className="flex justify-between items-baseline">
-                            <span className="text-muted-foreground">Available Limit</span>
-                            <span className="font-semibold text-green-600">{formatCurrency(currentDealer.availableLimit)}</span>
+                         <div className="space-y-1">
+                            <Label className="text-muted-foreground">Available Limit</Label>
+                            <p className="font-semibold text-green-600">{formatCurrency(currentDealer.availableLimit)}</p>
                         </div>
-                         <div className="flex justify-between items-baseline">
-                            <span className="text-muted-foreground">Associated Lender</span>
-                            <span className="font-semibold text-right">{currentDealer.lenderName}</span>
+                         <div className="space-y-1">
+                            <Label className="text-muted-foreground">Associated Lender</Label>
+                            <p className="font-semibold text-right">{currentDealer.lenderName || 'N/A'}</p>
                         </div>
                      </div>
                 </CardContent>
@@ -171,18 +224,17 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                     )
                 ) : <div></div>}
                  <div className="flex gap-2">
-                    {isEditing && (
+                    {isEditing ? (
                         <>
                            <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isSaving}>
                                 <X className="mr-2 h-4 w-4" /> Cancel
                            </Button>
-                           <Button onClick={handleSaveLimit} disabled={isSaving}>
+                           <Button onClick={handleSave} disabled={isSaving}>
                                 {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                 Save Changes
                            </Button>
                         </>
-                    )}
-                    {!isEditing && <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>}
+                    ) : <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>}
                 </div>
             </div>
         </DialogFooter>
