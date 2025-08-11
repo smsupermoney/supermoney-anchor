@@ -86,11 +86,21 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     }, [initialDealers]);
 
     const dealersWithNoRecentUtilization = useMemo(() => {
-        // This chart specifically looks at the last 7 days, regardless of the filter
-        const sevenDaysAgo = subDays(new Date(), 7);
+        if (dateRange === 'all') {
+             // For "All Time", show dealers who have never had an invoice
+            const dealersWithAnyInvoice = new Set(initialInvoices.map(inv => inv.dealerId));
+            return initialDealers
+                .filter(d => !dealersWithAnyInvoice.has(d.id) && d.availableLimit > 0)
+                .sort((a, b) => b.availableLimit - a.availableLimit)
+                .slice(0, 5)
+                .map(d => ({ name: d.name, "Available Limit": d.availableLimit }));
+        }
+
+        const days = parseInt(dateRange, 10);
+        const startDate = startOfDay(subDays(new Date(), days));
         const dealersWithRecentInvoices = new Set(
             initialInvoices
-                .filter(inv => new Date(inv.date) >= sevenDaysAgo)
+                .filter(inv => new Date(inv.date) >= startDate)
                 .map(inv => inv.dealerId)
         );
 
@@ -99,7 +109,17 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
             .sort((a, b) => b.availableLimit - a.availableLimit)
             .slice(0, 5) // Show top 5
             .map(d => ({ name: d.name, "Available Limit": d.availableLimit }));
-    }, [initialInvoices, initialDealers]);
+    }, [initialInvoices, initialDealers, dateRange]);
+
+    const noUtilizationCardTitle = useMemo(() => {
+        if (dateRange === 'all') return "Dealers with No Utilization (All Time)";
+        return `Dealers with No Utilization (Last ${dateRange} Days)`;
+    }, [dateRange]);
+
+    const noUtilizationCardDescription = useMemo(() => {
+        if (dateRange === 'all') return "Top 5 dealers who have never submitted an invoice.";
+        return `Top 5 dealers with no invoices in the past ${dateRange} days, sorted by available limit.`;
+    }, [dateRange]);
     
     const downloadExcel = (data: any[], sheetName: string, fileName: string) => {
         const worksheet = xlsx.utils.json_to_sheet(data);
@@ -245,8 +265,8 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
              <div className="grid gap-6 md:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Dealers with No Utilization (Last 7 Days)</CardTitle>
-                        <CardDescription>Top 5 dealers with no invoices in the past week, sorted by available limit.</CardDescription>
+                        <CardTitle>{noUtilizationCardTitle}</CardTitle>
+                        <CardDescription>{noUtilizationCardDescription}</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[20rem]">
                         {dealersWithNoRecentUtilization.length > 0 ? (
