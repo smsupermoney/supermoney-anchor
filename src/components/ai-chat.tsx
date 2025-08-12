@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { askAi } from "@/ai/flows/ask-ai-flow";
 import { Skeleton } from "./ui/skeleton";
 import { useAuth } from "@/context/auth-context";
+import { Badge } from "./ui/badge";
 
 type Message = {
   role: "user" | "assistant";
@@ -68,6 +69,7 @@ export default function AiChat() {
         <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-primary" />
             <CardTitle className="text-sm font-semibold">AI Assistant</CardTitle>
+            <Badge variant="outline">Coming soon</Badge>
         </div>
       </CardHeader>
       <CardContent className="flex-1 p-0">
