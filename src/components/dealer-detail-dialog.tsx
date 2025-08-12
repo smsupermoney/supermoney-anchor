@@ -188,7 +188,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                         </div>
                          <div className="space-y-1">
                             <Label className="text-muted-foreground">Associated Lender</Label>
-                            <p className="font-semibold text-right">{currentDealer.lenderName || 'N/A'}</p>
+                            <p className="font-semibold">{currentDealer.lenderName || 'N/A'}</p>
                         </div>
                      </div>
                 </CardContent>
