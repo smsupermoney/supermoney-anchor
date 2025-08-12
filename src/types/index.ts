@@ -3,6 +3,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -36,6 +37,7 @@ export type Invoice = {
   anchorId: string;
   date: string;
   dueDate: string;
+  disburseDate?: string;
   amount: number;
   disbursementSentAmount: number;
   status: InvoiceStatus;

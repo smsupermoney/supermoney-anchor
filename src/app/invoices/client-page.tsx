@@ -328,6 +328,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                   <TableHead>Lender</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Due Date</TableHead>
+                  <TableHead>Disburse Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="text-right">Overdue Amount</TableHead>
                   <TableHead>Status</TableHead>
@@ -406,6 +407,16 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                             <div className="truncate max-w-[100px]">{invoice.dueDate}</div>
                           </TooltipTrigger>
                           <TooltipContent><p>{invoice.dueDate}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                     <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[100px]">{invoice.disburseDate || '-'}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{invoice.disburseDate || 'N/A'}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>

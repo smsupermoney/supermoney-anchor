@@ -329,6 +329,7 @@ export const sampleInvoices = [
         dealerId: "DEALER_001",
         date: "2024-01-01",
         dueDate: "2024-02-01",
+        disburseDate: "2024-01-05",
         invoiceAmount: 50000,
         disbursementSentAmount: 48000,
         status: "Initiated",
@@ -365,7 +366,8 @@ export const sampleBulkInvoices = [
         'Invoice Amount': 75000,
         'Disburse Amount': 75000,
         'Invoice Date': '2024-08-01',
-        'Due Date': '2024-09-01'
+        'Due Date': '2024-09-01',
+        'Disburse Date': '2024-08-05'
     },
     {
         'Invoice Number': 'BULK-002',
@@ -373,6 +375,7 @@ export const sampleBulkInvoices = [
         'Invoice Amount': 125000,
         'Disburse Amount': 120000,
         'Invoice Date': '2024-08-15',
-        'Due Date': '2024-09-15'
+        'Due Date': '2024-09-15',
+        'Disburse Date': '2024-08-20'
     }
 ];
