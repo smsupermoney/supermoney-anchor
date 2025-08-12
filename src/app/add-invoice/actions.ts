@@ -2,7 +2,7 @@
 "use server";
 
 import { db1 } from "@/lib/firebase";
-import { collection, writeBatch, doc, getDocs, query } from "firebase/firestore";
+import { collection, writeBatch, doc, getDocs, query, where, limit } from "firebase/firestore";
 import * as xlsx from 'xlsx';
 import type { Invoice, InvoiceStatus } from "@/types";
 
@@ -34,49 +34,66 @@ export async function addInvoices(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing invoice numbers to check for duplicates
-    const invoicesRef = collection(db1, "invoices");
-    const existingInvoicesSnapshot = await getDocs(query(invoicesRef));
-    const existingInvoiceNumbers = new Set(existingInvoicesSnapshot.docs.map(doc => doc.id));
-
     const batch = writeBatch(db1);
     let newEntriesCount = 0;
     let updatedEntriesCount = 0;
+    const invoicesRef = collection(db1, "invoices");
 
-    invoicesArray.forEach((row: any) => {
-        let invoiceNumber = row.invoiceNumber?.toString().trim();
-        let isUpdate = false;
+    // Process invoices sequentially to handle checks correctly
+    for (const row of invoicesArray) {
+        const invoiceNumber = row.invoiceNumber?.toString().trim();
 
         if (!invoiceNumber || invoiceNumber.toLowerCase() === 'not applicable') {
-            invoiceNumber = doc(collection(db1, "invoices")).id; // Generate a unique ID for new invoices
-        } else if (existingInvoiceNumbers.has(invoiceNumber)) {
-            isUpdate = true;
-        }
-
-        const docRef = doc(db1, "invoices", invoiceNumber);
-
-        const invoiceData: Partial<Invoice> = {
-            invoiceNumber: invoiceNumber,
-            programId: row.programId?.toString() || '',
-            anchorId: row.anchorId?.toString() || '',
-            dealerId: row.dealerId?.toString() || '',
-            date: row.date || new Date().toISOString().split('T')[0],
-            dueDate: row.dueDate || new Date().toISOString().split('T')[0],
-            amount: Number(row.invoiceAmount) || 0,
-            disbursementSentAmount: Number(row.disbursementSentAmount) || 0,
-            status: (row.status || 'Initiated') as InvoiceStatus,
-            remarks: row.remarks || '',
-            utrNo: row.utrNo?.toString() || ''
-        };
-        
-        if (isUpdate) {
-            batch.update(docRef, invoiceData);
-            updatedEntriesCount++;
-        } else {
-            batch.set(docRef, invoiceData);
+            // If no invoice number, create a new doc with a unique ID
+            const newDocRef = doc(invoicesRef);
+            const invoiceData: Partial<Invoice> = {
+                // id will be newDocRef.id, but we don't set it explicitly in the data
+                invoiceNumber: newDocRef.id, // Use the generated ID as the invoice number if none provided
+                programId: row.programId?.toString() || '',
+                anchorId: row.anchorId?.toString() || '',
+                dealerId: row.dealerId?.toString() || '',
+                date: row.date || new Date().toISOString().split('T')[0],
+                dueDate: row.dueDate || new Date().toISOString().split('T')[0],
+                amount: Number(row.invoiceAmount) || 0,
+                disbursementSentAmount: Number(row.disbursementSentAmount) || 0,
+                status: (row.status || 'Initiated') as InvoiceStatus,
+                remarks: row.remarks || '',
+                utrNo: row.utrNo?.toString() || ''
+            };
+            batch.set(newDocRef, invoiceData);
             newEntriesCount++;
+        } else {
+            // Check if an invoice with this invoiceNumber field already exists
+            const q = query(invoicesRef, where("invoiceNumber", "==", invoiceNumber), limit(1));
+            const existingInvoiceSnapshot = await getDocs(q);
+
+            const invoiceData: Partial<Invoice> = {
+                invoiceNumber: invoiceNumber,
+                programId: row.programId?.toString() || '',
+                anchorId: row.anchorId?.toString() || '',
+                dealerId: row.dealerId?.toString() || '',
+                date: row.date || new Date().toISOString().split('T')[0],
+                dueDate: row.dueDate || new Date().toISOString().split('T')[0],
+                amount: Number(row.invoiceAmount) || 0,
+                disbursementSentAmount: Number(row.disbursementSentAmount) || 0,
+                status: (row.status || 'Initiated') as InvoiceStatus,
+                remarks: row.remarks || '',
+                utrNo: row.utrNo?.toString() || ''
+            };
+            
+            if (!existingInvoiceSnapshot.empty) {
+                // Update existing invoice
+                const existingDocRef = existingInvoiceSnapshot.docs[0].ref;
+                batch.update(existingDocRef, invoiceData);
+                updatedEntriesCount++;
+            } else {
+                // Create new invoice
+                const newDocRef = doc(invoicesRef); // Generate a unique ID
+                batch.set(newDocRef, invoiceData);
+                newEntriesCount++;
+            }
         }
-    });
+    }
     
     if (newEntriesCount > 0 || updatedEntriesCount > 0) {
         await batch.commit();
