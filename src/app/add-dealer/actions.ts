@@ -34,6 +34,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
 
     const batch = writeBatch(db1);
     let newEntriesCount = 0;
+    let updatedEntriesCount = 0;
     let skippedEntriesCount = 0;
 
     dataArray.forEach((row: any) => {
@@ -44,11 +45,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
             return;
         }
 
-        if (existingDealerIds.has(dealerId)) {
-            console.warn(`Skipping duplicate dealerId (from applicationId): ${dealerId}`);
-            skippedEntriesCount++;
-            return;
-        }
+        const isUpdate = existingDealerIds.has(dealerId);
         
         const customerId = row.customerId?.toString();
         const programId = row.programId?.toString();
@@ -70,7 +67,6 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
           dealerName: row.dealerName || '',
           status: row.status || 'Pending',
         };
-        batch.set(dealerRef, dealerData);
 
         // 2. Prepare data for the 'dealerLimits' collection
         const limitRef = doc(db1, "dealerLimits", dealerId); 
@@ -82,18 +78,25 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
           availableAmount: Number(row.availableAmount) || 0,
           principalOverdue: Number(row.principalOverdue) || 0,
         };
-        batch.set(limitRef, limitData);
         
-        newEntriesCount++;
+        if (isUpdate) {
+            batch.update(dealerRef, dealerData);
+            batch.update(limitRef, limitData);
+            updatedEntriesCount++;
+        } else {
+            batch.set(dealerRef, dealerData);
+            batch.set(limitRef, limitData);
+            newEntriesCount++;
+        }
     });
     
-    if (newEntriesCount > 0) {
+    if (newEntriesCount > 0 || updatedEntriesCount > 0) {
       await batch.commit();
     }
 
-    let message = `${newEntriesCount} new dealer entries added successfully.`;
+    let message = `${newEntriesCount} new dealer(s) added and ${updatedEntriesCount} dealer(s) updated successfully.`;
     if (skippedEntriesCount > 0) {
-      message += ` ${skippedEntriesCount} entries were skipped due to missing required fields or duplicate Application IDs.`;
+      message += ` ${skippedEntriesCount} entries were skipped due to missing required fields.`;
     }
 
     return { message };

@@ -27,13 +27,14 @@ export async function addPrograms(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing program IDs to prevent duplicates
+    // Fetch existing program IDs to check for duplicates
     const programsRef = collection(db1, "programs");
     const existingProgramsSnapshot = await getDocs(programsRef);
     const existingProgramIds = new Set(existingProgramsSnapshot.docs.map(doc => doc.id));
 
     const batch = writeBatch(db1);
     let newProgramsCount = 0;
+    let updatedProgramsCount = 0;
     let skippedProgramsCount = 0;
 
     programsArray.forEach((program: any) => {
@@ -44,32 +45,29 @@ export async function addPrograms(formData: FormData): Promise<ActionResult> {
             return;
         }
 
-        if (existingProgramIds.has(programId)) {
-            console.warn(`Skipping duplicate programId: ${programId}`);
-            skippedProgramsCount++;
-            return;
-        }
-
         const docRef = doc(db1, "programs", programId);
-
         const programData = {
           programId: programId,
           lenderName: program.lenderName || '',
           lenderType: program.lenderType || '',
-          // anchorIds is no longer directly imported but can be managed elsewhere
         };
         
-        batch.set(docRef, programData);
-        newProgramsCount++;
+        if (existingProgramIds.has(programId)) {
+            batch.update(docRef, programData);
+            updatedProgramsCount++;
+        } else {
+            batch.set(docRef, programData);
+            newProgramsCount++;
+        }
     });
     
-    if (newProgramsCount > 0) {
+    if (newProgramsCount > 0 || updatedProgramsCount > 0) {
       await batch.commit();
     }
     
-    let message = `${newProgramsCount} new program(s) added successfully.`;
+    let message = `${newProgramsCount} new program(s) added and ${updatedProgramsCount} program(s) updated successfully.`;
     if (skippedProgramsCount > 0) {
-      message += ` ${skippedProgramsCount} program(s) were skipped due to missing or duplicate IDs.`;
+      message += ` ${skippedProgramsCount} program(s) were skipped due to missing IDs.`;
     }
 
     return { message };
