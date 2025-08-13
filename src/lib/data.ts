@@ -122,7 +122,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     const dealerInfo = dealerMap.get(data.dealerId);
     
     const dueDate = new Date(data.dueDate);
-    const isOverdue = dueDate < today && data.status !== 'Disbursed' && data.status !== 'Repaid';
+    const isOverdue = dueDate < today && data.status !== 'Disbursed' && data.status !== 'Repaid' && data.status !== 'Rejected';
     const overdueAmount = isOverdue ? data.amount : 0;
     
     return { 
@@ -527,6 +527,7 @@ export const dealerLeads: DealerLead[] = [
     
 
     
+
 
 
 
