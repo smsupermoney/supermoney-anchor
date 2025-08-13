@@ -58,7 +58,12 @@ export async function getMomentumDealerLeads(anchorId?: string): Promise<Momentu
         fetchLeads('vendors', 'Vendor')
     ]);
     
-    return [...dealerLeads, ...vendorLeads];
+    const allLeads = [...dealerLeads, ...vendorLeads];
+    
+    // Sort all leads by createdAt date in descending order (newest first)
+    allLeads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return allLeads;
 }
 
 export async function getMomentumDealerLeadById(id: string): Promise<MomentumDealerLead | null> {
