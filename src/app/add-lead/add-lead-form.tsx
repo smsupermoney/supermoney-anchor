@@ -34,21 +34,22 @@ const priorities = ["High", "Medium", "Low"];
 const leadFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
   leadCategory: z.enum(["Dealer", "Vendor"], { required_error: "Lead Category is required." }),
-  contactNumber: z.string().regex(/^\d{10}$/, "Contact number must be exactly 10 digits."),
-  email: z.string().email("Invalid email address."),
-  city: z.string().min(1, "City is required."),
-  state: z.string().min(1, "State is required."),
-  zone: z.string().min(1, "Zone is required."),
-  anchorName: z.string().min(1, "Anchor name is required."),
-  product: z.string().min(1, "Product is required."),
-  leadSource: z.string().min(1, "Lead source is required."),
-  leadType: z.string().min(1, "Lead type is required."),
-  priority: z.string().min(1, "Priority is required."),
-  dealValue: z.string().min(1, "Deal value is required."),
-  lender: z.string().min(1, "Lender is required."),
   spoc: z.string().min(1, "SPOC is required."),
+  contactNumber: z.string().regex(/^\d{10}$/, "Contact number must be exactly 10 digits."),
+  // Optional fields
+  email: z.string().email("Invalid email address.").optional().or(z.literal("")),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zone: z.string().optional(),
+  product: z.string().optional(),
+  leadSource: z.string().optional(),
+  leadType: z.string().optional(),
+  priority: z.string().optional(),
+  dealValue: z.string().optional(),
+  lender: z.string().optional(),
   remarks: z.string().optional(),
 });
+
 
 type LeadFormValues = z.infer<typeof leadFormSchema>;
 
@@ -60,7 +61,6 @@ const defaultFormValues: LeadFormValues = {
     city: "",
     state: "",
     zone: "",
-    anchorName: "",
     product: "",
     leadSource: "",
     leadType: "",
@@ -140,10 +140,10 @@ export default function AddLeadForm() {
                 <FormItem><FormLabelWithAsterisk>Contact Number</FormLabelWithAsterisk><FormControl><Input type="tel" placeholder="e.g., 9876543210" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Email</FormLabelWithAsterisk><FormControl><Input type="email" placeholder="e.g., contact@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="e.g., contact@example.com" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
              <FormField control={form.control} name="state" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>State</FormLabelWithAsterisk>
+                <FormItem><FormLabel>State</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select a state" /></SelectTrigger></FormControl>
                         <SelectContent>{indianStates.map(s => <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>)}</SelectContent>
@@ -151,7 +151,7 @@ export default function AddLeadForm() {
                 </FormItem>
             )}/>
             <FormField control={form.control} name="city" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>City</FormLabelWithAsterisk>
+                <FormItem><FormLabel>City</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value} disabled={!selectedState}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select a city" /></SelectTrigger></FormControl>
                         <SelectContent>{availableCities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
@@ -159,7 +159,7 @@ export default function AddLeadForm() {
                 </FormItem>
             )}/>
              <FormField control={form.control} name="zone" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Zone</FormLabelWithAsterisk>
+                <FormItem><FormLabel>Zone</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select a zone" /></SelectTrigger></FormControl>
                         <SelectContent>{zones.map(z => <SelectItem key={z} value={z}>{z}</SelectItem>)}</SelectContent>
@@ -167,16 +167,13 @@ export default function AddLeadForm() {
                 </FormItem>
             )}/>
             <FormField control={form.control} name="dealValue" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Deal Value (Lacs)</FormLabelWithAsterisk><FormControl><Input type="number" placeholder="e.g., 5.5" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Deal Value (Lacs)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5.5" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="lender" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Lender</FormLabelWithAsterisk><FormControl><Input placeholder="e.g., HDFC Bank" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-             <FormField control={form.control} name="anchorName" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Anchor Name</FormLabelWithAsterisk><FormControl><Input placeholder="e.g., Reliance Retail" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Lender</FormLabel><FormControl><Input placeholder="e.g., HDFC Bank" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
              <FormField control={form.control} name="product" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Product</FormLabelWithAsterisk>
+                <FormItem><FormLabel>Product</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select a product" /></SelectTrigger></FormControl>
                         <SelectContent>{products.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
@@ -184,10 +181,10 @@ export default function AddLeadForm() {
                 </FormItem>
             )}/>
             <FormField control={form.control} name="leadSource" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Lead Source</FormLabelWithAsterisk><FormControl><Input placeholder="e.g., Connector" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Lead Source</FormLabel><FormControl><Input placeholder="e.g., Connector" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="leadType" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Lead Type</FormLabelWithAsterisk>
+                <FormItem><FormLabel>Lead Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select a lead type" /></SelectTrigger></FormControl>
                         <SelectContent>{leadTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
@@ -195,7 +192,7 @@ export default function AddLeadForm() {
                 </FormItem>
             )}/>
             <FormField control={form.control} name="priority" render={({ field }) => (
-                <FormItem><FormLabelWithAsterisk>Priority</FormLabelWithAsterisk>
+                <FormItem><FormLabel>Priority</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select a priority" /></SelectTrigger></FormControl>
                         <SelectContent>{priorities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>

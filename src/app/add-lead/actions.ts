@@ -10,19 +10,18 @@ const leadFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
   leadCategory: z.enum(["Dealer", "Vendor"], { required_error: "Lead Category is required."}),
   contactNumber: z.string().regex(/^\d{10}$/, "Contact number must be exactly 10 digits."),
-  email: z.string().email("Invalid email address."),
-  city: z.string().min(1, "City is required."),
-  state: z.string().min(1, "State is required."),
-  zone: z.string().min(1, "Zone is required."),
-  anchorName: z.string().min(1, "Anchor name is required."),
-  product: z.string().min(1, "Product is required."),
-  leadSource: z.string().min(1, "Lead source is required."),
-  leadType: z.string().min(1, "Lead type is required."),
-  priority: z.string().min(1, "Priority is required."),
-  dealValue: z.string().min(1, "Deal value is required."),
-  lender: z.string().min(1, "Lender is required."),
   spoc: z.string().min(1, "SPOC is required."),
   // Optional fields
+  email: z.string().email("Invalid email address.").optional().or(z.literal("")),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zone: z.string().optional(),
+  product: z.string().optional(),
+  leadSource: z.string().optional(),
+  leadType: z.string().optional(),
+  priority: z.string().optional(),
+  dealValue: z.string().optional(),
+  lender: z.string().optional(),
   remarks: z.string().optional(),
 });
 
@@ -45,6 +44,7 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   const session = await getSession();
   
   const anchorId = session?.roleType === 'Anchor' ? session.leadExternalId || '' : '';
+  const anchorName = session?.roleType === 'Anchor' ? session.userName || '' : 'Supermoney Admin';
 
   if (session?.roleType === 'Anchor' && !anchorId) {
       console.warn("Anchor user is creating a lead but does not have a leadExternalId in their session.");
@@ -54,9 +54,10 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   
   const leadData = {
     ...rest,
-    anchorId: anchorId, // Ensure this is correctly assigned
+    anchorId: anchorId,
+    anchorName: anchorName,
     dealValue: dealValue ? Number(dealValue) : 0,
-    remarks: remarks ? [{ remark: remarks, timestamp: new Date().toISOString() }] : [],
+    remarks: remarks ? [{ remark: remarks, timestamp: new Date().toISOString(), user: session?.userName || 'System' }] : [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     status: "New",
