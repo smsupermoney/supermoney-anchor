@@ -123,7 +123,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     
     const dueDate = new Date(data.dueDate);
     const isOverdue = dueDate < today && data.status !== 'Disbursed' && data.status !== 'Repaid' && data.status !== 'Rejected';
-    const overdueAmount = isOverdue ? data.amount : 0;
+    const overdueAmount = isOverdue ? data.disbursementSentAmount : 0;
     
     return { 
         id: doc.id, 
@@ -538,3 +538,6 @@ export const dealerLeads: DealerLead[] = [
 
 
 
+
+
+    
