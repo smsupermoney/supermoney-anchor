@@ -49,6 +49,7 @@ export async function addPrograms(formData: FormData): Promise<ActionResult> {
         const programData = {
           programId: programId,
           lenderName: program.lenderName || '',
+          shortName: program.shortName || '',
           lenderType: program.lenderType || '',
         };
         

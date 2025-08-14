@@ -30,6 +30,7 @@ export default function ProgramsTable({ programs }: ProgramsTableProps) {
                     <TableRow>
                         <TableHead>Program ID</TableHead>
                         <TableHead>Lender Name</TableHead>
+                        <TableHead>Short Name</TableHead>
                         <TableHead>Lender Type</TableHead>
                         <TableHead>Linked Anchor Names</TableHead>
                     </TableRow>
@@ -39,6 +40,7 @@ export default function ProgramsTable({ programs }: ProgramsTableProps) {
                         <TableRow key={program.id}>
                             <TableCell className="font-mono text-xs">{program.programId}</TableCell>
                             <TableCell className="font-medium">{program.lenderName}</TableCell>
+                            <TableCell>{program.shortName || 'N/A'}</TableCell>
                             <TableCell>
                                 <Badge variant={program.lenderType === 'Supermoney' ? 'default' : 'secondary'}>
                                     {program.lenderType}
@@ -54,7 +56,7 @@ export default function ProgramsTable({ programs }: ProgramsTableProps) {
                         </TableRow>
                     )) : (
                         <TableRow>
-                            <TableCell colSpan={4} className="text-center">No programs found.</TableCell>
+                            <TableCell colSpan={5} className="text-center">No programs found.</TableCell>
                         </TableRow>
                     )}
                 </TableBody>

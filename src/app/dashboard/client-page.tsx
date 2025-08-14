@@ -368,7 +368,6 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                             {programs.map((program) => {
                             const utilizationPercentage = (program.totalLimit && program.totalLimit > 0) ? ((program.usedLimit || 0) / program.totalLimit) * 100 : 0;
                             const remainingLimit = (program.totalLimit || 0) - (program.usedLimit || 0);
-                            const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
 
                             return (
                                 <div key={program.id} className="w-[320px] shrink-0">
@@ -379,10 +378,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                                         <TooltipProvider>
                                             <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                                                <CardTitle className="text-sm truncate">{program.shortName || program.lenderName}</CardTitle>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>{fullName}</p>
+                                                <p>{program.lenderName}</p>
                                             </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>

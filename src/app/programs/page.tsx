@@ -31,14 +31,6 @@ export default async function ProgramsPage() {
     
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
     
-    const lenderFullNameMapping: Record<string, string> = {
-        'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
-        'ADITYA BIRLA CAPITAL LTD': 'ADITYA BIRLA CAPITAL LTD',
-        'Supply Chain Finance Co.': 'Supply Chain Finance Co.',
-        'Flexi Loans': 'Flexi Loans',
-        'Supermoney Finance': 'Supermoney Finance'
-    };
-    
     const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
 
   if (isAdmin) {
@@ -73,7 +65,6 @@ export default async function ProgramsPage() {
         {programs.map((program) => {
           const utilizationPercentage = (program.totalLimit && program.totalLimit > 0) ? ((program.usedLimit || 0) / program.totalLimit) * 100 : 0;
           const remainingLimit = (program.totalLimit || 0) - (program.usedLimit || 0);
-          const fullName = lenderFullNameMapping[program.lenderName] || program.lenderName;
 
           return (
             <Card key={program.id} className="flex flex-col">
@@ -83,10 +74,10 @@ export default async function ProgramsPage() {
                     <TooltipProvider>
                         <Tooltip>
                         <TooltipTrigger asChild>
-                            <CardTitle className="text-sm truncate">{program.lenderName}</CardTitle>
+                            <CardTitle className="text-sm truncate">{program.shortName || program.lenderName}</CardTitle>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>{fullName}</p>
+                            <p>{program.lenderName}</p>
                         </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>

@@ -4,6 +4,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -56,6 +57,7 @@ export type Program = {
   id: string; // This is the programId (e.g. PROG001)
   programId: string; // The business key
   lenderName: string;
+  shortName?: string;
   lenderType: 'Supermoney' | 'External';
   totalLimit?: number;
   usedLimit?: number;

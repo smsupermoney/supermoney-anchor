@@ -157,18 +157,21 @@ export const dummyPrograms = [
     "id": "PROG001",
     "programId": "PROG001",
     "lenderName": "Supermoney Finance",
+    "shortName": "Supermoney",
     "lenderType": "Supermoney",
   },
   {
     "id": "PROG002",
     "programId": "PROG002",
     "lenderName": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
+    "shortName": "Cholamandalam",
     "lenderType": "External",
   },
   {
     "id": "PROG003",
     "programId": "PROG003",
     "lenderName": "ADITYA BIRLA CAPITAL LTD",
+    "shortName": "Aditya Birla",
     "lenderType": "External",
   },
 ];
@@ -300,6 +303,7 @@ export const samplePrograms = [
     {
         programId: "PROG_SAMPLE_1",
         lenderName: "Sample Finance Inc.",
+        shortName: "Sample Fin",
         lenderType: "External",
     }
 ];
