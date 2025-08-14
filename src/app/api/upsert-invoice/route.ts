@@ -18,7 +18,7 @@ const upsertInvoiceSchema = z.object({
   disbursementSentAmount: z.number().nonnegative('Disbursement amount must be a non-negative number.'),
   status: z.enum(['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid']),
   remarks: z.string().optional(),
-  utrNo: z.string().optional(),
+  utrNo: z.string().max(200, "UTR number cannot exceed 200 characters.").optional(),
 });
 
 export async function POST(request: Request) {
