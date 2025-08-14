@@ -72,10 +72,9 @@ export async function POST(request: Request) {
     }
 
     const dealerData = dealerSnapshot.docs[0].data();
-    const dealerId = dealerData.dealerId;
-
-    // 5. Return the dealerId
-    return NextResponse.json({ dealerId: dealerId }, { status: 200 });
+    
+    // 5. Return the entire dealer object
+    return NextResponse.json(dealerData, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching dealer ID:', error);
