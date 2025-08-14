@@ -13,7 +13,7 @@ const upsertInvoiceSchema = z.object({
   dealerId: z.string().min(1, 'dealerId is required.'),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format.'),
   dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Due date must be in YYYY-MM-DD format.'),
-  disburseDate: z.string().optional(),
+  disburseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Disburse date must be in YYYY-MM-DD format.').optional().or(z.literal('')),
   amount: z.number().positive('Amount must be a positive number.'),
   disbursementSentAmount: z.number().nonnegative('Disbursement amount must be a non-negative number.'),
   status: z.enum(['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid']),
