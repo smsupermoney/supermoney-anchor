@@ -1,6 +1,7 @@
 
 'use server';
 
+import 'dotenv/config';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getUserByEmail, clearUserAuthToken } from '@/lib/data';
