@@ -1,4 +1,3 @@
-
 import 'dotenv/config';
 import { unsealData } from 'iron-session';
 import { cookies } from 'next/headers';
