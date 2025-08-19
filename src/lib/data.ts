@@ -169,7 +169,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     
     const limitsMap = new Map(limitsSnapshot.docs.map(doc => [doc.id, doc.data() as DealerLimit]));
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, p.data().lenderName]));
-    const userMap = new Map(usersSnapshot.docs.map(u => [u.data().externalId, u.data()]));
+    const userMap = new Map(usersSnapshot.docs.map(u => [u.id, u.data()]));
 
     const dealerList = dealerSnapshot.docs.map(doc => {
         const dealerData = doc.data();
@@ -177,8 +177,10 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         const limitData = limitsMap.get(dealerId);
         
         const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
-        const dealerUser = userMap.get(dealerId);
         
+        // Match user by externalId which corresponds to dealerId
+        const dealerUser = Array.from(userMap.values()).find(u => u.externalId === dealerId);
+
         const limitAmount = limitData?.limitAmount || 0;
         const utilisationAmount = limitData?.utilisationAmount || 0;
         
@@ -186,6 +188,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             id: dealerId,
             name: dealerData.dealerName,
             emailAddress: dealerUser?.emailAddress || '',
+            phoneNumber: dealerUser?.phoneNumber || '',
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
             applicationId: dealerData.applicationId,
@@ -551,4 +554,5 @@ export const dealerLeads: DealerLead[] = [
 
 
     
+
 

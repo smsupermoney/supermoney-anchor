@@ -2,11 +2,12 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import * as xlsx from 'xlsx';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { X as XIcon } from "lucide-react";
+import { X as XIcon, Download } from "lucide-react";
 import StatusBadge from "@/components/status-badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,6 +58,28 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
   
+  const handleDownload = () => {
+    const dataToExport = initialDealers.map(d => ({
+        applicationId: d.applicationId,
+        customerId: d.customerId,
+        programId: d.programId,
+        anchorId: d.anchorId,
+        dealerName: d.name,
+        emailAddress: d.emailAddress,
+        phoneNumber: d.phoneNumber,
+        status: d.status,
+        limitAmount: d.totalLimit,
+        utilisationAmount: d.amountDisbursed,
+        availableAmount: d.availableLimit,
+        principalOverdue: d.overdueAmount,
+    }));
+    
+    const worksheet = xlsx.utils.json_to_sheet(dataToExport);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, "Dealers");
+    xlsx.writeFile(workbook, "all_dealers_export.xlsx");
+  };
+
   useEffect(() => {
     const lender = searchParams.get('lender');
     const overdue = searchParams.get('overdue');
@@ -112,7 +135,14 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
 
   return (
     <>
-      <PageHeader title="Dealers" />
+      <PageHeader title="Dealers">
+        {isAdmin && (
+            <Button onClick={handleDownload} variant="outline" size="sm">
+                <Download className="mr-2 h-4 w-4" />
+                Download Excel
+            </Button>
+        )}
+      </PageHeader>
       <Card className="mt-6">
         <CardHeader>
             <CardTitle>All Dealers</CardTitle>
