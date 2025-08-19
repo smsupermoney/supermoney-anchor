@@ -122,7 +122,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Set to the beginning of today
 
-  return invoiceSnapshot.docs.map(doc => {
+  const invoices = invoiceSnapshot.docs.map(doc => {
     const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
     const dealerInfo = dealerMap.get(data.dealerId);
     
@@ -140,6 +140,11 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
         invoiceImage: data.invoiceImage || ''
     } as Invoice;
   });
+
+  // Sort invoices by date in descending order (newest first)
+  invoices.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  return invoices;
 }
 
 export async function getDealers(anchorId?: string): Promise<Dealer[]> {
@@ -546,3 +551,4 @@ export const dealerLeads: DealerLead[] = [
 
 
     
+
