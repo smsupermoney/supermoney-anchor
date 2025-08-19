@@ -56,12 +56,12 @@ export async function POST(request: Request) {
     }
     const anchorId = anchorSnapshot.docs[0].data().externalId;
 
-    // 4. Find the dealer using customerId, dealerName, and the retrieved anchorId
+    // 4. Find the dealer using customerId, dealerName_lowercase, and the retrieved anchorId
     const dealersRef = collection(db1, 'dealers');
     const dealerQuery = query(
       dealersRef,
       where('customerId', '==', customerId),
-      where('dealerName', '==', dealerName),
+      where('dealerName_lowercase', '==', dealerName.toLowerCase()),
       where('anchorId', '==', anchorId),
       limit(1)
     );

@@ -58,13 +58,15 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
 
         // 1. Prepare data for the 'dealers' collection
         const dealerRef = doc(db1, "dealers", dealerId);
+        const dealerName = row.dealerName || '';
         const dealerData = {
           dealerId: dealerId,
           customerId: customerId,
           applicationId: dealerId,
           programId: programId,
           anchorId: row.anchorId || '',
-          dealerName: row.dealerName || '',
+          dealerName: dealerName,
+          dealerName_lowercase: dealerName.toLowerCase(),
           status: row.status || 'Pending',
         };
 
