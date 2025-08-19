@@ -40,7 +40,8 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch (error) {
-    return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
+    // This block executes if the request body is not valid JSON.
+    return NextResponse.json({ error: 'Invalid JSON body. Please ensure the request body is well-formed JSON with a Content-Type of application/json.' }, { status: 400 });
   }
 
   const validated = upsertInvoiceSchema.safeParse(body);
