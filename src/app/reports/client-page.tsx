@@ -42,7 +42,6 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     const summaryStats = useMemo(() => {
         const totalInvoiceValue = filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0);
         const totalOverdueAmount = filteredInvoices.reduce((sum, inv) => sum + (inv.overdueAmount || 0), 0);
-        // Active dealers and programs are not time-sensitive, so they are calculated from the initial full list
         const activeDealers = initialDealers.filter(d => d.status === 'Active').length;
         const activePrograms = initialPrograms.length;
         
@@ -131,6 +130,61 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         xlsx.writeFile(workbook, fileName);
     };
 
+    const downloadFullReport = () => {
+        const workbook = xlsx.utils.book_new();
+
+        // Sheet 1: Summary
+        const summaryData = [
+            { Metric: "Total Invoice Value", Value: formatCurrency(summaryStats.totalInvoiceValue) },
+            { Metric: "Total Overdue", Value: formatCurrency(summaryStats.totalOverdueAmount) },
+            { Metric: "Active Dealers", Value: summaryStats.activeDealers },
+            { Metric: "Active Programs", Value: summaryStats.activePrograms },
+        ];
+        const summarySheet = xlsx.utils.json_to_sheet(summaryData);
+        xlsx.utils.book_append_sheet(workbook, summarySheet, "Summary");
+
+        // Sheet 2: Filtered Invoices
+        const invoiceData = filteredInvoices.map(inv => ({
+            "Invoice #": inv.invoiceNumber,
+            "Dealer Name": inv.dealerName,
+            "Anchor Name": inv.anchorName,
+            "Lender": inv.lender,
+            "Date": inv.date,
+            "Due Date": inv.dueDate,
+            "Amount": inv.amount,
+            "Overdue Amount": inv.overdueAmount,
+            "Status": inv.status,
+        }));
+        const invoiceSheet = xlsx.utils.json_to_sheet(invoiceData);
+        xlsx.utils.book_append_sheet(workbook, invoiceSheet, "Filtered Invoices");
+
+        // Sheet 3: All Dealers
+        const dealerData = initialDealers.map(d => ({
+            "Dealer ID": d.id,
+            "Dealer Name": d.name,
+            "Status": d.status,
+            "Total Limit": d.totalLimit,
+            "Amount Disbursed": d.amountDisbursed,
+            "Available Limit": d.availableLimit,
+            "Overdue Amount": d.overdueAmount,
+        }));
+        const dealerSheet = xlsx.utils.json_to_sheet(dealerData);
+        xlsx.utils.book_append_sheet(workbook, dealerSheet, "All Dealers");
+        
+        // Sheet 4: All Programs
+        const programData = initialPrograms.map(p => ({
+            "Program Name": p.lenderName,
+            "Lender Type": p.lenderType,
+            "Total Limit": p.totalLimit,
+            "Used Limit": p.usedLimit,
+            "Total Dealers": p.totalDealers,
+        }));
+        const programSheet = xlsx.utils.json_to_sheet(programData);
+        xlsx.utils.book_append_sheet(workbook, programSheet, "All Programs");
+
+        xlsx.writeFile(workbook, "full_report.xlsx");
+    };
+
     const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
             return (
@@ -149,7 +203,11 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     
     return (
         <div className="space-y-6">
-             <div className="flex justify-end">
+             <div className="flex justify-between items-center">
+                 <Button onClick={downloadFullReport}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Full Report
+                </Button>
                 <Select value={dateRange} onValueChange={setDateRange}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Select date range" />
