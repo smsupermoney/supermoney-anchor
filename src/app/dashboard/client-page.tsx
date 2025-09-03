@@ -35,14 +35,17 @@ type DashboardClientProps = {
 
 export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, totalOverdueAmount }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [programs] = useState(initialPrograms);
-  const [invoices] = useState(initialInvoices);
-  const [dealers, setDealers] = useState(initialDealers);
   const { user } = useAuth();
   
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 5; // Smaller page size for dashboard view
   const [isOverdueNoticeOpen, setOverdueNoticeOpen] = useState(false);
+
+  // Directly use the initialDealers prop and manage updates with a separate state
+  const [dealers, setDealers] = useState(initialDealers);
+  useEffect(() => {
+    setDealers(initialDealers);
+  }, [initialDealers]);
 
   const overdueDealers = useMemo(() => dealers.filter(d => d.overdueAmount > 0), [dealers]);
 
@@ -64,8 +67,8 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
   };
 
 
-  const supermoneyPrograms = programs.filter(p => p.lenderType === 'Supermoney');
-  const externalPrograms = programs.filter(p => p.lenderType === 'External');
+  const supermoneyPrograms = initialPrograms.filter(p => p.lenderType === 'Supermoney');
+  const externalPrograms = initialPrograms.filter(p => p.lenderType === 'External');
 
   const supermoneyTotalLimit = supermoneyPrograms.reduce((sum, p) => sum + (p.totalLimit || 0), 0);
   const supermoneyUtilizedCredit = supermoneyPrograms.reduce((sum, p) => sum + (p.usedLimit || 0), 0);
@@ -84,7 +87,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
   
   const dateFilterParams = `dateFrom=${formatISO(sevenDaysAgo)}&dateTo=${formatISO(today)}`;
 
-  const invoicesLast7Days = invoices.filter((i) => {
+  const invoicesLast7Days = initialInvoices.filter((i) => {
     const invoiceDate = startOfDay(new Date(i.date));
     return invoiceDate >= sevenDaysAgo && invoiceDate <= today;
   });
@@ -119,7 +122,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
 
   const upcomingPayments = useMemo(() => {
     const today = new Date();
-    const upcomingInvoices = invoices.filter(i => new Date(i.dueDate) >= today && i.status !== 'Disbursed' && (i.overdueAmount ?? 0) === 0);
+    const upcomingInvoices = initialInvoices.filter(i => new Date(i.dueDate) >= today && i.status !== 'Disbursed' && (i.overdueAmount ?? 0) === 0);
 
     const calcTotal = (days: number) => {
         const endDate = addDays(today, days);
@@ -133,15 +136,15 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
         next15Days: calcTotal(15),
         next30Days: calcTotal(30),
     };
-  }, [invoices]);
+  }, [initialInvoices]);
   
   const recentInvoicesPageData = useMemo(() => {
     const start = pageIndex * pageSize;
     const end = start + pageSize;
-    return invoices.slice(start, end);
-  }, [invoices, pageIndex, pageSize]);
+    return initialInvoices.slice(start, end);
+  }, [initialInvoices, pageIndex, pageSize]);
 
-  const pageCount = Math.ceil(invoices.length / pageSize);
+  const pageCount = Math.ceil(initialInvoices.length / pageSize);
 
 
   return (
@@ -365,7 +368,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                 <div className="relative w-full overflow-auto">
                     <div className="overflow-x-auto">
                         <div className="flex space-x-4 pb-4">
-                            {programs.map((program) => {
+                            {initialPrograms.map((program) => {
                             const utilizationPercentage = (program.totalLimit && program.totalLimit > 0) ? ((program.usedLimit || 0) / program.totalLimit) * 100 : 0;
                             const remainingLimit = (program.totalLimit || 0) - (program.usedLimit || 0);
 
