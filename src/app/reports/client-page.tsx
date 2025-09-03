@@ -69,11 +69,14 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
     }, [filteredInvoices, initialPrograms]);
     
     const programLimitData = useMemo(() => {
-        return initialPrograms.map(p => ({
-            name: p.lenderName.substring(0, 15) + (p.lenderName.length > 15 ? '...' : ''), // Truncate name for chart
-            Utilized: p.usedLimit || 0,
-            Available: (p.totalLimit || 0) - (p.usedLimit || 0),
-        }));
+        return initialPrograms.map(p => {
+            const name = p.lenderName || 'Unknown Program';
+            return {
+                name: name.substring(0, 15) + (name.length > 15 ? '...' : ''), // Truncate name for chart
+                Utilized: p.usedLimit || 0,
+                Available: (p.totalLimit || 0) - (p.usedLimit || 0),
+            }
+        });
     }, [initialPrograms]);
 
     const topOverdueDealers = useMemo(() => {
