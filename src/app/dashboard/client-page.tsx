@@ -49,6 +49,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
 
   const overdueDealers = useMemo(() => dealers.filter(d => d.overdueAmount > 0), [dealers]);
 
+  /*
   useEffect(() => {
     // Only open the dialog if there are overdue dealers AND the dialog isn't already open
     if (overdueDealers.length > 0) {
@@ -57,6 +58,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
       return () => clearTimeout(timer);
     }
   }, []); // Run only on initial mount
+  */
 
   const handleDealerUpdate = (dealerId: string, newStatus: Dealer['status']) => {
     setDealers(prevDealers =>
