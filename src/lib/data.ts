@@ -325,6 +325,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   }
   
   const userDoc = querySnapshot.docs[0];
+  // Important: Use userDoc.id to get the actual Firestore Document ID
   return { id: userDoc.id, ...userDoc.data() } as User;
 }
 
@@ -554,5 +555,6 @@ export const dealerLeads: DealerLead[] = [
 
 
     
+
 
 
