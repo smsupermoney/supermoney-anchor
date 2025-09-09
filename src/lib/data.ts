@@ -96,7 +96,7 @@ export async function getMomentumDealerLeadById(id: string): Promise<MomentumDea
 export async function getUsers(): Promise<User[]> {
   const usersCol = collection(db1, 'users');
   const userSnapshot = await getDocs(query(usersCol));
-  return userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+  return userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as User));
 }
 
 export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
@@ -325,8 +325,10 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   }
   
   const userDoc = querySnapshot.docs[0];
-  // Important: Use userDoc.id to get the actual Firestore Document ID
-  return { id: userDoc.id, ...userDoc.data() } as User;
+  const userData = userDoc.data();
+  // Ensure the final object's 'id' is the Firestore document ID,
+  // overwriting any 'id' field that might exist in the document data.
+  return { ...userData, id: userDoc.id } as User;
 }
 
 export async function clearUserAuthToken(userId: string): Promise<void> {
@@ -555,6 +557,7 @@ export const dealerLeads: DealerLead[] = [
 
 
     
+
 
 
 
