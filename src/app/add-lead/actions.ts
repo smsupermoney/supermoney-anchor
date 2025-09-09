@@ -43,11 +43,11 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   
   const session = await getSession();
   
-  const anchorId = session?.roleType === 'Anchor' ? session.leadExternalId || '' : '';
-  const anchorName = session?.roleType === 'Anchor' ? session.userName || '' : 'Supermoney Admin';
+  const anchorId = session?.roleType === 'Anchor' ? session.externalId || '' : '';
+  const anchorName = session?.roleType === 'Anchor' ? session.userName || 'Supermoney Admin' : 'Supermoney Admin';
 
   if (session?.roleType === 'Anchor' && !anchorId) {
-      console.warn("Anchor user is creating a lead but does not have a leadExternalId in their session.");
+      console.warn("Anchor user is creating a lead but does not have a externalId in their session.");
   }
   
   const { leadCategory, dealValue, remarks, ...rest } = validatedFields.data;
@@ -63,6 +63,7 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
     status: "New",
     leadDate: new Date().toISOString(),
     initialLeadDate: new Date().toISOString(),
+    assignedTo: null,
   };
 
   try {
