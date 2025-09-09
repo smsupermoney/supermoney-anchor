@@ -36,7 +36,8 @@ export async function authenticate(
     }
     
     const session = await getIronSession<User>(cookies(), sessionOptions);
-    session.id = user.id;
+    // This is the key fix: We use the user.id which now correctly holds the firestore doc ID
+    session.id = user.id; 
     session.userName = user.userName;
     session.roleType = user.roleType;
     session.emailAddress = user.emailAddress;
