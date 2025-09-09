@@ -43,6 +43,16 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   
   const session = await getSession();
   
+  // Example of what the `session` object looks like for an anchor user:
+  // {
+  //   id: "8eqZodWO89So7VApzCef", // The unique Firestore document ID for this user
+  //   externalId": "ANC001",      // The business-facing ID for the anchor company
+  //   "userName": "Jindal stainless steelway limited",
+  //   "emailAddress": "jindal@example.com",
+  //   "roleType": "Anchor",
+  //   // ...and other session properties
+  // }
+  
   const anchorId = session?.roleType === 'Anchor' ? session.id || '' : '';
   const anchorName = session?.roleType === 'Anchor' ? session.userName || 'Supermoney Admin' : 'Supermoney Admin';
 
@@ -51,7 +61,7 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   }
   
   const { leadCategory, dealValue, remarks, ...rest } = validatedFields.data;
-  
+
   const leadData = {
     ...rest,
     anchorId: anchorId,
