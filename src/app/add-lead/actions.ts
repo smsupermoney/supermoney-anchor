@@ -16,13 +16,7 @@ const leadFormSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   zone: z.string().optional(),
-  product: z.string().optional(),
-  leadSource: z.string().optional(),
-  leadType: z.string().optional(),
-  priority: z.string().optional(),
   dealValue: z.string().optional(),
-  lender: z.string().optional(),
-  remarks: z.string().optional(),
 });
 
 
@@ -43,31 +37,22 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   
   const session = await getSession();
   
-  // Example of what the `session` object looks like for an anchor user:
-  // {
-  //   "id": "8eqZodWO89So7VApzCef", // The unique Firestore document ID for this user
-  //   "externalId": "ANC001",      // The business-facing ID for the anchor company
-  //   "userName": "Jindal stainless steelway limited",
-  //   "emailAddress": "jindal@example.com",
-  //   "roleType": "Anchor",
-  //   // ...and other session properties
-  // }
-  
-  const anchorId = session?.roleType === 'Anchor' ? session.leadExternalId || '' : '';
+  // The user's Firestore document ID, e.g., "8eqZodWO89So7VApzCef", is stored in session.id
+  const anchorId = session?.roleType === 'Anchor' ? session.id || '' : '';
   const anchorName = session?.roleType === 'Anchor' ? session.userName || 'Supermoney Admin' : 'Supermoney Admin';
 
   if (session?.roleType === 'Anchor' && !anchorId) {
       console.warn("Anchor user is creating a lead but does not have a user ID in their session.");
   }
   
-  const { leadCategory, dealValue, remarks, ...rest } = validatedFields.data;
+  const { leadCategory, dealValue, ...rest } = validatedFields.data;
 
   const leadData = {
     ...rest,
     anchorId: anchorId,
     anchorName: anchorName,
     dealValue: dealValue ? Number(dealValue) : 0,
-    remarks: remarks ? [{ remark: remarks, timestamp: new Date().toISOString(), user: session?.userName || 'System' }] : [],
+    remarks: [], // Start with empty remarks
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     status: "New",

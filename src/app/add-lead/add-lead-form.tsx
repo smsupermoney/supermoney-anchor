@@ -20,16 +20,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { addSingleLead } from "./actions";
 import { indianStates } from "@/lib/location-data";
 import { useRouter } from "next/navigation";
 
 const zones = ["North", "South", "East", "West", "Central"];
-const products = ["Primary", "Secondary", "Cross-sell", "Anchor-led"];
-const leadTypes = ["Fresh", "Warm", "Cold", "Re-engaged"];
-const priorities = ["High", "Medium", "Low"];
-
 
 const leadFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
@@ -41,13 +36,7 @@ const leadFormSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   zone: z.string().optional(),
-  product: z.string().optional(),
-  leadSource: z.string().optional(),
-  leadType: z.string().optional(),
-  priority: z.string().optional(),
   dealValue: z.string().optional(),
-  lender: z.string().optional(),
-  remarks: z.string().optional(),
 });
 
 
@@ -61,14 +50,8 @@ const defaultFormValues: LeadFormValues = {
     city: "",
     state: "",
     zone: "",
-    product: "",
-    leadSource: "",
-    leadType: "",
-    priority: "",
     dealValue: "",
-    lender: "",
     spoc: "",
-    remarks: "",
 };
 
 const FormLabelWithAsterisk = ({ children }: { children: React.ReactNode }) => (
@@ -169,52 +152,6 @@ export default function AddLeadForm() {
             <FormField control={form.control} name="dealValue" render={({ field }) => (
                 <FormItem><FormLabel>Deal Value (Lacs)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5.5" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
-            <FormField control={form.control} name="lender" render={({ field }) => (
-                <FormItem><FormLabel>Lender</FormLabel><FormControl><Input placeholder="e.g., HDFC Bank" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-             <FormField control={form.control} name="product" render={({ field }) => (
-                <FormItem><FormLabel>Product</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select a product" /></SelectTrigger></FormControl>
-                        <SelectContent>{products.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                    </Select><FormMessage />
-                </FormItem>
-            )}/>
-            <FormField control={form.control} name="leadSource" render={({ field }) => (
-                <FormItem><FormLabel>Lead Source</FormLabel><FormControl><Input placeholder="e.g., Connector" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-            <FormField control={form.control} name="leadType" render={({ field }) => (
-                <FormItem><FormLabel>Lead Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select a lead type" /></SelectTrigger></FormControl>
-                        <SelectContent>{leadTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                    </Select><FormMessage />
-                </FormItem>
-            )}/>
-            <FormField control={form.control} name="priority" render={({ field }) => (
-                <FormItem><FormLabel>Priority</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select a priority" /></SelectTrigger></FormControl>
-                        <SelectContent>{priorities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                    </Select><FormMessage />
-                </FormItem>
-            )}/>
-             <FormField
-              control={form.control}
-              name="remarks"
-              render={({ field }) => (
-                <FormItem className="md:col-span-3">
-                  <FormLabel>Remarks</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Add any relevant notes or remarks here..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
         </div>
         
         {error && (
