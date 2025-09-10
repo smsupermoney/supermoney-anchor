@@ -53,7 +53,7 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   //   // ...and other session properties
   // }
   
-  const anchorId = session?.roleType === 'Anchor' ? session.id || '' : '';
+  const anchorId = session?.roleType === 'Anchor' ? session.leadExternalId || '' : '';
   const anchorName = session?.roleType === 'Anchor' ? session.userName || 'Supermoney Admin' : 'Supermoney Admin';
 
   if (session?.roleType === 'Anchor' && !anchorId) {
