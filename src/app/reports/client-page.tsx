@@ -14,7 +14,7 @@ import StatusBadge from '@/components/status-badge';
 import type { NameValue } from 'recharts/types/component/DefaultTooltipContent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amount);
+const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
 const formatCompactCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact', maximumFractionDigits: 2 }).format(amount);
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ff4d4d'];
@@ -190,11 +190,18 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
             return (
             <div className="p-2 text-xs bg-background/90 backdrop-blur-sm border rounded-md shadow-lg">
                 <p className="font-bold mb-1">{label}</p>
-                {payload.map((entry: NameValue<number,string>, index: number) => (
-                    <p key={`item-${index}`} style={{ color: entry.color }}>
-                        {`${entry.name}: ${entry.name?.toLowerCase().includes("limit") || entry.name?.toLowerCase().includes("overdue") || entry.name?.toLowerCase().includes("value") ? formatCurrency(entry.value ?? 0) : entry.value}`}
-                    </p>
-                ))}
+                {payload.map((entry: NameValue<number,string>, index: number) => {
+                    const isCurrency = entry.name?.toLowerCase().includes("limit") || 
+                                       entry.name?.toLowerCase().includes("overdue") || 
+                                       entry.name?.toLowerCase().includes("value") ||
+                                       entry.name?.toLowerCase().includes("utilized") ||
+                                       entry.name?.toLowerCase().includes("available");
+                    return (
+                        <p key={`item-${index}`} style={{ color: entry.color }}>
+                            {`${entry.name}: ${isCurrency ? formatCurrency(entry.value ?? 0) : entry.value}`}
+                        </p>
+                    )
+                })}
             </div>
             );
         }
