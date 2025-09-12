@@ -150,7 +150,7 @@ export default function AddLeadForm() {
                 </FormItem>
             )}/>
             <FormField control={form.control} name="dealValue" render={({ field }) => (
-                <FormItem><FormLabel>Deal Value (Lacs)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5.5" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Deal Value (Crores)</FormLabel><FormControl><Input type="number" placeholder="e.g., 5.5" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
         </div>
         

@@ -293,7 +293,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 <TableCell>{lead.zone}</TableCell>
                                 <TableCell>{lead.leadSource}</TableCell>
                                 <TableCell>
-                                    <Badge variant="secondary">{formatCurrency(lead.dealValue * 100000)}</Badge>
+                                    <Badge variant="secondary">{formatCurrency(lead.dealValue * 10000000)}</Badge>
                                 </TableCell>
                                 <TableCell>{formatDate(lead.leadDate)}</TableCell>
                                 <TableCell>
