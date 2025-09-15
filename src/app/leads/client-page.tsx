@@ -60,7 +60,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     setLeads(initialLeads);
   }, [initialLeads]);
   
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount * 10000000);
   const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
 
   const getLatestRemark = (lead: MomentumDealerLead) => {
@@ -103,11 +103,14 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
 
       const categoryCondition = filters.leadCategory === "" || (lead.leadCategory || '').toLowerCase() === filters.leadCategory.toLowerCase();
 
+      // Check against both old and new contact number fields
+      const contactNumberString = lead.contactNumber || (lead.contactNumbers && lead.contactNumbers[0]?.value) || '';
+
       return (
         (lead.name || '').toLowerCase().includes(filters.name.toLowerCase()) &&
         (lead.city || '').toLowerCase().includes(filters.city.toLowerCase()) &&
         (lead.zone || '').toLowerCase().includes(filters.zone.toLowerCase()) &&
-        (lead.contactNumber || '').toLowerCase().includes(filters.contactNumber.toLowerCase()) &&
+        contactNumberString.toLowerCase().includes(filters.contactNumber.toLowerCase()) &&
         statusCondition &&
         categoryCondition
       );
@@ -285,7 +288,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 <TableCell>{lead.spoc}</TableCell>
                                  <TableCell>
                                     <div className="max-w-[150px] truncate">
-                                        <p>{lead.contactNumber || 'N/A'}</p>
+                                        <p>{lead.contactNumber || (lead.contactNumbers && lead.contactNumbers[0]?.value) || 'N/A'}</p>
                                         <p className="text-muted-foreground truncate">{lead.email || 'N/A'}</p>
                                     </div>
                                 </TableCell>
@@ -293,7 +296,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 <TableCell>{lead.zone}</TableCell>
                                 <TableCell>{lead.leadSource}</TableCell>
                                 <TableCell>
-                                    <Badge variant="secondary">{formatCurrency(lead.dealValue * 10000000)}</Badge>
+                                    <Badge variant="secondary">{formatCurrency(lead.dealValue)}</Badge>
                                 </TableCell>
                                 <TableCell>{formatDate(lead.leadDate)}</TableCell>
                                 <TableCell>

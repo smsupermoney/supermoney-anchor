@@ -6,6 +6,7 @@
 
 
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -211,7 +212,8 @@ export type MomentumDealerLead = {
   status: string;
   updatedAt: string; // ISO date string
   zone: string;
-  contactNumber?: string;
+  contactNumber?: string; // Kept for backwards compatibility
+  contactNumbers?: { value: string }[]; // New structure
   email?: string;
   leadCategory: 'Dealer' | 'Vendor';
 }

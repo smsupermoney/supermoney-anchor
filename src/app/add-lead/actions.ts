@@ -38,14 +38,14 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   const session = await getSession();
   
   // The user's Firestore document ID, e.g., "8eqZodWO89So7VApzCef", is stored in session.id
-  const anchorId = session?.roleType === 'Anchor' ? session.id || '' : '';
-  const anchorName = session?.roleType === 'Anchor' ? session.userName || 'Supermoney Admin' : 'Supermoney Admin';
+  const anchorId = session?.id || '';
+  const anchorName = session?.userName || 'Supermoney Admin';
 
   if (session?.roleType === 'Anchor' && !anchorId) {
       console.warn("Anchor user is creating a lead but does not have a user ID in their session.");
   }
   
-  const { leadCategory, dealValue, ...rest } = validatedFields.data;
+  const { leadCategory, dealValue, contactNumber, ...rest } = validatedFields.data;
 
   const leadData = {
     ...rest,
@@ -59,6 +59,7 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
     leadDate: new Date().toISOString(),
     initialLeadDate: new Date().toISOString(),
     assignedTo: null,
+    contactNumbers: [{ value: contactNumber }], // New format
   };
 
   console.log({leadData, session, anchorId, anchorName});
