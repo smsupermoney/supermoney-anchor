@@ -38,7 +38,7 @@ export async function addSingleLead(data: LeadFormValues): Promise<ActionResult>
   const session = await getSession();
   
   // The user's Firestore document ID, e.g., "8eqZodWO89So7VApzCef", is stored in session.id
-  const anchorId = session?.id || '';
+  const anchorId = session?.leadExternalId || '';
   const anchorName = session?.userName || 'Supermoney Admin';
 
   if (session?.roleType === 'Anchor' && !anchorId) {
