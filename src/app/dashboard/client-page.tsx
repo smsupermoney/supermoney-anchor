@@ -15,7 +15,7 @@ import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
 import type { Invoice, Program, Dealer, MomentumDealerLead } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
-import { subDays, startOfDay, addDays, formatISO } from "date-fns";
+import { subDays, startOfDay, addDays, formatISO, parseISO } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import AiChat from "@/components/ai-chat";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
@@ -90,8 +90,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
   const dateFilterParams = `dateFrom=${formatISO(sevenDaysAgo)}&dateTo=${formatISO(today)}`;
 
   const invoicesLast7Days = initialInvoices.filter((i) => {
-    const invoiceDate = startOfDay(new Date(i.date));
-    return invoiceDate >= sevenDaysAgo && invoiceDate <= today;
+    if (!i.disburseDate) return false;
+    const disburseDate = startOfDay(parseISO(i.disburseDate));
+    if (isNaN(disburseDate.getTime())) return false;
+    return disburseDate >= sevenDaysAgo && disburseDate <= today;
   });
   
   const totalLast7Days = invoicesLast7Days.length;
