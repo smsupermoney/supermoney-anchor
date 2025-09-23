@@ -98,6 +98,24 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
     'Supermoney Finance': 'Supermoney Finance'
   };
 
+  // Function to map detailed status to a simplified display status
+  const getDisplayStatus = (status: InvoiceStatus): 'Disbursed' | 'Rejected' | 'Pending' | 'Repaid' => {
+      switch (status) {
+          case 'Disbursed':
+              return 'Disbursed';
+          case 'Rejected':
+              return 'Rejected';
+          case 'Repaid':
+              return 'Repaid';
+          case 'Initiated':
+          case 'Approved':
+          case 'Sent to Lender':
+              return 'Pending';
+          default:
+              return 'Pending';
+      }
+  };
+
   // This effect ensures that if the user navigates (e.g., browser back/forward),
   // the state is updated to reflect the new URL parameters.
   useEffect(() => {
@@ -433,7 +451,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div><StatusBadge status={invoice.status} /></div>
+                            <div><StatusBadge status={getDisplayStatus(invoice.status)} /></div>
                           </TooltipTrigger>
                           <TooltipContent><p>{invoice.status}</p></TooltipContent>
                         </Tooltip>
@@ -475,5 +493,3 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
     </>
   );
 }
-
-    
