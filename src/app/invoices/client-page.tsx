@@ -347,7 +347,6 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                   <TableHead>Date</TableHead>
                   <TableHead>Disburse Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Overdue Amount</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Remarks</TableHead>
                 </TableRow>
@@ -434,16 +433,6 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                             <div className="truncate max-w-[120px] ml-auto">{formatCurrency(invoice.amount)}</div>
                           </TooltipTrigger>
                           <TooltipContent><p>{formatCurrency(invoice.amount)}</p></TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableCell>
-                    <TableCell className="text-right text-destructive">
-                       <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="truncate max-w-[100px] ml-auto">{invoice.overdueAmount && invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}</div>
-                          </TooltipTrigger>
-                          <TooltipContent><p>{invoice.overdueAmount && invoice.overdueAmount > 0 ? formatCurrency(invoice.overdueAmount) : "-"}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
