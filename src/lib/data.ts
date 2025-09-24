@@ -137,7 +137,8 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
         anchorId: dealerInfo?.anchorId || data.anchorId || '',
         lender: programMap.get(data.programId) || 'Unknown Lender',
         overdueAmount: overdueAmount,
-        invoiceImage: data.invoiceImage || ''
+        invoiceImage: data.invoiceImage || '',
+        invoiceSentDate: data.invoiceSentDate || ''
     } as Invoice;
   });
 
@@ -557,6 +558,7 @@ export const dealerLeads: DealerLead[] = [
 
 
     
+
 
 
 
