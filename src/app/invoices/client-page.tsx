@@ -344,7 +344,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                   <TableHead>Dealer</TableHead>
                   {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Invoice Date</TableHead>
                   <TableHead>Disburse Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead>Status</TableHead>
