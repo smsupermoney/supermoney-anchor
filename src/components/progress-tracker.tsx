@@ -14,8 +14,10 @@ export default function ProgressTracker({ steps, currentStep, className }: Progr
   return (
     <div className={cn('flex items-center w-full', className)}>
       {steps.map((step, index) => {
-        const isCompleted = index < currentStepIndex;
-        const isCurrent = index === currentStepIndex;
+        // A step is considered completed if its index is less than the current step's index.
+        // OR if the current step is 'Disbursed' and the step being rendered is also 'Disbursed'.
+        const isCompleted = index < currentStepIndex || (currentStep === 'Disbursed' && index === currentStepIndex);
+        const isCurrent = index === currentStepIndex && !isCompleted;
 
         return (
           <React.Fragment key={step}>
