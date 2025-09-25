@@ -422,9 +422,9 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="truncate max-w-[100px]">{invoice.invoiceSentDate || '-'}</div>
+                            <div className="truncate max-w-[100px]">{invoice.disbursementSentDate || '-'}</div>
                           </TooltipTrigger>
-                          <TooltipContent><p>{invoice.invoiceSentDate || 'N/A'}</p></TooltipContent>
+                          <TooltipContent><p>{invoice.disbursementSentDate || 'N/A'}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
