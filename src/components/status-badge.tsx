@@ -2,6 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { InvoiceStatus, LeadStatus, Retailer, DealerOnboardingStatus, RepaymentStatus } from "@/types";
+import { CheckCircle2 } from "lucide-react";
 
 type Status = Retailer['status'] | InvoiceStatus | LeadStatus | DealerOnboardingStatus | RepaymentStatus | string;
 
@@ -52,14 +53,18 @@ const statusColors: Record<Status, string> = {
 };
 
 export default function StatusBadge({ status, className }: StatusBadgeProps) {
+  const isDisbursed = status === 'Disbursed';
+
   return (
     <Badge
       className={cn(
         "font-medium capitalize",
         statusColors[status] || 'bg-gray-100 text-gray-800 border-gray-200',
+        isDisbursed && "flex items-center gap-1",
         className
       )}
     >
+      {isDisbursed && <CheckCircle2 className="h-3 w-3" />}
       {status}
     </Badge>
   );
