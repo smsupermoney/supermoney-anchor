@@ -8,7 +8,7 @@ import type { User } from "@/types";
 export default async function InvoicesPage() {
   noStore();
   const session = await getSession();
-  const isAdmin = session?.roleType === 'Admin';
+  const isAdmin = session?.roleType === 'Admin' || session?.roleType === 'SuperMoney User';
   // Pass anchorId if the user is not an admin, otherwise pass undefined.
   const anchorId = isAdmin ? undefined : session?.externalId;
 

@@ -116,7 +116,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     getDocs(collection(db1, 'programs')),
   ]);
   
-  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.id, {name: d.data().dealerName, anchorId: d.data().anchorId}]));
+  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.data().dealerId, {name: d.data().dealerName, anchorId: d.data().anchorId}]));
   const programMap = new Map(programSnapshot.docs.map(p => [p.data().programId, p.data().lenderName]));
   
   const today = new Date();
@@ -356,7 +356,7 @@ export const spokeStatuses = [
     'Limit Live', 'On Hold', 'Queries Raised', 'Relook'
 ] as const;
 
-export const leadStatuses: LeadStatus[] = ['Lead Created', 'Registered', 'KYC', 'Credit', 'Operations', 'PSD Completed', 'Dropped'];
+export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
 
 export const leads: Lead[] = [
   { id: 'LEAD001', dealerName: 'New Age Retail', contactPerson: 'John Doe', contactEmail: 'john.d@newage.com', status: 'KYC', createdAt: '2024-07-15' },
@@ -558,6 +558,7 @@ export const dealerLeads: DealerLead[] = [
 
 
     
+
 
 
 
