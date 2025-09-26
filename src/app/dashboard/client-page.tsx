@@ -84,39 +84,27 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount).replace('₹', '₹ ');
   const formatCompactCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
 
-  const today = startOfDay(new Date());
-  const sevenDaysAgo = subDays(today, 6); // To include today, we go back 6 days
-  
-  const dateFilterParams = `dateFrom=${formatISO(sevenDaysAgo)}&dateTo=${formatISO(today)}`;
-
-  // Corrected Invoice Summary Logic
   const { totalLast7Days, disbursedLast7Days, pendingLast7Days, rejectedLast7Days } = useMemo(() => {
-    const today = startOfDay(new Date());
-    const sevenDaysAgo = subDays(today, 6);
+      const today = startOfDay(new Date());
+      const sevenDaysAgo = subDays(today, 6);
 
-    const invoicesSentLast7Days = initialInvoices.filter(i => {
-        if (!i.disbursementSentDate) return false;
-        const sentDate = startOfDay(parseISO(i.disbursementSentDate));
-        return sentDate >= sevenDaysAgo && sentDate <= today;
-    });
+      const invoicesSentLast7Days = initialInvoices.filter(i => {
+          if (!i.disbursementSentDate) return false;
+          const sentDate = startOfDay(parseISO(i.disbursementSentDate));
+          return sentDate >= sevenDaysAgo && sentDate <= today;
+      });
 
-    const invoicesDisbursedLast7Days = initialInvoices.filter(i => {
-        if (!i.disburseDate) return false;
-        const disburseDate = startOfDay(parseISO(i.disburseDate));
-        return disburseDate >= sevenDaysAgo && disburseDate <= today;
-    });
-
-    const total = invoicesSentLast7Days.length;
-    const disbursed = invoicesDisbursedLast7Days.filter(i => i.status === 'Disbursed').length;
-    const rejected = invoicesDisbursedLast7Days.filter(i => i.status === 'Rejected').length;
-    const pending = invoicesDisbursedLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
-
-    return {
-        totalLast7Days: total,
-        disbursedLast7Days: disbursed,
-        pendingLast7Days: pending,
-        rejectedLast7Days: rejected
-    };
+      const total = invoicesSentLast7Days.length;
+      const disbursed = invoicesSentLast7Days.filter(i => i.status === 'Disbursed').length;
+      const rejected = invoicesSentLast7Days.filter(i => i.status === 'Rejected').length;
+      const pending = invoicesSentLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
+      
+      return {
+          totalLast7Days: total,
+          disbursedLast7Days: disbursed,
+          pendingLast7Days: pending,
+          rejectedLast7Days: rejected
+      };
   }, [initialInvoices]);
 
   const overdueDealersCount = dealers.filter((d) => d.overdueAmount > 0).length;
@@ -285,19 +273,19 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                 </CardHeader>
                 <CardContent className="p-3 pt-0">
                     <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-center">
-                        <Link href={`/invoices?${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{totalLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><FileText className="w-3 h-3" /> Total</span>
                         </Link>
-                        <Link href={`/invoices?status=Disbursed&${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices?status=Disbursed" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{disbursedLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> Disbursed</span>
                         </Link>
-                        <Link href={`/invoices?status=Initiated,Approved,Sent to Lender&${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices?status=Initiated,Approved,Sent to Lender" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{pendingLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                         </Link>
-                        <Link href={`/invoices?status=Rejected&${dateFilterParams}`} className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
+                        <Link href="/invoices?status=Rejected" className="flex flex-col hover:bg-secondary rounded-md p-1 transition-colors">
                             <span className="font-bold">{rejectedLast7Days}</span>
                             <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><Ban className="w-3 h-3" /> Rejected</span>
                         </Link>
