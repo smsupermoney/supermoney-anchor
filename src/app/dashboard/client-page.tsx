@@ -89,17 +89,35 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
   
   const dateFilterParams = `dateFrom=${formatISO(sevenDaysAgo)}&dateTo=${formatISO(today)}`;
 
-  const invoicesLast7Days = initialInvoices.filter((i) => {
-    if (!i.disburseDate) return false;
-    const disburseDate = startOfDay(parseISO(i.disburseDate));
-    if (isNaN(disburseDate.getTime())) return false;
-    return disburseDate >= sevenDaysAgo && disburseDate <= today;
-  });
-  
-  const totalLast7Days = invoicesLast7Days.length;
-  const disbursedLast7Days = invoicesLast7Days.filter(i => i.status === 'Disbursed').length;
-  const pendingLast7Days = invoicesLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
-  const rejectedLast7Days = invoicesLast7Days.filter(i => i.status === 'Rejected').length;
+  // Corrected Invoice Summary Logic
+  const { totalLast7Days, disbursedLast7Days, pendingLast7Days, rejectedLast7Days } = useMemo(() => {
+    const today = startOfDay(new Date());
+    const sevenDaysAgo = subDays(today, 6);
+
+    const invoicesSentLast7Days = initialInvoices.filter(i => {
+        if (!i.disbursementSentDate) return false;
+        const sentDate = startOfDay(parseISO(i.disbursementSentDate));
+        return sentDate >= sevenDaysAgo && sentDate <= today;
+    });
+
+    const invoicesDisbursedLast7Days = initialInvoices.filter(i => {
+        if (!i.disburseDate) return false;
+        const disburseDate = startOfDay(parseISO(i.disburseDate));
+        return disburseDate >= sevenDaysAgo && disburseDate <= today;
+    });
+
+    const total = invoicesSentLast7Days.length;
+    const disbursed = invoicesDisbursedLast7Days.filter(i => i.status === 'Disbursed').length;
+    const rejected = invoicesDisbursedLast7Days.filter(i => i.status === 'Rejected').length;
+    const pending = invoicesDisbursedLast7Days.filter(i => ['Initiated', 'Approved', 'Sent to Lender'].includes(i.status)).length;
+
+    return {
+        totalLast7Days: total,
+        disbursedLast7Days: disbursed,
+        pendingLast7Days: pending,
+        rejectedLast7Days: rejected
+    };
+  }, [initialInvoices]);
 
   const overdueDealersCount = dealers.filter((d) => d.overdueAmount > 0).length;
   
@@ -111,10 +129,6 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
   const disbursedLeads = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'disbursed').length;
   const rejectedLeads = momentumLeads.filter(l => (l.status || '').toLowerCase() === 'rejected').length;
 
-
-  const disbursedAmountLast7Days = invoicesLast7Days
-    .filter(i => i.status === 'Disbursed')
-    .reduce((sum, i) => sum + i.amount, 0);
 
   const lenderFullNameMapping: Record<string, string> = {
     'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED': 'CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED',
