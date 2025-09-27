@@ -18,6 +18,7 @@ import SupermoneyLogo from '@/components/supermoney-logo';
 import CompanyLogo from '@/components/company-logo';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import ResetPasswordDialog from './reset-password-dialog';
 
 function LoginButton() {
   const { pending } = useFormStatus();
@@ -78,10 +79,9 @@ export default function LoginForm() {
           <LoginButton />
         </form>
       </CardContent>
-      {/* <CardFooter className="flex flex-col items-center space-y-2">
-        <SupermoneyLogo className="mx-auto" />
-      </CardFooter> */}
-
+      <CardFooter className="flex flex-col items-center space-y-4 pb-6">
+        <ResetPasswordDialog />
+      </CardFooter>
     </Card>
   );
 }

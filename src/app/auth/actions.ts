@@ -8,6 +8,8 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/lib/session';
 import { cookies } from 'next/headers';
 import type { User, UserRole } from '@/types';
+import { collection, getDocs, query, where, updateDoc } from 'firebase/firestore';
+import { db1 } from '@/lib/firebase';
 
 export async function authenticate(
   prevState: string | undefined,
@@ -74,4 +76,41 @@ export async function logout() {
   
   session.destroy();
   redirect('/');
+}
+
+const resetPasswordSchema = z.object({
+    email: z.string().email(),
+    newPassword: z.string().min(6, "Password must be at least 6 characters."),
+});
+
+type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export async function resetPassword(input: ResetPasswordInput): Promise<{ message?: string; error?: string }> {
+    const validated = resetPasswordSchema.safeParse(input);
+
+    if (!validated.success) {
+        return { error: 'Invalid data provided.' };
+    }
+
+    const { email, newPassword } = validated.data;
+
+    try {
+        const usersRef = collection(db1, 'users');
+        const q = query(usersRef, where('emailAddress', '==', email));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return { error: 'User with this email address not found.' };
+        }
+
+        const userDoc = querySnapshot.docs[0];
+        await updateDoc(userDoc.ref, { password: newPassword });
+
+        return { message: 'Password has been reset successfully.' };
+
+    } catch (e) {
+        console.error('Error resetting password:', e);
+        const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
+        return { error: `Failed to reset password: ${errorMessage}` };
+    }
 }
