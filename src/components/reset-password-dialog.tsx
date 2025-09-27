@@ -68,7 +68,7 @@ export default function ResetPasswordDialog() {
       const result = await checkUserExists(values.emailAddress);
       if (result.exists) {
         setEmail(values.emailAddress);
-        passwordForm.reset(); // Explicitly reset password form here
+        passwordForm.reset({ newPassword: "", confirmPassword: "" }); // Explicitly reset here
         setStep("password");
       } else {
         setError(result.error || "No user found with this email address.");
@@ -83,7 +83,6 @@ export default function ResetPasswordDialog() {
       const result = await resetPassword({ email, newPassword: values.newPassword });
       if (result.error) {
         setError(result.error);
-        // If the user doesn't exist, go back to the email step
         if (result.error.includes("not found")) {
             setTimeout(() => {
                 setStep("email");
@@ -105,7 +104,6 @@ export default function ResetPasswordDialog() {
     }
   };
   
-  // Reset state when dialog is closed/opened
   React.useEffect(() => {
     if (open) {
       setStep("email");
@@ -167,7 +165,7 @@ export default function ResetPasswordDialog() {
             </Form>
         ) : (
             <Form {...passwordForm}>
-                <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)} className="space-y-6 pt-4">
+                <form key={step} onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)} className="space-y-6 pt-4">
                      <FormField
                     control={passwordForm.control}
                     name="newPassword"
