@@ -114,3 +114,17 @@ export async function resetPassword(input: ResetPasswordInput): Promise<{ messag
         return { error: `Failed to reset password: ${errorMessage}` };
     }
 }
+
+
+export async function checkUserExists(email: string): Promise<{ exists: boolean; error?: string }> {
+    if (!email) {
+        return { exists: false, error: 'Email is required.' };
+    }
+    try {
+        const user = await getUserByEmail(email);
+        return { exists: !!user };
+    } catch (e) {
+        console.error('Error checking user existence:', e);
+        return { exists: false, error: 'An error occurred while verifying the email.' };
+    }
+}

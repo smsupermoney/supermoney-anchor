@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, KeyRound, Loader2, Mail } from "lucide-react";
-import { resetPassword } from "@/app/auth/actions";
+import { resetPassword, checkUserExists } from "@/app/auth/actions";
 
 const emailSchema = z.object({
   emailAddress: z.string().email("Please enter a valid email address."),
@@ -65,11 +65,13 @@ export default function ResetPasswordDialog() {
   const handleEmailSubmit = async (values: EmailFormValues) => {
       setIsSubmitting(true);
       setError(null);
-      // We don't actually check the email here on the client. 
-      // We will check it when we try to update the password.
-      // This is a simple implementation. A real-world one would send an email.
-      setEmail(values.emailAddress);
-      setStep("password");
+      const result = await checkUserExists(values.emailAddress);
+      if (result.exists) {
+        setEmail(values.emailAddress);
+        setStep("password");
+      } else {
+        setError(result.error || "No user found with this email address.");
+      }
       setIsSubmitting(false);
   };
 
@@ -147,6 +149,13 @@ export default function ResetPasswordDialog() {
                         </FormItem>
                     )}
                     />
+                     {error && (
+                        <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
                     <DialogFooter>
                         <Button type="submit" disabled={isSubmitting}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
