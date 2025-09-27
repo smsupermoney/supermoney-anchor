@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, KeyRound, Loader2, Mail } from "lucide-react";
+import { AlertCircle, KeyRound, Loader2, Mail, X } from "lucide-react";
 import { resetPassword, checkUserExists } from "@/app/auth/actions";
 
 const emailSchema = z.object({
@@ -68,6 +68,7 @@ export default function ResetPasswordDialog() {
       const result = await checkUserExists(values.emailAddress);
       if (result.exists) {
         setEmail(values.emailAddress);
+        passwordForm.reset(); // Explicitly reset password form here
         setStep("password");
       } else {
         setError(result.error || "No user found with this email address.");
