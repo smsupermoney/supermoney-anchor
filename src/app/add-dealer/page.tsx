@@ -15,7 +15,7 @@ export default function AddDealerPage() {
           <CardTitle>Bulk Import Dealers & Limits</CardTitle>
           <CardDescription className="flex justify-between items-center">
             <span>
-              Upload an Excel file. `GST` is mandatory (15-digit alphanumeric). The combination of `applicationId` and `GST` must be unique.
+              Upload an Excel file. `GST` and `programId` are mandatory. The combination of `programId` and `GST` must be unique.
             </span>
              <DownloadSampleExcel data={sampleDealers} fileName="sample-dealers.xlsx" />
           </CardDescription>

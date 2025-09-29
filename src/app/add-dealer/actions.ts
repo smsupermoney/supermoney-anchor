@@ -30,13 +30,13 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing dealers to check for duplicates based on appId + GST
+    // Fetch existing dealers to check for duplicates based on programId + GST
     const dealersRef = collection(db1, "dealers");
     const existingDealersSnapshot = await getDocs(query(dealersRef));
     const existingDealerKeys = new Set(
-        existingDealersSnapshot.docs.map(doc => `${doc.data().applicationId}-${doc.data().GST}`)
+        existingDealersSnapshot.docs.map(doc => `${doc.data().programId}-${doc.data().GST}`)
     );
-    const existingDealerIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
+    const existingDealerAppIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
 
 
     const batch = writeBatch(db1);
@@ -46,10 +46,11 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
     const processedCompositeKeys = new Set<string>();
 
     for (const row of dataArray) {
-        const dealerId = row.applicationId?.toString().trim();
+        const dealerAppId = row.applicationId?.toString().trim();
         const gst = row.GST?.toString().trim();
+        const programId = row.programId?.toString().trim();
 
-        if (!dealerId) {
+        if (!dealerAppId) {
             console.warn("Skipping a row because applicationId is missing.", row);
             skippedEntriesCount++;
             continue;
@@ -60,6 +61,12 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
             skippedEntriesCount++;
             continue;
         }
+
+        if (!programId) {
+            console.warn("Skipping a row because programId is missing.", row);
+            skippedEntriesCount++;
+            continue;
+        }
         
         if (!gstRegex.test(gst)) {
             console.warn(`Skipping a row because GST is invalid: ${gst}`, row);
@@ -67,18 +74,18 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
             continue;
         }
 
-        const compositeKey = `${dealerId}-${gst}`;
+        const compositeKey = `${programId}-${gst}`;
         if (processedCompositeKeys.has(compositeKey)) {
              console.warn(`Skipping a duplicate row found in the Excel file itself: ${compositeKey}`, row);
              skippedEntriesCount++;
              continue;
         }
         
-        const isUpdate = existingDealerIds.has(dealerId);
+        const isUpdate = existingDealerAppIds.has(dealerAppId);
 
         // Even if it's an update, we must check if the new composite key conflicts.
         if (!isUpdate && existingDealerKeys.has(compositeKey)) {
-             console.warn(`Skipping a row because the combination of applicationId and GST already exists in the database: ${compositeKey}`, row);
+             console.warn(`Skipping a row because the combination of programId and GST already exists in the database: ${compositeKey}`, row);
              skippedEntriesCount++;
              continue;
         }
@@ -86,34 +93,33 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         processedCompositeKeys.add(compositeKey);
 
         const customerId = row.customerId?.toString();
-        const programId = row.programId?.toString();
-
-        if (!customerId || !programId) {
-            console.warn("Skipping a row because customerId or programId is missing.", row);
+        
+        if (!customerId) {
+            console.warn("Skipping a row because customerId is missing.", row);
             skippedEntriesCount++;
             continue;
         }
 
         // 1. Prepare data for the 'dealers' collection
-        const dealerRef = doc(db1, "dealers", dealerId);
+        const dealerRef = doc(db1, "dealers", dealerAppId);
         const dealerName = row.dealerName || '';
         const dealerData = {
-          dealerId: dealerId,
+          dealerId: dealerAppId,
           customerId: customerId,
-          applicationId: dealerId,
+          applicationId: dealerAppId,
           programId: programId,
           anchorId: row.anchorId || '',
           dealerName: dealerName,
           dealerName_lowercase: dealerName.toLowerCase(),
           status: row.status || 'Pending',
-          GST: gst, // Add the GST field
+          GST: gst,
         };
 
         // 2. Prepare data for the 'dealerLimits' collection
-        const limitRef = doc(db1, "dealerLimits", dealerId); 
+        const limitRef = doc(db1, "dealerLimits", dealerAppId); 
         const limitData = {
-          dealerId: dealerId,
-          applicationId: dealerId,
+          dealerId: dealerAppId,
+          applicationId: dealerAppId,
           limitAmount: Number(row.limitAmount) || 0,
           utilisationAmount: Number(row.utilisationAmount) || 0,
           availableAmount: Number(row.availableAmount) || 0,
