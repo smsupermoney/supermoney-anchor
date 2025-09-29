@@ -213,11 +213,23 @@ export async function getDealerLimits(dealerIds?: string[]): Promise<DealerLimit
     if (!dealerIds || dealerIds.length === 0) {
         return [];
     }
+
     const limitsCol = collection(db1, 'dealerLimits');
-    const q = query(limitsCol, where(documentId(), 'in', dealerIds));
+    const allLimits: DealerLimit[] = [];
+    const chunkSize = 30; // Firestore 'in' query limit
+
+    // Process the dealerIds in chunks
+    for (let i = 0; i < dealerIds.length; i += chunkSize) {
+        const chunk = dealerIds.slice(i, i + chunkSize);
+        if (chunk.length > 0) {
+            const q = query(limitsCol, where(documentId(), 'in', chunk));
+            const limitsSnapshot = await getDocs(q);
+            const chunkLimits = limitsSnapshot.docs.map(doc => doc.data() as DealerLimit);
+            allLimits.push(...chunkLimits);
+        }
+    }
     
-    const limitsSnapshot = await getDocs(q);
-    return limitsSnapshot.docs.map(doc => doc.data() as DealerLimit);
+    return allLimits;
 }
 
 
@@ -558,6 +570,7 @@ export const dealerLeads: DealerLead[] = [
 
 
     
+
 
 
 
