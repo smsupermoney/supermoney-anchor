@@ -25,9 +25,10 @@ type ReportsClientPageProps = {
     initialPrograms: Program[];
     users: User[];
     isAdmin: boolean;
+    totalOverdueAmount: number;
 };
 
-export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, users, isAdmin }: ReportsClientPageProps) {
+export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, users, isAdmin, totalOverdueAmount }: ReportsClientPageProps) {
     const [dateRange, setDateRange] = useState<string>('all');
 
     const filteredInvoices = useMemo(() => {
@@ -41,11 +42,10 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
 
     const summaryStats = useMemo(() => {
         const totalInvoiceValue = filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0);
-        const totalOverdueAmount = filteredInvoices.reduce((sum, inv) => sum + (inv.overdueAmount || 0), 0);
         const activeDealers = initialDealers.filter(d => d.status === 'Active').length;
         const activePrograms = initialPrograms.length;
         
-        return { totalInvoiceValue, totalOverdueAmount, activeDealers, activePrograms };
+        return { totalInvoiceValue, activeDealers, activePrograms };
     }, [filteredInvoices, initialDealers, initialPrograms]);
     
     const invoiceStatusData = useMemo(() => {
@@ -136,7 +136,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         // Sheet 1: Summary
         const summaryData = [
             { Metric: "Total Invoice Value", Value: formatCurrency(summaryStats.totalInvoiceValue) },
-            { Metric: "Total Overdue", Value: formatCurrency(summaryStats.totalOverdueAmount) },
+            { Metric: "Total Overdue", Value: formatCurrency(totalOverdueAmount) },
             { Metric: "Active Dealers", Value: summaryStats.activeDealers },
             { Metric: "Active Programs", Value: summaryStats.activePrograms },
         ];
@@ -235,7 +235,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                 </Card>
                  <Card>
                     <CardHeader><CardTitle className='text-sm font-medium'>Total Overdue</CardTitle></CardHeader>
-                    <CardContent><p className='text-2xl font-bold text-destructive'>{formatCurrency(summaryStats.totalOverdueAmount)}</p></CardContent>
+                    <CardContent><p className='text-2xl font-bold text-destructive'>{formatCurrency(totalOverdueAmount)}</p></CardContent>
                 </Card>
                  <Card>
                     <CardHeader><CardTitle className='text-sm font-medium'>Active Dealers</CardTitle></CardHeader>
@@ -404,7 +404,3 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         </div>
     );
 }
-
-    
-
-    

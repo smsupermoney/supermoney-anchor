@@ -13,13 +13,16 @@ export default async function ReportsPage() {
   const isAdmin = session?.roleType === 'Admin';
   
   // Fetch all necessary data. The client component will handle filtering.
-  const [invoices, dealers, { programs }, users] = await Promise.all([
+  const [invoices, dealers, { programs }, users, dealerLimits] = await Promise.all([
     getInvoices(anchorId),
     getDealers(anchorId),
     getPrograms(anchorId),
-    isAdmin ? getUsers() : Promise.resolve([])
+    isAdmin ? getUsers() : Promise.resolve([]),
+    getDealerLimits(anchorId ? (await getDealers(anchorId)).map(d => d.id) : undefined)
   ]);
   
+  const totalOverdueAmount = dealers.reduce((acc, dealer) => acc + dealer.overdueAmount, 0);
+
   return (
     <>
       <PageHeader title="Reports & Analytics" />
@@ -30,6 +33,7 @@ export default async function ReportsPage() {
             initialPrograms={programs}
             users={users}
             isAdmin={isAdmin}
+            totalOverdueAmount={totalOverdueAmount}
         />
       </div>
     </>
