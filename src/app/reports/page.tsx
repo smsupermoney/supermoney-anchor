@@ -4,7 +4,6 @@ import PageHeader from "@/components/page-header";
 import { getSession } from '@/lib/session';
 import { getInvoices, getDealers, getPrograms, getUsers, getDealerLimits } from '@/lib/data';
 import ReportsClientPage from './client-page';
-import { Dealer } from '@/types';
 
 export default async function ReportsPage() {
   noStore();
@@ -12,16 +11,18 @@ export default async function ReportsPage() {
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
   const isAdmin = session?.roleType === 'Admin';
   
-  // Fetch all necessary data. The client component will handle filtering.
-  const [invoices, dealers, { programs }, users, dealerLimits] = await Promise.all([
+  // Fetch all necessary data.
+  const [invoices, dealers, { programs }, users] = await Promise.all([
     getInvoices(anchorId),
     getDealers(anchorId),
     getPrograms(anchorId),
     isAdmin ? getUsers() : Promise.resolve([]),
-    getDealerLimits(anchorId ? (await getDealers(anchorId)).map(d => d.id) : undefined)
   ]);
+
+  const dealerIds = dealers.map(d => d.id);
+  const dealerLimits = await getDealerLimits(dealerIds);
   
-  const totalOverdueAmount = dealers.reduce((acc, dealer) => acc + dealer.overdueAmount, 0);
+  const totalOverdueAmount = dealerLimits.reduce((acc, limit) => acc + limit.principalOverdue, 0);
 
   return (
     <>
