@@ -10,6 +10,9 @@ type ActionResult = {
   error?: string;
 };
 
+// GST validation regex: 15-digit alphanumeric
+const gstRegex = /^[a-zA-Z0-9]{15}$/;
+
 export async function addDealers(formData: FormData): Promise<ActionResult> {
   const file = formData.get('excel-file') as File;
   if (!file) {
@@ -27,33 +30,68 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing dealer IDs to prevent duplicates
+    // Fetch existing dealers to check for duplicates based on appId + GST
     const dealersRef = collection(db1, "dealers");
     const existingDealersSnapshot = await getDocs(query(dealersRef));
+    const existingDealerKeys = new Set(
+        existingDealersSnapshot.docs.map(doc => `${doc.data().applicationId}-${doc.data().GST}`)
+    );
     const existingDealerIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
+
 
     const batch = writeBatch(db1);
     let newEntriesCount = 0;
     let updatedEntriesCount = 0;
     let skippedEntriesCount = 0;
+    const processedCompositeKeys = new Set<string>();
 
-    dataArray.forEach((row: any) => {
-        const dealerId = row.applicationId?.toString();
+    for (const row of dataArray) {
+        const dealerId = row.applicationId?.toString().trim();
+        const gst = row.GST?.toString().trim();
+
         if (!dealerId) {
             console.warn("Skipping a row because applicationId is missing.", row);
             skippedEntriesCount++;
-            return;
+            continue;
         }
 
-        const isUpdate = existingDealerIds.has(dealerId);
+        if (!gst) {
+            console.warn("Skipping a row because GST is missing.", row);
+            skippedEntriesCount++;
+            continue;
+        }
         
+        if (!gstRegex.test(gst)) {
+            console.warn(`Skipping a row because GST is invalid: ${gst}`, row);
+            skippedEntriesCount++;
+            continue;
+        }
+
+        const compositeKey = `${dealerId}-${gst}`;
+        if (processedCompositeKeys.has(compositeKey)) {
+             console.warn(`Skipping a duplicate row found in the Excel file itself: ${compositeKey}`, row);
+             skippedEntriesCount++;
+             continue;
+        }
+        
+        const isUpdate = existingDealerIds.has(dealerId);
+
+        // Even if it's an update, we must check if the new composite key conflicts.
+        if (!isUpdate && existingDealerKeys.has(compositeKey)) {
+             console.warn(`Skipping a row because the combination of applicationId and GST already exists in the database: ${compositeKey}`, row);
+             skippedEntriesCount++;
+             continue;
+        }
+        
+        processedCompositeKeys.add(compositeKey);
+
         const customerId = row.customerId?.toString();
         const programId = row.programId?.toString();
 
         if (!customerId || !programId) {
             console.warn("Skipping a row because customerId or programId is missing.", row);
             skippedEntriesCount++;
-            return;
+            continue;
         }
 
         // 1. Prepare data for the 'dealers' collection
@@ -68,6 +106,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
           dealerName: dealerName,
           dealerName_lowercase: dealerName.toLowerCase(),
           status: row.status || 'Pending',
+          GST: gst, // Add the GST field
         };
 
         // 2. Prepare data for the 'dealerLimits' collection
@@ -90,7 +129,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
             batch.set(limitRef, limitData);
             newEntriesCount++;
         }
-    });
+    }
     
     if (newEntriesCount > 0 || updatedEntriesCount > 0) {
       await batch.commit();
@@ -98,7 +137,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
 
     let message = `${newEntriesCount} new dealer(s) added and ${updatedEntriesCount} dealer(s) updated successfully.`;
     if (skippedEntriesCount > 0) {
-      message += ` ${skippedEntriesCount} entries were skipped due to missing required fields.`;
+      message += ` ${skippedEntriesCount} entries were skipped due to missing/invalid fields or duplicates.`;
     }
 
     return { message };

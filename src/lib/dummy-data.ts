@@ -311,6 +311,7 @@ export const samplePrograms = [
 export const sampleDealers = [
     {
         applicationId: "DEALER_001",
+        GST: "27ABCDE1234F1Z5",
         customerId: "CUST_001",
         programId: "PROG_SAMPLE_1",
         anchorId: "ANC001",
