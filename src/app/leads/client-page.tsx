@@ -253,11 +253,9 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                             <TableRow>
                                 <TableHead>Lead Name</TableHead>
                                 <TableHead>Lead Category</TableHead>
-                                <TableHead>SPOC</TableHead>
                                 <TableHead>Contact</TableHead>
                                 <TableHead>City</TableHead>
                                 <TableHead>Zone</TableHead>
-                                <TableHead>Lead Source</TableHead>
                                 <TableHead>Deal Value</TableHead>
                                 <TableHead>Lead Date</TableHead>
                                 <TableHead>Status</TableHead>
@@ -285,7 +283,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                         {lead.leadCategory}
                                     </Badge>
                                 </TableCell>
-                                <TableCell>{lead.spoc}</TableCell>
                                  <TableCell>
                                     <div className="max-w-[150px] truncate">
                                         <p>{lead.contactNumber || (lead.contactNumbers && lead.contactNumbers[0]?.value) || 'N/A'}</p>
@@ -294,7 +291,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 </TableCell>
                                 <TableCell>{lead.city}</TableCell>
                                 <TableCell>{lead.zone}</TableCell>
-                                <TableCell>{lead.leadSource}</TableCell>
                                 <TableCell>
                                     <Badge variant="secondary">{formatCurrency(lead.dealValue)}</Badge>
                                 </TableCell>
