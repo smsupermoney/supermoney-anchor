@@ -157,9 +157,17 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
 
   const filteredInvoices = useMemo(() => {
     return initialInvoices.filter((invoice) => {
-      const invoiceDate = new Date(invoice.date);
-      const isAfterStartDate = !date?.from || invoiceDate >= date.from;
-      const isBeforeEndDate = !date?.to || invoiceDate <= date.to;
+      let dateCondition = true;
+      if (date?.from || date?.to) {
+        if (!invoice.disburseDate) {
+          dateCondition = false;
+        } else {
+          const disburseDate = new Date(invoice.disburseDate);
+          const isAfterStartDate = !date.from || disburseDate >= date.from;
+          const isBeforeEndDate = !date.to || disburseDate <= date.to;
+          dateCondition = isAfterStartDate && isBeforeEndDate;
+        }
+      }
 
       const overdueCondition =
         filters.overdue === "" ||
@@ -179,8 +187,7 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
         (invoice.lender ?? '').toLowerCase().includes(filters.lender.toLowerCase()) &&
         statusCondition &&
         overdueCondition &&
-        isAfterStartDate &&
-        isBeforeEndDate
+        dateCondition
       );
     });
   }, [filters, date, initialInvoices]);
@@ -494,3 +501,5 @@ export default function InvoicesClientPage({ initialInvoices, isAdmin }: Invoice
     </>
   );
 }
+
+    
