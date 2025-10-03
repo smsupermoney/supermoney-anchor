@@ -187,11 +187,11 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                         <h4 className="font-semibold mb-1 text-primary">Supermoney</h4>
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Total Limit</span>
+                                <span className="text-muted-foreground">Total Active Limit</span>
                                 <span className="font-medium">{formatCurrency(supermoneyTotalLimit)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Utilized</span>
+                                <span className="text-muted-foreground">Active Utilized Limit</span>
                                 <span className="font-medium">{formatCurrency(supermoneyUtilizedCredit)}</span>
                             </div>
                         </div>
@@ -201,11 +201,11 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                         <h4 className="font-semibold mb-1">External Lenders</h4>
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Total Limit</span>
+                                <span className="text-muted-foreground">Total Active Limit</span>
                                 <span className="font-medium">{formatCurrency(externalTotalLimit)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Utilized</span>
+                                <span className="text-muted-foreground">Active Utilized Limit</span>
                                 <span className="font-medium">{formatCurrency(externalUtilizedCredit)}</span>
                             </div>
                         </div>
@@ -215,11 +215,11 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                         <h4 className="font-bold mb-1">Total</h4>
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Total Limit</span>
+                                <span className="text-muted-foreground">Total Active Limit</span>
                                 <span className="font-semibold">{formatCurrency(totalCreditLimit)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Utilized</span>
+                                <span className="text-muted-foreground">Active Utilized Limit</span>
                                 <span className="font-semibold">{formatCurrency(utilizedCredit)}</span>
                             </div>
                             <div className="flex justify-between items-center">
