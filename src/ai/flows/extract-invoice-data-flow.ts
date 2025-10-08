@@ -28,6 +28,7 @@ const ExtractInvoiceDataOutputSchema = z.object({
   amount: z.number().describe('The total amount on the invoice.'),
   dueDate: z.string().describe('The due date of the invoice in YYYY-MM-DD format.'),
   utrNumber: z.string().optional().describe('The Unique Transaction Reference (UTR) number, if present.'),
+  gstOrGstin: z.string().describe('The GST or GSTIN number of the dealer or buyer.'),
 });
 export type ExtractInvoiceDataOutput = z.infer<typeof ExtractInvoiceDataOutputSchema>;
 
@@ -46,7 +47,7 @@ const prompt = ai.definePrompt({
 
   Document: {{media url=documentDataUri}}
 
-  Extract the invoice number, dealer name (who the bill is for), the document type (e.g., Invoice, E-Way Bill), the total amount, the payment due date, and the UTR number if it is available.
+  Extract the invoice number, GST or GSTIN (who the bill is for), dealer name (who the bill is for), the document type (e.g., Invoice, E-Way Bill), the total amount, the payment due date, and the UTR number if it is available.
   Format the due date as YYYY-MM-DD.
   `,
 });
