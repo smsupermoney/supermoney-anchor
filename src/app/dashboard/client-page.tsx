@@ -216,10 +216,6 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                         <h4 className="font-bold mb-1">Total</h4>
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Lifetime Sanction Limit</span>
-                                <span className="font-semibold">{formatCurrency(lifetimeSanctionLimit)}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Total Active Limit</span>
                                 <span className="font-semibold">{formatCurrency(totalCreditLimit)}</span>
                             </div>
@@ -230,6 +226,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                             <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Available</span>
                                 <span className="font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
+                            </div>
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Lifetime Sanction Limit</span>
+                                <span className="font-semibold">{formatCurrency(lifetimeSanctionLimit)}</span>
                             </div>
                         </div>
                     </div>
@@ -592,5 +592,3 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
     </div>
   );
 }
-
-    
