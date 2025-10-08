@@ -202,6 +202,7 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             status: dealerData.status, 
             totalLimit: limitAmount,
             availableLimit: limitAmount - utilisationAmount,
+            GST: dealerData?.GST
         } as Dealer;
     });
 

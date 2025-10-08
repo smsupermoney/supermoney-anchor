@@ -45,6 +45,11 @@ function generateEmailBody(data: EmailData[]): string {
     `;
 
     data.forEach((item, index) => {
+        const now = new Date();
+        const date = now.toISOString().split('T')[0] || 'Not Detected';
+
+        const pad = (num: any) => String(num).padStart(2, '0');
+        const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
         html += `
             <h2>Document ${index + 1}: ${item.fileName}</h2>
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
@@ -57,7 +62,7 @@ function generateEmailBody(data: EmailData[]): string {
                 <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
                 <tr><td><strong>Invoice Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
                 <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>
-                <tr><td><strong>Due Date</strong></td><td>${item.extractedData.dueDate || 'Not Detected'}</td></tr>
+                <tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>
             `;
         } else if (item.error) {
             html += `<tr><td style="width: 30%;"><strong>Error</strong></td><td style="color: red;">${item.error}</td></tr>`;
@@ -86,7 +91,7 @@ export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult>
 
     const mailOptions = {
         from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-        to: "ashwathi@supermoney.in",
+        to: "invoice@supermoney.in",
         subject: "New Invoice Submission",
         html: generateEmailBody(data),
         attachments: attachments,
