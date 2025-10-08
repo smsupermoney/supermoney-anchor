@@ -31,6 +31,7 @@ export type Dealer = {
   availableLimit: number;
   applicationId: string;
   customerId: string;
+  GST: string;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';
@@ -230,3 +231,23 @@ export type StopSupplyLog = {
     overdueAmount: number;
     createdAt: string; // ISO Date string
 };
+
+export interface ExtractedData {
+  invoiceNumber: string;
+  dealerName: string;
+  documentType: string;
+  amount: number;
+  dueDate: string;
+  utrNumber: string;
+}
+
+export interface InvoiceDocument {
+  file: File; // or Blob if you're using blobs
+  preview: string;
+  isLoading: boolean;
+  extractedData: ExtractedData;
+  disburseAmount: string;
+  overdueAmount: number;
+  applicationId: string;
+  customerId: string;
+}

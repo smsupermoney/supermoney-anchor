@@ -20,7 +20,8 @@ import { Card, CardContent } from "./ui/card";
 import { sendInvoiceEmail } from "@/app/add-invoice/email-actions";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import type { Dealer } from "@/types";
+import type { Dealer, InvoiceDocument } from "@/types";
+import { InvoiceConsentDialog } from "./invoice-consent-dialog";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
@@ -44,6 +45,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [open, setOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [consentOpen, setConsentOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
@@ -74,7 +76,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const result = await extractInvoiceData({ documentDataUri });
 
       // Find dealer to get IDs
-      const dealer = dealers.find(d => d.name.toLowerCase() === result.dealerName.toLowerCase());
+      const dealer = dealers.find(d => d.GST === result.gstOrGstin);
       const overdueAmount = dealer?.overdueAmount;
       const applicationId = dealer?.applicationId;
       const customerId = dealer?.customerId;
@@ -151,6 +153,20 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       e.dataTransfer.clearData();
     }
   };
+
+  const handleInvoiceConstent = () => {
+    if (uploadedFiles.length === 0) {
+      toast({ variant: "destructive", title: "No Files Uploaded", description: "Please upload at least one invoice document." });
+      return;
+    }
+
+    if (uploadedFiles.some(f => f.isLoading)) {
+      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the AI to finish reading all documents." });
+      return;
+    }
+
+    setConsentOpen(true);
+  }
 
   const handleSubmit = async () => {
     if (uploadedFiles.length === 0) {
@@ -317,11 +333,20 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || uploadedFiles.some(f => f.isLoading)}>
+          <Button onClick={handleInvoiceConstent} disabled={isSubmitting || uploadedFiles.some(f => f.isLoading)}>
             {isSubmitting || uploadedFiles.some(f => f.isLoading) ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4"/>}
             {isSubmitting ? 'Submitting...' : 'Submit Invoice'}
           </Button>
         </DialogFooter>
+        <InvoiceConsentDialog
+          open={consentOpen}
+          document={uploadedFiles as InvoiceDocument[]}
+          onClose={() => setConsentOpen(false)}
+          onVerified={async () => {
+            setConsentOpen(false);
+            await handleSubmit(); // your original invoice submission
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
