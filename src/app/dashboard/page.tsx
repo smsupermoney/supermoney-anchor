@@ -20,6 +20,8 @@ export default async function Dashboard() {
     getMomentumDealerLeads(leadAnchorId), // Use the correct ID for fetching leads
   ]);
   
+  const lifetimeSanctionLimit = dealers.reduce((sum, dealer) => sum + dealer.totalLimit, 0);
+  
   return (
     <DashboardClient 
       initialPrograms={programs} 
@@ -27,6 +29,9 @@ export default async function Dashboard() {
       initialDealers={dealers}
       momentumLeads={momentumLeads}
       totalOverdueAmount={totalOverdueAmount}
+      lifetimeSanctionLimit={lifetimeSanctionLimit}
     />
   );
 }
+
+    

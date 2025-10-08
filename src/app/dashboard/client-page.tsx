@@ -31,9 +31,10 @@ type DashboardClientProps = {
   initialDealers: Dealer[];
   momentumLeads: MomentumDealerLead[];
   totalOverdueAmount: number;
+  lifetimeSanctionLimit: number;
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, totalOverdueAmount }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, totalOverdueAmount, lifetimeSanctionLimit }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { user } = useAuth();
   
@@ -214,6 +215,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                     <div>
                         <h4 className="font-bold mb-1">Total</h4>
                         <div className="space-y-1">
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Lifetime Sanction Limit</span>
+                                <span className="font-semibold">{formatCurrency(lifetimeSanctionLimit)}</span>
+                            </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Total Active Limit</span>
                                 <span className="font-semibold">{formatCurrency(totalCreditLimit)}</span>
@@ -587,3 +592,5 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
     </div>
   );
 }
+
+    
