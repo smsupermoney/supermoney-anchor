@@ -1,0 +1,18 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  # Increase this value if you'd like to automatically spin up
+  # more instances in response to increased traffic.
+  maxInstances: 1
+# This section securely provides your application's secrets.
+# These secrets are stored in Google Cloud Secret Manager.
+# https://firebase.google.com/docs/app-hosting/configure#manage-secrets
+secretEnvironmentVariables:
+  - secret: SMTP_HOST
+  - secret: SMTP_PORT
+  - secret: SMTP_USER
+  - secret: SMTP_PASS
+  - secret: SECRET_COOKIE_PASSWORD
+  - secret: SECRET_GEMINI_API_KEY
+  - secret: DEALER_API_SECRET_KEY
