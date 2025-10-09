@@ -46,10 +46,12 @@ function generateEmailBody(data: EmailData[]): string {
 
     data.forEach((item, index) => {
         const now = new Date();
-        const date = now.toISOString().split('T')[0] || 'Not Detected';
+        const istDateTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-        const pad = (num: any) => String(num).padStart(2, '0');
-        const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const pad = (num: number) => String(num).padStart(2, '0');
+        const date = `${istDateTime.getFullYear()}-${pad(istDateTime.getMonth() + 1)}-${pad(istDateTime.getDate())}`;
+        const time = `${pad(istDateTime.getHours())}:${pad(istDateTime.getMinutes())}:${pad(istDateTime.getSeconds())}`;
+
         html += `
             <h2>Document ${index + 1}: ${item.fileName}</h2>
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
