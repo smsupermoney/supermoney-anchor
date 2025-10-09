@@ -22,6 +22,7 @@ import DealerDetailDialog from "@/components/dealer-detail-dialog";
 import { useSearchParams } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { Badge } from "@/components/ui/badge";
 
 type RetailersClientPageProps = {
   initialDealers: Dealer[];
@@ -206,6 +207,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   <TableHead>Email Address</TableHead>
                   {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
+                  <TableHead>Zone</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Total Limit</TableHead>
                   <TableHead className="text-right">Amount Disbursed</TableHead>
@@ -264,9 +266,12 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                           <TooltipTrigger asChild>
                             <div className="truncate max-w-[200px]">{dealer.lenderName}</div>
                           </TooltipTrigger>
-                           <TooltipContent><p>{lenderFullNameMapping[dealer.lenderName] || dealer.lenderName}</p></TooltipContent>
+                           <TooltipContent><p>{lenderFullNameMapping[dealer.lenderName ?? ''] || dealer.lenderName}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+                    </TableCell>
+                    <TableCell>
+                      {dealer.zone ? <Badge variant="secondary">{dealer.zone}</Badge> : 'N/A'}
                     </TableCell>
                     <TableCell>
                       <TooltipProvider>

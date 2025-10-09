@@ -384,3 +384,14 @@ export const sampleBulkInvoices = [
         'Disburse Date': '2024-08-20'
     }
 ];
+
+export const sampleZoneUpdate = [
+    {
+        applicationId: "APP001",
+        zone: "West",
+    },
+    {
+        applicationId: "APP002",
+        zone: "West",
+    }
+];
