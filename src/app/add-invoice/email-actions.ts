@@ -1,4 +1,3 @@
-
 "use server";
 
 import nodemailer from "nodemailer";
@@ -37,7 +36,7 @@ const formatCurrency = (amount?: number) => {
     return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
 };
 
-function generateEmailBody(data: EmailData[]): string {
+function generateEmailBody(data: EmailData[], isConsent: boolean): string {
     let html = `
         <h1>New Invoice Submission</h1>
         <p>Please find the details of the newly submitted invoice(s) below:</p>
@@ -63,9 +62,8 @@ function generateEmailBody(data: EmailData[]): string {
                 <tr><td style="width: 30%;"><strong>Customer ID</strong></td><td>${item.customerId || 'Not Found'}</td></tr>
                 <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
                 <tr><td><strong>Invoice Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
-                <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>
-                <tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>
-            `;
+                <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>` + 
+                `${isConsent ? `<tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>` : ''}`;     
         } else if (item.error) {
             html += `<tr><td style="width: 30%;"><strong>Error</strong></td><td style="color: red;">${item.error}</td></tr>`;
         } else {
@@ -78,7 +76,7 @@ function generateEmailBody(data: EmailData[]): string {
     return html;
 }
 
-export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult> {
+export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): Promise<ActionResult> {
     if (!smtpConfigured || !transporter) {
         console.error("SMTP environment variables are not configured.");
         return { error: "Email service is not configured on the server. Please contact the administrator." };
@@ -95,7 +93,7 @@ export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult>
         from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
         to: "invoice@supermoney.in",
         subject: "New Invoice Submission",
-        html: generateEmailBody(data),
+        html: generateEmailBody(data, isConsent),
         attachments: attachments,
     };
 
