@@ -2,7 +2,7 @@
 "use server";
 
 import { db1 } from "@/lib/firebase";
-import { writeBatch, doc } from "firebase/firestore";
+import { writeBatch, doc, getDoc } from "firebase/firestore";
 import * as xlsx from 'xlsx';
 
 type ActionResult = {
@@ -30,7 +30,9 @@ export async function updateDealerRegion(formData: FormData): Promise<ActionResu
     const batch = writeBatch(db1);
     let updatedCount = 0;
     let skippedCount = 0;
+    const notFoundIds: string[] = [];
 
+    // Use a for...of loop to handle async operations inside
     for (const row of dataArray as any[]) {
       const applicationId = row.applicationId?.toString().trim();
       const region = row.region?.toString().trim();
@@ -40,11 +42,15 @@ export async function updateDealerRegion(formData: FormData): Promise<ActionResu
         continue;
       }
 
-      // The document ID in the 'dealers' collection is the dealer's `applicationId`.
       const dealerDocRef = doc(db1, "dealers", applicationId);
-      
-      batch.update(dealerDocRef, { region: region });
-      updatedCount++;
+      const docSnap = await getDoc(dealerDocRef);
+
+      if (docSnap.exists()) {
+        batch.update(dealerDocRef, { region: region });
+        updatedCount++;
+      } else {
+        notFoundIds.push(applicationId);
+      }
     }
     
     if (updatedCount > 0) {
@@ -55,12 +61,21 @@ export async function updateDealerRegion(formData: FormData): Promise<ActionResu
     if (skippedCount > 0) {
       message += ` ${skippedCount} rows were skipped due to missing data.`;
     }
+
+    if (notFoundIds.length > 0) {
+        const errorDetail = `The following applicationIds were not found in the database: ${notFoundIds.join(", ")}. Please check your Excel file.`;
+        // If there were also successful updates, we return both a message and an error.
+        if (updatedCount > 0 || skippedCount > 0) {
+             return { message: message, error: errorDetail };
+        }
+        return { error: errorDetail };
+    }
     
     return { message };
   } catch (error) {
     console.error("Error processing Excel file or writing to Firestore:", error);
     if (error instanceof Error) {
-        return { error: `Failed to process file: ${error.message}. Make sure all applicationIds are correct.` };
+        return { error: `Failed to process file: ${error.message}.` };
     }
     return { error: "An unknown error occurred during the upload process. Some records may not have been updated." };
   }
