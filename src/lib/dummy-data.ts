@@ -395,3 +395,14 @@ export const sampleZoneUpdate = [
         zone: "West",
     }
 ];
+
+export const sampleRegionUpdate = [
+    {
+        applicationId: "APP001",
+        region: "Maharashtra",
+    },
+    {
+        applicationId: "APP002",
+        region: "Maharashtra",
+    }
+];

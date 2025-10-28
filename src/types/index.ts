@@ -1,15 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -34,6 +23,7 @@ export type Dealer = {
   customerId: string;
   GST: string;
   zone?: string;
+  region?: string;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';

@@ -208,6 +208,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
                   <TableHead>Zone</TableHead>
+                  <TableHead>Region</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Total Limit</TableHead>
                   <TableHead className="text-right">Amount Disbursed</TableHead>
@@ -272,6 +273,9 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                     </TableCell>
                     <TableCell>
                       {dealer.zone ? <Badge variant="secondary">{dealer.zone}</Badge> : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {dealer.region ? <Badge variant="outline">{dealer.region}</Badge> : 'N/A'}
                     </TableCell>
                     <TableCell>
                       <TooltipProvider>

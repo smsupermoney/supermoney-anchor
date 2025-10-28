@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe, Map } from 'lucide-react';
 import type { UserSubRole } from '@/types';
 
 export const anchorNavigationLinks = [
@@ -24,6 +24,7 @@ export const adminNavigationLinks = [
   { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
   { href: '/update-gst', label: 'Update Dealer GST', icon: FileUp },
   { href: '/update-zone', label: 'Update Dealer Zone', icon: Globe },
+  { href: '/update-region', label: 'Update Dealer Region', icon: Map },
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/retailers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
