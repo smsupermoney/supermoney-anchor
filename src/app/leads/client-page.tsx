@@ -260,7 +260,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 <TableHead>Lead Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Priority</TableHead>
-                                <TableHead>Latest Remark</TableHead>
                             </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -299,16 +298,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                     <StatusBadge status={lead.status as any} />
                                 </TableCell>
                                 <TableCell>{lead.priority || 'N/A'}</TableCell>
-                                <TableCell className="text-muted-foreground">
-                                     <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <span className="block max-w-[150px] truncate">{getLatestRemark(lead)}</span>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>{getLatestRemark(lead)}</p></TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </TableCell>
                                 </TableRow>
                             ))}
                             </TableBody>
