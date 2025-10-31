@@ -18,6 +18,7 @@ const formSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
   roleType: z.enum(["Anchor", "SuperMoney User"]),
   userSubRole: z.string().optional(),
+  region: z.string().optional(),
 });
 
 type UserFormValues = z.infer<typeof formSchema>;

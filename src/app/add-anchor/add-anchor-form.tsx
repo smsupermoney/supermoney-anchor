@@ -37,6 +37,7 @@ const formSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
   roleType: z.enum(["Anchor", "SuperMoney User"]),
   userSubRole: z.string().optional(),
+  region: z.string().optional(),
 });
 
 type UserFormValues = z.infer<typeof formSchema>;
@@ -55,6 +56,7 @@ export default function AddUserForm() {
       phoneNumber: "",
       password: "",
       roleType: "Anchor",
+      region: "",
     },
   });
 
@@ -194,6 +196,19 @@ export default function AddUserForm() {
                     </FormItem>
                 )}
              />
+             <FormField
+                control={form.control}
+                name="region"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Region (Optional)</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., West" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
         </div>
         {error && (
             <Alert variant="destructive">
