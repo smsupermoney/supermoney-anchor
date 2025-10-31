@@ -33,7 +33,7 @@ const formSchema = z.object({
   externalId: z.string().min(1, "External ID is required."),
   userName: z.string().min(1, "User name is required."),
   emailAddress: z.string().email("Invalid email address."),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits."),
+  phoneNumber: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters."),
   roleType: z.enum(["Anchor", "SuperMoney User"]),
   userSubRole: z.string().optional(),
@@ -128,7 +128,7 @@ export default function AddUserForm() {
             name="phoneNumber"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel>Phone Number (Optional)</FormLabel>
                 <FormControl>
                     <Input type="tel" placeholder="9876543210" {...field} />
                 </FormControl>
