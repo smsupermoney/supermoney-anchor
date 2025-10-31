@@ -207,7 +207,6 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   <TableHead>Email Address</TableHead>
                   {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
-                  <TableHead>Zone</TableHead>
                   <TableHead>Region</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Total Limit</TableHead>
@@ -270,9 +269,6 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                            <TooltipContent><p>{lenderFullNameMapping[dealer.lenderName ?? ''] || dealer.lenderName}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                    </TableCell>
-                    <TableCell>
-                      {dealer.zone ? <Badge variant="secondary">{dealer.zone}</Badge> : 'N/A'}
                     </TableCell>
                     <TableCell>
                       {dealer.region ? <Badge variant="outline">{dealer.region}</Badge> : 'N/A'}

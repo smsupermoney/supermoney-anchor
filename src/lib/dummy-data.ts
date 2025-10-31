@@ -152,153 +152,6 @@ export const dummyUsers = [
 ];
 
 // --- DUMMY PROGRAMS ---
-export const dummyPrograms = [
-  {
-    "id": "PROG001",
-    "programId": "PROG001",
-    "lenderName": "Supermoney Finance",
-    "shortName": "Supermoney",
-    "lenderType": "Supermoney",
-  },
-  {
-    "id": "PROG002",
-    "programId": "PROG002",
-    "lenderName": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
-    "shortName": "Cholamandalam",
-    "lenderType": "External",
-  },
-  {
-    "id": "PROG003",
-    "programId": "PROG003",
-    "lenderName": "ADITYA BIRLA CAPITAL LTD",
-    "shortName": "Aditya Birla",
-    "lenderType": "External",
-  },
-];
-
-// --- DUMMY DEALER-LIMIT MAPPING ---
-// This collection `dealerLimits` is crucial for calculating program and dealer aggregates.
-// The document ID should be the `applicationId`.
-export const dummyDealerLimits = [
-  { "id": "APP001", "applicationId": "APP001", "limitAmount": 2000000, "utilisationAmount": 750000, "availableAmount": 1250000, "principalOverdue": 150000 },
-  { "id": "APP002", "applicationId": "APP002", "limitAmount": 1000000, "utilisationAmount": 500000, "availableAmount": 500000, "principalOverdue": 0 },
-  { "id": "APP003", "applicationId": "APP003", "limitAmount": 2000000, "utilisationAmount": 0, "availableAmount": 2000000, "principalOverdue": 0 },
-  { "id": "APP004", "applicationId": "APP004", "limitAmount": 5000000, "utilisationAmount": 4500000, "availableAmount": 500000, "principalOverdue": 0 },
-  { "id": "APP005", "applicationId": "APP005", "limitAmount": 3000000, "utilisationAmount": 750000, "availableAmount": 2250000, "principalOverdue": 250000 },
-  { "id": "APP006", "applicationId": "APP006", "limitAmount": 1000000, "utilisationAmount": 100000, "availableAmount": 900000, "principalOverdue": 0 },
-];
-
-// --- DUMMY DEALERS ---
-// This collection `dealers` holds dealer identity info. 
-// The document ID should be the `customerId`.
-export const dummyDealersData = [
-  { "id": "DLR001", "dealerId": "DLR001", "applicationId": "APP001", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Star Electronics", "status": "Active", "emailAddress":"dummy@gmail.com" },
-  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP002", "programId": "PROG001", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active", "emailAddress":"dummy@gmail.com" },
-  { "id": "DLR002", "dealerId": "DLR002", "applicationId": "APP003", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Future Gadgets", "status": "Active", "emailAddress":"dummy@gmail.com" },
-  { "id": "DLR003", "dealerId": "DLR003", "applicationId": "APP004", "programId": "PROG002", "anchorId": "ANC001", "dealerName": "Innovative Tech", "status": "Pending", "emailAddress":"dummy@gmail.com" },
-  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP005", "programId": "PROG003", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Inactive", "emailAddress":"dummy@gmail.com" },
-  { "id": "DLR004", "dealerId": "DLR004", "applicationId": "APP006", "programId": "PROG002", "anchorId": "ANC002", "dealerName": "Gotham Goods", "status": "Active", "emailAddress":"dummy@gmail.com" }
-];
-
-
-
-// --- DUMMY INVOICES ---
-// Each invoice links to a dealer, anchor, and program. This is the source for all financial calculations.
-export const dummyInvoices = [
-  {
-    "id": "INV001",
-    "dealerId": "DLR001",
-    "anchorId": "ANC001",
-    "programId": "PROG001",
-    "invoiceNumber": "SE-2024-001",
-    "dealerName": "Star Electronics",
-    "amount": 150000,
-    "date": "2024-07-01",
-    "dueDate": "2024-07-15",
-    "utrNo": "UTR123456789012",
-    "status": "Disbursed",
-    "lender": "Supermoney Finance",
-    "overdueAmount": 150000,
-  },
-  {
-    "id": "INV002",
-    "dealerId": "DLR001",
-    "anchorId": "ANC001",
-    "programId": "PROG001",
-    "invoiceNumber": "SE-2024-002",
-    "dealerName": "Star Electronics",
-    "amount": 250000,
-    "date": "2024-07-05",
-    "dueDate": "2024-08-04",
-    "utrNo": "UTR123456789013",
-    "status": "Approved",
-    "lender": "Supermoney Finance",
-    "overdueAmount": 0,
-  },
-  {
-    "id": "INV003",
-    "dealerId": "DLR002",
-    "anchorId": "ANC001",
-    "programId": "PROG002",
-    "invoiceNumber": "FG-2024-001",
-    "dealerName": "Future Gadgets",
-    "amount": 300000,
-    "date": "2024-07-10",
-    "dueDate": "2024-08-09",
-    "utrNo": "UTR234567890123",
-    "status": "Sent to Lender",
-    "lender": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
-    "overdueAmount": 0,
-  },
-  {
-    "id": "INV004",
-    "dealerId": "DLR004",
-    "anchorId": "ANC002",
-    "programId": "PROG003",
-    "invoiceNumber": "GG-2024-001",
-    "dealerName": "Gotham Goods",
-    "amount": 500000,
-    "date": "2024-06-20",
-    "dueDate": "2024-07-20",
-    "utrNo": "UTR345678901235",
-    "status": "Disbursed",
-    "lender": "ADITYA BIRLA CAPITAL LTD",
-    "overdueAmount": 0,
-  },
-  {
-    "id": "INV005",
-    "dealerId": "DLR004",
-    "anchorId": "ANC002",
-    "programId": "PROG003",
-    "invoiceNumber": "GG-2024-002",
-    "dealerName": "Gotham Goods",
-    "amount": 250000,
-    "date": "2024-06-25",
-    "dueDate": "2024-07-10",
-    "utrNo": "UTR345678901234",
-    "status": "Disbursed",
-    "lender": "ADITYA BIRLA CAPITAL LTD",
-    "overdueAmount": 250000,
-  },
-  {
-    "id": "INV006",
-    "dealerId": "DLR004",
-    "anchorId": "ANC002",
-    "programId": "PROG002",
-    "invoiceNumber": "GG-2024-003",
-    "dealerName": "Gotham Goods",
-    "amount": 100000,
-    "date": "2024-07-18",
-    "dueDate": "2024-08-17",
-    "utrNo": "UTR345678901236",
-    "status": "Initiated",
-    "lender": "CHOLAMANDALAM INVESTMENT AND FINANCE COMPANY LIMITED",
-    "overdueAmount": 0,
-  },
-];
-
-// --- SAMPLE DATA FOR EXCEL DOWNLOADS ---
-
 export const samplePrograms = [
     {
         programId: "PROG_SAMPLE_1",
@@ -308,6 +161,7 @@ export const samplePrograms = [
     }
 ];
 
+// --- DUMMY DEALERS ---
 export const sampleDealers = [
     {
         applicationId: "DEALER_001",
@@ -326,6 +180,7 @@ export const sampleDealers = [
     }
 ];
 
+// --- DUMMY INVOICES ---
 export const sampleInvoices = [
     {
         invoiceNumber: "SAMPLE-2024-001",
@@ -382,17 +237,6 @@ export const sampleBulkInvoices = [
         'Invoice Date': '2024-08-15',
         'Due Date': '2024-09-15',
         'Disburse Date': '2024-08-20'
-    }
-];
-
-export const sampleZoneUpdate = [
-    {
-        applicationId: "APP001",
-        zone: "West",
-    },
-    {
-        applicationId: "APP002",
-        zone: "West",
     }
 ];
 

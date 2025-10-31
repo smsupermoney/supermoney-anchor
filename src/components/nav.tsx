@@ -23,7 +23,6 @@ export const adminNavigationLinks = [
   { href: '/add-anchor', label: 'Add User', icon: UserPlus },
   { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
   { href: '/update-gst', label: 'Update Dealer GST', icon: FileUp },
-  { href: '/update-zone', label: 'Update Dealer Zone', icon: Globe },
   { href: '/update-region', label: 'Update Dealer Region', icon: Map },
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/retailers', label: 'View Dealers', icon: Users },

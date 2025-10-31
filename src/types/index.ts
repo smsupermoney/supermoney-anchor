@@ -22,7 +22,6 @@ export type Dealer = {
   applicationId: string;
   customerId: string;
   GST: string;
-  zone?: string;
   region?: string;
 };
 
@@ -207,7 +206,6 @@ export type MomentumDealerLead = {
   state: string;
   status: string;
   updatedAt: string; // ISO date string
-  zone: string;
   contactNumber?: string; // Kept for backwards compatibility
   contactNumbers?: { value: string }[]; // New structure
   email?: string;
