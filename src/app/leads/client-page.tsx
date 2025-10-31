@@ -285,7 +285,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                  <TableCell>
                                     <div className="max-w-[150px] truncate">
                                         <p>{lead.contactNumber || (lead.contactNumbers && lead.contactNumbers[0]?.value) || 'N/A'}</p>
-                                        <p className="text-muted-foreground truncate">{lead.email || 'N/A'}</p>
                                     </div>
                                 </TableCell>
                                 <TableCell>{lead.city}</TableCell>
