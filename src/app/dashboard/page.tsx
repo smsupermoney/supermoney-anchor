@@ -10,13 +10,14 @@ export default async function Dashboard() {
   
   // ID for programs, dealers, invoices
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
+  const region = session?.roleType === 'Admin' ? undefined : session?.region;
   
   // Separate ID specifically for leads, as per recent changes
   const leadAnchorId = session?.roleType === 'Admin' ? undefined : session?.leadExternalId;
   
   const [{ programs, invoices, totalOverdueAmount }, dealers, momentumLeads] = await Promise.all([
-    getPrograms(anchorId),
-    getDealers(anchorId),
+    getPrograms(anchorId, region),
+    getDealers(anchorId, region),
     getMomentumDealerLeads(leadAnchorId), // Use the correct ID for fetching leads
   ]);
   

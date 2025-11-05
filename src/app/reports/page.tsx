@@ -9,13 +9,14 @@ export default async function ReportsPage() {
   noStore();
   const session = await getSession();
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
+  const region = session?.roleType === 'Admin' ? undefined : session?.region;
   const isAdmin = session?.roleType === 'Admin';
   
   // Fetch all necessary data.
   const [invoices, dealers, { programs }, users] = await Promise.all([
-    getInvoices(anchorId),
-    getDealers(anchorId),
-    getPrograms(anchorId),
+    getInvoices(anchorId, region),
+    getDealers(anchorId, region),
+    getPrograms(anchorId, region),
     isAdmin ? getUsers() : Promise.resolve([]),
   ]);
 

@@ -99,9 +99,9 @@ export async function getUsers(): Promise<User[]> {
   return userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as User));
 }
 
-export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
-  const invoicesCol = collection(db1, 'invoices');
+export async function getInvoices(anchorId?: string, region?: string): Promise<Invoice[]> {
   let invoiceQuery;
+  const invoicesCol = collection(db1, 'invoices');
 
   if (anchorId) {
     invoiceQuery = query(invoicesCol, where('anchorId', '==', anchorId));
@@ -109,38 +109,55 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     // Admin case: fetch all invoices
     invoiceQuery = query(invoicesCol);
   }
-
+  
   const [invoiceSnapshot, allDealersSnapshot, programSnapshot] = await Promise.all([
     getDocs(invoiceQuery),
     getDocs(collection(db1, 'dealers')),
     getDocs(collection(db1, 'programs')),
   ]);
-  
-  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.data().dealerId, {name: d.data().dealerName, anchorId: d.data().anchorId}]));
+
+  let dealers = allDealersSnapshot.docs.map(d => d.data() as Dealer);
+
+  // Apply region filtering for dealers if a region is specified and it's not 'all'
+  if (region && region !== 'all') {
+      dealers = dealers.filter(dealer => dealer.region === region);
+  }
+  const visibleDealerIds = new Set(dealers.map(d => d.dealerId));
+
+  const dealerMap = new Map(dealers.map(d => [d.dealerId, {name: d.dealerName, anchorId: d.anchorId}]));
   const programMap = new Map(programSnapshot.docs.map(p => [p.data().programId, p.data().lenderName]));
   
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Set to the beginning of today
 
-  const invoices = invoiceSnapshot.docs.map(doc => {
-    const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
-    const dealerInfo = dealerMap.get(data.dealerId);
-    
-    const dueDate = new Date(data.dueDate);
-    const isOverdue = data.status === 'Disbursed' && dueDate < today;
-    const overdueAmount = isOverdue ? data.disbursementSentAmount : 0;
-    
-    return { 
-        id: doc.id, 
-        ...data,
-        dealerName: dealerInfo?.name || 'Unknown Dealer',
-        anchorId: dealerInfo?.anchorId || data.anchorId || '',
-        lender: programMap.get(data.programId) || 'Unknown Lender',
-        overdueAmount: overdueAmount,
-        invoiceImage: data.invoiceImage || '',
-        disbursementSentDate: data.disbursementSentDate || ''
-    } as Invoice;
-  });
+  const invoices = invoiceSnapshot.docs
+    .map(doc => {
+      const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
+      const dealerInfo = dealerMap.get(data.dealerId);
+      
+      const dueDate = new Date(data.dueDate);
+      const isOverdue = data.status === 'Disbursed' && dueDate < today;
+      const overdueAmount = isOverdue ? data.disbursementSentAmount : 0;
+      
+      return { 
+          id: doc.id, 
+          ...data,
+          dealerName: dealerInfo?.name || 'Unknown Dealer',
+          anchorId: dealerInfo?.anchorId || data.anchorId || '',
+          lender: programMap.get(data.programId) || 'Unknown Lender',
+          overdueAmount: overdueAmount,
+          invoiceImage: data.invoiceImage || '',
+          disbursementSentDate: data.disbursementSentDate || ''
+      } as Invoice;
+    })
+    .filter(invoice => {
+        // If anchorId is provided, filter invoices to only those whose dealers are in the visible list
+        if (anchorId) {
+            return visibleDealerIds.has(invoice.dealerId);
+        }
+        // Admins see all invoices
+        return true;
+    });
 
   // Sort invoices by date in descending order (newest first)
   invoices.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -148,7 +165,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   return invoices;
 }
 
-export async function getDealers(anchorId?: string): Promise<Dealer[]> {
+export async function getDealers(anchorId?: string, region?: string): Promise<Dealer[]> {
     const dealersCol = collection(db1, 'dealers');
     let dealerQuery = query(dealersCol);
 
@@ -156,15 +173,22 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         dealerQuery = query(dealersCol, where('anchorId', '==', anchorId));
     }
     
-    const [dealerSnapshot, limitsSnapshot, invoicesSnapshot, programSnapshot, usersSnapshot] = await Promise.all([
+    const [dealerSnapshot, limitsSnapshot, allInvoices, programSnapshot, usersSnapshot] = await Promise.all([
         getDocs(dealerQuery),
         getDocs(collection(db1, 'dealerLimits')),
-        getInvoices(anchorId), 
+        getInvoices(anchorId, region), // Pass region to get filtered invoices for accurate counts
         getDocs(collection(db1, 'programs')),
         getDocs(collection(db1, 'users')),
     ]);
 
-    if (dealerSnapshot.empty) {
+    let dealersDocs = dealerSnapshot.docs;
+
+    // Further filter by region if provided and not 'all'
+    if (anchorId && region && region !== 'all') {
+        dealersDocs = dealersDocs.filter(doc => doc.data().region === region);
+    }
+    
+    if (dealersDocs.length === 0) {
         return [];
     }
     
@@ -172,12 +196,12 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, p.data().lenderName]));
     const userMap = new Map(usersSnapshot.docs.map(u => [u.id, u.data()]));
 
-    const dealerList = dealerSnapshot.docs.map(doc => {
+    const dealerList = dealersDocs.map(doc => {
         const dealerData = doc.data();
         const dealerId = dealerData.dealerId;
         const limitData = limitsMap.get(dealerId);
         
-        const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
+        const dealerInvoices = allInvoices.filter(i => i.dealerId === dealerId);
         
         // Match user by externalId which corresponds to dealerId
         const dealerUser = Array.from(userMap.values()).find(u => u.externalId === dealerId);
@@ -235,20 +259,27 @@ export async function getDealerLimits(dealerIds?: string[]): Promise<DealerLimit
 }
 
 
-export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[], totalOverdueAmount: number}> {
+export async function getPrograms(anchorId?: string, region?: string): Promise<{programs: Program[], invoices: Invoice[], totalOverdueAmount: number}> {
     const [programSnapshot, dealerSnapshot, limitsSnapshot, allInvoicesSnapshot] = await Promise.all([
         getDocs(collection(db1, 'programs')),
         getDocs(collection(db1, 'dealers')),
         getDocs(collection(db1, 'dealerLimits')),
-        getInvoices(anchorId) // This is already filtered by anchorId if provided
+        getInvoices(anchorId, region) // Pass region to get filtered invoices
     ]);
 
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, { id: p.id, ...p.data() } as Program]));
     const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
     
-    // Use all dealers to correctly map programs, then filter
-    const allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string });
-    const relevantDealers = anchorId ? allDealers.filter(d => d.anchorId === anchorId) : allDealers;
+    let allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string, region?: string });
+    
+    // Filter dealers based on anchor and region
+    let relevantDealers = allDealers;
+    if (anchorId) {
+        relevantDealers = relevantDealers.filter(d => d.anchorId === anchorId);
+        if (region && region !== 'all') {
+            relevantDealers = relevantDealers.filter(d => d.region === region);
+        }
+    }
     
     const programAggregates: Record<string, Program> = {};
 

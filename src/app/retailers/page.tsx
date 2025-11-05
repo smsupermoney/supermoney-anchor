@@ -11,8 +11,9 @@ export default async function DealersPage() {
   const session = await getSession();
   const isAdmin = session?.roleType === 'Admin';
   const anchorId = isAdmin ? undefined : session?.externalId;
+  const region = isAdmin ? undefined : session?.region;
   
-  let dealers = await getDealers(anchorId);
+  let dealers = await getDealers(anchorId, region);
 
   if (isAdmin) {
     const allUsers = await getUsers();

@@ -1,3 +1,4 @@
+
 import 'dotenv/config';
 import { unsealData } from 'iron-session';
 import { cookies } from 'next/headers';
@@ -42,6 +43,7 @@ export async function getSession(): Promise<User | null> {
       lastLoginTime: sessionData.lastLoginTime,
       leadExternalId: sessionData.leadExternalId,
       logoImage: sessionData.logoImage,
+      region: sessionData.region,
     };
 
   } catch (error) {

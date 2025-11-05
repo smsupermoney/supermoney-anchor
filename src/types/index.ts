@@ -113,7 +113,8 @@ export type User = {
     authToken?: string;
     expiryTime?: number;
     leadExternalId?: string;
-    logoImage? : string
+    logoImage? : string;
+    region?: string;
 };
 
 export type DealerLimit = {

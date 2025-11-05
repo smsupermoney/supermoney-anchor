@@ -22,11 +22,12 @@ export default async function ProgramsPage() {
     const session = await getSession();
     const isAdmin = session?.roleType === 'Admin';
     const anchorId = isAdmin ? undefined : session?.externalId;
+    const region = isAdmin ? undefined : session?.region;
 
     const [{ programs }, allUsers, dealers] = await Promise.all([
-      getPrograms(anchorId),
+      getPrograms(anchorId, region),
       isAdmin ? getUsers() : Promise.resolve([] as User[]),
-      getDealers(anchorId)
+      getDealers(anchorId, region)
     ]);
     
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount);
@@ -34,7 +35,7 @@ export default async function ProgramsPage() {
     const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
 
   if (isAdmin) {
-    const allDealers = await getDealers(undefined);
+    const allDealers = await getDealers(undefined, undefined);
     const programsWithAnchors = programs.map(program => {
         const relevantDealerAnchorIds = new Set(allDealers.filter(d => d.programId === program.id).map(d => d.anchorId));
         const anchorNames = Array.from(relevantDealerAnchorIds).map(id => anchorUserMap.get(id) || id);

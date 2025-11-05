@@ -11,8 +11,9 @@ export default async function InvoicesPage() {
   const isAdmin = session?.roleType === 'Admin' || session?.roleType === 'SuperMoney User';
   // Pass anchorId if the user is not an admin, otherwise pass undefined.
   const anchorId = isAdmin ? undefined : session?.externalId;
+  const region = isAdmin ? undefined : session?.region;
 
-  let invoices = await getInvoices(anchorId);
+  let invoices = await getInvoices(anchorId, region);
 
   // If the user is an admin, enrich the invoices with anchor names.
   if (isAdmin) {
