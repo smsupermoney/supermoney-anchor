@@ -176,7 +176,8 @@ export const sampleDealers = [
         limitAmount: 500000,
         utilisationAmount: 100000,
         availableAmount: 400000,
-        principalOverdue: 0
+        principalOverdue: 0,
+        region: "West",
     }
 ];
 

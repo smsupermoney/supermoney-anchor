@@ -64,6 +64,7 @@ export default async function ProgramsPage() {
       <PageHeader title="Lender Programs" />
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
         {programs.map((program) => {
+          console.log(program, "yash")
           const utilizationPercentage = (program.totalLimit && program.totalLimit > 0) ? ((program.usedLimit || 0) / program.totalLimit) * 100 : 0;
           const remainingLimit = (program.totalLimit || 0) - (program.usedLimit || 0);
 

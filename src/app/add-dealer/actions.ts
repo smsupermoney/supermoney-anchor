@@ -50,6 +50,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         const gst = row.GST?.toString().trim();
         const programId = row.programId?.toString().trim();
         const anchorId = row.anchorId?.toString().trim();
+        const region = row.region?.toString().trim();
 
         if (!dealerAppId) {
             console.warn("Skipping a row because applicationId is missing.", row);
@@ -110,7 +111,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         // 1. Prepare data for the 'dealers' collection
         const dealerRef = doc(db1, "dealers", dealerAppId);
         const dealerName = row.dealerName || '';
-        const dealerData = {
+        const dealerData: any = {
           dealerId: dealerAppId,
           customerId: customerId,
           applicationId: dealerAppId,
@@ -121,6 +122,11 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
           status: row.status || 'Pending',
           GST: gst,
         };
+        
+        if (region) {
+            dealerData.region = region;
+        }
+
 
         // 2. Prepare data for the 'dealerLimits' collection
         const limitRef = doc(db1, "dealerLimits", dealerAppId); 
