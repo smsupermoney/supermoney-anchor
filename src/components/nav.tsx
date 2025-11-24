@@ -5,7 +5,7 @@ import type { UserSubRole } from '@/types';
 export const anchorNavigationLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/programs', label: 'Programs', icon: Library },
-  { href: '/retailers', label: 'Dealers', icon: Users },
+  { href: '/dealers', label: 'Dealers', icon: Users },
   { href: '/invoices', label: 'Invoices', icon: FileText },
   { href: '/leads', label: 'Leads', icon: PlusCircle },
   { href: '/reports', label: 'Reports', icon: FileBarChart },
@@ -25,7 +25,7 @@ export const adminNavigationLinks = [
   { href: '/update-gst', label: 'Update Dealer GST', icon: FileUp },
   { href: '/update-region', label: 'Update Dealer Region', icon: Map },
   { href: '/programs', label: 'View Programs', icon: Library },
-  { href: '/retailers', label: 'View Dealers', icon: Users },
+  { href: '/dealers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
   { href: '/leads', label: 'View Leads', icon: FileText },
   { href: '/reports', label: 'Reports', icon: FileBarChart },

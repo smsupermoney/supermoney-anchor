@@ -239,7 +239,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
         
         {/* Summary Column */}
         <div className="flex flex-col gap-4">
-            <Link href="/retailers?overdue=yes">
+            <Link href="/dealers?overdue=yes">
               <Card className="flex-1 hover:bg-secondary transition-colors">
                   <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                       <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
@@ -402,7 +402,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                                         <p className="text-[10px] text-muted-foreground">Initiated Invoices</p>
                                         <p className="font-semibold text-xs">{program.initiatedInvoicesCount}</p>
                                         </Link>
-                                        <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                                        <Link href={`/dealers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                                         <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                                         <p className="font-semibold text-xs">{program.totalDealers}</p>
                                         </Link>
