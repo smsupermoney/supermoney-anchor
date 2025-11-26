@@ -21,7 +21,9 @@ export default async function Dashboard() {
     getMomentumDealerLeads(leadAnchorId), // Use the correct ID for fetching leads
   ]);
   
-  const lifetimeSanctionLimit = dealers.reduce((sum, dealer) => sum + dealer.totalLimit, 0);
+  const lifetimeSanctionLimit = dealers
+    .filter(dealer => dealer.status === 'Active' || dealer.status === 'Inactive')
+    .reduce((sum, dealer) => sum + dealer.totalLimit, 0);
   
   return (
     <DashboardClient 
