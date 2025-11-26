@@ -1,14 +1,8 @@
 
 "use client";
 
-import { unstable_noStore as noStore } from 'next/cache';
-import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import { getSession } from '@/lib/session';
-import type { User } from '@/types';
-import { AuthProvider } from '@/context/auth-context';
-
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger, SidebarSeparator } from '@/components/ui/sidebar';
 import { adminNavigationLinks, superMoneyUserNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from '@/components/nav';
@@ -18,7 +12,7 @@ import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import CompanyLogo from '@/components/company-logo';
 import { logout } from '@/app/auth/actions';
-import { useAuth } from '@/context/auth-context';
+import { useAuth, AuthProvider } from '@/context/auth-context';
 import SupermoneyLogo from '@/components/supermoney-logo';
 import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -27,9 +21,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // noStore();
-  // const user = await getSession();
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -67,13 +58,12 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === '/';
   const isSubscribePage = pathname === '/subscribe';
 
-  if (isLoginPage || (isSubscribePage && !user)) {
+  if (isLoginPage || isSubscribePage) {
     return <>{children}</>;
   }
 
 
   if (!user) {
-    // This handles the redirect case where there's no user, so we show the login page.
     return <>{children}</>;
   }
 
