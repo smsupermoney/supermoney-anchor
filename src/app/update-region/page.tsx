@@ -1,27 +1,27 @@
 
 import PageHeader from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { addDealers } from "./actions";
 import UploadExcelForm from "@/components/upload-excel-form";
+import { updateDealerRegion } from "./actions";
 import DownloadSampleExcel from "@/components/download-sample-excel";
-import { sampleDealers } from "@/lib/dummy-data";
+import { sampleRegionUpdate } from "@/lib/dummy-data";
 
-export default function AddDealerPage() {
+export default function UpdateRegionPage() {
   return (
     <>
-      <PageHeader title="Add New Dealers (Bulk)" />
+      <PageHeader title="Update Dealer Region" />
       <Card className="mt-4">
         <CardHeader>
-          <CardTitle>Bulk Import Dealers & Limits</CardTitle>
+          <CardTitle>Bulk Update Dealer Regions</CardTitle>
           <CardDescription className="flex justify-between items-center">
             <span>
-              Upload an Excel file. `GST` and `anchorId` are mandatory. The combination of `anchorId` and `GST` must be unique.
+              Upload an Excel file with `applicationId` and `region` columns. The region will be updated for the matching dealer.
             </span>
-             <DownloadSampleExcel data={sampleDealers} fileName="sample-dealers.xlsx" />
+             <DownloadSampleExcel data={sampleRegionUpdate} fileName="sample-region-update.xlsx" />
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <UploadExcelForm action={addDealers} />
+            <UploadExcelForm action={updateDealerRegion} buttonText="Upload and Update Regions" />
         </CardContent>
       </Card>
     </>

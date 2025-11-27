@@ -1,4 +1,3 @@
-
 # Product Requirements Document: Supermoney Anchor Platform
 
 **Version:** 1.0  
@@ -116,15 +115,31 @@ The global supply chain finance market is rapidly growing. There is a significan
 ### 5.1. System Architecture
 - **Frontend:** Next.js 15+ (App Router), React 18, TypeScript.
 - **Styling:** Tailwind CSS with ShadCN UI components. CSS variables should be used for theming.
-- **Backend/Database:** Firebase Firestore for all data storage. The application must support connecting to two separate Firestore projects (`db1` for core SCF data, `db2` for lead management data).
+- **Backend/Database:** Firebase Firestore for all data storage.
 - **AI:** Google AI (Gemini) managed through the Genkit framework.
 - **Authentication:** Iron Session for server-side session management.
 
-### 5.2. Database Schema Requirements
-- The Firestore database must be structured into the following collections: `users`, `programs`, `dealers`, `dealerLimits`, `invoices`.
-- The `dealers` collection in `db2` is used for momentum leads.
-- Data integrity must be maintained. For instance, `dealerLimits` and `dealers` collections use the `applicationId` as the document ID to link related data.
-- See `src/types/index.ts` for detailed field specifications for each collection.
+### 5.2. Database Schema & Storage Rules
+The database is designed around a collection-based, NoSQL model using Firestore, prioritizing scalability and role-based data access.
+
+-   **Collection-Oriented Structure:** Data is organized into top-level collections (e.g., `users`, `programs`, `dealers`, `invoices`). This flat structure is simple and allows for efficient, targeted queries.
+
+-   **Strategic Normalization:** Rather than embedding large, related objects within documents (denormalization), the application primarily uses a normalized approach. Documents are linked by storing IDs. For instance, an `invoice` document contains a `dealerId` and a `programId`, which reference documents in the `dealers` and `programs` collections, respectively. This keeps documents lightweight and prevents data duplication.
+
+-   **Consistent ID Management:**
+    -   **Business Keys as Document IDs:** Where a unique business identifier exists, it is used as the Firestore document ID. For example, a dealer's unique `applicationId` is used as the document ID for both their entry in the `dealers` collection and their corresponding entry in the `dealerLimits` collection. This creates a direct, 1-to-1 link and allows for fast lookups without needing a separate query.
+    -   **Auto-Generated IDs:** For collections where a natural unique key doesn't exist or isn't necessary at creation (like `invoices` or `stopSupplyLogs`), Firestore's auto-ID functionality is used to generate a unique document ID.
+
+-   **Dual Database Strategy:** The application utilizes two separate Firestore databases to enforce a clean separation of concerns:
+    -   **`db1` (Core SCF Database):** This is the primary database that stores all core financial and operational data, including users, programs, dealers, and invoices.
+    -   **`db2` (Lead Management Database):** This database is dedicated exclusively to the sales and pre-onboarding pipeline (Momentum Leads). This separation ensures that the performance of the core financial platform is not impacted by high-volume sales activities and provides an extra layer of data isolation.
+
+-   **Security via Firestore Rules:** Data access is not controlled by the application code alone. `firestore.rules` provides the ultimate server-side enforcement of who can read or write data.
+    -   **Default to Secure:** Access is denied by default.
+    -   **Role-Based Access:** Rules explicitly check a user's `roleType` and `userSubRole` before allowing an operation.
+    -   **Ownership & Scoping:** Anchors can only access data (dealers, invoices) linked to their own `anchorId`. This prevents one anchor from seeing another anchor's information.
+
+-   **Data Integrity:** The relationships between collections are maintained through these stored IDs. See `src/types/index.ts` for detailed field specifications.
 
 ### 5.3. Security and Compliance
 - Passwords must not be stored in plaintext. (Note: Current implementation stores passwords in plaintext and requires immediate remediation with a secure hashing mechanism like Bcrypt, integrated with Firebase Auth).

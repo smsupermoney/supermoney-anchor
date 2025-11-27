@@ -1,14 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -32,6 +22,7 @@ export type Dealer = {
   applicationId: string;
   customerId: string;
   GST: string;
+  region?: string;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';
@@ -122,7 +113,8 @@ export type User = {
     authToken?: string;
     expiryTime?: number;
     leadExternalId?: string;
-    logoImage? : string
+    logoImage? : string;
+    region?: string;
 };
 
 export type DealerLimit = {
@@ -215,7 +207,6 @@ export type MomentumDealerLead = {
   state: string;
   status: string;
   updatedAt: string; // ISO date string
-  zone: string;
   contactNumber?: string; // Kept for backwards compatibility
   contactNumbers?: { value: string }[]; // New structure
   email?: string;

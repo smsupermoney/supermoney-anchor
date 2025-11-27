@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -47,6 +46,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [isDragging, setIsDragging] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConsentRequired, setIsConsentRequired] = useState(false);
   const { toast } = useToast();
   
   const resetState = () => {
@@ -80,6 +80,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const overdueAmount = dealer?.overdueAmount;
       const applicationId = dealer?.applicationId;
       const customerId = dealer?.customerId;
+      setIsConsentRequired(dealer?.anchorId === "ANC008");
       
       setUploadedFiles(prev => prev.map((f, i) => 
         i === index ? { 
@@ -165,7 +166,12 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       return;
     }
 
-    setConsentOpen(true);
+    if(isConsentRequired){
+      setConsentOpen(true);
+    } else {
+      handleSubmit()
+    }
+    
   }
 
   const handleSubmit = async () => {
@@ -194,7 +200,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       
       const emailData = await Promise.all(emailDataPromises);
 
-      const result = await sendInvoiceEmail(emailData);
+      const result = await sendInvoiceEmail(emailData, isConsentRequired);
 
       if (result.error) {
           toast({

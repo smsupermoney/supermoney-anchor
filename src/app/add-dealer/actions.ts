@@ -30,11 +30,11 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing dealers to check for duplicates based on programId + GST
+    // Fetch existing dealers to check for duplicates based on anchorId + GST
     const dealersRef = collection(db1, "dealers");
     const existingDealersSnapshot = await getDocs(query(dealersRef));
     const existingDealerKeys = new Set(
-        existingDealersSnapshot.docs.map(doc => `${doc.data().programId}-${doc.data().GST}`)
+        existingDealersSnapshot.docs.map(doc => `${doc.data().anchorId}-${doc.data().GST}`)
     );
     const existingDealerAppIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
 
@@ -49,6 +49,8 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         const dealerAppId = row.applicationId?.toString().trim();
         const gst = row.GST?.toString().trim();
         const programId = row.programId?.toString().trim();
+        const anchorId = row.anchorId?.toString().trim();
+        const region = row.region?.toString().trim();
 
         if (!dealerAppId) {
             console.warn("Skipping a row because applicationId is missing.", row);
@@ -58,6 +60,12 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
 
         if (!gst) {
             console.warn("Skipping a row because GST is missing.", row);
+            skippedEntriesCount++;
+            continue;
+        }
+        
+        if (!anchorId) {
+            console.warn("Skipping a row because anchorId is missing.", row);
             skippedEntriesCount++;
             continue;
         }
@@ -74,7 +82,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
             continue;
         }
 
-        const compositeKey = `${programId}-${gst}`;
+        const compositeKey = `${anchorId}-${gst}`;
         if (processedCompositeKeys.has(compositeKey)) {
              console.warn(`Skipping a duplicate row found in the Excel file itself: ${compositeKey}`, row);
              skippedEntriesCount++;
@@ -85,7 +93,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
 
         // Even if it's an update, we must check if the new composite key conflicts.
         if (!isUpdate && existingDealerKeys.has(compositeKey)) {
-             console.warn(`Skipping a row because the combination of programId and GST already exists in the database: ${compositeKey}`, row);
+             console.warn(`Skipping a row because the combination of anchorId and GST already exists in the database: ${compositeKey}`, row);
              skippedEntriesCount++;
              continue;
         }
@@ -103,17 +111,22 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         // 1. Prepare data for the 'dealers' collection
         const dealerRef = doc(db1, "dealers", dealerAppId);
         const dealerName = row.dealerName || '';
-        const dealerData = {
+        const dealerData: any = {
           dealerId: dealerAppId,
           customerId: customerId,
           applicationId: dealerAppId,
           programId: programId,
-          anchorId: row.anchorId || '',
+          anchorId: anchorId,
           dealerName: dealerName,
           dealerName_lowercase: dealerName.toLowerCase(),
           status: row.status || 'Pending',
           GST: gst,
         };
+        
+        if (region) {
+            dealerData.region = region;
+        }
+
 
         // 2. Prepare data for the 'dealerLimits' collection
         const limitRef = doc(db1, "dealerLimits", dealerAppId); 

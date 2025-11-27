@@ -99,9 +99,9 @@ export async function getUsers(): Promise<User[]> {
   return userSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as User));
 }
 
-export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
-  const invoicesCol = collection(db1, 'invoices');
+export async function getInvoices(anchorId?: string, region?: string): Promise<Invoice[]> {
   let invoiceQuery;
+  const invoicesCol = collection(db1, 'invoices');
 
   if (anchorId) {
     invoiceQuery = query(invoicesCol, where('anchorId', '==', anchorId));
@@ -109,38 +109,55 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
     // Admin case: fetch all invoices
     invoiceQuery = query(invoicesCol);
   }
-
+  
   const [invoiceSnapshot, allDealersSnapshot, programSnapshot] = await Promise.all([
     getDocs(invoiceQuery),
     getDocs(collection(db1, 'dealers')),
     getDocs(collection(db1, 'programs')),
   ]);
-  
-  const dealerMap = new Map(allDealersSnapshot.docs.map(d => [d.data().dealerId, {name: d.data().dealerName, anchorId: d.data().anchorId}]));
+
+  let dealers = allDealersSnapshot.docs.map(d => d.data() as Dealer);
+
+  // Apply region filtering for dealers if a region is specified and it's not 'all'
+  if (region && region !== 'all') {
+      dealers = dealers.filter(dealer => dealer.region === region);
+  }
+  const visibleDealerIds = new Set(dealers.map(d => d.dealerId));
+
+  const dealerMap = new Map(dealers.map(d => [d.dealerId, {name: d.dealerName, anchorId: d.anchorId}]));
   const programMap = new Map(programSnapshot.docs.map(p => [p.data().programId, p.data().lenderName]));
   
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Set to the beginning of today
 
-  const invoices = invoiceSnapshot.docs.map(doc => {
-    const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
-    const dealerInfo = dealerMap.get(data.dealerId);
-    
-    const dueDate = new Date(data.dueDate);
-    const isOverdue = data.status === 'Disbursed' && dueDate < today;
-    const overdueAmount = isOverdue ? data.disbursementSentAmount : 0;
-    
-    return { 
-        id: doc.id, 
-        ...data,
-        dealerName: dealerInfo?.name || 'Unknown Dealer',
-        anchorId: dealerInfo?.anchorId || data.anchorId || '',
-        lender: programMap.get(data.programId) || 'Unknown Lender',
-        overdueAmount: overdueAmount,
-        invoiceImage: data.invoiceImage || '',
-        disbursementSentDate: data.disbursementSentDate || ''
-    } as Invoice;
-  });
+  const invoices = invoiceSnapshot.docs
+    .map(doc => {
+      const data = doc.data() as Omit<Invoice, 'id' | 'dealerName'>;
+      const dealerInfo = dealerMap.get(data.dealerId);
+      
+      const dueDate = new Date(data.dueDate);
+      const isOverdue = data.status === 'Disbursed' && dueDate < today;
+      const overdueAmount = isOverdue ? data.disbursementSentAmount : 0;
+      
+      return { 
+          id: doc.id, 
+          ...data,
+          dealerName: dealerInfo?.name || 'Unknown Dealer',
+          anchorId: dealerInfo?.anchorId || data.anchorId || '',
+          lender: programMap.get(data.programId) || 'Unknown Lender',
+          overdueAmount: overdueAmount,
+          invoiceImage: data.invoiceImage || '',
+          disbursementSentDate: data.disbursementSentDate || ''
+      } as Invoice;
+    })
+    .filter(invoice => {
+        // If anchorId is provided, filter invoices to only those whose dealers are in the visible list
+        if (anchorId) {
+            return visibleDealerIds.has(invoice.dealerId);
+        }
+        // Admins see all invoices
+        return true;
+    });
 
   // Sort invoices by date in descending order (newest first)
   invoices.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -148,7 +165,7 @@ export async function getInvoices(anchorId?: string): Promise<Invoice[]> {
   return invoices;
 }
 
-export async function getDealers(anchorId?: string): Promise<Dealer[]> {
+export async function getDealers(anchorId?: string, region?: string): Promise<Dealer[]> {
     const dealersCol = collection(db1, 'dealers');
     let dealerQuery = query(dealersCol);
 
@@ -156,15 +173,22 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
         dealerQuery = query(dealersCol, where('anchorId', '==', anchorId));
     }
     
-    const [dealerSnapshot, limitsSnapshot, invoicesSnapshot, programSnapshot, usersSnapshot] = await Promise.all([
+    const [dealerSnapshot, limitsSnapshot, allInvoices, programSnapshot, usersSnapshot] = await Promise.all([
         getDocs(dealerQuery),
         getDocs(collection(db1, 'dealerLimits')),
-        getInvoices(anchorId), 
+        getInvoices(anchorId, region), // Pass region to get filtered invoices for accurate counts
         getDocs(collection(db1, 'programs')),
         getDocs(collection(db1, 'users')),
     ]);
 
-    if (dealerSnapshot.empty) {
+    let dealersDocs = dealerSnapshot.docs;
+
+    // Further filter by region if provided and not 'all'
+    if (anchorId && region && region !== 'all') {
+        dealersDocs = dealersDocs.filter(doc => doc.data().region === region);
+    }
+    
+    if (dealersDocs.length === 0) {
         return [];
     }
     
@@ -172,12 +196,12 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, p.data().lenderName]));
     const userMap = new Map(usersSnapshot.docs.map(u => [u.id, u.data()]));
 
-    const dealerList = dealerSnapshot.docs.map(doc => {
+    const dealerList = dealersDocs.map(doc => {
         const dealerData = doc.data();
         const dealerId = dealerData.dealerId;
         const limitData = limitsMap.get(dealerId);
         
-        const dealerInvoices = invoicesSnapshot.filter(i => i.dealerId === dealerId);
+        const dealerInvoices = allInvoices.filter(i => i.dealerId === dealerId);
         
         // Match user by externalId which corresponds to dealerId
         const dealerUser = Array.from(userMap.values()).find(u => u.externalId === dealerId);
@@ -202,7 +226,8 @@ export async function getDealers(anchorId?: string): Promise<Dealer[]> {
             status: dealerData.status, 
             totalLimit: limitAmount,
             availableLimit: limitAmount - utilisationAmount,
-            GST: dealerData?.GST
+            GST: dealerData?.GST,
+            region: dealerData?.region
         } as Dealer;
     });
 
@@ -234,20 +259,27 @@ export async function getDealerLimits(dealerIds?: string[]): Promise<DealerLimit
 }
 
 
-export async function getPrograms(anchorId?: string): Promise<{programs: Program[], invoices: Invoice[], totalOverdueAmount: number}> {
+export async function getPrograms(anchorId?: string, region?: string): Promise<{programs: Program[], invoices: Invoice[], totalOverdueAmount: number}> {
     const [programSnapshot, dealerSnapshot, limitsSnapshot, allInvoicesSnapshot] = await Promise.all([
         getDocs(collection(db1, 'programs')),
         getDocs(collection(db1, 'dealers')),
         getDocs(collection(db1, 'dealerLimits')),
-        getInvoices(anchorId) // This is already filtered by anchorId if provided
+        getInvoices(anchorId, region) // Pass region to get filtered invoices
     ]);
 
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, { id: p.id, ...p.data() } as Program]));
     const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
     
-    // Use all dealers to correctly map programs, then filter
-    const allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string });
-    const relevantDealers = anchorId ? allDealers.filter(d => d.anchorId === anchorId) : allDealers;
+    let allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string, region?: string });
+    
+    // Filter dealers based on anchor and region
+    let relevantDealers = allDealers;
+    if (anchorId) {
+        relevantDealers = relevantDealers.filter(d => d.anchorId === anchorId);
+        if (region && region !== 'all') {
+            relevantDealers = relevantDealers.filter(d => d.region === region);
+        }
+    }
     
     const programAggregates: Record<string, Program> = {};
 
@@ -369,16 +401,6 @@ export const spokeStatuses = [
     'Limit Live', 'On Hold', 'Queries Raised', 'Relook'
 ] as const;
 
-export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
-
-export const leads: Lead[] = [
-  { id: 'LEAD001', dealerName: 'New Age Retail', contactPerson: 'John Doe', contactEmail: 'john.d@newage.com', status: 'KYC', createdAt: '2024-07-15' },
-  { id: 'LEAD002', dealerName: 'Mega Stores', contactPerson: 'Jane Smith', contactEmail: 'jane.s@megastores.com', status: 'Credit', createdAt: '2024-07-10' },
-  { id: 'LEAD003', dealerName: 'The Corner Shop', contactPerson: 'Peter Jones', contactEmail: 'p.jones@cornershop.com', status: 'Lead Created', createdAt: '2024-07-20' },
-  { id: 'LEAD004', dealerName: 'Daily Needs', contactPerson: 'Mary Johnson', contactEmail: 'mary.j@dailyneeds.com', status: 'PSD Completed', createdAt: '2024-06-25' },
-  { id: 'LEAD005', dealerName: 'Value Mart', contactPerson: 'Chris Lee', contactEmail: 'chris.l@valuemart.com', status: 'Dropped', createdAt: '2024-07-05' },
-];
-
 export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'];
 
 // --- DEALER ONBOARDING STATIC DATA ---
@@ -391,191 +413,3 @@ export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
   'Business Limit Approved',
   'Dealer Activated'
 ];
-
-export const dealerLeads: DealerLead[] = [
-    // For sales_manager to validate
-    {
-        id: 'DL001',
-        dealerName: 'Global Electronics',
-        contactPerson: 'Ravi Kumar',
-        contactEmail: 'ravi.k@globalelectro.com',
-        contactPhone: '9876543210',
-        businessType: 'Electronics Retail',
-        location: 'Mumbai, MH',
-        region: 'West',
-        status: 'Lead Created',
-        createdBy: 'Sales Person',
-        createdAt: '2024-07-20',
-        requestedLimit: 1000000,
-        comments: [
-          { user: 'Sales Person', comment: 'New lead, looks promising.', timestamp: '2024-07-20 10:00 AM' }
-        ]
-    },
-    // For sales_person/onboarding_ops to collect documents
-    {
-        id: 'DL007',
-        dealerName: 'Modern Mobiles',
-        contactPerson: 'Rohan Gupta',
-        contactEmail: 'rohan.g@modernmobiles.com',
-        contactPhone: '9876543211',
-        businessType: 'Mobile Retail',
-        location: 'Kolkata, WB',
-        region: 'East',
-        status: 'Lead Verified',
-        createdBy: 'Sales Person',
-        createdAt: '2024-07-19',
-        requestedLimit: 750000,
-        comments: [
-            { user: 'Sales Person', comment: 'Initial contact made.', timestamp: '2024-07-19 02:15 PM' },
-            { user: 'Sales Manager', comment: 'Lead has been verified. Please proceed with document collection.', timestamp: '2024-07-20 11:00 AM' }
-        ]
-    },
-    // For onboarding_ops/legal_compliance to verify documents
-    {
-        id: 'DL006',
-        dealerName: 'Fresh Grocers',
-        contactPerson: 'Alia Khan',
-        contactEmail: 'alia.k@freshgrocers.com',
-        contactPhone: '9876543212',
-        businessType: 'Grocery Store',
-        location: 'Hyderabad, TS',
-        region: 'South',
-        status: 'Documents Collected',
-        createdBy: 'Sales Person',
-        createdAt: '2024-07-21',
-        requestedLimit: 500000,
-        documents: [
-            { name: 'GST Certificate', url: '#', status: 'Pending' },
-            { name: 'PAN Card', url: '#', status: 'Pending' },
-            { name: 'Shop License', url: '#', status: 'Pending' },
-        ],
-        comments: [
-           { user: 'Onboarding Ops', comment: 'All initial documents have been uploaded.', timestamp: '2024-07-21 03:00 PM' }
-        ]
-    },
-    // For field_inspector to do site visit
-    {
-        id: 'DL002',
-        dealerName: 'Quick Supplies',
-        contactPerson: 'Priya Sharma',
-        contactEmail: 'priya.s@quicksupplies.com',
-        contactPhone: '9876543213',
-        businessType: 'General Store',
-        location: 'Delhi, DL',
-        region: 'North',
-        status: 'Documents Verified',
-        createdBy: 'Sales Person',
-        createdAt: '2024-07-18',
-        requestedLimit: 800000,
-        documents: [
-            { name: 'GST Certificate', url: '#', status: 'Verified' },
-            { name: 'PAN Card', url: '#', status: 'Verified' },
-        ],
-        comments: [
-          { user: 'Legal Compliance', comment: 'Documents look good. Cleared for site visit.', timestamp: '2024-07-22 09:30 AM'}
-        ]
-    },
-    // For regional_manager/legal_compliance to approve limit
-    {
-        id: 'DL003',
-        dealerName: 'Metro Appliances',
-        contactPerson: 'Anil Mehta',
-        contactEmail: 'anil.m@metroappliances.com',
-        contactPhone: '9876543214',
-        businessType: 'Home Appliances',
-        location: 'Bengaluru, KA',
-        region: 'South',
-        status: 'Site Visit Done',
-        createdBy: 'Sales Person',
-        createdAt: '2024-07-15',
-        requestedLimit: 2000000,
-        documents: [
-            { name: 'GST Certificate', url: '#', status: 'Verified' },
-            { name: 'PAN Card', url: '#', status: 'Verified' },
-            { name: 'Shop License', url: '#', status: 'Verified' },
-        ],
-        siteVisitReport: {
-            notes: 'Shop is in a prime location with good footfall. Owner is cooperative.',
-            images: ['/placeholder.png', '/placeholder.png']
-        },
-        comments: [
-            { user: 'Field Inspector', comment: 'Site visit completed. Report submitted.', timestamp: '2024-07-22 01:00 PM'}
-        ]
-    },
-    // For dealer_admin to activate
-    {
-        id: 'DL004',
-        dealerName: 'Super Farm Co.',
-        contactPerson: 'Sunita Rao',
-        contactEmail: 'sunita.r@superfarm.com',
-        contactPhone: '9876543215',
-        businessType: 'Agri Supplies',
-        location: 'Pune, MH',
-        region: 'West',
-        status: 'Business Limit Approved',
-        requestedLimit: 500000,
-        approvedLimit: 450000,
-        creditCheckScore: 8,
-        businessLimit: 450000, // This seems redundant if approvedLimit is present. Kept for compatibility.
-        paymentTerms: 'Net 30',
-        createdBy: 'Sales Person',
-        createdAt: '2024-07-12',
-        comments: [
-            { user: 'Regional Manager', comment: 'Approved a limit of 4.5 Lacs with Net 30 terms. Ready for activation.', timestamp: '2024-07-23 11:00 AM'}
-        ]
-    },
-    // Completed
-    {
-        id: 'DL005',
-        dealerName: 'City Hardware',
-        contactPerson: 'Vijay Singh',
-        contactEmail: 'vijay.s@cityhardware.com',
-        contactPhone: '9876543216',
-        businessType: 'Hardware Store',
-        location: 'Chennai, TN',
-        region: 'South',
-        status: 'Dealer Activated',
-        requestedLimit: 300000,
-        approvedLimit: 250000,
-        creditCheckScore: 7,
-        businessLimit: 250000,
-        paymentTerms: 'Net 45',
-        dealerCode: 'DEALER-CH-00123',
-        createdBy: 'Sales Person',
-        createdAt: '2024-07-10',
-    },
-];
-    
-
-    
-
-
-
-    
-
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-

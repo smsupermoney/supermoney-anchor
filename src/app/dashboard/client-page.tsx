@@ -31,9 +31,10 @@ type DashboardClientProps = {
   initialDealers: Dealer[];
   momentumLeads: MomentumDealerLead[];
   totalOverdueAmount: number;
+  lifetimeSanctionLimit: number;
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, totalOverdueAmount }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, totalOverdueAmount, lifetimeSanctionLimit }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { user } = useAuth();
   
@@ -226,6 +227,10 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                                 <span className="text-muted-foreground">Available</span>
                                 <span className="font-semibold text-primary">{formatCurrency(totalCreditLimit - utilizedCredit)}</span>
                             </div>
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Lifetime Sanction Limit</span>
+                                <span className="font-semibold">{formatCurrency(lifetimeSanctionLimit)}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -234,7 +239,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
         
         {/* Summary Column */}
         <div className="flex flex-col gap-4">
-            <Link href="/retailers?overdue=yes">
+            <Link href="/dealers?overdue=yes">
               <Card className="flex-1 hover:bg-secondary transition-colors">
                   <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                       <CardTitle className="text-sm font-semibold">Overdue Summary</CardTitle>
@@ -246,26 +251,6 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                   </CardContent>
               </Card>
             </Link>
-            <Card className="flex-1">
-                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
-                    <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
-                    <CalendarClock className="w-4 h-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="p-3 pt-0 text-xs space-y-2">
-                    <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Next 7 days</span>
-                        <span className="font-semibold">{formatCurrency(upcomingPayments.next7Days)}</span>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Next 15 days</span>
-                        <span className="font-semibold">{formatCurrency(upcomingPayments.next15Days)}</span>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Next 30 days</span>
-                        <span className="font-semibold">{formatCurrency(upcomingPayments.next30Days)}</span>
-                    </div>
-                </CardContent>
-            </Card>
             <Card className="flex-1">
                 <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                     <CardTitle className="text-sm font-semibold">Invoice Summary (7d)</CardTitle>
@@ -417,7 +402,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                                         <p className="text-[10px] text-muted-foreground">Initiated Invoices</p>
                                         <p className="font-semibold text-xs">{program.initiatedInvoicesCount}</p>
                                         </Link>
-                                        <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                                        <Link href={`/dealers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                                         <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                                         <p className="font-semibold text-xs">{program.totalDealers}</p>
                                         </Link>

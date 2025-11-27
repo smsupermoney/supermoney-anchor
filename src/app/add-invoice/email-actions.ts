@@ -1,4 +1,3 @@
-
 "use server";
 
 import nodemailer from "nodemailer";
@@ -37,7 +36,7 @@ const formatCurrency = (amount?: number) => {
     return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(amount);
 };
 
-function generateEmailBody(data: EmailData[]): string {
+function generateEmailBody(data: EmailData[], isConsent: boolean): string {
     let html = `
         <h1>New Invoice Submission</h1>
         <p>Please find the details of the newly submitted invoice(s) below:</p>
@@ -46,10 +45,12 @@ function generateEmailBody(data: EmailData[]): string {
 
     data.forEach((item, index) => {
         const now = new Date();
-        const date = now.toISOString().split('T')[0] || 'Not Detected';
+        const istDateTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
 
-        const pad = (num: any) => String(num).padStart(2, '0');
-        const time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        const pad = (num: number) => String(num).padStart(2, '0');
+        const date = `${istDateTime.getFullYear()}-${pad(istDateTime.getMonth() + 1)}-${pad(istDateTime.getDate())}`;
+        const time = `${pad(istDateTime.getHours())}:${pad(istDateTime.getMinutes())}:${pad(istDateTime.getSeconds())}`;
+
         html += `
             <h2>Document ${index + 1}: ${item.fileName}</h2>
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
@@ -61,9 +62,8 @@ function generateEmailBody(data: EmailData[]): string {
                 <tr><td style="width: 30%;"><strong>Customer ID</strong></td><td>${item.customerId || 'Not Found'}</td></tr>
                 <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
                 <tr><td><strong>Invoice Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
-                <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>
-                <tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>
-            `;
+                <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>` + 
+                `${isConsent ? `<tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>` : ''}`;     
         } else if (item.error) {
             html += `<tr><td style="width: 30%;"><strong>Error</strong></td><td style="color: red;">${item.error}</td></tr>`;
         } else {
@@ -76,7 +76,7 @@ function generateEmailBody(data: EmailData[]): string {
     return html;
 }
 
-export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult> {
+export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): Promise<ActionResult> {
     if (!smtpConfigured || !transporter) {
         console.error("SMTP environment variables are not configured.");
         return { error: "Email service is not configured on the server. Please contact the administrator." };
@@ -93,7 +93,7 @@ export async function sendInvoiceEmail(data: EmailData[]): Promise<ActionResult>
         from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
         to: "invoice@supermoney.in",
         subject: "New Invoice Submission",
-        html: generateEmailBody(data),
+        html: generateEmailBody(data, isConsent),
         attachments: attachments,
     };
 
