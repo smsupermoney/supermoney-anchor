@@ -14,11 +14,12 @@ export default async function Dashboard() {
   
   // Separate ID specifically for leads, as per recent changes
   const leadAnchorId = session?.roleType === 'Admin' ? undefined : session?.leadExternalId;
-  
-  const [{ programs, invoices, totalOverdueAmount }, dealers, momentumLeads] = await Promise.all([
-    getPrograms(anchorId, region),
+
+  // Fetch all data
+  const { programs, invoices, totalOverdueAmount } = await getPrograms(anchorId, region);
+  const [dealers, momentumLeads] = await Promise.all([
     getDealers(anchorId, region),
-    getMomentumDealerLeads(leadAnchorId), // Use the correct ID for fetching leads
+    (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_2) ? getMomentumDealerLeads(leadAnchorId) : Promise.resolve([]),
   ]);
   
   const lifetimeSanctionLimit = dealers.reduce((sum, dealer) => sum + dealer.totalLimit, 0);
