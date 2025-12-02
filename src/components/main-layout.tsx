@@ -162,9 +162,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <footer className="mt-auto border-t bg-background px-4 py-3 text-xs text-muted-foreground">
               <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                      <Link href="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>
+                      <a href="https://www.supermoney.in/PrivacyPolicies.html" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
                       <Link href="/disclaimer" className="text-primary hover:underline">Disclaimer</Link>
-                      <Link href="/terms-and-conditions" className="text-primary hover:underline">Terms and Conditions</Link>
+                      <a href="https://www.supermoney.in/Terms&Conditions.htm" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Terms and Conditions</a>
                   </div>
                   <SupermoneyLogo />
               </div>
