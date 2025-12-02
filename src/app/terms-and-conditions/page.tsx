@@ -11,7 +11,7 @@ export default function TermsAndConditionsPage() {
           <CardTitle>Terms and Conditions of Use</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p><strong>Last Updated:</strong> [Date]</p>
+          <p><strong>Last Updated:</strong> 02/11/25</p>
           
           <p>
             Please read these terms and conditions carefully before using Our Service.

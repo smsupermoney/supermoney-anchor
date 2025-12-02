@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
           <CardTitle>Privacy Policy for Supermoney Anchor Platform</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p><strong>Last Updated:</strong> [Date]</p>
+          <p><strong>Last Updated:</strong> 02/11/25</p>
           
           <p>
             Welcome to the Supermoney Anchor Platform ("us", "we", or "our"). We operate the Supermoney Anchor Platform website and mobile application (the "Service").

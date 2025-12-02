@@ -11,7 +11,7 @@ export default function DisclaimerPage() {
           <CardTitle>Platform Disclaimer</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p><strong>Last Updated:</strong> [Date]</p>
+          <p><strong>Last Updated:</strong> 02/11/25</p>
           
           <p>
             The information provided by the Supermoney Anchor Platform ("we," "us," or "our") on our website and mobile application is for general informational purposes only. All information on the site and our mobile application is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site or our mobile application.
