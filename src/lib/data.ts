@@ -28,6 +28,7 @@ const processDocumentDates = (data: Record<string, any>): Record<string, any> =>
 // Functions to fetch data from Firestore
 
 export async function getMomentumDealerLeads(anchorId?: string): Promise<MomentumDealerLead[]> {
+    console.log(`[getMomentumDealerLeads] Fetching for anchorId: ${anchorId}`);
     const fetchLeads = async (collectionName: 'dealers' | 'vendors', category: 'Dealer' | 'Vendor') => {
         try {
             let leadsQuery;
@@ -147,7 +148,8 @@ export async function getInvoices(anchorId?: string, region?: string): Promise<I
           lender: programMap.get(data.programId) || 'Unknown Lender',
           overdueAmount: overdueAmount,
           invoiceImage: data.invoiceImage || '',
-          disbursementSentDate: data.disbursementSentDate || ''
+          disbursementSentDate: data.disbursementSentDate || '',
+          disburseDate: data.disburseDate || '',
       } as Invoice;
     })
     .filter(invoice => {
@@ -270,7 +272,7 @@ export async function getPrograms(anchorId?: string, region?: string): Promise<{
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, { id: p.id, ...p.data() } as Program]));
     const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
     
-    let allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string, region?: string });
+    let allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string, region?: string, status: Dealer['status'] });
     
     // Filter dealers based on anchor and region
     let relevantDealers = allDealers;
@@ -308,7 +310,9 @@ export async function getPrograms(anchorId?: string, region?: string): Promise<{
         const programId = dealer.programId;
         const limit = limitsMap.get(dealer.dealerId);
 
-        if (programId && programAggregates[programId] && limit) {
+        // ** LOGIC CHANGE HERE **
+        // Only aggregate limit and usage if the dealer is 'Active'
+        if (programId && programAggregates[programId] && limit && dealer.status === 'Active') {
             programAggregates[programId].totalLimit! += limit.limitAmount;
             programAggregates[programId].usedLimit! += limit.utilisationAmount;
         }
