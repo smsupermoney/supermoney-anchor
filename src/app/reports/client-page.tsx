@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Legend, Bar, PieChart, Pie, Cell, TooltipProps } from 'recharts';
-import type { Invoice, Dealer, Program, User } from '@/types';
+import type { Invoice, Dealer, Program, User, MomentumDealerLead } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import StatusBadge from '@/components/status-badge';
 import type { NameValue } from 'recharts/types/component/DefaultTooltipContent';
@@ -23,12 +23,13 @@ type ReportsClientPageProps = {
     initialInvoices: Invoice[];
     initialDealers: Dealer[];
     initialPrograms: Program[];
+    initialLeads: MomentumDealerLead[];
     users: User[];
     isAdmin: boolean;
     totalOverdueAmount: number;
 };
 
-export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, users, isAdmin, totalOverdueAmount }: ReportsClientPageProps) {
+export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, initialLeads, users, isAdmin, totalOverdueAmount }: ReportsClientPageProps) {
     const [dateRange, setDateRange] = useState<string>('all');
 
     const filteredInvoices = useMemo(() => {
@@ -181,6 +182,24 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         }));
         const programSheet = xlsx.utils.json_to_sheet(programData);
         xlsx.utils.book_append_sheet(workbook, programSheet, "All Programs");
+
+        // Sheet 5: All Leads
+        const leadData = initialLeads.map(l => ({
+            "Lead ID": l.id,
+            "Lead Name": l.name,
+            "Category": l.leadCategory,
+            "Status": l.status,
+            "City": l.city,
+            "State": l.state,
+            "SPOC": l.spoc,
+            "Contact Number": l.contactNumber,
+            "Email": l.email,
+            "Deal Value (Lacs)": l.dealValue,
+            "Created At": l.createdAt,
+            "Updated At": l.updatedAt,
+        }));
+        const leadSheet = xlsx.utils.json_to_sheet(leadData);
+        xlsx.utils.book_append_sheet(workbook, leadSheet, "All Leads");
 
         xlsx.writeFile(workbook, "full_report.xlsx");
     };
@@ -373,6 +392,9 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                             </Button>
                              <Button variant="outline" onClick={() => downloadExcel(initialPrograms, 'Programs', 'program_report.xlsx')}>
                                 <Download className="mr-2 h-4 w-4" /> Download Programs
+                            </Button>
+                            <Button variant="outline" onClick={() => downloadExcel(initialLeads, 'Leads', 'leads_report.xlsx')}>
+                                <Download className="mr-2 h-4 w-4" /> Download Leads
                             </Button>
                         </div>
                         <div className="relative w-full overflow-auto border rounded-md max-h-60 mt-4">
