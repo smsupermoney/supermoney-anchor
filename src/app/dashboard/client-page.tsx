@@ -253,6 +253,28 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
             </Link>
             <Card className="flex-1">
                 <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                    <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
+                    <CalendarClock className="w-4 h-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="p-3 pt-0">
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Next 7 Days</span>
+                            <span className="font-medium">{formatCurrency(upcomingPayments.next7Days)}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Next 15 Days</span>
+                            <span className="font-medium">{formatCurrency(upcomingPayments.next15Days)}</span>
+                        </div>
+                         <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Next 30 Days</span>
+                            <span className="font-medium">{formatCurrency(upcomingPayments.next30Days)}</span>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="flex-1">
+                <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
                     <CardTitle className="text-sm font-semibold">Invoice Summary (7d)</CardTitle>
                     <FileText className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
