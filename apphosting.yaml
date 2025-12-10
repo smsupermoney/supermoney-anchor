@@ -16,5 +16,3 @@ secretEnvironmentVariables:
   - secret: SECRET_COOKIE_PASSWORD
   - secret: SECRET_GEMINI_API_KEY
   - secret: DEALER_API_SECRET_KEY
-  - secret: EMAIL_SERVER_USER
-  - secret: EMAIL_SERVER_APP_PASSWORD
