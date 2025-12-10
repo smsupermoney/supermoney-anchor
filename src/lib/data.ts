@@ -245,10 +245,9 @@ export async function getDealerLimits(dealerIds?: string[]): Promise<DealerLimit
     const limitsCol = collection(db1, 'dealerLimits');
     const allLimits: DealerLimit[] = [];
     
-    // Firestore 'in' query limit is 30
+    // Firestore 'in' query can handle up to 30 items.
     const CHUNK_SIZE = 30; 
 
-    // Process the dealerIds in chunks
     for (let i = 0; i < dealerIds.length; i += CHUNK_SIZE) {
         const chunk = dealerIds.slice(i, i + CHUNK_SIZE);
         if (chunk.length > 0) {
@@ -419,3 +418,5 @@ export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
   'Business Limit Approved',
   'Dealer Activated'
 ];
+
+    
