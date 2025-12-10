@@ -244,11 +244,13 @@ export async function getDealerLimits(dealerIds?: string[]): Promise<DealerLimit
 
     const limitsCol = collection(db1, 'dealerLimits');
     const allLimits: DealerLimit[] = [];
-    const chunkSize = 30; // Firestore 'in' query limit
+    
+    // Firestore 'in' query limit is 30
+    const CHUNK_SIZE = 30; 
 
     // Process the dealerIds in chunks
-    for (let i = 0; i < dealerIds.length; i += chunkSize) {
-        const chunk = dealerIds.slice(i, i + chunkSize);
+    for (let i = 0; i < dealerIds.length; i += CHUNK_SIZE) {
+        const chunk = dealerIds.slice(i, i + CHUNK_SIZE);
         if (chunk.length > 0) {
             const q = query(limitsCol, where(documentId(), 'in', chunk));
             const limitsSnapshot = await getDocs(q);
