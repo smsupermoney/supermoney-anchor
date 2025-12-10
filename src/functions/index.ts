@@ -35,8 +35,23 @@ const getDealerDataForAnchor = async (anchorId: string) => {
   if (dealerIds.length === 0) {
       return [];
   }
-  const limitsSnapshot = await db.collection("dealerLimits").where(admin.firestore.FieldPath.documentId(), 'in', dealerIds).get();
-  const limitsMap = new Map(limitsSnapshot.docs.map(doc => [doc.id, doc.data()]));
+
+  // Chunking logic to handle Firestore's 30-item limit for 'in' queries
+  const CHUNK_SIZE = 30;
+  const dealerIdChunks = [];
+  for (let i = 0; i < dealerIds.length; i += CHUNK_SIZE) {
+      dealerIdChunks.push(dealerIds.slice(i, i + CHUNK_SIZE));
+  }
+
+  const allLimits: admin.firestore.DocumentData[] = [];
+  for (const chunk of dealerIdChunks) {
+      const limitsSnapshot = await db.collection("dealerLimits").where(admin.firestore.FieldPath.documentId(), 'in', chunk).get();
+      limitsSnapshot.forEach(doc => {
+          allLimits.push({ id: doc.id, ...doc.data() });
+      });
+  }
+
+  const limitsMap = new Map(allLimits.map(doc => [doc.id, doc]));
 
   return dealers.map(dealer => {
       const limit = limitsMap.get(dealer.id);
