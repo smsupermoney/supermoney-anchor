@@ -8,14 +8,9 @@ const json2csv_1 = require("json2csv");
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 const db = admin.firestore();
-// Nodemailer transporter setup
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_SERVER_USER,
-        pass: process.env.EMAIL_SERVER_APP_PASSWORD,
-    },
-});
+// Nodemailer transporter setup, configured inside the function
+// to use environment variables populated from secrets.
+let transporter;
 // Function to get all active users
 const getActiveUsers = async () => {
     const usersSnapshot = await db.collection("users").where("roleType", "==", "Anchor").get();
@@ -68,7 +63,20 @@ const generateEmailBody = (userName, overdueAmount, overdueCount) => {
   `;
 };
 // Main function to be triggered by Cloud Scheduler
-exports.sendDailyReports = functions.https.onRequest(async (req, res) => {
+// The .runWith() method configures the function's runtime options, including secrets.
+exports.sendDailyReports = functions
+    .runWith({
+    secrets: ["EMAIL_SERVER_USER", "EMAIL_SERVER_APP_PASSWORD"],
+})
+    .https.onRequest(async (req, res) => {
+    // Initialize transporter inside the function to access secrets
+    transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_SERVER_USER,
+            pass: process.env.EMAIL_SERVER_APP_PASSWORD,
+        },
+    });
     try {
         const users = await getActiveUsers();
         for (const user of users) {

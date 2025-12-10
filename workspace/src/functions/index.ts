@@ -8,14 +8,9 @@ import { Parser } from "json2csv";
 admin.initializeApp();
 const db = admin.firestore();
 
-// Nodemailer transporter setup
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_SERVER_USER,
-    pass: process.env.EMAIL_SERVER_APP_PASSWORD,
-  },
-});
+// Nodemailer transporter setup, configured inside the function
+// to use environment variables populated from secrets.
+let transporter: nodemailer.Transporter;
 
 // Function to get all active users
 const getActiveUsers = async () => {
@@ -37,6 +32,9 @@ const getDealerDataForAnchor = async (anchorId: string) => {
   
   // Fetch limits for these dealers
   const dealerIds = dealers.map(d => d.id);
+  if (dealerIds.length === 0) {
+      return [];
+  }
   const limitsSnapshot = await db.collection("dealerLimits").where(admin.firestore.FieldPath.documentId(), 'in', dealerIds).get();
   const limitsMap = new Map(limitsSnapshot.docs.map(doc => [doc.id, doc.data()]));
 
@@ -75,65 +73,79 @@ const generateEmailBody = (userName: string, overdueAmount: number, overdueCount
 };
 
 // Main function to be triggered by Cloud Scheduler
-export const sendDailyReports = functions.https.onRequest(async (req, res) => {
-  try {
-    const users = await getActiveUsers();
+// The .runWith() method configures the function's runtime options, including secrets.
+export const sendDailyReports = functions
+  .runWith({
+    secrets: ["SMTP_USER", "SMTP_PASS"],
+  })
+  .https.onRequest(async (req, res) => {
+    // Initialize transporter inside the function to access secrets
+    transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+    });
 
-    for (const user of users) {
-      if (!user.emailAddress) {
-        console.log(`User ${user.userName} has no email address, skipping.`);
-        continue;
-      }
-      
-      const dealers = await getDealerDataForAnchor(user.externalId);
-      const overdueDealers = dealers.filter((d) => d.overdueAmount > 0);
-      const totalOverdueAmount = overdueDealers.reduce((sum, d) => sum + d.overdueAmount, 0);
+    try {
+        const users = await getActiveUsers();
 
-      const logData: any = {
-          userId: user.id,
-          userName: user.userName,
-          email: user.emailAddress,
-          sentAt: new Date(),
-      };
-
-      try {
-        // Generate CSV
-        const csvFields = ["dealerName", "overdueAmount", "status"];
-        const json2csvParser = new Parser({ fields: csvFields });
-        const csv = json2csvParser.parse(overdueDealers);
+        for (const user of users) {
+        if (!user.emailAddress) {
+            console.log(`User ${user.userName} has no email address, skipping.`);
+            continue;
+        }
         
-        // Setup email data
-        const mailOptions: nodemailer.SendMailOptions = {
-          from: `"Supermoney" <${process.env.EMAIL_SERVER_USER}>`,
-          to: user.emailAddress,
-          subject: "Supermoney Daily Dashboard Summary & Dealer Report",
-          html: generateEmailBody(user.userName, totalOverdueAmount, overdueDealers.length),
-          attachments: [
-            {
-              filename: `Daily_Overdue_Report_${new Date().toISOString().split('T')[0]}.csv`,
-              content: csv,
-              contentType: 'text/csv'
-            },
-          ],
+        const dealers = await getDealerDataForAnchor(user.externalId);
+        const overdueDealers = dealers.filter((d) => d.overdueAmount > 0);
+        const totalOverdueAmount = overdueDealers.reduce((sum, d) => sum + d.overdueAmount, 0);
+
+        const logData: any = {
+            userId: user.id,
+            userName: user.userName,
+            email: user.emailAddress,
+            sentAt: new Date(),
         };
+
+        try {
+            // Generate CSV
+            const csvFields = ["dealerName", "overdueAmount", "status"];
+            const json2csvParser = new Parser({ fields: csvFields });
+            const csv = json2csvParser.parse(overdueDealers);
+            
+            // Setup email data
+            const mailOptions: nodemailer.SendMailOptions = {
+            from: `"Supermoney" <${process.env.SMTP_USER}>`,
+            to: user.emailAddress,
+            subject: "Supermoney Daily Dashboard Summary & Dealer Report",
+            html: generateEmailBody(user.userName, totalOverdueAmount, overdueDealers.length),
+            attachments: [
+                {
+                filename: `Daily_Overdue_Report_${new Date().toISOString().split('T')[0]}.csv`,
+                content: csv,
+                contentType: 'text/csv'
+                },
+            ],
+            };
+            
+            await transporter.sendMail(mailOptions);
+            console.log(`Email sent successfully to ${user.emailAddress}`);
+            logData.status = 'Success';
+
+        } catch (emailError) {
+            console.error(`Failed to send email to ${user.emailAddress}:`, emailError);
+            logData.status = 'Failure';
+            logData.error = (emailError as Error).message;
+        }
+
+        await db.collection("email_logs").add(logData);
+        }
         
-        await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully to ${user.emailAddress}`);
-        logData.status = 'Success';
+        res.status(200).send("Daily reports process completed successfully.");
 
-      } catch (emailError) {
-          console.error(`Failed to send email to ${user.emailAddress}:`, emailError);
-          logData.status = 'Failure';
-          logData.error = (emailError as Error).message;
-      }
-
-      await db.collection("email_logs").add(logData);
+    } catch (error) {
+        console.error("Error in sendDailyReports function:", error);
+        res.status(500).send("An internal error occurred.");
     }
-    
-    res.status(200).send("Daily reports process completed successfully.");
-
-  } catch (error) {
-    console.error("Error in sendDailyReports function:", error);
-    res.status(500).send("An internal error occurred.");
-  }
 });
