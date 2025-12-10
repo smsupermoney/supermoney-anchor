@@ -66,15 +66,15 @@ const generateEmailBody = (userName, overdueAmount, overdueCount) => {
 // The .runWith() method configures the function's runtime options, including secrets.
 exports.sendDailyReports = functions
     .runWith({
-    secrets: ["EMAIL_SERVER_USER", "EMAIL_SERVER_APP_PASSWORD"],
+    secrets: ["SMTP_USER", "SMTP_PASS"],
 })
     .https.onRequest(async (req, res) => {
     // Initialize transporter inside the function to access secrets
     transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-            user: process.env.EMAIL_SERVER_USER,
-            pass: process.env.EMAIL_SERVER_APP_PASSWORD,
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
         },
     });
     try {
@@ -100,7 +100,7 @@ exports.sendDailyReports = functions
                 const csv = json2csvParser.parse(overdueDealers);
                 // Setup email data
                 const mailOptions = {
-                    from: `"Supermoney" <${process.env.EMAIL_SERVER_USER}>`,
+                    from: `"Supermoney" <${process.env.SMTP_USER}>`,
                     to: user.emailAddress,
                     subject: "Supermoney Daily Dashboard Summary & Dealer Report",
                     html: generateEmailBody(user.userName, totalOverdueAmount, overdueDealers.length),
