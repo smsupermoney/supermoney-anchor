@@ -30,7 +30,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const isLoginPage = pathname === '/';
   const isSubscribePage = pathname === '/subscribe';
-  const isLegalPage = ['/privacy-policy', '/disclaimer', '/terms-and-conditions'].includes(pathname);
+  const isLegalPage = ['/privacy-policy', '/disclaimer', '/terms-and-conditions', '/api/upcoming-payments'].includes(pathname);
 
 
   if (isLoginPage || (isSubscribePage && !user) || (isLegalPage && !user)) {

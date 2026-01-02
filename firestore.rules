@@ -81,5 +81,13 @@ service cloud.firestore {
       allow update: if isSignedIn() && isAdmin();
       // No delete rule defined, so it's denied.
     }
+
+    // UpcomingPayments Collection
+    // Anchors can read payments linked to them. Writes are handled by the secure API endpoint.
+    match /upcomingPayments/{paymentId} {
+        allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(resource.data.anchorId)));
+        // Writes are denied from the client-side for security.
+        allow write: if false;
+    }
   }
 }

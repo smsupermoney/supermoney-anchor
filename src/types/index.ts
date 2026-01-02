@@ -242,3 +242,12 @@ export interface InvoiceDocument {
   applicationId: string;
   customerId: string;
 }
+
+export type UpcomingPayment = {
+  invoiceNumber: string;
+  dealerName: string;
+  anchorId: string;
+  amount: number;
+  dueDate: string; // YYYY-MM-DD
+};
+
