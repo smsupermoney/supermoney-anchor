@@ -280,6 +280,15 @@ export const sampleUpcomingPayments = [
     "amount": 45000,
     "dueDate": "2024-09-25",
     "lender": "Supermoney Finance"
+  },
+  {
+    "id": "UP004",
+    "invoiceNumber": "INV-2024-08-004",
+    "dealerName": "Oscorp",
+    "anchorId": "ANC001",
+    "amount": 95000,
+    "dueDate": "2024-09-28",
+    "lender": "Supermoney Finance"
   }
 ];
 
