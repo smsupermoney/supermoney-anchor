@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe, Map } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe, Map, CalendarClock } from 'lucide-react';
 import type { UserSubRole } from '@/types';
 
 export const anchorNavigationLinks = [
@@ -7,6 +7,7 @@ export const anchorNavigationLinks = [
   { href: '/programs', label: 'Programs', icon: Library },
   { href: '/retailers', label: 'Dealers', icon: Users },
   { href: '/invoices', label: 'Invoices', icon: FileText },
+  { href: '/upcoming-payments', label: 'Upcoming Payments', icon: CalendarClock },
   { href: '/leads', label: 'Leads', icon: PlusCircle },
   { href: '/reports', label: 'Reports', icon: FileBarChart },
   { href: '/settings', label: 'Settings', icon: Settings },
@@ -27,6 +28,7 @@ export const adminNavigationLinks = [
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/retailers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
+  { href: '/upcoming-payments', label: 'Upcoming Payments', icon: CalendarClock },
   { href: '/leads', label: 'View Leads', icon: FileText },
   { href: '/reports', label: 'Reports', icon: FileBarChart },
   { href: '/view-users', label: 'View Users', icon: Users },
