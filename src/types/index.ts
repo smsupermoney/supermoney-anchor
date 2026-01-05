@@ -243,14 +243,21 @@ export interface InvoiceDocument {
   customerId: string;
 }
 
-export type UpcomingPayment = {
-  id?: string;
-  invoiceNumber: string;
+export type UpcomingPaymentItem = {
+  id: string;
+  dealerId: string;
   dealerName: string;
-  anchorId: string;
-  amount: number;
-  dueDate: string; // YYYY-MM-DD
-  lender?: string;
+  outstandingAmount: number;
+  dueDate: string;
+  lender: string;
+};
+
+export type UpcomingPayment = {
+  dealerId: string;
+  payments: Array<{
+    dueDate: string;
+    outstandingAmount: number;
+  }>;
 };
 
     

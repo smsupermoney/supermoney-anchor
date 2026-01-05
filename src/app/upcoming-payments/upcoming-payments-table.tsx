@@ -12,24 +12,24 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import type { Invoice } from "@/types";
+import type { UpcomingPaymentItem } from "@/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type UpcomingPaymentsTableProps = {
-  invoices: Invoice[];
+  payments: UpcomingPaymentItem[];
   isAdmin: boolean;
 };
 
-export default function UpcomingPaymentsTable({ invoices, isAdmin }: UpcomingPaymentsTableProps) {
+export default function UpcomingPaymentsTable({ payments, isAdmin }: UpcomingPaymentsTableProps) {
   const [pageIndex, setPageIndex] = React.useState(0);
   const pageSize = 10;
 
-  const pageCount = Math.ceil(invoices.length / pageSize);
-  const paginatedInvoices = React.useMemo(() => {
+  const pageCount = Math.ceil(payments.length / pageSize);
+  const paginatedPayments = React.useMemo(() => {
     const start = pageIndex * pageSize;
     const end = start + pageSize;
-    return invoices.slice(start, end);
-  }, [invoices, pageIndex, pageSize]);
+    return payments.slice(start, end);
+  }, [payments, pageIndex, pageSize]);
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -42,7 +42,7 @@ export default function UpcomingPaymentsTable({ invoices, isAdmin }: UpcomingPay
       <CardHeader>
         <CardTitle>Outstanding Payments</CardTitle>
         <CardDescription>
-          A list of all disbursed invoices that are due for payment.
+          A list of all outstanding payments due from dealers.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -51,52 +51,50 @@ export default function UpcomingPaymentsTable({ invoices, isAdmin }: UpcomingPay
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Dealer Name</TableHead>
                   <TableHead>Dealer ID</TableHead>
-                  {isAdmin && <TableHead>Anchor</TableHead>}
                   <TableHead>Lender</TableHead>
                   <TableHead>Due Date</TableHead>
                   <TableHead className="text-right">Outstanding Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedInvoices.length > 0 ? (
-                  paginatedInvoices.map((invoice) => (
-                    <TableRow key={invoice.id}>
+                {paginatedPayments.length > 0 ? (
+                  paginatedPayments.map((payment) => (
+                    <TableRow key={payment.id}>
                       <TableCell className="font-medium">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div className="truncate max-w-[150px]">{invoice.dealerName}</div>
+                                    <div className="truncate max-w-[150px]">{payment.dealerName}</div>
                                 </TooltipTrigger>
-                                <TooltipContent><p>{invoice.dealerName} ({invoice.dealerId})</p></TooltipContent>
+                                <TooltipContent><p>{payment.dealerName}</p></TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                       </TableCell>
-                       {isAdmin && (
-                        <TableCell>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div className="truncate max-w-[150px]">{invoice.anchorName}</div>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>{invoice.anchorName}</p></TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </TableCell>
-                       )}
                       <TableCell>
                          <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div className="truncate max-w-[150px]">{invoice.lender}</div>
+                                    <div className="truncate max-w-[150px]">{payment.dealerId}</div>
                                 </TooltipTrigger>
-                                <TooltipContent><p>{invoice.lender}</p></TooltipContent>
+                                <TooltipContent><p>{payment.dealerId}</p></TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                       </TableCell>
-                      <TableCell>{invoice.dueDate}</TableCell>
+                       <TableCell>
+                         <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="truncate max-w-[150px]">{payment.lender}</div>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{payment.lender}</p></TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                      <TableCell>{payment.dueDate}</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {formatCurrency(invoice.disbursementSentAmount)}
+                        {formatCurrency(payment.outstandingAmount)}
                       </TableCell>
                     </TableRow>
                   ))
@@ -124,3 +122,4 @@ export default function UpcomingPaymentsTable({ invoices, isAdmin }: UpcomingPay
     </Card>
   );
 }
+

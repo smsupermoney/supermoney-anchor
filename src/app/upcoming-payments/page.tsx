@@ -2,54 +2,88 @@
 import { unstable_noStore as noStore } from 'next/cache';
 import PageHeader from "@/components/page-header";
 import { getSession } from '@/lib/session';
-import { getInvoices, getUsers, getDealers } from '@/lib/data';
+import { getDealers } from '@/lib/data';
+import { db1 } from '@/lib/firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import UpcomingPaymentsTable from './upcoming-payments-table';
+import type { UpcomingPayment, Dealer, UpcomingPaymentItem } from '@/types';
+
+
+async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentItem[]> {
+    const paymentsCol = collection(db1, 'upcomingPayments');
+    let paymentsQuery;
+
+    if (anchorId) {
+        // If anchorId is provided, we need to first get the dealers for that anchor
+        const dealers = await getDealers(anchorId);
+        const dealerIds = dealers.map(d => d.id);
+        
+        if (dealerIds.length === 0) {
+            return [];
+        }
+        // Firestore 'in' queries are limited to 30 items. If there are more, we need to chunk.
+        const chunks = [];
+        for (let i = 0; i < dealerIds.length; i += 30) {
+            chunks.push(dealerIds.slice(i, i + 30));
+        }
+
+        const paymentPromises = chunks.map(chunk => 
+            getDocs(query(paymentsCol, where('dealerId', 'in', chunk)))
+        );
+        const paymentSnapshots = await Promise.all(paymentPromises);
+        paymentsQuery = paymentSnapshots.flatMap(snap => snap.docs);
+
+    } else {
+        // Admin case, fetch all
+        const snapshot = await getDocs(paymentsCol);
+        paymentsQuery = snapshot.docs;
+    }
+
+    const allDealers = await getDealers();
+    const dealerMap = new Map(allDealers.map(d => [d.id, d.name]));
+
+    const flattenedPayments: UpcomingPaymentItem[] = [];
+    paymentsQuery.forEach(doc => {
+        const data = doc.data() as UpcomingPayment;
+        if (data.payments && Array.isArray(data.payments)) {
+            data.payments.forEach(payment => {
+                flattenedPayments.push({
+                    id: `${data.dealerId}-${payment.dueDate}-${payment.outstandingAmount}`, // Create a unique ID
+                    dealerId: data.dealerId,
+                    dealerName: dealerMap.get(data.dealerId) || 'Unknown Dealer',
+                    outstandingAmount: payment.outstandingAmount,
+                    dueDate: payment.dueDate,
+                    lender: 'N/A' // This data is not in the upcomingPayments collection
+                });
+            });
+        }
+    });
+
+    // Sort by due date
+    flattenedPayments.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+
+    return flattenedPayments;
+}
+
 
 export default async function UpcomingPaymentsPage() {
   noStore();
   const session = await getSession();
   const isAdmin = session?.roleType === 'Admin';
   const anchorId = isAdmin ? undefined : session?.externalId;
-  const region = isAdmin ? undefined : session?.region;
-
-  // Fetch all invoices that could be upcoming payments
-  const allInvoices = await getInvoices(anchorId, region);
-
-  let upcomingInvoices = allInvoices.filter(invoice => {
-    const dueDate = new Date(invoice.dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Compare dates only
-    return invoice.status === 'Disbursed' && dueDate >= today;
-  });
-
-  // If the user is an admin, enrich the invoices with anchor names.
-  // If not an admin, the invoices are already scoped by getInvoices, but we re-verify here.
-  if (isAdmin) {
-    const allUsers = await getUsers();
-    const anchorUserMap = new Map(allUsers.filter(u => u.roleType === 'Anchor').map(u => [u.externalId, u.userName]));
-    upcomingInvoices.forEach(invoice => {
-      invoice.anchorName = anchorUserMap.get(invoice.anchorId) || invoice.anchorId;
-    });
-  } else if (anchorId) {
-    // For a non-admin, ensure we only show payments for their dealers.
-    // 1. Get all dealers for this anchor.
-    const anchorDealers = await getDealers(anchorId, region);
-    const anchorDealerIds = new Set(anchorDealers.map(d => d.id));
-    
-    // 2. Filter the upcoming invoices to only those whose dealerId is in the anchor's list.
-    upcomingInvoices = upcomingInvoices.filter(invoice => anchorDealerIds.has(invoice.dealerId));
-  }
-
-
+  
+  const upcomingPayments = await getUpcomingPayments(anchorId);
+  
   return (
     <>
       <PageHeader title="Upcoming Payments" />
       <div className="mt-4">
         <UpcomingPaymentsTable 
-            invoices={upcomingInvoices}
+            payments={upcomingPayments}
             isAdmin={isAdmin}
         />
       </div>
     </>
   );
 }
+
