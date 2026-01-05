@@ -4,15 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AddDealerLimitForm from "./add-dealer-limit-form";
 import { sampleUpcomingPayments } from "@/lib/dummy-data";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-
-const CopyButton = ({ text }: { text: string }) => {
-    "use client";
-    const handleCopy = () => {
-        navigator.clipboard.writeText(text);
-    };
-    return <Button onClick={handleCopy} size="sm">Copy Sample JSON</Button>;
-}
+import CopyButton from "./copy-button";
 
 export default function AddUpcomingPaymentsPage() {
   const sampleJson = JSON.stringify(sampleUpcomingPayments, null, 2);
