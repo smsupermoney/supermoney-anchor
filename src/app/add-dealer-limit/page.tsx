@@ -31,7 +31,7 @@ export default function AddUpcomingPaymentsPage() {
             <CardContent>
                 <AddDealerLimitForm />
             </CardContent>
-        </Card>>
+        </Card>
         <Card>
             <CardHeader>
                 <CardTitle className="flex justify-between items-center">
@@ -52,5 +52,3 @@ export default function AddUpcomingPaymentsPage() {
     </>
   );
 }
-
-    
