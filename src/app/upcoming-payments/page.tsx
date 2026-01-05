@@ -11,10 +11,10 @@ import type { UpcomingPayment, Dealer, UpcomingPaymentItem } from '@/types';
 
 async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentItem[]> {
     const paymentsCol = collection(db1, 'upcomingPayments');
-    let paymentsQuery;
-
-    const allDealers = await getDealers(anchorId);
-    const dealerMap = new Map(allDealers.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
+    const allDealersForAnchor = await getDealers(anchorId);
+    const dealerMap = new Map(allDealersForAnchor.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
+    
+    let paymentDocsQuery;
 
     if (anchorId) {
         // If anchorId is provided, we only fetch payments for dealers belonging to that anchor.
@@ -24,7 +24,8 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
             return []; // Anchor has no dealers, so no payments to show.
         }
 
-        // Firestore 'in' queries are limited to 30 items. If there are more, we need to chunk.
+        // Firestore 'in' queries are limited to 30 items per query. 
+        // We must "chunk" the dealer IDs into groups of 30 to query them all.
         const chunks: string[][] = [];
         for (let i = 0; i < dealerIds.length; i += 30) {
             chunks.push(dealerIds.slice(i, i + 30));
@@ -34,28 +35,30 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
             getDocs(query(paymentsCol, where('dealerId', 'in', chunk)))
         );
         const paymentSnapshots = await Promise.all(paymentPromises);
-        paymentsQuery = paymentSnapshots.flatMap(snap => snap.docs);
+        paymentDocsQuery = paymentSnapshots.flatMap(snap => snap.docs);
 
     } else {
-        // Admin case, fetch all upcoming payments.
+        // Admin case: fetch all upcoming payments.
         const snapshot = await getDocs(paymentsCol);
-        paymentsQuery = snapshot.docs;
+        paymentDocsQuery = snapshot.docs;
     }
 
     const flattenedPayments: UpcomingPaymentItem[] = [];
-    paymentsQuery.forEach(doc => {
+    paymentDocsQuery.forEach(doc => {
         const data = doc.data() as UpcomingPayment;
         const dealerInfo = dealerMap.get(data.dealerId);
 
-        if (data.payments && Array.isArray(data.payments)) {
+        // This check is important: only include the payment if its dealer is in the anchor's list.
+        // For admins, dealerInfo will always exist if the dealer exists.
+        if (dealerInfo && data.payments && Array.isArray(data.payments)) {
             data.payments.forEach(payment => {
                 flattenedPayments.push({
                     id: `${data.dealerId}-${payment.dueDate}-${payment.outstandingAmount}`,
                     dealerId: data.dealerId,
-                    dealerName: dealerInfo?.name || 'Unknown Dealer',
+                    dealerName: dealerInfo.name || 'Unknown Dealer',
                     outstandingAmount: payment.outstandingAmount,
                     dueDate: payment.dueDate,
-                    lender: dealerInfo?.lender || 'N/A' // Populate lender from dealer info
+                    lender: dealerInfo.lender || 'N/A'
                 });
             });
         }
