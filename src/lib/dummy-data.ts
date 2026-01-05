@@ -251,3 +251,35 @@ export const sampleRegionUpdate = [
         region: "Maharashtra",
     }
 ];
+
+export const sampleUpcomingPayments = [
+  {
+    "id": "UP001",
+    "invoiceNumber": "INV-2024-08-001",
+    "dealerName": "Stark Industries",
+    "anchorId": "ANC001",
+    "amount": 75000,
+    "dueDate": "2024-09-15",
+    "lender": "Supermoney Finance"
+  },
+  {
+    "id": "UP002",
+    "invoiceNumber": "INV-2024-08-002",
+    "dealerName": "Wayne Enterprises",
+    "anchorId": "ANC002",
+    "amount": 120000,
+    "dueDate": "2024-09-20",
+    "lender": "Flexi Loans"
+  },
+  {
+    "id": "UP003",
+    "invoiceNumber": "INV-2024-08-003",
+    "dealerName": "Pied Piper",
+    "anchorId": "ANC001",
+    "amount": 45000,
+    "dueDate": "2024-09-25",
+    "lender": "Supermoney Finance"
+  }
+];
+
+    

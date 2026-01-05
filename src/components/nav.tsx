@@ -21,6 +21,7 @@ export const adminNavigationLinks = [
   { href: '/add-program', label: 'Add Program', icon: PlusCircle },
   { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
   { href: '/add-invoice', label: 'Add Invoice', icon: PlusCircle },
+  { href: '/add-dealer-limit', label: 'Add Upcoming Payments', icon: PlusCircle },
   { href: '/add-anchor', label: 'Add User', icon: UserPlus },
   { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
   { href: '/update-gst', label: 'Update Dealer GST', icon: FileUp },
@@ -86,3 +87,5 @@ export const dealerOnboardingNavigationLinks: { href: string; label: string; ico
     subRole: ['onboarding_ops', 'field_inspector', 'legal_compliance', 'regional_manager', 'dealer_admin']
   }
 ];
+
+    

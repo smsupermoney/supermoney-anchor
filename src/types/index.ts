@@ -244,10 +244,13 @@ export interface InvoiceDocument {
 }
 
 export type UpcomingPayment = {
+  id?: string;
   invoiceNumber: string;
   dealerName: string;
   anchorId: string;
   amount: number;
   dueDate: string; // YYYY-MM-DD
+  lender?: string;
 };
 
+    
