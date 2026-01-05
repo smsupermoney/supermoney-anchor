@@ -13,16 +13,19 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
     const paymentsCol = collection(db1, 'upcomingPayments');
     let paymentsQuery;
 
+    const allDealers = await getDealers(anchorId);
+    const dealerMap = new Map(allDealers.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
+
     if (anchorId) {
-        // If anchorId is provided, we need to first get the dealers for that anchor
-        const dealers = await getDealers(anchorId);
-        const dealerIds = dealers.map(d => d.id);
+        // If anchorId is provided, we only fetch payments for dealers belonging to that anchor.
+        const dealerIds = Array.from(dealerMap.keys());
         
         if (dealerIds.length === 0) {
-            return [];
+            return []; // Anchor has no dealers, so no payments to show.
         }
+
         // Firestore 'in' queries are limited to 30 items. If there are more, we need to chunk.
-        const chunks = [];
+        const chunks: string[][] = [];
         for (let i = 0; i < dealerIds.length; i += 30) {
             chunks.push(dealerIds.slice(i, i + 30));
         }
@@ -34,26 +37,25 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
         paymentsQuery = paymentSnapshots.flatMap(snap => snap.docs);
 
     } else {
-        // Admin case, fetch all
+        // Admin case, fetch all upcoming payments.
         const snapshot = await getDocs(paymentsCol);
         paymentsQuery = snapshot.docs;
     }
 
-    const allDealers = await getDealers();
-    const dealerMap = new Map(allDealers.map(d => [d.id, d.name]));
-
     const flattenedPayments: UpcomingPaymentItem[] = [];
     paymentsQuery.forEach(doc => {
         const data = doc.data() as UpcomingPayment;
+        const dealerInfo = dealerMap.get(data.dealerId);
+
         if (data.payments && Array.isArray(data.payments)) {
             data.payments.forEach(payment => {
                 flattenedPayments.push({
-                    id: `${data.dealerId}-${payment.dueDate}-${payment.outstandingAmount}`, // Create a unique ID
+                    id: `${data.dealerId}-${payment.dueDate}-${payment.outstandingAmount}`,
                     dealerId: data.dealerId,
-                    dealerName: dealerMap.get(data.dealerId) || 'Unknown Dealer',
+                    dealerName: dealerInfo?.name || 'Unknown Dealer',
                     outstandingAmount: payment.outstandingAmount,
                     dueDate: payment.dueDate,
-                    lender: 'N/A' // This data is not in the upcomingPayments collection
+                    lender: dealerInfo?.lender || 'N/A' // Populate lender from dealer info
                 });
             });
         }
@@ -86,4 +88,3 @@ export default async function UpcomingPaymentsPage() {
     </>
   );
 }
-
