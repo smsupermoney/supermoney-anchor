@@ -26,7 +26,7 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
     const paymentDocs = [];
 
     // If dealerIdsForQuery is not empty, fetch payments for those dealers.
-    // If it IS empty (which only happens for an admin viewing an empty system), this loop is skipped.
+    // If it IS empty (which can happen for an admin viewing an empty system), this loop is skipped.
     if (dealerIdsForQuery.length > 0) {
         // Firestore 'in' queries are limited to 30 items per query.
         // We must "chunk" the dealer IDs into groups of 30 to query them all.
@@ -48,8 +48,8 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
         const data = doc.data() as UpcomingPayment;
         const dealerInfo = dealerMap.get(data.dealerId);
 
-        // This check is now redundant for anchors because we pre-filtered dealerIds,
-        // but it's good practice to keep for data integrity.
+        // This check is now robust. For an anchor, dealerInfo will only exist if the dealer is theirs.
+        // For an admin, it will exist for all dealers fetched.
         if (dealerInfo && data.payments && Array.isArray(data.payments)) {
             data.payments.forEach(payment => {
                 flattenedPayments.push({
