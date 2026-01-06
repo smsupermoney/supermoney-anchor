@@ -11,45 +11,45 @@ import type { UpcomingPayment, Dealer, UpcomingPaymentItem } from '@/types';
 
 async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentItem[]> {
     const paymentsCol = collection(db1, 'upcomingPayments');
-    const allDealersForAnchor = await getDealers(anchorId);
-    const dealerMap = new Map(allDealersForAnchor.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
     
-    let paymentDocsQuery;
-
-    if (anchorId) {
-        // If anchorId is provided, we only fetch payments for dealers belonging to that anchor.
-        const dealerIds = Array.from(dealerMap.keys());
-        
-        if (dealerIds.length === 0) {
-            return []; // Anchor has no dealers, so no payments to show.
-        }
-
-        // Firestore 'in' queries are limited to 30 items per query. 
-        // We must "chunk" the dealer IDs into groups of 30 to query them all.
-        const chunks: string[][] = [];
-        for (let i = 0; i < dealerIds.length; i += 30) {
-            chunks.push(dealerIds.slice(i, i + 30));
-        }
-
-        const paymentPromises = chunks.map(chunk => 
-            getDocs(query(paymentsCol, where('dealerId', 'in', chunk)))
-        );
-        const paymentSnapshots = await Promise.all(paymentPromises);
-        paymentDocsQuery = paymentSnapshots.flatMap(snap => snap.docs);
-
-    } else {
-        // Admin case: fetch all upcoming payments.
-        const snapshot = await getDocs(paymentsCol);
-        paymentDocsQuery = snapshot.docs;
+    // First, get all dealers for the specific anchor, or all dealers if admin.
+    const allDealersForScope = await getDealers(anchorId);
+    const dealerMap = new Map(allDealersForScope.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
+    
+    const dealerIdsForQuery = Array.from(dealerMap.keys());
+    
+    // If a non-admin user has no dealers, they have no payments to see.
+    if (anchorId && dealerIdsForQuery.length === 0) {
+        return [];
     }
 
+    const paymentDocs = [];
+
+    // If dealerIdsForQuery is not empty, fetch payments for those dealers.
+    // If it IS empty (which only happens for an admin viewing an empty system), this loop is skipped.
+    if (dealerIdsForQuery.length > 0) {
+        // Firestore 'in' queries are limited to 30 items per query.
+        // We must "chunk" the dealer IDs into groups of 30 to query them all.
+        const CHUNK_SIZE = 30;
+        for (let i = 0; i < dealerIdsForQuery.length; i += CHUNK_SIZE) {
+            const chunk = dealerIdsForQuery.slice(i, i + CHUNK_SIZE);
+            const q = query(paymentsCol, where('dealerId', 'in', chunk));
+            const paymentSnapshots = await getDocs(q);
+            paymentDocs.push(...paymentSnapshots.docs);
+        }
+    } else if (!anchorId) {
+        // This is the admin case with no dealers in the system at all. Fetch all (zero) payments.
+        const snapshot = await getDocs(paymentsCol);
+        paymentDocs.push(...snapshot.docs);
+    }
+    
     const flattenedPayments: UpcomingPaymentItem[] = [];
-    paymentDocsQuery.forEach(doc => {
+    paymentDocs.forEach(doc => {
         const data = doc.data() as UpcomingPayment;
         const dealerInfo = dealerMap.get(data.dealerId);
 
-        // This check is important: only include the payment if its dealer is in the anchor's list.
-        // For admins, dealerInfo will always exist if the dealer exists.
+        // This check is now redundant for anchors because we pre-filtered dealerIds,
+        // but it's good practice to keep for data integrity.
         if (dealerInfo && data.payments && Array.isArray(data.payments)) {
             data.payments.forEach(payment => {
                 flattenedPayments.push({
