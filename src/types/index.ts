@@ -1,4 +1,5 @@
 
+
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
 
 
@@ -243,8 +244,9 @@ export interface InvoiceDocument {
   customerId: string;
 }
 
+// Data structure for the flattened upcoming payments list shown in the UI
 export type UpcomingPaymentItem = {
-  id: string;
+  id: string; // loan document ID
   dealerId: string;
   dealerName: string;
   outstandingAmount: number;
@@ -252,12 +254,21 @@ export type UpcomingPaymentItem = {
   lender: string;
 };
 
-export type UpcomingPayment = {
-  dealerId: string;
-  payments: Array<{
-    dueDate: string;
-    outstandingAmount: number;
-  }>;
+// Data structure for a document in the 'loans' subcollection
+export type UpcomingPaymentLoan = {
+  loanId: string;
+  dueDate: string;
+  outstandingAmount: number;
+  updatedAt: any; // Firestore ServerTimestamp
 };
 
+// Data structure for the parent document in the 'upcomingPayments' collection
+export type UpcomingPayment = {
+  dealerId: string;
+  updatedAt: any; // Firestore ServerTimestamp
+  // The 'loans' are now in a subcollection, not an array here.
+};
+
+
     
+

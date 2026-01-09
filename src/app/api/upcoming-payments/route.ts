@@ -3,22 +3,18 @@ import { z } from 'zod';
 import { db1 } from '@/lib/firebase';
 import {
   doc,
-  setDoc,
   serverTimestamp,
-  arrayUnion,
+  writeBatch,
 } from 'firebase/firestore';
 
 /* ================= SCHEMA ================= */
 
 const upcomingPaymentSchema = z.array(
   z.object({
-    dealerId: z.string().min(1, 'dealerId is required'),
-    dueDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
-    outstandingAmount: z
-      .number()
-      .positive('Outstanding amount must be > 0'),
+    dealerId: z.string().min(1),
+    loanId: z.string().min(1),
+    dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    outstandingAmount: z.number().nonnegative(),
   })
 );
 
@@ -66,21 +62,53 @@ export async function POST(request: Request) {
     );
   }
 
-  /* 💾 FIRESTORE UPSERT */
+  /* 💾 FIRESTORE WRITE (CLIENT SDK – BATCHED) */
   try {
-    for (const row of validated.data) {
-      await setDoc(
-        doc(db1, 'upcomingPayments', row.dealerId),
-        {
-          dealerId: row.dealerId,
-          payments: arrayUnion({
-            dueDate: row.dueDate,
-            outstandingAmount: row.outstandingAmount,
-          }),
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      );
+    const BATCH_LIMIT = 25; // 🔑 SAFE LIMIT FOR CLIENT SDK
+
+    for (let i = 0; i < validated.data.length; i += BATCH_LIMIT) {
+      const slice = validated.data.slice(i, i + BATCH_LIMIT);
+      const batch = writeBatch(db1);
+
+      for (const row of slice) {
+        // Ensure dealer doc exists
+        const dealerRef = doc(db1, 'upcomingPayments', row.dealerId);
+        batch.set(
+          dealerRef,
+          {
+            dealerId: row.dealerId,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        // Loan-level document
+        const loanRef = doc(
+          db1,
+          'upcomingPayments',
+          row.dealerId,
+          'loans',
+          row.loanId
+        );
+
+        if (row.outstandingAmount === 0) {
+          batch.delete(loanRef);
+        } else {
+          batch.set(
+            loanRef,
+            {
+              loanId: row.loanId,
+              dueDate: row.dueDate,
+              outstandingAmount: row.outstandingAmount,
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+        }
+      }
+
+      // ✅ Commit each small batch safely
+      await batch.commit();
     }
 
     return NextResponse.json(

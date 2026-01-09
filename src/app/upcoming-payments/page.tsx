@@ -4,15 +4,15 @@ import PageHeader from "@/components/page-header";
 import { getSession } from '@/lib/session';
 import { getDealers } from '@/lib/data';
 import { db1 } from '@/lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, collectionGroup } from 'firebase/firestore';
 import UpcomingPaymentsTable from './upcoming-payments-table';
-import type { UpcomingPayment, Dealer, UpcomingPaymentItem } from '@/types';
+import type { UpcomingPayment, UpcomingPaymentLoan, UpcomingPaymentItem } from '@/types';
 
 
 async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentItem[]> {
-    const paymentsCol = collection(db1, 'upcomingPayments');
+    noStore();
     
-    // First, get all dealers for the specific anchor, or all dealers if admin.
+    // 1. Get the list of dealers this user is allowed to see.
     const allDealersForScope = await getDealers(anchorId);
     const dealerMap = new Map(allDealersForScope.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
     
@@ -23,43 +23,29 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
         return [];
     }
 
-    const paymentDocs = [];
-
-    // If dealerIdsForQuery is not empty, fetch payments for those dealers.
-    // If it IS empty (which can happen for an admin viewing an empty system), this loop is skipped.
-    if (dealerIdsForQuery.length > 0) {
-        // Firestore 'in' queries are limited to 30 items per query.
-        // We must "chunk" the dealer IDs into groups of 30 to query them all.
-        const CHUNK_SIZE = 30;
-        for (let i = 0; i < dealerIdsForQuery.length; i += CHUNK_SIZE) {
-            const chunk = dealerIdsForQuery.slice(i, i + CHUNK_SIZE);
-            const q = query(paymentsCol, where('dealerId', 'in', chunk));
-            const paymentSnapshots = await getDocs(q);
-            paymentDocs.push(...paymentSnapshots.docs);
-        }
-    } else if (!anchorId) {
-        // This is the admin case with no dealers in the system at all. Fetch all (zero) payments.
-        const snapshot = await getDocs(paymentsCol);
-        paymentDocs.push(...snapshot.docs);
-    }
-    
     const flattenedPayments: UpcomingPaymentItem[] = [];
-    paymentDocs.forEach(doc => {
-        const data = doc.data() as UpcomingPayment;
-        const dealerInfo = dealerMap.get(data.dealerId);
+    
+    // 2. Query the 'loans' subcollection across all documents.
+    const loansQuery = collectionGroup(db1, 'loans');
+    const loansSnapshot = await getDocs(loansQuery);
 
-        // This check is now robust. For an anchor, dealerInfo will only exist if the dealer is theirs.
-        // For an admin, it will exist for all dealers fetched.
-        if (dealerInfo && data.payments && Array.isArray(data.payments)) {
-            data.payments.forEach(payment => {
-                flattenedPayments.push({
-                    id: `${data.dealerId}-${payment.dueDate}-${payment.outstandingAmount}`,
-                    dealerId: data.dealerId,
-                    dealerName: dealerInfo.name || 'Unknown Dealer',
-                    outstandingAmount: payment.outstandingAmount,
-                    dueDate: payment.dueDate,
-                    lender: dealerInfo.lender || 'N/A'
-                });
+    loansSnapshot.forEach(loanDoc => {
+        const loanData = loanDoc.data() as UpcomingPaymentLoan;
+        
+        // The parent document's ID is the dealerId.
+        const dealerId = loanDoc.ref.parent.parent?.id;
+
+        // 3. Check if the current user has access to this dealer.
+        // dealerMap will only contain dealers visible to the current user.
+        if (dealerId && dealerMap.has(dealerId)) {
+            const dealerInfo = dealerMap.get(dealerId)!;
+            flattenedPayments.push({
+                id: loanDoc.id, // The loan document ID
+                dealerId: dealerId,
+                dealerName: dealerInfo.name || 'Unknown Dealer',
+                outstandingAmount: loanData.outstandingAmount,
+                dueDate: loanData.dueDate,
+                lender: dealerInfo.lender || 'N/A'
             });
         }
     });
@@ -91,3 +77,4 @@ export default async function UpcomingPaymentsPage() {
     </>
   );
 }
+
