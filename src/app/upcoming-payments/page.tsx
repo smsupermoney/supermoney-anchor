@@ -7,6 +7,7 @@ import { db1 } from '@/lib/firebase';
 import { collection, getDocs, query, where, collectionGroup } from 'firebase/firestore';
 import UpcomingPaymentsTable from './upcoming-payments-table';
 import type { UpcomingPayment, UpcomingPaymentLoan, UpcomingPaymentItem } from '@/types';
+import UploadUpcomingPaymentsDialog from './upload-dialog';
 
 
 async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentItem[]> {
@@ -36,7 +37,7 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
         const dealerId = loanDoc.ref.parent.parent?.id;
 
         // 3. Check if the current user has access to this dealer.
-        // dealerMap will only contain dealers visible to the current user.
+        // For admins, dealerMap contains all dealers. For anchors, it's pre-filtered.
         if (dealerId && dealerMap.has(dealerId)) {
             const dealerInfo = dealerMap.get(dealerId)!;
             flattenedPayments.push({
@@ -67,7 +68,9 @@ export default async function UpcomingPaymentsPage() {
   
   return (
     <>
-      <PageHeader title="Upcoming Payments" />
+      <PageHeader title="Upcoming Payments">
+        <UploadUpcomingPaymentsDialog />
+      </PageHeader>
       <div className="mt-4">
         <UpcomingPaymentsTable 
             payments={upcomingPayments}
@@ -77,4 +80,3 @@ export default async function UpcomingPaymentsPage() {
     </>
   );
 }
-
