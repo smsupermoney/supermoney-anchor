@@ -69,7 +69,7 @@ export default async function UpcomingPaymentsPage() {
   return (
     <>
       <PageHeader title="Upcoming Payments">
-        <UploadUpcomingPaymentsDialog />
+        {isAdmin && <UploadUpcomingPaymentsDialog />}
       </PageHeader>
       <div className="mt-4">
         <UpcomingPaymentsTable 
