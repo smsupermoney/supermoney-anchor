@@ -210,7 +210,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   <TableHead>Region</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Total Limit</TableHead>
-                  <TableHead className="text-right">Amount Disbursed</TableHead>
+                  <TableHead className="text-right">Utilized Limit</TableHead>
                   <TableHead className="text-right">Available Limit</TableHead>
                   <TableHead className="text-right">Overdue Amount</TableHead>
                 </TableRow>
