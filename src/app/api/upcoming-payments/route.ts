@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db1 } from '@/lib/firebase';
@@ -9,14 +10,16 @@ import {
 
 /* ================= SCHEMA ================= */
 
-const upcomingPaymentSchema = z.array(
-  z.object({
-    dealerId: z.string().min(1),
-    loanId: z.string().min(1),
-    dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    outstandingAmount: z.number().nonnegative(),
-  })
-);
+const upcomingPaymentSchema = z.object({
+  data: z.array(
+    z.object({
+      dealerId: z.string().min(1),
+      loanId: z.string().min(1),
+      dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      outstandingAmount: z.number().nonnegative(),
+    })
+  ),
+});
 
 /* ================= HANDLER ================= */
 
@@ -62,12 +65,14 @@ export async function POST(request: Request) {
     );
   }
 
+  const paymentData = validated.data.data;
+
   /* 💾 FIRESTORE WRITE (CLIENT SDK – BATCHED) */
   try {
     const BATCH_LIMIT = 25; // 🔑 SAFE LIMIT FOR CLIENT SDK
 
-    for (let i = 0; i < validated.data.length; i += BATCH_LIMIT) {
-      const slice = validated.data.slice(i, i + BATCH_LIMIT);
+    for (let i = 0; i < paymentData.length; i += BATCH_LIMIT) {
+      const slice = paymentData.slice(i, i + BATCH_LIMIT);
       const batch = writeBatch(db1);
 
       for (const row of slice) {
