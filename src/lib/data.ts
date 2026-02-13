@@ -224,6 +224,7 @@ export async function getDealers(anchorId?: string, region?: string): Promise<De
             amountDisbursed: utilisationAmount,
             overdueCount: dealerInvoices.filter(i => (i.overdueAmount ?? 0) > 0).length,
             overdueAmount: limitData?.principalOverdue || 0,
+            principalDPD: limitData?.principalDPD || 0,
             lenderName: programMap.get(dealerData.programId) || 'N/A',
             status: dealerData.status, 
             totalLimit: limitAmount,

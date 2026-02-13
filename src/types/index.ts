@@ -24,6 +24,7 @@ export type Dealer = {
   customerId: string;
   GST: string;
   region?: string;
+  principalDPD?: number;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';
@@ -125,6 +126,7 @@ export type DealerLimit = {
   utilisationAmount: number;
   availableAmount: number;
   principalOverdue: number;
+  principalDPD?: number;
 };
 
 // --- Dealer Onboarding Module Types ---
@@ -271,4 +273,3 @@ export type UpcomingPayment = {
 
 
     
-

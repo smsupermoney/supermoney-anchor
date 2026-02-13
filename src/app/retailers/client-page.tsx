@@ -213,6 +213,7 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                   <TableHead className="text-right">Utilized Limit</TableHead>
                   <TableHead className="text-right">Available Limit</TableHead>
                   <TableHead className="text-right">Overdue Amount</TableHead>
+                  <TableHead className="text-right">Principal DPD</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -310,6 +311,16 @@ export default function RetailersClientPage({ initialDealers, isAdmin }: Retaile
                             <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.overdueAmount)}</div>
                           </TooltipTrigger>
                           <TooltipContent><p>{formatCurrency(dealer.overdueAmount)}</p></TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell className="text-right">
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate max-w-[120px] ml-auto">{dealer.principalDPD ?? 0}</div>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{dealer.principalDPD ?? 0}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>

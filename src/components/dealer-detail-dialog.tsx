@@ -34,6 +34,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
       totalLimit: dealer.totalLimit.toString(),
       amountDisbursed: dealer.amountDisbursed.toString(),
       overdueAmount: dealer.overdueAmount.toString(),
+      principalDPD: (dealer.principalDPD ?? 0).toString(),
       status: dealer.status,
   });
 
@@ -72,6 +73,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
         totalLimit: Number(editValues.totalLimit),
         utilisationAmount: Number(editValues.amountDisbursed),
         principalOverdue: Number(editValues.overdueAmount),
+        principalDPD: Number(editValues.principalDPD),
         status: editValues.status as Dealer['status'],
       };
       
@@ -87,6 +89,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                 totalLimit: payload.totalLimit,
                 amountDisbursed: payload.utilisationAmount,
                 overdueAmount: payload.principalOverdue,
+                principalDPD: payload.principalDPD,
                 status: payload.status,
                 availableLimit: payload.totalLimit - payload.utilisationAmount, // Recalculate available limit
              }));
@@ -106,6 +109,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
           totalLimit: dealer.totalLimit.toString(),
           amountDisbursed: dealer.amountDisbursed.toString(),
           overdueAmount: dealer.overdueAmount.toString(),
+          principalDPD: (dealer.principalDPD ?? 0).toString(),
           status: dealer.status,
       });
       setIsEditing(false);
@@ -180,6 +184,16 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                                 </div>
                             ) : (
                                 <p className="font-semibold text-destructive">{formatCurrency(currentDealer.overdueAmount)}</p>
+                            )}
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-muted-foreground">Principal DPD</Label>
+                            {isEditing ? (
+                                <div className="relative">
+                                    <Input value={editValues.principalDPD} onChange={(e) => handleInputChange('principalDPD', e.target.value)} className="h-8" />
+                                </div>
+                            ) : (
+                                <p className="font-semibold">{currentDealer.principalDPD ?? 0}</p>
                             )}
                         </div>
                          <div className="space-y-1">
