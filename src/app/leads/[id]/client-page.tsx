@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -38,8 +39,8 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
     const pageSize = 5;
 
     const sortedRemarks = React.useMemo(() => {
-        if (!lead?.remarks) return [];
-        return lead.remarks.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        if (!lead?.remarks || !Array.isArray(lead.remarks)) return [];
+        return [...lead.remarks].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     }, [lead?.remarks]);
 
     const pageCount = lead?.remarks ? Math.ceil(sortedRemarks.length / pageSize) : 0;
