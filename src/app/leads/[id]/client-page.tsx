@@ -146,7 +146,7 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
                                             paginatedRemarks.map((remark, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell className='font-medium'>{remark.user || 'System'}</TableCell>
-                                                    <TableCell className='text-muted-foreground'>{remark.remark}</TableCell>
+                                                    <TableCell className='text-muted-foreground'>{remark.remark || remark.text}</TableCell>
                                                     <TableCell className='text-right'>{formatDate(remark.timestamp)}</TableCell>
                                                 </TableRow>
                                             ))
@@ -189,9 +189,9 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
                     <Card>
                         <CardHeader>
                             <CardTitle>Lead Information</CardTitle>
-                            <CardDescription>
+                            <div>
                                 <Badge variant={lead.leadCategory === 'Dealer' ? 'default' : 'secondary'}>{lead.leadCategory}</Badge>
-                            </CardDescription>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm">
                              <div className="flex justify-between items-center">

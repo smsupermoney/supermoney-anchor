@@ -64,13 +64,22 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
 
   const getLatestRemark = (lead: MomentumDealerLead) => {
-    if (!lead.remarks || lead.remarks.length === 0) {
+    if (!lead.remarks || !Array.isArray(lead.remarks) || lead.remarks.length === 0) {
       return 'N/A';
     }
-    const latestRemark = lead.remarks[lead.remarks.length - 1];
+
+    const sortedRemarks = [...lead.remarks].sort((a, b) => {
+        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+        return timeB - timeA;
+    });
+
+    const latestRemark = sortedRemarks[0];
+
     if (typeof latestRemark === 'object' && latestRemark !== null) {
         return (latestRemark as any).remark || (latestRemark as any).text || 'View Details';
     }
+    
     return 'View Details';
   };
 
