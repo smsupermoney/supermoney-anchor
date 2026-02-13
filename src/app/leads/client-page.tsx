@@ -260,6 +260,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 <TableHead>Lead Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Priority</TableHead>
+                                <TableHead>Remarks</TableHead>
                             </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -269,9 +270,9 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <div className="block max-w-[120px] truncate">
+                                                <Link href={`/leads/${lead.id}`} className="block max-w-[120px] truncate text-primary hover:underline">
                                                     {lead.name}
-                                                </div>
+                                                </Link>
                                             </TooltipTrigger>
                                             <TooltipContent><p>{lead.name}</p></TooltipContent>
                                         </Tooltip>
@@ -297,6 +298,18 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                     <StatusBadge status={lead.status as any} />
                                 </TableCell>
                                 <TableCell>{lead.priority || 'N/A'}</TableCell>
+                                <TableCell>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="block max-w-[120px] truncate">
+                                                    {getLatestRemark(lead)}
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>{getLatestRemark(lead)}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </TableCell>
                                 </TableRow>
                             ))}
                             </TableBody>
