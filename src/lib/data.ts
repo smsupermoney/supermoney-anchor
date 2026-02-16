@@ -61,8 +61,8 @@ export async function getMomentumDealerLeads(anchorId?: string): Promise<Momentu
     
     const allLeads = [...dealerLeads, ...vendorLeads];
     
-    // Sort all leads by createdAt date in descending order (newest first)
-    allLeads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Sort all leads by leadDate date in descending order (newest first)
+    allLeads.sort((a, b) => new Date(b.leadDate).getTime() - new Date(a.leadDate).getTime());
 
     return allLeads;
 }
@@ -419,5 +419,3 @@ export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
   'Business Limit Approved',
   'Dealer Activated'
 ];
-
-    
