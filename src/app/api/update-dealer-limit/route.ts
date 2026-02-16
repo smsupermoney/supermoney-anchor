@@ -11,6 +11,7 @@ const updateLimitSchema = z.object({
   principalOverdue: z.number().nonnegative('principalOverdue must be a non-negative number.'),
   utilisationAmount: z.number().nonnegative('utilisationAmount must be a non-negative number.'),
   availableAmount: z.number().nonnegative('availableAmount must be a non-negative number.'),
+  principalDPD: z.number().nonnegative('principalDPD must be a non-negative number.').optional(),
 });
 
 export async function POST(request: Request) {
