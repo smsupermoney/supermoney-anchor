@@ -44,6 +44,7 @@ export async function getSession(): Promise<User | null> {
       leadExternalId: sessionData.leadExternalId,
       logoImage: sessionData.logoImage,
       region: sessionData.region,
+      originalUser: sessionData.originalUser,
     };
 
   } catch (error) {

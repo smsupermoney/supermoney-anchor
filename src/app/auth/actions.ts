@@ -51,6 +51,10 @@ export async function authenticate(
 
     userRole = user.roleType;
 
+    if (user.emailAddress === 'biu@supermoney.in') {
+      redirect('/select-anchor');
+    }
+
   } catch (error) {
     if (error instanceof z.ZodError) {
       return 'Invalid email or password format.';

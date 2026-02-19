@@ -117,6 +117,14 @@ export type User = {
     leadExternalId?: string;
     logoImage? : string;
     region?: string;
+    originalUser?: {
+        id: string;
+        userName: string;
+        emailAddress: string;
+        roleType: UserRole;
+        externalId: string;
+        leadExternalId?: string;
+    }
 };
 
 export type DealerLimit = {

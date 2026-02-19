@@ -5,13 +5,15 @@ import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger, SidebarSeparator } from '@/components/ui/sidebar';
 import { adminNavigationLinks, superMoneyUserNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from '@/components/nav';
 import Link from 'next/link';
-import { Crown, LogOut } from 'lucide-react';
+import { Crown, LogOut, UserX } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import CompanyLogo from './company-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
 import SupermoneyLogo from './supermoney-logo';
+import { clearImpersonation } from '@/app/select-anchor/actions';
+import { Button } from './ui/button';
 
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -30,10 +32,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const isLoginPage = pathname === '/';
   const isSubscribePage = pathname === '/subscribe';
+  const isSelectAnchorPage = pathname === '/select-anchor';
   const isLegalPage = ['/privacy-policy', '/disclaimer', '/terms-and-conditions', '/api/upcoming-payments'].includes(pathname);
 
 
-  if (isLoginPage || (isSubscribePage && !user) || (isLegalPage && !user)) {
+  if (isLoginPage || isSelectAnchorPage || (isSubscribePage && !user) || (isLegalPage && !user)) {
     return <>{children}</>;
   }
 
@@ -44,6 +47,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }
 
   const getVisibleLinks = () => {
+    if (user.originalUser) {
+        // If impersonating, always show anchor links
+        return enterpriseAnchorNavigationLinks;
+    }
     if (user.roleType === 'Admin') {
       return adminNavigationLinks;
     }
@@ -113,7 +120,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarSeparator className="my-2" />
 
           <SidebarMenu>
-            {user?.userSubRole === 'Not Subscribed' && (
+            {user?.userSubRole === 'Not Subscribed' && !user.originalUser && (
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={{ children: 'Subscribe to Premium' }} isActive={pathname === '/subscribe'}>
                   <Link href="/subscribe">
@@ -152,6 +159,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
+        {user?.originalUser && (
+            <div className="bg-yellow-100 border-b-2 border-yellow-300 text-yellow-900 text-sm text-center p-2 flex items-center justify-center gap-4 sticky top-0 z-20">
+                <p>Viewing as <strong>{user.userName}</strong>.</p>
+                <form action={clearImpersonation}>
+                    <Button variant="ghost" size="sm" className="h-auto p-1 text-yellow-900 hover:bg-yellow-200">
+                        <UserX className="mr-2 h-4 w-4" /> Exit View
+                    </Button>
+                </form>
+            </div>
+        )}
         <div className="flex flex-col flex-1 min-w-0 min-h-screen">
           <header className="sticky top-0 z-10 flex h-14 items-center justify-start gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:hidden">
             <SidebarTrigger />
