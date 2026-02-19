@@ -16,6 +16,8 @@ export async function authenticate(
   formData: FormData,
 ) {
   let userRole: UserRole | undefined;
+  let isBiuUser = false;
+
   try {
     const { email, password } = z
       .object({
@@ -37,7 +39,6 @@ export async function authenticate(
     }
     
     const session = await getIronSession<User>(cookies(), sessionOptions);
-    // This is the key fix: We use the user.id which now correctly holds the firestore doc ID
     session.id = user.id; 
     session.userName = user.userName;
     session.roleType = user.roleType;
@@ -52,7 +53,7 @@ export async function authenticate(
     userRole = user.roleType;
 
     if (user.emailAddress === 'biu@supermoney.in') {
-      redirect('/select-anchor');
+      isBiuUser = true;
     }
 
   } catch (error) {
@@ -61,6 +62,10 @@ export async function authenticate(
     }
     console.error('Authentication Error:', error);
     return 'An unexpected error occurred.';
+  }
+
+  if (isBiuUser) {
+    redirect('/select-anchor');
   }
 
   if (userRole === 'Admin') {
