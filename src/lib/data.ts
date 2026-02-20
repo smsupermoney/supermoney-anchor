@@ -1,4 +1,5 @@
 
+
 import type { User, DealerLead, DealerOnboardingStatus, MomentumDealerLead, DealerLimit } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc, type Timestamp } from 'firebase/firestore';
@@ -419,3 +420,129 @@ export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
   'Business Limit Approved',
   'Dealer Activated'
 ];
+
+export const dealerLeads: DealerLead[] = [
+  {
+    id: 'DL001',
+    dealerName: 'Future Gadgets',
+    contactPerson: 'Emmett Brown',
+    contactEmail: 'emmett@futuregadgets.com',
+    contactPhone: '9876543210',
+    businessType: 'Electronics Retailer',
+    location: 'Hill Valley, CA',
+    region: 'West',
+    status: 'Lead Created',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-20',
+    requestedLimit: 500000,
+    comments: [
+        { user: 'Sales Person', comment: 'Initial contact made. Seems interested.', timestamp: '2024-07-20 10:00 AM'}
+    ]
+  },
+  {
+    id: 'DL002',
+    dealerName: 'Cyberdyne Systems',
+    contactPerson: 'Miles Dyson',
+    contactEmail: 'miles.dyson@cyberdyne.com',
+    contactPhone: '9876543211',
+    businessType: 'Tech Manufacturer',
+    location: 'Sunnyvale, CA',
+    region: 'West',
+    status: 'Lead Verified',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-19',
+     requestedLimit: 2500000,
+  },
+   {
+    id: 'DL003',
+    dealerName: 'Kwik-E-Mart',
+    contactPerson: 'Apu Nahasapeemapetilon',
+    contactEmail: 'apu@kwikemart.com',
+    contactPhone: '9876543212',
+    businessType: 'Convenience Store',
+    location: 'Springfield',
+    region: 'Central',
+    status: 'Documents Collected',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-18',
+    documents: [
+        { name: 'GST Certificate', url: '#', status: 'Pending' },
+        { name: 'PAN Card', url: '#', status: 'Pending' },
+    ],
+    requestedLimit: 200000,
+  },
+  {
+    id: 'DL004',
+    dealerName: 'Gekko & Co',
+    contactPerson: 'Gordon Gekko',
+    contactEmail: 'gordon@gekko.com',
+    contactPhone: '9876543213',
+    businessType: 'Financial Services',
+    location: 'New York, NY',
+    region: 'East',
+    status: 'Documents Verified',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-17',
+     documents: [
+        { name: 'GST Certificate', url: '#', status: 'Verified' },
+        { name: 'PAN Card', url: '#', status: 'Verified' },
+        { name: 'Business Registration', url: '#', status: 'Verified' },
+    ],
+    requestedLimit: 10000000,
+  },
+   {
+    id: 'DL005',
+    dealerName: 'Stark Expo',
+    contactPerson: 'Pepper Potts',
+    contactEmail: 'pepper@stark.com',
+    contactPhone: '9876543214',
+    businessType: 'Event Management',
+    location: 'New York, NY',
+    region: 'East',
+    status: 'Site Visit Done',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-16',
+    siteVisitReport: {
+        notes: 'Large scale operation. High potential for business. Premises are well-maintained.',
+        images: ['/placeholder.svg', '/placeholder.svg']
+    },
+    requestedLimit: 5000000,
+    creditCheckScore: 8,
+  },
+  {
+    id: 'DL006',
+    dealerName: 'InGen',
+    contactPerson: 'John Hammond',
+    contactEmail: 'hammond@ingen.com',
+    contactPhone: '9876543215',
+    businessType: 'Biotechnology',
+    location: 'Isla Nublar',
+    region: 'West',
+    status: 'Business Limit Approved',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-15',
+     requestedLimit: 20000000,
+     approvedLimit: 15000000,
+     businessLimit: 15000000,
+     creditCheckScore: 7
+  },
+   {
+    id: 'DL007',
+    dealerName: 'Buy n Large',
+    contactPerson: 'Shelby Forthright',
+    contactEmail: 'ceo@bnl.com',
+    contactPhone: '9876543216',
+    businessType: 'Mega Corporation',
+    location: 'Global',
+    region: 'Global',
+    status: 'Dealer Activated',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-14',
+    dealerCode: 'BNL-ACTIVE-001',
+    requestedLimit: 100000000,
+    approvedLimit: 100000000,
+    businessLimit: 100000000,
+  }
+];
+
+    
