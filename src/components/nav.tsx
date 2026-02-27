@@ -1,5 +1,4 @@
-
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe, Map, CalendarClock } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe, Map, CalendarClock, Mail } from 'lucide-react';
 import type { UserSubRole } from '@/types';
 
 export const anchorNavigationLinks = [
@@ -26,6 +25,7 @@ export const adminNavigationLinks = [
   { href: '/add-lead', label: 'Add Lead', icon: PlusCircle },
   { href: '/update-gst', label: 'Update Dealer GST', icon: FileUp },
   { href: '/update-region', label: 'Update Dealer Region', icon: Map },
+  { href: '/update-email', label: 'Update Dealer Email', icon: Mail },
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/retailers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
@@ -87,5 +87,3 @@ export const dealerOnboardingNavigationLinks: { href: string; label: string; ico
     subRole: ['onboarding_ops', 'field_inspector', 'legal_compliance', 'regional_manager', 'dealer_admin']
   }
 ];
-
-    

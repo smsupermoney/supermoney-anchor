@@ -1,5 +1,3 @@
-
-
 import type { User, DealerLead, DealerOnboardingStatus, MomentumDealerLead, DealerLimit } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc, type Timestamp } from 'firebase/firestore';
@@ -215,7 +213,7 @@ export async function getDealers(anchorId?: string, region?: string): Promise<De
         return {
             id: dealerId,
             name: dealerData.dealerName,
-            emailAddress: dealerUser?.emailAddress || '',
+            emailAddress: dealerData.emailAddress || dealerUser?.emailAddress || '',
             phoneNumber: dealerUser?.phoneNumber || '',
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
@@ -544,5 +542,3 @@ export const dealerLeads: DealerLead[] = [
     businessLimit: 100000000,
   }
 ];
-
-    

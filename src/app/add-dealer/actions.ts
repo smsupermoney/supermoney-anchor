@@ -1,4 +1,3 @@
-
 "use server";
 
 import { db1 } from "@/lib/firebase";
@@ -45,12 +44,13 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
     let skippedEntriesCount = 0;
     const processedCompositeKeys = new Set<string>();
 
-    for (const row of dataArray) {
+    for (const row of dataArray as any[]) {
         const dealerAppId = row.applicationId?.toString().trim();
         const gst = row.GST?.toString().trim();
         const programId = row.programId?.toString().trim();
         const anchorId = row.anchorId?.toString().trim();
         const region = row.region?.toString().trim();
+        const emailAddress = row.emailAddress?.toString().trim();
 
         if (!dealerAppId) {
             console.warn("Skipping a row because applicationId is missing.", row);
@@ -125,6 +125,10 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         
         if (region) {
             dealerData.region = region;
+        }
+
+        if (emailAddress) {
+            dealerData.emailAddress = emailAddress;
         }
 
 

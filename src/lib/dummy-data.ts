@@ -1,5 +1,3 @@
-
-
 /**
  * ==================================================================
  * HOW TO IMPORT THIS DATA INTO FIRESTORE
@@ -82,7 +80,10 @@ export const dummyUsers = [
     "emailAddress": "sales_person@enterprise.in",
     "roleType": "Anchor",
     "userSubRole": "sales_person",
-    "lastLoginTime": "", "lastLoginIp": "", "authToken": "", "expiryTime": 0
+    "lastLoginTime": "",
+    "lastLoginIp": "",
+    "authToken": "",
+    "expiryTime": 0
   },
   {
     "id": "USR010",
@@ -93,7 +94,10 @@ export const dummyUsers = [
     "emailAddress": "sales_manager@enterprise.in",
     "roleType": "Anchor",
     "userSubRole": "sales_manager",
-    "lastLoginTime": "", "lastLoginIp": "", "authToken": "", "expiryTime": 0
+    "lastLoginTime": "",
+    "lastLoginIp": "",
+    "authToken": "",
+    "expiryTime": 0
   },
   {
     "id": "USR011",
@@ -104,7 +108,10 @@ export const dummyUsers = [
     "emailAddress": "onboarding_ops@enterprise.in",
     "roleType": "Anchor",
     "userSubRole": "onboarding_ops",
-    "lastLoginTime": "", "lastLoginIp": "", "authToken": "", "expiryTime": 0
+    "lastLoginTime": "",
+    "lastLoginIp": "",
+    "authToken": "",
+    "expiryTime": 0
   },
   {
     "id": "USR012",
@@ -115,7 +122,10 @@ export const dummyUsers = [
     "emailAddress": "field_inspector@enterprise.in",
     "roleType": "Anchor",
     "userSubRole": "field_inspector",
-    "lastLoginTime": "", "lastLoginIp": "", "authToken": "", "expiryTime": 0
+    "lastLoginTime": "",
+    "lastLoginIp": "",
+    "authToken": "",
+    "expiryTime": 0
   },
   {
     "id": "USR013",
@@ -126,7 +136,10 @@ export const dummyUsers = [
     "emailAddress": "legal_compliance@enterprise.in",
     "roleType": "Anchor",
     "userSubRole": "legal_compliance",
-    "lastLoginTime": "", "lastLoginIp": "", "authToken": "", "expiryTime": 0
+    "lastLoginTime": "",
+    "lastLoginIp": "",
+    "authToken": "",
+    "expiryTime": 0
   },
   {
     "id": "USR014",
@@ -137,7 +150,10 @@ export const dummyUsers = [
     "emailAddress": "regional_manager@enterprise.in",
     "roleType": "Anchor",
     "userSubRole": "regional_manager",
-    "lastLoginTime": "", "lastLoginIp": "", "authToken": "", "expiryTime": 0
+    "lastLoginTime": "",
+    "lastLoginIp": "",
+    "authToken": "",
+    "expiryTime": 0
   },
   {
     "id": "USR015",
@@ -148,7 +164,10 @@ export const dummyUsers = [
     "emailAddress": "dealer_admin@enterprise.in",
     "roleType": "Anchor",
     "userSubRole": "dealer_admin",
-    "lastLoginTime": "", "lastLoginIp": "", "authToken": "", "expiryTime": 0
+    "lastLoginTime": "",
+    "lastLoginIp": "",
+    "authToken": "",
+    "expiryTime": 0
   }
 ];
 
@@ -291,5 +310,3 @@ export const sampleUpcomingPayments = [
     "lender": "Supermoney Finance"
   }
 ];
-
-    
