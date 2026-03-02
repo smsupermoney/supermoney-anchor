@@ -51,6 +51,10 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
         const anchorId = row.anchorId?.toString().trim();
         const region = row.region?.toString().trim();
         const emailAddress = row.emailAddress?.toString().trim();
+        
+        // New optional fields specifically for PROG011
+        const branchName = row.branchName?.toString().trim() || '';
+        const branchEmailId = row.branchEmailId?.toString().trim() || '';
 
         if (!dealerAppId) {
             console.warn("Skipping a row because applicationId is missing.", row);
@@ -121,6 +125,8 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
           dealerName_lowercase: dealerName.toLowerCase(),
           status: row.status || 'Pending',
           GST: gst,
+          branchName: branchName,
+          branchEmailId: branchEmailId,
         };
         
         if (region) {

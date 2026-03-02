@@ -229,7 +229,9 @@ export async function getDealers(anchorId?: string, region?: string): Promise<De
             totalLimit: limitAmount,
             availableLimit: limitAmount - utilisationAmount,
             GST: dealerData?.GST,
-            region: dealerData?.region
+            region: dealerData?.region,
+            branchName: dealerData?.branchName || '',
+            branchEmailId: dealerData?.branchEmailId || '',
         } as Dealer;
     });
 

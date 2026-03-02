@@ -198,6 +198,8 @@ export const sampleDealers = [
         availableAmount: 400000,
         principalOverdue: 0,
         region: "West",
+        branchName: "Main Branch",
+        branchEmailId: "main@sampleelectronics.com",
     }
 ];
 

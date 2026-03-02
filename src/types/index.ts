@@ -1,8 +1,4 @@
-
-
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
-
-
 
 export type Dealer = {
   id: string; // This is the dealerId (e.g. DLR001)
@@ -25,6 +21,8 @@ export type Dealer = {
   GST: string;
   region?: string;
   principalDPD?: number;
+  branchName?: string;
+  branchEmailId?: string;
 };
 
 export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';
@@ -278,6 +276,3 @@ export type UpcomingPayment = {
   updatedAt: any; // Firestore ServerTimestamp
   // The 'loans' are now in a subcollection, not an array here.
 };
-
-
-    
