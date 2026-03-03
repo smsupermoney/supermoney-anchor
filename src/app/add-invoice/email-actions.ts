@@ -2,6 +2,9 @@
 
 import nodemailer from "nodemailer";
 import { type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
+import { db1 } from "@/lib/firebase";
+import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore";
+import crypto from "crypto";
 
 type EmailData = {
     fileName: string;
@@ -76,35 +79,103 @@ function generateEmailBody(data: EmailData[], isConsent: boolean): string {
     return html;
 }
 
+function generateConsentEmailBody(item: EmailData, consentUrl: string): string {
+    return `
+        <h1>Invoice Consent Required</h1>
+        <p>Hello,</p>
+        <p>A new invoice has been submitted for your business. Please review the details below and provide your consent.</p>
+        <hr />
+        <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <tr><td style="width: 30%;"><strong>Invoice Number</strong></td><td>${item.extractedData?.invoiceNumber || 'N/A'}</td></tr>
+            <tr><td><strong>Amount</strong></td><td>${formatCurrency(item.extractedData?.amount)}</td></tr>
+            <tr><td><strong>Due Date</strong></td><td>${item.extractedData?.dueDate || 'N/A'}</td></tr>
+        </table>
+        <br />
+        <p>To approve or reject this invoice, please click the button below:</p>
+        <a href="${consentUrl}" style="background-color: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Provide Consent</a>
+        <p>This link will expire in 48 hours.</p>
+        <p>Thank you.</p>
+    `;
+}
+
 export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): Promise<ActionResult> {
     if (!smtpConfigured || !transporter) {
         console.error("SMTP environment variables are not configured.");
         return { error: "Email service is not configured on the server. Please contact the administrator." };
     }
 
-    const attachments = data
-        .filter(item => item.fileContent)
-        .map(item => ({
-            filename: item.fileName,
-            path: item.fileContent,
-        }));
+    // Check for ANC002 specialized workflow
+    // We need to fetch dealer info to check anchorId
+    for (const item of data) {
+        if (item.applicationId) {
+            const dealerSnap = await getDocs(query(collection(db1, "dealers"), where("applicationId", "==", item.applicationId)));
+            if (!dealerSnap.empty) {
+                const dealerData = dealerSnap.docs[0].data();
+                if (dealerData.anchorId === 'ANC002') {
+                    // Trigger specialized consent workflow
+                    const token = crypto.randomBytes(32).toString('hex');
+                    const expiry = new Date();
+                    expiry.setHours(expiry.getHours() + 48);
 
-    const mailOptions = {
-        from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-        to: "invoice@supermoney.in",
-        subject: "New Invoice Submission",
-        html: generateEmailBody(data, isConsent),
-        attachments: attachments,
-    };
+                    const consentRef = doc(collection(db1, "invoiceConsents"));
+                    await setDoc(consentRef, {
+                        invoiceNumber: item.extractedData?.invoiceNumber || 'N/A',
+                        dealerId: item.applicationId,
+                        token: token,
+                        status: 'Pending',
+                        expiryTime: expiry.toISOString(),
+                        createdAt: new Date().toISOString()
+                    });
 
-    try {
-        await transporter.sendMail(mailOptions);
-        return { message: "Email sent successfully." };
-    } catch (error) {
-        console.error("Failed to send email:", error);
-        if (error instanceof Error) {
-            return { error: `Failed to send email: ${error.message}` };
+                    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
+                    const consentUrl = `${baseUrl}/consent?token=${token}`;
+
+                    const mailOptions = {
+                        from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+                        to: dealerData.emailAddress || dealerData.branchEmailId,
+                        subject: `Consent Required: Invoice ${item.extractedData?.invoiceNumber}`,
+                        html: generateConsentEmailBody(item, consentUrl),
+                    };
+
+                    try {
+                        await transporter.sendMail(mailOptions);
+                    } catch (e) {
+                        console.error("Failed to send consent email:", e);
+                    }
+                    
+                    // After triggering consent email, we don't send the internal notification for this item yet.
+                    // If multiple items, we might need more complex logic, but for now we continue.
+                    continue;
+                }
+            }
         }
-        return { error: "An unknown error occurred while sending the email." };
+
+        // Default logic for other anchors
+        const attachments = data
+            .filter(item => item.fileContent)
+            .map(item => ({
+                filename: item.fileName,
+                path: item.fileContent,
+            }));
+
+        const mailOptions = {
+            from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+            to: "invoice@supermoney.in",
+            subject: "New Invoice Submission",
+            html: generateEmailBody(data, isConsent),
+            attachments: attachments,
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error("Failed to send email:", error);
+            if (error instanceof Error) {
+                return { error: `Failed to send email: ${error.message}` };
+            }
+            return { error: "An unknown error occurred while sending the email." };
+        }
     }
+
+    return { message: "Process initiated successfully." };
 }

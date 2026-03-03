@@ -351,7 +351,7 @@ export async function getPrograms(anchorId?: string, region?: string): Promise<{
                 prog.disbursedAmount! += invoice.amount;
                 prog.disbursedInvoicesCount!++;
             }
-            if (['Initiated', 'Approved', 'Sent to Lender'].includes(invoice.status)) {
+            if (['Initiated', 'Approved', 'Sent to Lender', 'Consent Approved'].includes(invoice.status)) {
                 prog.pendingInvoicesCount!++;
             }
             if (invoice.status === 'Initiated') {
@@ -408,7 +408,7 @@ export const spokeStatuses = [
     'Limit Live', 'On Hold', 'Queries Raised', 'Relook'
 ] as const;
 
-export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'];
+export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid', 'Consent Approved'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid', 'Consent Approved'];
 
 // --- DEALER ONBOARDING STATIC DATA ---
 export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [

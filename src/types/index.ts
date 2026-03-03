@@ -25,7 +25,7 @@ export type Dealer = {
   branchEmailId?: string;
 };
 
-export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';
+export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid' | 'Consent Approved';
 
 export type Invoice = {
   id: string;
@@ -275,4 +275,15 @@ export type UpcomingPayment = {
   dealerId: string;
   updatedAt: any; // Firestore ServerTimestamp
   // The 'loans' are now in a subcollection, not an array here.
+};
+
+export type InvoiceConsent = {
+  id: string;
+  invoiceNumber: string;
+  dealerId: string;
+  token: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  expiryTime: string; // ISO string
+  consentTimestamp?: string;
+  ipAddress?: string;
 };

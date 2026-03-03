@@ -1,4 +1,3 @@
-
 "use client";
 
 import { usePathname } from 'next/navigation';
@@ -33,10 +32,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const isLoginPage = pathname === '/';
   const isSubscribePage = pathname === '/subscribe';
   const isSelectAnchorPage = pathname === '/select-anchor';
+  const isConsentPage = pathname === '/consent';
   const isLegalPage = ['/privacy-policy', '/disclaimer', '/terms-and-conditions', '/api/upcoming-payments'].includes(pathname);
 
 
-  if (isLoginPage || isSelectAnchorPage || (isSubscribePage && !user) || (isLegalPage && !user)) {
+  if (isLoginPage || isSelectAnchorPage || isConsentPage || (isSubscribePage && !user) || (isLegalPage && !user)) {
     return <>{children}</>;
   }
 
