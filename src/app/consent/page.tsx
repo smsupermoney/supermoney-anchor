@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { processConsent } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { db1 } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { Separator } from "@/components/ui/separator";
 
-export default function ConsentPage() {
+function ConsentContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
     const initialAction = searchParams.get("action") as 'Approved' | 'Rejected' | null;
@@ -58,7 +58,6 @@ export default function ConsentPage() {
                 // If user came with an action parameter, auto-process it immediately
                 if (initialAction && (initialAction === 'Approved' || initialAction === 'Rejected') && !hasAutoProcessed.current) {
                     hasAutoProcessed.current = true;
-                    // Skip setting 'valid' status to avoid showing the review card
                     await handleAction(initialAction);
                 } else {
                     setStatus('valid');
@@ -92,16 +91,17 @@ export default function ConsentPage() {
         }
     };
 
-    // Show loader if we are initial loading OR if we are processing an auto-action
     if (status === 'loading' || isProcessing) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                {initialAction && (
-                    <p className="mt-4 text-sm font-medium animate-pulse">
-                        {initialAction === 'Approved' ? "Approving invoice..." : "Rejecting invoice..."}
-                    </p>
-                )}
+            <div className="min-h-screen flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <Card className="w-full max-w-sm text-center shadow-2xl">
+                    <CardContent className="pt-10 pb-10 flex flex-col items-center gap-4">
+                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                        <p className="text-sm font-medium text-muted-foreground">
+                            {initialAction ? (initialAction === 'Approved' ? "Processing Approval..." : "Processing Rejection...") : "Validating Link..."}
+                        </p>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
@@ -118,14 +118,14 @@ export default function ConsentPage() {
 
     if (status !== 'valid') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-                <Card className="w-full max-w-md text-center">
+            <div className="min-h-screen flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <Card className="w-full max-w-sm text-center shadow-2xl animate-in zoom-in-95 duration-200">
                     <CardHeader>
-                        {renderIcon()}
-                        <CardTitle className="mt-4">{message}</CardTitle>
+                        <div className="flex justify-center mb-2">{renderIcon()}</div>
+                        <CardTitle className="text-xl font-bold">{message}</CardTitle>
                     </CardHeader>
-                    <CardFooter className="justify-center">
-                        <p className="text-sm text-muted-foreground">You can close this window now.</p>
+                    <CardFooter className="justify-center border-t bg-muted/20 py-4">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">You can safely close this window</p>
                     </CardFooter>
                 </Card>
             </div>
@@ -133,55 +133,66 @@ export default function ConsentPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader className="text-center">
-                    <CardTitle>Invoice Consent</CardTitle>
-                    <CardDescription>Please review the invoice details and provide your consent.</CardDescription>
+        <div className="min-h-screen flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <Card className="w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+                <CardHeader className="text-center border-b bg-muted/10">
+                    <CardTitle className="text-xl font-bold">Invoice Consent</CardTitle>
+                    <CardDescription>Review the details and provide your confirmation.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="bg-secondary p-4 rounded-lg space-y-2">
+                <CardContent className="space-y-6 pt-6">
+                    <div className="bg-secondary/50 p-5 rounded-xl space-y-3 border border-border">
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Invoice Number:</span>
-                            <span className="font-semibold">{invoiceData?.invoiceNumber}</span>
+                            <span className="font-bold text-foreground">{invoiceData?.invoiceNumber}</span>
                         </div>
                         <Separator />
-                        <div className="flex justify-between items-baseline">
+                        <div className="flex justify-between items-baseline py-1">
                             <span className="text-muted-foreground">Amount:</span>
-                            <span className="text-xl font-bold flex items-center">
-                                <IndianRupee className="h-4 w-4" />
+                            <span className="text-2xl font-black flex items-center text-primary">
+                                <IndianRupee className="h-5 w-5 mr-0.5" />
                                 {new Intl.NumberFormat("en-IN").format(invoiceData?.amount || 0)}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Due Date:</span>
-                            <span className="font-medium">{invoiceData?.dueDate}</span>
+                            <span className="font-bold text-foreground">{invoiceData?.dueDate}</span>
                         </div>
                     </div>
-                    <div className="text-xs text-muted-foreground flex items-start gap-2 bg-blue-50 p-3 rounded-md border border-blue-100">
-                        <AlertCircle className="h-4 w-4 shrink-0 text-blue-500" />
-                        <p>By clicking approve, you authorize Supermoney to process this invoice for financing with the respective lender.</p>
+                    <div className="text-xs text-muted-foreground flex items-start gap-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                        <AlertCircle className="h-5 w-5 shrink-0 text-blue-500" />
+                        <p className="leading-relaxed">By confirming, you authorize the processing of this invoice for financing. This action is final and will be logged with your timestamp and IP address.</p>
                     </div>
                 </CardContent>
-                <CardFooter className="flex gap-3">
+                <CardFooter className="flex gap-3 pt-2 pb-6 px-6">
                     <Button 
                         variant="outline" 
-                        className="flex-1" 
+                        className="flex-1 h-11 font-bold" 
                         onClick={() => handleAction('Rejected')} 
                         disabled={isProcessing}
                     >
                         Reject
                     </Button>
                     <Button 
-                        className="flex-1" 
+                        className="flex-1 h-11 font-bold" 
                         onClick={() => handleAction('Approved')} 
                         disabled={isProcessing}
                     >
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         Approve
                     </Button>
                 </CardFooter>
             </Card>
         </div>
+    );
+}
+
+export default function ConsentPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            </div>
+        }>
+            <ConsentContent />
+        </Suspense>
     );
 }
