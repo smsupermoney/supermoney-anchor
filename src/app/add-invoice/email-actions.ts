@@ -142,7 +142,9 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                         expiryTime: expiry.toISOString(),
                         createdAt: new Date().toISOString(),
                         amount: item.extractedData?.amount || 0,
-                        dueDate: item.extractedData?.dueDate || 'N/A'
+                        dueDate: item.extractedData?.dueDate || 'N/A',
+                        fileName: item.fileName,
+                        fileContent: item.fileContent // Store for later use in approval mail
                     });
 
                     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
@@ -154,6 +156,10 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                         to: dealerData.emailAddress || dealerData.branchEmailId,
                         subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} for Approval`,
                         html: generateConsentEmailBody(item, approveUrl, rejectUrl),
+                        attachments: item.fileContent ? [{
+                            filename: item.fileName,
+                            path: item.fileContent,
+                        }] : [],
                     };
 
                     try {

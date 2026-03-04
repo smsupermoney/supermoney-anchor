@@ -67,7 +67,11 @@ export async function processConsent(token: string, action: 'Approved' | 'Reject
                         <li><strong>Branch Name:</strong> ${dealerData?.branchName || 'N/A'}</li>
                         <li><strong>Consent Timestamp:</strong> ${new Date().toLocaleString()}</li>
                     </ul>
-                `
+                `,
+                attachments: consentData.fileContent ? [{
+                    filename: consentData.fileName || 'invoice.pdf',
+                    path: consentData.fileContent,
+                }] : []
             };
             await transporter.sendMail(mailOptions);
         }
