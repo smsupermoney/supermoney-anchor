@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
@@ -22,8 +23,10 @@ export function AuthProvider({ children, session }: { children: ReactNode; sessi
     setUser(session);
     setLoading(false);
 
-    // If there's no session and the user is not on the login page, redirect them.
-    if (!session && pathname !== '/') {
+    // If there's no session and the user is not on the login page or consent page, redirect them.
+    const isPublicPage = pathname === '/' || pathname === '/consent' || pathname.startsWith('/privacy-policy') || pathname.startsWith('/terms-and-conditions') || pathname.startsWith('/disclaimer');
+    
+    if (!session && !isPublicPage) {
       router.push('/');
     }
   }, [session, pathname, router]);

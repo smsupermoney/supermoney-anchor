@@ -1,26 +1,30 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { processConsent } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { IndianRupee, Loader2, CheckCircle2, XCircle, AlertCircle, FileText } from "lucide-react";
 import { db1 } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { Separator } from "@/components/ui/separator";
 
 export default function ConsentPage() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
+    const initialAction = searchParams.get("action") as 'Approved' | 'Rejected' | null;
+    
     const [status, setStatus] = useState<'loading' | 'valid' | 'success' | 'error' | 'expired' | 'used'>('loading');
     const [invoiceData, setInvoiceData] = useState<any>(null);
     const [message, setMessage] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
+    
+    const hasAutoProcessed = useRef(false);
 
     useEffect(() => {
-        const validateToken = async () => {
+        const validateAndProcess = async () => {
             if (!token) {
                 setStatus('error');
                 setMessage("Invalid Link.");
@@ -28,19 +32,19 @@ export default function ConsentPage() {
             }
 
             try {
-                const q = query(collection(db1, "invoiceConsents"), where("token", "==", token));
-                const snap = await getDocs(q);
+                const docRef = doc(db1, "invoiceConsents", token);
+                const snap = await getDoc(docRef);
 
-                if (snap.empty) {
+                if (!snap.exists()) {
                     setStatus('error');
                     setMessage("Invalid Link.");
                     return;
                 }
 
-                const data = snap.docs[0].data();
+                const data = snap.data();
                 if (data.status !== 'Pending') {
                     setStatus('used');
-                    setMessage("Already Processed.");
+                    setMessage(data.status === 'Approved' ? "Already Approved." : "Already Rejected.");
                     return;
                 }
 
@@ -50,24 +54,27 @@ export default function ConsentPage() {
                     return;
                 }
 
-                // Directly use the data stored in the consent document
-                // This corresponds to the information sent in the "Invoice Consent Required" email
                 setInvoiceData(data);
                 setStatus('valid');
+
+                // If user came with an action parameter, auto-process it
+                if (initialAction && (initialAction === 'Approved' || initialAction === 'Rejected') && !hasAutoProcessed.current) {
+                    hasAutoProcessed.current = true;
+                    handleAction(initialAction);
+                }
             } catch (e) {
                 setStatus('error');
                 setMessage("Failed to validate link.");
             }
         };
 
-        validateToken();
-    }, [token]);
+        validateAndProcess();
+    }, [token, initialAction]);
 
     const handleAction = async (action: 'Approved' | 'Rejected') => {
         if (!token) return;
         setIsProcessing(true);
         try {
-            // Action processing logic handles the backend updates and stakeholder notifications
             const res = await processConsent(token, action, "N/A");
             if (res.success) {
                 setStatus('success');
@@ -84,10 +91,11 @@ export default function ConsentPage() {
         }
     };
 
-    if (status === 'loading') {
+    if (status === 'loading' || (status === 'valid' && initialAction && isProcessing)) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-muted/30">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                {initialAction && <p className="mt-4 text-sm font-medium animate-pulse">Processing your {initialAction.toLowerCase()} action...</p>}
             </div>
         );
     }

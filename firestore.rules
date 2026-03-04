@@ -43,8 +43,6 @@ service cloud.firestore {
     }
 
     // Users Collection
-    // Users can read their own data.
-    // Admins can read/write any user data.
     match /users/{userId} {
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
       allow list: if isSignedIn() && isAdmin();
@@ -52,42 +50,41 @@ service cloud.firestore {
     }
     
     // Programs Collection
-    // Authenticated users can read. Admins can write.
     match /programs/{programId} {
         allow read: if isSignedIn();
         allow write: if isSignedIn() && isAdmin();
     }
     
     // Dealers Collection
-    // Admins can read all. Anchors can read dealers linked to them.
     match /dealers/{dealerId} {
         allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(resource.data.anchorId)));
         allow write: if isSignedIn() && isAdmin();
     }
     
     // DealerLimits Collection
-    // Admins can read all. Anchors can read limits for their dealers.
     match /dealerLimits/{limitId} {
         allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(get(/databases/$(database)/documents/dealers/$(limitId)).data.anchorId)));
         allow write: if isSignedIn() && isAdmin();
     }
 
     // Invoices Collection
-    // Admins can read all. Anchors can read invoices linked to them.
-    // Anchors can create new invoices for themselves.
     match /invoices/{invoiceId} {
       allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(resource.data.anchorId)));
       allow create: if isSignedIn() && (isAnchorUser() && isRequestingAnchor(request.resource.data.anchorId));
       allow update: if isSignedIn() && isAdmin();
-      // No delete rule defined, so it's denied.
     }
 
     // UpcomingPayments Collection
-    // Anchors can read payments linked to them. Writes are handled by the secure API endpoint.
     match /upcomingPayments/{paymentId} {
         allow read: if isSignedIn() && (isAdmin() || (isAnchorUser() && isRequestingAnchor(resource.data.anchorId)));
-        // Writes are denied from the client-side for security.
         allow write: if false;
+    }
+
+    // InvoiceConsents Collection - Public access for dealer interaction via token
+    match /invoiceConsents/{consentId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if true;
     }
   }
 }
