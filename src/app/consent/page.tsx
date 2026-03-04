@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -55,12 +54,14 @@ export default function ConsentPage() {
                 }
 
                 setInvoiceData(data);
-                setStatus('valid');
-
-                // If user came with an action parameter, auto-process it
+                
+                // If user came with an action parameter, auto-process it immediately
                 if (initialAction && (initialAction === 'Approved' || initialAction === 'Rejected') && !hasAutoProcessed.current) {
                     hasAutoProcessed.current = true;
-                    handleAction(initialAction);
+                    // Skip setting 'valid' status to avoid showing the review card
+                    await handleAction(initialAction);
+                } else {
+                    setStatus('valid');
                 }
             } catch (e) {
                 setStatus('error');
@@ -91,11 +92,16 @@ export default function ConsentPage() {
         }
     };
 
-    if (status === 'loading' || (status === 'valid' && initialAction && isProcessing)) {
+    // Show loader if we are initial loading OR if we are processing an auto-action
+    if (status === 'loading' || isProcessing) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                {initialAction && <p className="mt-4 text-sm font-medium animate-pulse">Processing your {initialAction.toLowerCase()} action...</p>}
+                {initialAction && (
+                    <p className="mt-4 text-sm font-medium animate-pulse">
+                        {initialAction === 'Approved' ? "Approving invoice..." : "Rejecting invoice..."}
+                    </p>
+                )}
             </div>
         );
     }
