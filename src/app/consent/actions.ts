@@ -1,3 +1,4 @@
+
 "use server";
 
 import { db1 } from "@/lib/firebase";
@@ -37,48 +38,38 @@ export async function processConsent(token: string, action: 'Approved' | 'Reject
             return { error: "Link expired." };
         }
 
-        // Update consent status
+        // Update consent status in the consents collection
         await updateDoc(consentDoc.ref, {
             status: action,
             consentTimestamp: new Date().toISOString(),
             ipAddress: ip
         });
 
-        // Update invoice status
-        const invoiceQuery = query(collection(db1, "invoices"), where("invoiceNumber", "==", consentData.invoiceNumber));
-        const invoiceSnap = await getDocs(invoiceQuery);
+        // If approved, directly send notification email using data from the consent document
+        if (action === 'Approved' && smtpConfigured && transporter) {
+            // Fetch dealer for branch email and display details
+            const dealerDoc = await getDoc(doc(db1, "dealers", consentData.dealerId));
+            const dealerData = dealerDoc.exists() ? dealerDoc.data() : null;
 
-        if (!invoiceSnap.empty) {
-            const invoiceDoc = invoiceSnap.docs[0];
-            await updateDoc(invoiceDoc.ref, {
-                status: action === 'Approved' ? 'Consent Approved' : 'Rejected'
-            });
-
-            if (action === 'Approved' && smtpConfigured && transporter) {
-                // Fetch dealer for branch email
-                const dealerDoc = await getDoc(doc(db1, "dealers", consentData.dealerId));
-                const dealerData = dealerDoc.exists() ? dealerDoc.data() : null;
-
-                const mailOptions = {
-                    from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-                    to: ["invoice@supermoney.in", dealerData?.branchEmailId].filter(Boolean) as string[],
-                    subject: `Invoice Consent Approved: ${consentData.invoiceNumber}`,
-                    html: `
-                        <h1>Invoice Consent Approved</h1>
-                        <p>The dealer has approved the invoice.</p>
-                        <hr />
-                        <ul>
-                            <li><strong>Invoice Number:</strong> ${consentData.invoiceNumber}</li>
-                            <li><strong>Dealer Name:</strong> ${dealerData?.dealerName || 'N/A'}</li>
-                            <li><strong>Anchor ID:</strong> ${dealerData?.anchorId || 'N/A'}</li>
-                            <li><strong>Amount:</strong> ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(invoiceDoc.data().amount)}</li>
-                            <li><strong>Branch Name:</strong> ${dealerData?.branchName || 'N/A'}</li>
-                            <li><strong>Consent Timestamp:</strong> ${new Date().toLocaleString()}</li>
-                        </ul>
-                    `
-                };
-                await transporter.sendMail(mailOptions);
-            }
+            const mailOptions = {
+                from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+                to: ["invoice@supermoney.in", dealerData?.branchEmailId].filter(Boolean) as string[],
+                subject: `Invoice Consent Approved: ${consentData.invoiceNumber}`,
+                html: `
+                    <h1>Invoice Consent Approved</h1>
+                    <p>The dealer has approved the invoice.</p>
+                    <hr />
+                    <ul>
+                        <li><strong>Invoice Number:</strong> ${consentData.invoiceNumber}</li>
+                        <li><strong>Dealer Name:</strong> ${dealerData?.dealerName || 'N/A'}</li>
+                        <li><strong>Anchor ID:</strong> ${dealerData?.anchorId || 'N/A'}</li>
+                        <li><strong>Amount:</strong> ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(consentData.amount || 0)}</li>
+                        <li><strong>Branch Name:</strong> ${dealerData?.branchName || 'N/A'}</li>
+                        <li><strong>Consent Timestamp:</strong> ${new Date().toLocaleString()}</li>
+                    </ul>
+                `
+            };
+            await transporter.sendMail(mailOptions);
         }
 
         return { success: true };

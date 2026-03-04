@@ -1,3 +1,4 @@
+
 "use server";
 
 import nodemailer from "nodemailer";
@@ -124,7 +125,8 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                         token: token,
                         status: 'Pending',
                         expiryTime: expiry.toISOString(),
-                        createdAt: new Date().toISOString()
+                        createdAt: new Date().toISOString(),
+                        amount: item.extractedData?.amount || 0 // Store amount for final approval email
                     });
 
                     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
@@ -144,7 +146,6 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                     }
                     
                     // After triggering consent email, we don't send the internal notification for this item yet.
-                    // If multiple items, we might need more complex logic, but for now we continue.
                     continue;
                 }
             }
