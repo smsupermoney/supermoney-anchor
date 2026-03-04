@@ -1,7 +1,8 @@
+
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { processConsent } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,13 +50,9 @@ export default function ConsentPage() {
                     return;
                 }
 
-                // Fetch invoice details
-                const invQ = query(collection(db1, "invoices"), where("invoiceNumber", "==", data.invoiceNumber));
-                const invSnap = await getDocs(invQ);
-                if (!invSnap.empty) {
-                    setInvoiceData(invSnap.docs[0].data());
-                }
-
+                // Directly use the data stored in the consent document
+                // This corresponds to the information sent in the "Invoice Consent Required" email
+                setInvoiceData(data);
                 setStatus('valid');
             } catch (e) {
                 setStatus('error');
@@ -70,7 +67,7 @@ export default function ConsentPage() {
         if (!token) return;
         setIsProcessing(true);
         try {
-            // In a real app, we'd get the IP from the server action properly
+            // Action processing logic handles the backend updates and stakeholder notifications
             const res = await processConsent(token, action, "N/A");
             if (res.success) {
                 setStatus('success');
@@ -139,7 +136,7 @@ export default function ConsentPage() {
                             <span className="text-muted-foreground">Amount:</span>
                             <span className="text-xl font-bold flex items-center">
                                 <IndianRupee className="h-4 w-4" />
-                                {new Intl.NumberFormat("en-IN").format(invoiceData?.amount)}
+                                {new Intl.NumberFormat("en-IN").format(invoiceData?.amount || 0)}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">

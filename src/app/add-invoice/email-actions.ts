@@ -126,7 +126,8 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                         status: 'Pending',
                         expiryTime: expiry.toISOString(),
                         createdAt: new Date().toISOString(),
-                        amount: item.extractedData?.amount || 0 // Store amount for final approval email
+                        amount: item.extractedData?.amount || 0,
+                        dueDate: item.extractedData?.dueDate || 'N/A'
                     });
 
                     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
