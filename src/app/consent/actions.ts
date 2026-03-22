@@ -1,4 +1,3 @@
-
 "use server";
 
 import { db1 } from "@/lib/firebase";
@@ -15,7 +14,7 @@ const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && proc
 const transporter = smtpConfigured ? nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465,
+    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -51,18 +50,33 @@ export async function processConsent(token: string, action: 'Approved' | 'Reject
             const dealerDoc = await getDoc(doc(db1, "dealers", consentData.dealerId));
             const dealerData = dealerDoc.exists() ? dealerDoc.data() : null;
 
+            // Fetch anchor name based on anchorId from dealer record
+            let anchorName = 'N/A';
+            if (dealerData?.anchorId) {
+                const usersRef = collection(db1, 'users');
+                const anchorQuery = query(
+                    usersRef, 
+                    where('roleType', '==', 'Anchor'), 
+                    where('externalId', '==', dealerData.anchorId)
+                );
+                const anchorSnap = await getDocs(anchorQuery);
+                if (!anchorSnap.empty) {
+                    anchorName = anchorSnap.docs[0].data().userName || 'N/A';
+                }
+            }
+
             const mailOptions = {
                 from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
                 to: ["invoice@supermoney.in", dealerData?.branchEmailId].filter(Boolean) as string[],
-                subject: `Invoice Consent Approved: ${consentData.invoiceNumber}`,
+                subject: `JSPL CBoI - Invoice Disbursement Approved: ${consentData.invoiceNumber}`,
                 html: `
-                    <h1>Invoice Consent Approved</h1>
-                    <p>The dealer has approved the invoice.</p>
+                    <h1></h1>
+                    <p> for Disbursement.</p>
                     <hr />
                     <ul>
                         <li><strong>Invoice Number:</strong> ${consentData.invoiceNumber}</li>
                         <li><strong>Dealer Name:</strong> ${dealerData?.dealerName || 'N/A'}</li>
-                        <li><strong>Anchor ID:</strong> ${dealerData?.anchorId || 'N/A'}</li>
+                        <li><strong>Anchor Name:</strong> ${anchorName}</li>
                         <li><strong>Amount:</strong> ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(consentData.amount || 0)}</li>
                         <li><strong>Branch Name:</strong> ${dealerData?.branchName || 'N/A'}</li>
                         <li><strong>Consent Timestamp:</strong> ${new Date().toLocaleString()}</li>

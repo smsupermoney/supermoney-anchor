@@ -85,7 +85,7 @@ function generateConsentEmailBody(item: EmailData, approveUrl: string, rejectUrl
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
             <h1 style="color: #333; text-align: center;">Invoice Consent Required</h1>
             <p>Hello,</p>
-            <p>A new invoice has been submitted for your business. Please review the details below and provide your consent.</p>
+            <p>A new invoice has been submitted - please review the details below and provide your consent for Disbursement.</p>
             <hr style="border: 0; border-top: 1px solid #eee;" />
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                 <tr><td style="padding: 8px; color: #666;"><strong>Invoice Number:</strong></td><td style="padding: 8px; font-weight: bold;">${item.extractedData?.invoiceNumber || 'N/A'}</td></tr>
@@ -154,7 +154,7 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                     const mailOptions = {
                         from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
                         to: dealerData.emailAddress || dealerData.branchEmailId,
-                        subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} for Approval`,
+                        subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} from JSPL for Approval`,
                         html: generateConsentEmailBody(item, approveUrl, rejectUrl),
                         attachments: item.fileContent ? [{
                             filename: item.fileName,
