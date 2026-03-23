@@ -5,20 +5,25 @@ import type { Dealer, Invoice, Program } from '@/types';
 
 // --- API FUNCTIONS ---
 
-// Helper to convert Firestore Timestamps to ISO strings
-const processDocumentDates = (data: Record<string, any>): Record<string, any> => {
-    const processedData = { ...data };
-    for (const key in processedData) {
-        if (processedData[key] && typeof processedData[key].toDate === 'function') {
-            // This is a Firestore Timestamp
-            const date = (processedData[key] as Timestamp).toDate();
-            // Check if date is valid before converting
-            if (!isNaN(date.getTime())) {
-                processedData[key] = date.toISOString();
-            } else {
-                processedData[key] = null; // or some other placeholder for invalid dates
-            }
-        }
+// Helper to convert Firestore Timestamps to ISO strings recursively
+const processDocumentDates = (data: any): any => {
+    if (data === null || typeof data !== 'object') {
+        return data;
+    }
+
+    // Check for Firestore Timestamp
+    if (typeof data.toDate === 'function') {
+        const date = (data as Timestamp).toDate();
+        return !isNaN(date.getTime()) ? date.toISOString() : null;
+    }
+
+    if (Array.isArray(data)) {
+        return data.map(processDocumentDates);
+    }
+
+    const processedData: Record<string, any> = {};
+    for (const key in data) {
+        processedData[key] = processDocumentDates(data[key]);
     }
     return processedData;
 };

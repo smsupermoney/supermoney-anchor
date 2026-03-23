@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -64,11 +62,20 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
 
   const getLatestRemark = (lead: MomentumDealerLead) => {
-    if (!lead.remarks || !Array.isArray(lead.remarks) || lead.remarks.length === 0) {
+    const remarks = lead.remarks;
+    let remarksArray: any[] = [];
+    
+    if (Array.isArray(remarks)) {
+      remarksArray = remarks;
+    } else if (remarks && typeof remarks === 'object') {
+      remarksArray = Object.values(remarks);
+    }
+
+    if (remarksArray.length === 0) {
       return '';
     }
 
-    const sortedRemarks = [...lead.remarks].sort((a, b) => {
+    const sortedRemarks = [...remarksArray].sort((a, b) => {
         const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
         const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
         return timeB - timeA;
@@ -77,7 +84,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     const latestRemark = sortedRemarks[0];
 
     if (typeof latestRemark === 'object' && latestRemark !== null) {
-        return (latestRemark as any).remark || (latestRemark as any).text || '';
+        return latestRemark.remark || latestRemark.text || latestRemark.comment || '';
     }
     
     return '';

@@ -211,7 +211,7 @@ export type MomentumDealerLead = {
   name: string;
   priority?: string;
   product: string;
-  remarks: any[];
+  remarks: any[] | Record<string, any>;
   spoc: string;
   state: string;
   status: string;

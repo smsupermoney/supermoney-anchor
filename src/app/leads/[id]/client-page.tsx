@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import * as React from 'react';
@@ -7,7 +5,7 @@ import PageHeader from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { notFound, useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone, X, ThumbsUp, ThumbsDown, Eye, ShieldCheck, Save, Edit } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -39,11 +37,25 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
     const pageSize = 5;
 
     const sortedRemarks = React.useMemo(() => {
-        if (!lead?.remarks || !Array.isArray(lead.remarks)) return [];
-        return [...lead.remarks].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        const remarks = lead?.remarks;
+        let remarksArray: any[] = [];
+        
+        if (Array.isArray(remarks)) {
+          remarksArray = remarks;
+        } else if (remarks && typeof remarks === 'object') {
+          remarksArray = Object.values(remarks);
+        }
+
+        if (remarksArray.length === 0) return [];
+        
+        return [...remarksArray].sort((a, b) => {
+            const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+            const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+            return timeB - timeA;
+        });
     }, [lead?.remarks]);
 
-    const pageCount = lead?.remarks ? Math.ceil(sortedRemarks.length / pageSize) : 0;
+    const pageCount = sortedRemarks.length > 0 ? Math.ceil(sortedRemarks.length / pageSize) : 0;
     const paginatedRemarks = React.useMemo(() => {
         const start = pageIndex * pageSize;
         const end = start + pageSize;
@@ -146,7 +158,7 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
                                             paginatedRemarks.map((remark, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell className='font-medium'>{remark.user || 'System'}</TableCell>
-                                                    <TableCell className='text-muted-foreground'>{remark.remark || remark.text}</TableCell>
+                                                    <TableCell className='text-muted-foreground'>{remark.remark || remark.text || remark.comment}</TableCell>
                                                     <TableCell className='text-right'>{formatDate(remark.timestamp)}</TableCell>
                                                 </TableRow>
                                             ))
