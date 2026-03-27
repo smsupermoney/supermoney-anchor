@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import * as xlsx from 'xlsx';
-import { subDays, startOfDay } from 'date-fns';
+import { subDays, startOfDay, format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
@@ -31,6 +31,17 @@ type ReportsClientPageProps = {
 
 export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, initialLeads, users, isAdmin, totalOverdueAmount }: ReportsClientPageProps) {
     const [dateRange, setDateRange] = useState<string>('all');
+
+    const formatDateDash = (dateString?: string) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            return format(date, 'dd-MM-yyyy');
+        } catch (e) {
+            return dateString;
+        }
+    };
 
     const filteredInvoices = useMemo(() => {
         if (dateRange === 'all') {
@@ -185,18 +196,22 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
 
         // Sheet 5: All Leads
         const leadData = initialLeads.map(l => ({
-            "Lead ID": l.id,
-            "Lead Name": l.name,
-            "Category": l.leadCategory,
-            "Status": l.status,
-            "City": l.city,
-            "State": l.state,
-            "SPOC": l.spoc,
-            "Contact Number": l.contactNumber,
-            "Email": l.email,
+            "Lead Category": l.leadCategory,
+            "Anchor Name": l.anchorName || 'N/A',
+            "LeadDate": formatDateDash(l.leadDate),
+            "Name": l.name,
             "Deal Value (Lacs)": l.dealValue,
-            "Created At": l.createdAt,
-            "Updated At": l.updatedAt,
+            "Lender": l.lender,
+            "Zone": l.zone,
+            "State": l.state,
+            "City": l.city,
+            "Anchor SPOC": l.spoc,
+            "Status": l.status,
+            "created At": formatDateDash(l.createdAt),
+            "StatusUpdatedAt": formatDateDash((l as any).StatusUpdatedAt),
+            "LoginDate": formatDateDash((l as any).LoginDate),
+            "Updated At": formatDateDash(l.updatedAt),
+            "rejectedDate": formatDateDash((l as any).rejectedDate),
         }));
         const leadSheet = xlsx.utils.json_to_sheet(leadData);
         xlsx.utils.book_append_sheet(workbook, leadSheet, "All Leads");
@@ -393,7 +408,27 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                              <Button variant="outline" onClick={() => downloadExcel(initialPrograms, 'Programs', 'program_report.xlsx')}>
                                 <Download className="mr-2 h-4 w-4" /> Download Programs
                             </Button>
-                            <Button variant="outline" onClick={() => downloadExcel(initialLeads, 'Leads', 'leads_report.xlsx')}>
+                            <Button variant="outline" onClick={() => {
+                                const data = initialLeads.map(l => ({
+                                    "Lead Category": l.leadCategory,
+                                    "Anchor Name": l.anchorName || 'N/A',
+                                    "LeadDate": formatDateDash(l.leadDate),
+                                    "Name": l.name,
+                                    "Deal Value (Lacs)": l.dealValue,
+                                    "Lender": l.lender,
+                                    "Zone": l.zone,
+                                    "State": l.state,
+                                    "City": l.city,
+                                    "Anchor SPOC": l.spoc,
+                                    "Status": l.status,
+                                    "created At": formatDateDash(l.createdAt),
+                                    "StatusUpdatedAt": formatDateDash((l as any).StatusUpdatedAt),
+                                    "LoginDate": formatDateDash((l as any).LoginDate),
+                                    "Updated At": formatDateDash(l.updatedAt),
+                                    "rejectedDate": formatDateDash((l as any).rejectedDate),
+                                }));
+                                downloadExcel(data, 'Leads', 'leads_report.xlsx');
+                            }}>
                                 <Download className="mr-2 h-4 w-4" /> Download Leads
                             </Button>
                         </div>
