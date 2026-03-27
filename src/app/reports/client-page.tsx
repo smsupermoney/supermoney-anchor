@@ -43,6 +43,28 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         }
     };
 
+    const getRemarksString = (lead: MomentumDealerLead) => {
+        const remarks = lead.remarks;
+        let remarksArray: any[] = [];
+        
+        if (Array.isArray(remarks)) {
+          remarksArray = remarks;
+        } else if (remarks && typeof remarks === 'object') {
+          remarksArray = Object.values(remarks);
+        }
+
+        if (remarksArray.length === 0) return '';
+        
+        return remarksArray
+            .sort((a, b) => {
+                const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                return timeB - timeA;
+            })
+            .map(r => `${r.user || 'System'}: ${r.remark || r.text || r.comment || ''} (${formatDateDash(r.timestamp)})`)
+            .join(" | ");
+    };
+
     const filteredInvoices = useMemo(() => {
         if (dateRange === 'all') {
             return initialInvoices;
@@ -196,22 +218,15 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
 
         // Sheet 5: All Leads
         const leadData = initialLeads.map(l => ({
-            "Lead Category": l.leadCategory,
-            "Anchor Name": l.anchorName || 'N/A',
-            "LeadDate": formatDateDash(l.leadDate),
-            "Name": l.name,
-            "Deal Value (Lacs)": l.dealValue,
-            "Lender": l.lender,
-            "Zone": l.zone,
-            "State": l.state,
-            "City": l.city,
-            "Anchor SPOC": l.spoc,
-            "Status": l.status,
-            "created At": formatDateDash(l.createdAt),
-            "StatusUpdatedAt": formatDateDash((l as any).StatusUpdatedAt),
-            "LoginDate": formatDateDash((l as any).LoginDate),
-            "Updated At": formatDateDash(l.updatedAt),
-            "rejectedDate": formatDateDash((l as any).rejectedDate),
+            "leadCategory": l.leadCategory,
+            "createdAt": formatDateDash(l.createdAt),
+            "leadDate": formatDateDash(l.leadDate),
+            "name": l.name,
+            "customerName": l.name,
+            "dealValue": l.dealValue,
+            "status": l.status,
+            "statusUpdatedAt": formatDateDash(l.updatedAt),
+            "remarks": getRemarksString(l),
         }));
         const leadSheet = xlsx.utils.json_to_sheet(leadData);
         xlsx.utils.book_append_sheet(workbook, leadSheet, "All Leads");
@@ -410,22 +425,15 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                             </Button>
                             <Button variant="outline" onClick={() => {
                                 const data = initialLeads.map(l => ({
-                                    "Lead Category": l.leadCategory,
-                                    "Anchor Name": l.anchorName || 'N/A',
-                                    "LeadDate": formatDateDash(l.leadDate),
-                                    "Name": l.name,
-                                    "Deal Value (Lacs)": l.dealValue,
-                                    "Lender": l.lender,
-                                    "Zone": l.zone,
-                                    "State": l.state,
-                                    "City": l.city,
-                                    "Anchor SPOC": l.spoc,
-                                    "Status": l.status,
-                                    "created At": formatDateDash(l.createdAt),
-                                    "StatusUpdatedAt": formatDateDash((l as any).StatusUpdatedAt),
-                                    "LoginDate": formatDateDash((l as any).LoginDate),
-                                    "Updated At": formatDateDash(l.updatedAt),
-                                    "rejectedDate": formatDateDash((l as any).rejectedDate),
+                                    "leadCategory": l.leadCategory,
+                                    "createdAt": formatDateDash(l.createdAt),
+                                    "leadDate": formatDateDash(l.leadDate),
+                                    "name": l.name,
+                                    "customerName": l.name,
+                                    "dealValue": l.dealValue,
+                                    "status": l.status,
+                                    "statusUpdatedAt": formatDateDash(l.updatedAt),
+                                    "remarks": getRemarksString(l),
                                 }));
                                 downloadExcel(data, 'Leads', 'leads_report.xlsx');
                             }}>
