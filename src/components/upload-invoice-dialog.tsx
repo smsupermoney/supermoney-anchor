@@ -56,6 +56,8 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [isDragging, setIsDragging] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
+  const [dealerNotFoundErrorOpen, setDealerNotFoundErrorOpen] = useState(false);
+  const [overdueErrorOpen, setOverdueErrorOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsentRequired, setIsConsentRequired] = useState(false);
   const { toast } = useToast();
@@ -176,6 +178,20 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
 
     if (uploadedFiles.some(f => f.isLoading)) {
       toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the AI to finish reading all documents." });
+      return;
+    }
+
+    // Check if dealer is not found
+    const hasNotFound = uploadedFiles.some(f => !f.applicationId);
+    if (hasNotFound) {
+      setDealerNotFoundErrorOpen(true);
+      return;
+    }
+
+    // Check if any dealer is overdue
+    const hasOverdue = uploadedFiles.some(f => f.overdueAmount && f.overdueAmount > 0);
+    if (hasOverdue) {
+      setOverdueErrorOpen(true);
       return;
     }
 
@@ -397,6 +413,34 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
             <AlertDialogTitle>Limit Exceeded</AlertDialogTitle>
             <AlertDialogDescription>
               Kindly note the Disbursement request is greater than the Available limit. Click to edit the value or request the borrower to pay the additional amount
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={dealerNotFoundErrorOpen} onOpenChange={setDealerNotFoundErrorOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dealer Not Found</AlertDialogTitle>
+            <AlertDialogDescription>
+              One or more dealers in your upload could not be found in the system based on the extracted GST information. Please verify the dealer details and try again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={overdueErrorOpen} onOpenChange={setOverdueErrorOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dealer Overdue</AlertDialogTitle>
+            <AlertDialogDescription>
+              The Dealer is Overdue, kindly ask him to pay the Dues to Raise an Invoice
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
