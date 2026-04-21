@@ -23,13 +23,13 @@ import { Button } from "@/components/ui/button";
 import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
 import { Card, CardContent } from "./ui/card";
 import { sendInvoiceEmail } from "@/app/add-invoice/email-actions";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import type { Dealer, InvoiceDocument } from "@/types";
 import { InvoiceConsentDialog } from "./invoice-consent-dialog";
+import { readInvoiceWithExternalApi } from "@/app/add-invoice/ocr-actions";
 
 type UploadInvoiceDialogProps = {
   children: React.ReactNode;
@@ -40,7 +40,7 @@ type UploadInvoiceDialogProps = {
 type UploadedFile = {
   file: File;
   preview: string;
-  extractedData?: ExtractInvoiceDataOutput;
+  extractedData?: any;
   disburseAmount?: string;
   isLoading: boolean;
   error?: string;
@@ -84,7 +84,8 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const handleAIExtraction = async (file: File, index: number) => {
     try {
       const documentDataUri = await fileToDataUri(file);
-      const result = await extractInvoiceData({ documentDataUri });
+      // Using the external OCR API instead of Genkit
+      const result = await readInvoiceWithExternalApi(file.name, documentDataUri);
 
       // Find dealer to get IDs and limit
       const dealer = dealers.find(d => d.GST === result.gstOrGstin);
@@ -107,10 +108,10 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         } : f
       ));
 
-    } catch (error) {
-      console.error("AI Extraction Error:", error);
+    } catch (error: any) {
+      console.error("OCR Extraction Error:", error);
       setUploadedFiles(prev => prev.map((f, i) => 
-        i === index ? { ...f, isLoading: false, error: "AI failed to read this file." } : f
+        i === index ? { ...f, isLoading: false, error: error.message || "Failed to read document." } : f
       ));
     }
   };
@@ -123,10 +124,11 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         isLoading: true,
       }));
       
+      const currentLength = uploadedFiles.length;
       setUploadedFiles(prev => [...prev, ...addedFiles]);
 
       addedFiles.forEach((newFile, i) => {
-        handleAIExtraction(newFile.file, uploadedFiles.length + i);
+        handleAIExtraction(newFile.file, currentLength + i);
       });
     }
   };
@@ -175,7 +177,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     }
 
     if (uploadedFiles.some(f => f.isLoading)) {
-      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the AI to finish reading all documents." });
+      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the OCR to finish reading all documents." });
       return;
     }
 
@@ -206,7 +208,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     }
 
     if (uploadedFiles.some(f => f.isLoading)) {
-      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the AI to finish reading all documents." });
+      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the OCR to finish reading all documents." });
       return;
     }
 
@@ -262,9 +264,9 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Raise Invoice with AI</DialogTitle>
+            <DialogTitle>Raise Invoice with OCR</DialogTitle>
             <DialogDescription>
-              Upload invoice documents. The AI will automatically extract the details for you to review.
+              Upload invoice documents. The external OCR agent will automatically extract the details for you to review.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
@@ -299,7 +301,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                 <h4 className="font-medium text-sm">Review Documents:</h4>
                 <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
                   {uploadedFiles.map((upFile, index) => (
-                    <Card key={index}>
+                    <Card key={index} className="bg-background">
                       <CardContent className="p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3 flex-grow">
@@ -309,7 +311,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                                   {upFile.isLoading ? (
                                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                                           <Loader2 className="w-3 h-3 animate-spin"/>
-                                          <span>AI is reading...</span>
+                                          <span>OCR is reading...</span>
                                       </div>
                                   ) : upFile.error ? (
                                       <p className="text-xs text-destructive mt-1">{upFile.error}</p>
@@ -385,14 +387,14 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
             onClose={() => setConsentOpen(false)}
             onVerified={async () => {
               setConsentOpen(false);
-              await handleSubmit(); // your original invoice submission
+              await handleSubmit();
             }}
           />
         </DialogContent>
       </Dialog>
 
       <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-background">
           <AlertDialogHeader>
             <AlertDialogTitle>Limit Exceeded</AlertDialogTitle>
             <AlertDialogDescription>
