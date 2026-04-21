@@ -56,6 +56,8 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [isDragging, setIsDragging] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
+  const [dealerNotFoundErrorOpen, setDealerNotFoundErrorOpen] = useState(false);
+  const [dealerOverdueErrorOpen, setDealerOverdueErrorOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsentRequired, setIsConsentRequired] = useState(false);
   const { toast } = useToast();
@@ -179,6 +181,20 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     if (uploadedFiles.some(f => f.isLoading)) {
       toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the OCR to finish reading all documents." });
       return;
+    }
+
+    // Check if any dealer was not found
+    const hasMissingDealer = uploadedFiles.some(f => !f.applicationId && !f.error);
+    if (hasMissingDealer) {
+        setDealerNotFoundErrorOpen(true);
+        return;
+    }
+
+    // Check if any dealer is overdue
+    const hasOverdueDealer = uploadedFiles.some(f => (f.overdueAmount ?? 0) > 0);
+    if (hasOverdueDealer) {
+        setDealerOverdueErrorOpen(true);
+        return;
     }
 
     // Check if disburse amount exceeds available limit
@@ -392,6 +408,34 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           />
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={dealerNotFoundErrorOpen} onOpenChange={setDealerNotFoundErrorOpen}>
+        <AlertDialogContent className="bg-background">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dealer Not Found</AlertDialogTitle>
+            <AlertDialogDescription>
+              One or more dealers associated with the uploaded invoices could not be identified in the system. Please verify the GST information and try again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={dealerOverdueErrorOpen} onOpenChange={setDealerOverdueErrorOpen}>
+        <AlertDialogContent className="bg-background">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dealer Overdue</AlertDialogTitle>
+            <AlertDialogDescription>
+              The Dealer is Overdue, kindly ask him to pay the Dues to Raise an Invoice.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
         <AlertDialogContent className="bg-background">
