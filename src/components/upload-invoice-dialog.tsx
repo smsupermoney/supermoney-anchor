@@ -414,7 +414,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           <AlertDialogHeader>
             <AlertDialogTitle>Dealer Not Found</AlertDialogTitle>
             <AlertDialogDescription>
-              One or more dealers associated with the uploaded invoices could not be identified in the system. Please verify the GST information and try again.
+              Dealer associated with the uploaded invoice could not be identified in the system. Please verify the GST information and try again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
