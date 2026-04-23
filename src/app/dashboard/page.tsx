@@ -75,7 +75,9 @@ export default async function Dashboard() {
     getUpcomingPayments(anchorId)
   ]);
   
-  const lifetimeSanctionLimit = dealers.reduce((sum, dealer) => sum + dealer.totalLimit, 0);
+  const lifetimeSanctionLimit = dealers
+    .filter(dealer => dealer.status === 'Active' || dealer.status === 'Inactive')
+    .reduce((sum, dealer) => sum + dealer.totalLimit, 0);
   
   return (
     <DashboardClient 
@@ -89,7 +91,3 @@ export default async function Dashboard() {
     />
   );
 }
-
-    
-
-    

@@ -106,7 +106,7 @@ export default async function ProgramsPage() {
                     <p className="text-[10px] text-muted-foreground">Initiated Invoices</p>
                     <p className="font-semibold text-xs">{program.initiatedInvoicesCount}</p>
                   </Link>
-                  <Link href={`/retailers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
+                  <Link href={`/dealers?lender=${encodeURIComponent(program.lenderName)}`} className="space-y-0 hover:bg-secondary p-1 rounded-md transition-colors">
                       <p className="text-[10px] text-muted-foreground">Total Dealers</p>
                       <p className="font-semibold text-xs">{program.totalDealers}</p>
                   </Link>

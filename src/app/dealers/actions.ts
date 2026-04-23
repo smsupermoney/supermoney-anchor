@@ -26,10 +26,6 @@ const updateDetailsSchema = z.object({
     (val) => Number(val),
     z.number().min(0, 'Overdue amount must be a non-negative number.')
   ),
-  principalDPD: z.preprocess(
-    (val) => Number(val),
-    z.number().min(0, 'DPD must be a non-negative number.')
-  ),
   status: z.enum(['Active', 'Inactive', 'Pending', 'Supply Stopped']),
 });
 
@@ -43,7 +39,7 @@ export async function updateDealerDetails(
     return { error: 'Invalid data provided. Please check the form.' };
   }
 
-  const { dealerId, totalLimit, utilisationAmount, principalOverdue, principalDPD, status } = validatedFields.data;
+  const { dealerId, totalLimit, utilisationAmount, principalOverdue, status } = validatedFields.data;
 
   if (utilisationAmount > totalLimit) {
       return { error: 'Utilisation amount cannot be greater than the total limit.' };
@@ -58,7 +54,6 @@ export async function updateDealerDetails(
       limitAmount: totalLimit,
       utilisationAmount: utilisationAmount,
       principalOverdue: principalOverdue,
-      principalDPD: principalDPD,
       availableAmount: totalLimit - utilisationAmount, // Recalculate available amount
     });
 
