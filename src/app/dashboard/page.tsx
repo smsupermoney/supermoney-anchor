@@ -8,11 +8,11 @@ import { collection, getDocs, query, where, collectionGroup } from 'firebase/fir
 import type { UpcomingPayment, UpcomingPaymentLoan, UpcomingPaymentItem } from '@/types';
 
 
-async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentItem[]> {
+async function getUpcomingPayments(anchorId?: string, region?: string): Promise<UpcomingPaymentItem[]> {
     noStore();
     
     // 1. Get the list of dealers this user is allowed to see.
-    const allDealersForScope = await getDealers(anchorId);
+    const allDealersForScope = await getDealers(anchorId, region);
     const dealerMap = new Map(allDealersForScope.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
     
     const dealerIdsForQuery = Array.from(dealerMap.keys());
@@ -61,18 +61,19 @@ export default async function Dashboard() {
   const session = await getSession();
   
   // ID for programs, dealers, invoices
-  const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
-  const region = session?.roleType === 'Admin' ? undefined : session?.region;
+  const isAdmin = session?.roleType === 'Admin' || session?.roleType === 'SuperMoney User';
+  const anchorId = isAdmin ? undefined : session?.externalId;
+  const region = isAdmin ? undefined : session?.region;
   
   // Separate ID specifically for leads, as per recent changes
-  const leadAnchorId = session?.roleType === 'Admin' ? undefined : session?.leadExternalId;
+  const leadAnchorId = isAdmin ? undefined : session?.leadExternalId;
 
   // Fetch all data
   const { programs, invoices, totalOverdueAmount } = await getPrograms(anchorId, region);
   const [dealers, momentumLeads, upcomingPaymentsData] = await Promise.all([
     getDealers(anchorId, region),
     (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_2) ? getMomentumDealerLeads(leadAnchorId) : Promise.resolve([]),
-    getUpcomingPayments(anchorId)
+    getUpcomingPayments(anchorId, region)
   ]);
   
   const lifetimeSanctionLimit = dealers
