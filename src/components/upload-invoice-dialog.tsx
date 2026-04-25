@@ -56,6 +56,9 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [isDragging, setIsDragging] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
+  const [dealerNotFoundErrorOpen, setDealerNotFoundErrorOpen] = useState(false);
+  const [dealerOverdueErrorOpen, setDealerOverdueErrorOpen] = useState(false);
+  const [overdueErrorOpen, setOverdueErrorOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsentRequired, setIsConsentRequired] = useState(false);
   const { toast } = useToast();
@@ -64,6 +67,10 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     setUploadedFiles([]);
     setIsDragging(false);
     setIsSubmitting(false);
+    setDealerNotFoundErrorOpen(false);
+    setDealerOverdueErrorOpen(false);
+    setOverdueErrorOpen(false);
+    setLimitErrorOpen(false);
   };
 
   useEffect(() => {
@@ -193,20 +200,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     if (hasOverdueDealer) {
         setDealerOverdueErrorOpen(true);
         return;
-    }
-
-    // Check if dealer is not found
-    const hasNotFound = uploadedFiles.some(f => !f.applicationId);
-    if (hasNotFound) {
-      setDealerNotFoundErrorOpen(true);
-      return;
-    }
-
-    // Check if any dealer is overdue
-    const hasOverdue = uploadedFiles.some(f => f.overdueAmount && f.overdueAmount > 0);
-    if (hasOverdue) {
-      setOverdueErrorOpen(true);
-      return;
     }
 
     // Check if disburse amount exceeds available limit
@@ -455,20 +448,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
             <AlertDialogTitle>Limit Exceeded</AlertDialogTitle>
             <AlertDialogDescription>
               Kindly note the Disbursement request is greater than the Available limit. Click to edit the value or request the borrower to pay the additional amount
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={dealerNotFoundErrorOpen} onOpenChange={setDealerNotFoundErrorOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Dealer Not Found</AlertDialogTitle>
-            <AlertDialogDescription>
-              One or more dealers in your upload could not be found in the system based on the extracted GST information. Please verify the dealer details and try again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
