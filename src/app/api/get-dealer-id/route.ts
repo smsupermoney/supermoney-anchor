@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db1 } from '@/lib/firebase';
@@ -112,7 +111,7 @@ export async function POST(request: Request) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': apiKey,
+            'Authorization': `Bearer ${apiKey}`,
           },
           body: JSON.stringify(externalApiPayload)
         })

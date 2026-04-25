@@ -1,4 +1,3 @@
-
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
@@ -38,11 +37,11 @@ let db2: Firestore;
 
 if (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_2) {
     app2 = initializeAppSafely(firebaseConfig2, 'app2');
-    db2 = getFirestore(app2, "live");
+    // Default to the standard database instance for the second project to avoid NOT_FOUND errors
+    db2 = getFirestore(app2);
 } else {
     // If the second project is not configured, we can point db2 to db1
     // or handle it as an unconfigured service.
-    // For now, let's make it point to db1 to avoid crashes in functions that use it.
     console.warn("Firebase project 'db2' is not configured. Falling back to 'db1'.");
     app2 = app1;
     db2 = db1;
