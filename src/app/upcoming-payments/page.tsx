@@ -10,11 +10,11 @@ import type { UpcomingPayment, UpcomingPaymentLoan, UpcomingPaymentItem } from '
 import UploadUpcomingPaymentsDialog from './upload-dialog';
 
 
-async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentItem[]> {
+async function getUpcomingPayments(anchorId?: string, region?: string): Promise<UpcomingPaymentItem[]> {
     noStore();
     
     // 1. Get the list of dealers this user is allowed to see.
-    const allDealersForScope = await getDealers(anchorId);
+    const allDealersForScope = await getDealers(anchorId, region);
     const dealerMap = new Map(allDealersForScope.map(d => [d.id, { name: d.name, lender: d.lenderName }]));
     
     const dealerIdsForQuery = Array.from(dealerMap.keys());
@@ -61,10 +61,11 @@ async function getUpcomingPayments(anchorId?: string): Promise<UpcomingPaymentIt
 export default async function UpcomingPaymentsPage() {
   noStore();
   const session = await getSession();
-  const isAdmin = session?.roleType === 'Admin';
+  const isAdmin = session?.roleType === 'Admin' || session?.roleType === 'SuperMoney User';
   const anchorId = isAdmin ? undefined : session?.externalId;
+  const region = isAdmin ? undefined : session?.region;
   
-  const upcomingPayments = await getUpcomingPayments(anchorId);
+  const upcomingPayments = await getUpcomingPayments(anchorId, region);
   
   return (
     <>

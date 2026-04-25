@@ -5,7 +5,7 @@ import PageHeader from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { notFound, useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Download, FileText, Send, Upload, FilePlus2, MessageSquare, SendHorizonal, Mail, Phone, X, ThumbsUp, ThumbsDown, Eye, ShieldCheck, Save, Edit } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';

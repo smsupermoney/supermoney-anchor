@@ -57,8 +57,10 @@ export default function SubscribePage() {
                             </p>
                         </div>
                         
-                        <Button size="lg" className="w-full text-base font-semibold">
-                            Contact Sales to Get Started
+                        <Button size="lg" className="w-full text-base font-semibold" asChild>
+                            <a href="mailto:nikhil@supermoney.in">
+                                Contact Sales to Get Started
+                            </a>
                         </Button>
                     </CardContent>
                 </Card>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -22,7 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/page-header";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import BulkLeadUploadDialog from "@/components/bulk-lead-upload-dialog";
@@ -34,6 +35,7 @@ type LeadsClientPageProps = {
 export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
   const [leads, setLeads] = useState(initialLeads);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const initialFilters = {
     name: "",
@@ -58,7 +60,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
     setLeads(initialLeads);
   }, [initialLeads]);
   
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount * 10000000);
+  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount * 100000); // Assuming deal value is in lacs
   const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
 
   const getLatestRemark = (lead: MomentumDealerLead) => {
@@ -152,7 +154,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
 
 
   return (
-    <>
+    <TooltipProvider>
         <PageHeader title="All Leads">
             <div className="flex items-center gap-2">
                  <BulkLeadUploadDialog />
@@ -281,7 +283,7 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                             </TableHeader>
                             <TableBody>
                             {paginatedLeads.map((lead) => (
-                                <TableRow key={lead.id}>
+                                <TableRow key={lead.id} onClick={() => router.push(`/leads/${lead.id}`)} className="cursor-pointer">
                                 <TableCell className="font-medium">
                                     <TooltipProvider>
                                         <Tooltip>
@@ -341,6 +343,6 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                 </CardContent>
             </Card>
         </div>
-    </>
+    </TooltipProvider>
   );
 }
