@@ -7,6 +7,7 @@ import { Parser } from "json2csv";
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 const db = admin.firestore();
+db.settings({ databaseId: "live" });
 
 // Nodemailer transporter setup, configured inside the function
 // to use environment variables populated from secrets.

@@ -31,14 +31,14 @@ function initializeAppSafely(config: object, appName: string): FirebaseApp {
 }
 
 const app1: FirebaseApp = initializeAppSafely(firebaseConfig1, 'app1');
-const db1: Firestore = getFirestore(app1);
+const db1: Firestore = getFirestore(app1, "live");
 
 let app2: FirebaseApp;
 let db2: Firestore;
 
 if (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_2) {
     app2 = initializeAppSafely(firebaseConfig2, 'app2');
-    db2 = getFirestore(app2);
+    db2 = getFirestore(app2, "live");
 } else {
     // If the second project is not configured, we can point db2 to db1
     // or handle it as an unconfigured service.
