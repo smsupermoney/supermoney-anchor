@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,8 +6,8 @@ import StatusBadge from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Ban, Loader2, Edit, Save, X, IndianRupee } from "lucide-react";
-import type { Dealer } from "@/types";
+import { Ban, Loader2, Edit, Save, X, IndianRupee, ShieldCheck, ExternalLink } from "lucide-react";
+import type { Dealer, PsbxLimitData, Program } from "@/types";
 import { stopSupplyAction } from "@/app/dashboard/stop-supply-action";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "./ui/badge";
@@ -16,6 +15,9 @@ import { Input } from "./ui/input";
 import { updateDealerDetails } from "@/app/retailers/actions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Label } from "./ui/label";
+import { fetchPsbxLimit } from "@/app/retailers/psbx-actions";
+import { db1 } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 type DealerDetailDialogProps = {
   dealer: Dealer;
@@ -39,6 +41,10 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [psbxData, setPsbxData] = useState<PsbxLimitData | null>(null);
+  const [isPsbxLoading, setIsPsbxLoading] = useState(false);
+  const [psbxError, setPsbxError] = useState<string | null>(null);
+  
   const { toast } = useToast();
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
@@ -57,7 +63,6 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
         title: "Action Successful",
         description: result.message,
       });
-      // Update local state to reflect the change immediately
       const newStatus = 'Supply Stopped';
       setCurrentDealer(prev => ({...prev, status: newStatus}));
       setEditValues(prev => ({...prev, status: newStatus}));
@@ -67,7 +72,6 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
   
   const handleSave = async () => {
       setIsSaving(true);
-
       const payload = {
         dealerId: currentDealer.id,
         totalLimit: Number(editValues.totalLimit),
@@ -78,12 +82,10 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
       };
       
       const result = await updateDealerDetails(payload);
-
       if (result.error) {
             toast({ variant: 'destructive', title: 'Update Failed', description: result.error });
         } else {
             toast({ title: 'Success', description: result.message });
-            // Update local state with the new values
             setCurrentDealer(prev => ({ 
                 ...prev,
                 totalLimit: payload.totalLimit,
@@ -91,7 +93,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                 overdueAmount: payload.principalOverdue,
                 principalDPD: payload.principalDPD,
                 status: payload.status,
-                availableLimit: payload.totalLimit - payload.utilisationAmount, // Recalculate available limit
+                availableLimit: payload.totalLimit - payload.utilisationAmount,
              }));
             setIsEditing(false);
         }
@@ -113,12 +115,39 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
           status: dealer.status,
       });
       setIsEditing(false);
+      setPsbxData(null);
+      setPsbxError(null);
+      
+      const checkAndFetchPsbx = async () => {
+          if (!dealer.programId) return;
+          
+          try {
+              const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
+              const programData = programDoc.data() as Program | undefined;
+              
+              // Enable for PROG011 by default or if toggle is on
+              if (dealer.programId === 'PROG011' || programData?.psbxEnabled) {
+                  setIsPsbxLoading(true);
+                  const psbxResult = await fetchPsbxLimit(dealer.applicationId);
+                  if (psbxResult.data) {
+                      setPsbxData(psbxResult.data);
+                  } else {
+                      setPsbxError(psbxResult.error || "Failed to load PSBX details.");
+                  }
+                  setIsPsbxLoading(false);
+              }
+          } catch (e) {
+              console.error("Error checking program for PSBX:", e);
+          }
+      };
+
+      checkAndFetchPsbx();
     }
   }, [open, dealer]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center pr-10">
             <span>{currentDealer.name}</span>
@@ -143,7 +172,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
         </DialogHeader>
         <div className="space-y-4">
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-row items-center justify-between py-4">
                     <CardTitle className="text-base">Financial Summary</CardTitle>
                     {!isEditing && (
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsEditing(true)}>
@@ -208,7 +237,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                 </CardContent>
             </Card>
              <Card>
-                <CardHeader>
+                <CardHeader className="py-4">
                     <CardTitle className="text-base">Activity Summary</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -224,8 +253,71 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                      </div>
                 </CardContent>
             </Card>
+
+            {(isPsbxLoading || psbxData || psbxError) && (
+                <Card className="border-primary/20 bg-primary/5">
+                    <CardHeader className="flex flex-row items-center justify-between py-4">
+                        <CardTitle className="text-base flex items-center gap-2">
+                            <ShieldCheck className="h-5 w-5 text-primary" />
+                            PSBX Details
+                        </CardTitle>
+                        {isPsbxLoading && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                    </CardHeader>
+                    <CardContent>
+                        {psbxError ? (
+                            <p className="text-xs text-destructive bg-destructive/10 p-2 rounded">{psbxError}</p>
+                        ) : psbxData ? (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Sanctioned Limit</Label>
+                                        <p className="font-bold text-foreground">{formatCurrency(psbxData.sanctionedlimit)}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Utilized Limit</Label>
+                                        <p className="font-bold text-foreground">{formatCurrency(psbxData.utilizedlimit)}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Pipeline Limit</Label>
+                                        <p className="font-bold text-foreground">{formatCurrency(psbxData.pipelinelimit)}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Available Limit</Label>
+                                        <p className="font-bold text-primary">{formatCurrency(psbxData.availablelimit)}</p>
+                                    </div>
+                                    {psbxData.lmsstatus && (
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">PSBX LMS Status</Label>
+                                            <p className="font-bold">{psbxData.lmsstatus}</p>
+                                        </div>
+                                    )}
+                                    {psbxData.lmsnpastatus && (
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">PSBX LMS NPA Status</Label>
+                                            <p className={`font-bold ${psbxData.lmsnpastatus === 'No' ? 'text-green-600' : 'text-destructive'}`}>
+                                                {psbxData.lmsnpastatus}
+                                            </p>
+                                        </div>
+                                    )}
+                                     {psbxData.limitexpirydate && (
+                                        <div className="space-y-1 col-span-2">
+                                            <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-wider">Limit Expiry Date</Label>
+                                            <p className="font-bold">{psbxData.limitexpirydate}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {psbxData.psbchannelpartneridentifier && (
+                                    <div className="pt-2">
+                                         <p className="text-[10px] text-muted-foreground italic">ID: {psbxData.psbchannelpartneridentifier}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
+                    </CardContent>
+                </Card>
+            )}
         </div>
-        <DialogFooter>
+        <DialogFooter className="pt-2">
             <div className="flex justify-between w-full">
                 {currentDealer.overdueAmount > 0 ? (
                     currentDealer.status === 'Supply Stopped' ? (
