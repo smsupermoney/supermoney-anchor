@@ -56,9 +56,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [isDragging, setIsDragging] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
-  const [dealerNotFoundErrorOpen, setDealerNotFoundErrorOpen] = useState(false);
-  const [dealerOverdueErrorOpen, setDealerOverdueErrorOpen] = useState(false);
-  const [overdueErrorOpen, setOverdueErrorOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsentRequired, setIsConsentRequired] = useState(false);
   const { toast } = useToast();
@@ -67,9 +64,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     setUploadedFiles([]);
     setIsDragging(false);
     setIsSubmitting(false);
-    setDealerNotFoundErrorOpen(false);
-    setDealerOverdueErrorOpen(false);
-    setOverdueErrorOpen(false);
     setLimitErrorOpen(false);
   };
 
@@ -100,7 +94,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const applicationId = dealer?.applicationId;
       const customerId = dealer?.customerId;
       const availableLimit = dealer?.availableLimit;
-      setIsConsentRequired(dealer?.anchorId === "ANC008");
       
       setUploadedFiles(prev => prev.map((f, i) => 
         i === index ? { 
@@ -188,51 +181,22 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       return;
     }
 
-    // Check if any dealer was not found
-    const hasMissingDealer = uploadedFiles.some(f => !f.applicationId && !f.error);
-    if (hasMissingDealer) {
-        setDealerNotFoundErrorOpen(true);
-        return;
-    }
-
-    // Check if any dealer is overdue
-    const hasOverdueDealer = uploadedFiles.some(f => (f.overdueAmount ?? 0) > 0);
-    if (hasOverdueDealer) {
-        setDealerOverdueErrorOpen(true);
-        return;
-    }
-
-    // Check if disburse amount exceeds available limit
-    const hasLimitViolation = uploadedFiles.some(f => {
-        const disburse = Number(f.disburseAmount || 0);
-        const limit = f.availableLimit ?? 0;
-        return disburse > limit;
+    // Submission is now allowed in all cases, we just check for consent requirement
+    const anyConsentRequired = uploadedFiles.some(f => {
+        const dealer = dealers.find(d => d.applicationId === f.applicationId);
+        return dealer?.anchorId === "ANC008";
     });
 
-    if (hasLimitViolation) {
-        setLimitErrorOpen(true);
-        return;
-    }
-
-    if(isConsentRequired){
+    if (anyConsentRequired) {
+      setIsConsentRequired(true);
       setConsentOpen(true);
     } else {
-      handleSubmit()
+      setIsConsentRequired(false);
+      handleSubmit();
     }
-    
   }
 
   const handleSubmit = async () => {
-    if (uploadedFiles.length === 0) {
-      toast({ variant: "destructive", title: "No Files Uploaded", description: "Please upload at least one invoice document." });
-      return;
-    }
-
-    if (uploadedFiles.some(f => f.isLoading)) {
-      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the OCR to finish reading all documents." });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
@@ -367,10 +331,18 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                                           <p className="text-[10px] text-destructive mt-1 font-medium">Disbursement exceeds available limit.</p>
                                         )}
                                       </div>
+                                      
+                                      {!upFile.applicationId && (
+                                        <div className="mt-2 text-xs flex items-center gap-2 text-destructive font-medium border border-destructive/20 bg-destructive/10 p-2 rounded-md">
+                                          <AlertTriangle className="h-4 w-4" />
+                                          <span>Dealer Not Found</span>
+                                        </div>
+                                      )}
+
                                       {upFile.overdueAmount && upFile.overdueAmount > 0 && (
                                         <div className="mt-2 text-xs flex items-center gap-2 text-destructive font-medium border border-destructive/20 bg-destructive/10 p-2 rounded-md">
                                           <AlertTriangle className="h-4 w-4" />
-                                          <span>This dealer has an overdue amount of {formatCurrency(upFile.overdueAmount)}.</span>
+                                          <span>The Dealer is Overdue, kindly ask him to pay the Dues to Raise an Invoice</span>
                                         </div>
                                       )}
                                     </>
@@ -414,54 +386,12 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={dealerNotFoundErrorOpen} onOpenChange={setDealerNotFoundErrorOpen}>
-        <AlertDialogContent className="bg-background">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Dealer Not Found</AlertDialogTitle>
-            <AlertDialogDescription>
-              Dealer associated with the uploaded invoice could not be identified in the system. Please verify the GST information and try again.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={dealerOverdueErrorOpen} onOpenChange={setDealerOverdueErrorOpen}>
-        <AlertDialogContent className="bg-background">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Dealer Overdue</AlertDialogTitle>
-            <AlertDialogDescription>
-              The Dealer is Overdue, kindly ask him to pay the Dues to Raise an Invoice.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
         <AlertDialogContent className="bg-background">
           <AlertDialogHeader>
             <AlertDialogTitle>Limit Exceeded</AlertDialogTitle>
             <AlertDialogDescription>
               Kindly note the Disbursement request is greater than the Available limit. Click to edit the value or request the borrower to pay the additional amount
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={overdueErrorOpen} onOpenChange={setOverdueErrorOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Dealer Overdue</AlertDialogTitle>
-            <AlertDialogDescription>
-              The Dealer is Overdue, kindly ask him to pay the Dues to Raise an Invoice
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
