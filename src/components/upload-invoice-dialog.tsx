@@ -23,10 +23,11 @@ import { Button } from "@/components/ui/button";
 import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, AlertTriangle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "./ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { sendInvoiceEmail } from "@/app/add-invoice/email-actions";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import type { Dealer, InvoiceDocument, Program, PsbxLimitData } from "@/types";
 import { InvoiceConsentDialog } from "./invoice-consent-dialog";
 import { readInvoiceWithExternalApi } from "@/app/add-invoice/ocr-actions";
@@ -112,7 +113,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         i === index ? { 
             ...f, 
             extractedData: result, 
-            isLoading: !programId, // If we have a program, we might still be loading PSBX
+            isLoading: !programId,
             disburseAmount: result.amount.toString(), 
             overdueAmount: overdueAmount,
             availableLimit: availableLimit,
@@ -122,11 +123,11 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         } : f
       ));
 
-      // Check if PSBX validation is required
       if (programId && applicationId) {
           const programDoc = await getDoc(doc(db1, "programs", programId));
           const programData = programDoc.data() as Program | undefined;
 
+          // Specifically check for PROG011 or enabled PSBX
           if (programId === 'PROG011' || programData?.psbxEnabled) {
               const psbxResult = await fetchPsbxLimit(applicationId);
               setUploadedFiles(prev => prev.map((f, i) => 
@@ -141,7 +142,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           }
       }
 
-      // If not PSBX, finish loading
       setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: false } : f));
 
     } catch (error: any) {
@@ -242,7 +242,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         }
     }
 
-    // Submission logic
     const anyConsentRequired = uploadedFiles.some(f => {
         const dealer = dealers.find(d => d.applicationId === f.applicationId);
         return dealer?.anchorId === "ANC008";
@@ -312,7 +311,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           <DialogHeader>
             <DialogTitle>Raise Invoice with OCR</DialogTitle>
             <DialogDescription>
-              Upload invoice documents. The external OCR agent will automatically extract the details for you to review.
+              Upload invoice documents. Details will be automatically extracted for you to review.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
@@ -402,14 +401,12 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                                               />
                                           </div>
                                           
-                                          {/* Rule 4: Insufficient PSBX Limit Warning (Non-blocking) */}
                                           {insufficientPsbxLimit && (
                                             <p className="text-[10px] text-destructive mt-1 font-medium bg-destructive/10 p-1 rounded">
-                                                Repay old dues to get the invoice disbursed.
+                                                repay old dues to get the invoice disbursed
                                             </p>
                                           )}
                                           
-                                          {/* Standard Limit Exceeded Warning */}
                                           {!isPsbx && Number(upFile.disburseAmount || 0) > (upFile.availableLimit ?? 0) && (
                                             <p className="text-[10px] text-destructive mt-1 font-medium">Disbursement exceeds available limit.</p>
                                           )}
@@ -470,7 +467,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         </DialogContent>
       </Dialog>
 
-      {/* Standard Limit Exceeded Alert */}
       <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
         <AlertDialogContent className="bg-background">
           <AlertDialogHeader>
@@ -485,7 +481,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Rule 1: PSBX NPA Blocking Alert */}
       <AlertDialog open={psbxNpaErrorOpen} onOpenChange={setPsbxNpaErrorOpen}>
         <AlertDialogContent className="bg-background border-destructive/50">
           <AlertDialogHeader>
@@ -493,7 +488,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                 <AlertTriangle className="w-5 h-5"/> Submission Blocked
             </AlertDialogTitle>
             <AlertDialogDescription className="text-foreground font-medium">
-              Invoice can't be approved as customer is in NPA.
+              invoice can't be uploaded as customer is in npa.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -502,7 +497,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Rule 2: PSBX Limit Status Blocking Alert */}
       <AlertDialog open={psbxLimitStatusErrorOpen} onOpenChange={setPsbxLimitStatusErrorOpen}>
         <AlertDialogContent className="bg-background border-destructive/50">
           <AlertDialogHeader>
@@ -510,7 +504,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                 <AlertTriangle className="w-5 h-5"/> Submission Blocked
             </AlertDialogTitle>
             <AlertDialogDescription className="text-foreground font-medium">
-              Invoice can't be approved as customer limit is not approved.
+              invoice can't be uploaded as customer limit is not approved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -519,7 +513,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Rule 3: PSBX Status Blocking Alert */}
       <AlertDialog open={psbxStatusErrorOpen} onOpenChange={setPsbxStatusErrorOpen}>
         <AlertDialogContent className="bg-background border-destructive/50">
           <AlertDialogHeader>
