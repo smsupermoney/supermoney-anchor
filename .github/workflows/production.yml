@@ -1,0 +1,42 @@
+name: Sync GitHub to GitLab
+
+on:
+  push:
+    branches: ["live"]
+
+jobs:
+  sync:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout GitHub Repo
+        uses: actions/checkout@v4
+
+      - name: Clone GitLab Repo (live branch)
+        run: |
+          cd /home/github-runner/actions-runner/_work
+
+          if [ ! -d "supermoney-borrower-web/.git" ]; then
+            git clone git@gitlab.mintwalk.com:ritik/supermoney-anchor-web.git -b live
+          else
+            echo "GitLab repo already exists"
+          fi
+
+      - name: Rsync GitHub source to GitLab working directory
+        run: |
+          rsync -av --delete \
+            --exclude='.git' \
+            ./ /home/github-runner/actions-runner/_work/supermoney-anchor-web/
+
+      - name: Commit and Push to GitLab
+        run: |
+          cd /home/github-runner/actions-runner/_work/supermoney-anchor-web
+
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@mintwalk.com"
+
+          git status
+          git add .
+          git commit -m "Sync from GitHub (live)" || echo "No changes to commit"
+
+          git push origin live --force
