@@ -14,7 +14,7 @@ jobs:
 
       - name: Clone GitLab Repo (live branch)
         run: |
-          cd /home/github-runner/actions-runner/_work
+          cd /home/github-runner/anchor-actions-runner/anchor
 
           if [ ! -d "supermoney-borrower-web/.git" ]; then
             git clone git@gitlab.mintwalk.com:ritik/supermoney-anchor-web.git -b live
@@ -26,11 +26,11 @@ jobs:
         run: |
           rsync -av --delete \
             --exclude='.git' \
-            ./ /home/github-runner/actions-runner/_work/supermoney-anchor-web/
+            ./ /home/github-runner/anchor-actions-runner/anchor/supermoney-anchor-web/
 
       - name: Commit and Push to GitLab
         run: |
-          cd /home/github-runner/actions-runner/_work/supermoney-anchor-web
+          cd /home/github-runner/anchor-actions-runner/anchor/supermoney-anchor-web
 
           git config user.name "GitHub Actions"
           git config user.email "github-actions@mintwalk.com"
