@@ -66,6 +66,7 @@ export type Program = {
   pendingInvoicesCount?: number;
   disbursedInvoicesCount?: number;
   initiatedInvoicesCount?: number;
+  psbxEnabled?: boolean;
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
@@ -286,4 +287,19 @@ export type InvoiceConsent = {
   expiryTime: string; // ISO string
   consentTimestamp?: string;
   ipAddress?: string;
+};
+
+export type PsbxLimitData = {
+    psbchannelpartneridentifier?: string;
+    sanctionedlimit: number;
+    utilizedlimit: number;
+    pipelinelimit: number;
+    availablelimit: number;
+    psbanchorname?: string;
+    lmslimitstatus?: string;
+    lmsnpastatus?: string;
+    limitexpirydate?: string;
+    sanctiondate?: string;
+    psbprogramname?: string;
+    lmsstatus?: string;
 };

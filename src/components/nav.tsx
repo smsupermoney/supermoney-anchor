@@ -18,6 +18,7 @@ export const enterpriseAnchorNavigationLinks = [
 
 export const adminNavigationLinks = [
   { href: '/add-program', label: 'Add Program', icon: PlusCircle },
+  { href: '/psbx', label: 'PSBX', icon: ShieldCheck },
   { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
   { href: '/add-invoice', label: 'Add Invoice', icon: PlusCircle },
   { href: '/add-dealer-limit', label: 'Add Upcoming Payments', icon: PlusCircle },
