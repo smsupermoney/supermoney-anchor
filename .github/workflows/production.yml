@@ -14,21 +14,27 @@ jobs:
 
       - name: Prepare GitLab Repo
         run: |
-          cd /home/github-runner/anchor-actions-runner/anchor
+          BASE_DIR="/home/github-runner/anchor-actions-runner/anchor"
+          REPO_DIR="$BASE_DIR/supermoney-anchor-web"
 
-          # Clone if not exists
-          if [ ! -d "supermoney-crm-web/.git" ]; then
-            git clone git@gitlab.mintwalk.com:ritik/supermoney-anchor-web.git -b live
+          mkdir -p $BASE_DIR
+          cd $BASE_DIR
+
+          # Clone only if not exists
+          if [ ! -d "$REPO_DIR/.git" ]; then
+            echo "Cloning GitLab repo..."
+            rm -rf $REPO_DIR
+            git clone -b live git@gitlab.mintwalk.com:ritik/supermoney-anchor-web.git
           fi
 
-          cd supermoney-anchor-web
+          cd $REPO_DIR
 
-          # Ensure clean state every time
+          # Always reset to clean state
           git fetch origin
           git reset --hard origin/live
           git clean -fd
 
-      - name: Sync GitHub source to GitLab working directory
+      - name: Sync GitHub code to GitLab repo
         run: |
           rsync -av --delete \
             --exclude='.git' \
@@ -42,6 +48,11 @@ jobs:
           git config user.email "github-actions@mintwalk.com"
 
           git add .
-          git commit -m "Sync from GitHub (live)" || echo "No changes to commit"
 
-          git push origin live --force
+          # Commit only if changes exist
+          if ! git diff --cached --quiet; then
+            git commit -m "Sync from GitHub (live)"
+            git push origin live --force
+          else
+            echo "No changes to commit"
+          fi
