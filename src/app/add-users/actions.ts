@@ -1,7 +1,7 @@
 
 "use server";
 
-import bcrypt from "bcryptjs";
+import { hash } from "bcryptjs";
 import { requireAdmin } from "@/lib/auth";
 import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
@@ -40,7 +40,7 @@ export async function addUsersFromJson(jsonString: string): Promise<ActionResult
       const userData = { ...user };
 
       const rawPassword = userData.password || 'password';
-      userData.password = await bcrypt.hash(rawPassword, 12);
+      userData.password = await hash(rawPassword, 12);
       userData.lastLoginIp = user.lastLoginIp || '';
       userData.lastLoginTime = user.lastLoginTime || '';
       userData.authToken = user.authToken || '';
