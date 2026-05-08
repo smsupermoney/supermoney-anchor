@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/auth";
 import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc, getDocs, query } from "firebase/firestore";
 import * as xlsx from 'xlsx';
@@ -13,6 +14,9 @@ type ActionResult = {
 const gstRegex = /^[a-zA-Z0-9]{15}$/;
 
 export async function addDealers(formData: FormData): Promise<ActionResult> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   const file = formData.get('excel-file') as File;
   if (!file) {
     return { error: "No file uploaded." };

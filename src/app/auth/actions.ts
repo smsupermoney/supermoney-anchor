@@ -1,6 +1,7 @@
 
 'use server';
 
+import bcrypt from "bcryptjs";
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getUserByEmail, clearUserAuthToken } from '@/lib/data';
@@ -8,7 +9,7 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/lib/session';
 import { cookies } from 'next/headers';
 import type { User, UserRole } from '@/types';
-import { collection, getDocs, query, where, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
 import { db1 } from '@/lib/firebase';
 
 export async function authenticate(
@@ -32,7 +33,19 @@ export async function authenticate(
       return 'Invalid email or password.';
     }
 
-    const passwordsMatch = password === user.password;
+    const isBcryptHash = user.password?.startsWith('$2a$') || user.password?.startsWith('$2b$') || user.password?.startsWith('$2y$');
+
+    let passwordsMatch = false;
+    if (isBcryptHash) {
+      passwordsMatch = await bcrypt.compare(password, user.password!);
+    } else {
+      passwordsMatch = password === user.password;
+      if (passwordsMatch) {
+        // Transparent migration: re-hash legacy plaintext password
+        const hashed = await bcrypt.hash(password, 12);
+        await updateDoc(doc(db1, 'users', user.id), { password: hashed });
+      }
+    }
 
     if (!passwordsMatch) {
         return 'Invalid email or password.';
@@ -114,7 +127,8 @@ export async function resetPassword(input: ResetPasswordInput): Promise<{ messag
         }
 
         const userDoc = querySnapshot.docs[0];
-        await updateDoc(userDoc.ref, { password: newPassword });
+        const hashed = await bcrypt.hash(newPassword, 12);
+        await updateDoc(userDoc.ref, { password: hashed });
 
         return { message: 'Password has been reset successfully.' };
 

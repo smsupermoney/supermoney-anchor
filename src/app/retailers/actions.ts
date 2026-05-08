@@ -1,6 +1,7 @@
 
 "use server";
 
+import { requireAnchorOrAdmin } from "@/lib/auth";
 import { db1 } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
@@ -48,6 +49,11 @@ export async function updateDealerDetails(
   if (utilisationAmount > totalLimit) {
       return { error: 'Utilisation amount cannot be greater than the total limit.' };
   }
+
+  const dealerSnap = await getDoc(doc(db1, 'dealers', dealerId));
+  const dealerAnchorId = dealerSnap.exists() ? dealerSnap.data().anchorId : '';
+  const authError = await requireAnchorOrAdmin(dealerAnchorId);
+  if (authError) return authError;
 
   try {
     const limitRef = doc(db1, 'dealerLimits', dealerId);
