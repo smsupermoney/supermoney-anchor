@@ -4,21 +4,22 @@
 **Date:** 2026-05-08  
 **Branch:** enterprise  
 **Assessment Type:** Static Code Analysis  
+**Status:** Findings #1, #2, #3, #4 resolved. #5, #6, #7 remain open.  
 
 ---
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| Critical | 1 |
-| High     | 3 |
-| Medium   | 2 |
-| Low      | 1 |
+| Severity | Count | Resolved | Open |
+|----------|-------|----------|------|
+| Critical | 1 | 1 | 0 |
+| High     | 3 | 3 | 0 |
+| Medium   | 2 | 0 | 2 |
+| Low      | 1 | 0 | 1 |
 
 ---
 
-## Finding #1 — Plaintext Password Storage
+## Finding #1 — Plaintext Password Storage ✅ RESOLVED
 
 * **Severity:** Critical
 * **Category:** `credential_storage`
@@ -38,7 +39,7 @@ Hash all passwords using bcrypt or argon2 before storage. Update `authenticate` 
 
 ---
 
-## Finding #2 — Missing Authorization on User Creation/Overwrite
+## Finding #2 — Missing Authorization on User Creation/Overwrite ✅ RESOLVED
 
 * **Severity:** High
 * **Category:** `authorization_bypass`
@@ -62,7 +63,7 @@ if (!session || session.roleType !== 'Admin') {
 
 ---
 
-## Finding #3 — Missing Authorization on Bulk Data Operations
+## Finding #3 — Missing Authorization on Bulk Data Operations ✅ RESOLVED
 
 * **Severity:** High
 * **Category:** `authorization_bypass`
@@ -98,7 +99,7 @@ if (!session || session.roleType !== 'Admin') {
 
 ---
 
-## Finding #4 — Missing Authorization on Dealer Detail Updates
+## Finding #4 — Missing Authorization on Dealer Detail Updates ✅ RESOLVED
 
 * **Severity:** High
 * **Category:** `authorization_bypass`
