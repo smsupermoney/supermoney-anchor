@@ -29,20 +29,21 @@ export async function uploadRegionMappings(formData: FormData): Promise<ActionRe
       const batch = writeBatch(db1);
 
       chunk.forEach((row) => {
-        const id = `${row.city}-${row.state}`.toLowerCase().replace(/\s+/g, '-');
-        const ref = doc(db1, "regionMapping", id);
-        batch.set(ref, {
-          city: row.city,
-          state: row.state,
-          region: row.region
-        });
-        successCount++;
+        if (row.state && row.region) {
+          const id = row.state.toString().toLowerCase().replace(/\s+/g, '-');
+          const ref = doc(db1, "regionMapping", id);
+          batch.set(ref, {
+            state: row.state.toString(),
+            region: row.region.toString()
+          });
+          successCount++;
+        }
       });
 
       await batch.commit();
     }
 
-    return { message: `${successCount} mappings uploaded successfully.` };
+    return { message: `${successCount} state-to-region mappings uploaded successfully.` };
   } catch (e: any) {
     return { error: e.message };
   }

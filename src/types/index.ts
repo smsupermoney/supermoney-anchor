@@ -308,7 +308,6 @@ export type PsbxLimitData = {
 
 export type RegionMapping = {
     id?: string;
-    city: string;
     state: string;
     region: string;
 };
