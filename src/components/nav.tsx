@@ -29,6 +29,7 @@ export const adminNavigationLinks = [
   { href: '/update-email', label: 'Update Dealer Email', icon: Mail },
   { href: '/region-mapping', label: 'Region Mapping', icon: MapPinned },
   { href: '/update-smartdash-company', label: 'Smartdash Company', icon: Building2 },
+  { href: '/update-smartdash-lender', label: 'Smartdash Lender', icon: Link2 },
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/dealers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
@@ -43,7 +44,8 @@ export const superMoneyUserNavigationLinks = adminNavigationLinks.filter(
   link => ![
     '/add-anchor', 
     '/view-users',
-    '/update-smartdash-company'
+    '/update-smartdash-company',
+    '/update-smartdash-lender'
   ].includes(link.href)
 );
 
