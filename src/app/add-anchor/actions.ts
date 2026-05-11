@@ -1,6 +1,6 @@
 "use server";
 
-import { hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { db1 } from "@/lib/firebase";
 import { collection, addDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
 import { z } from "zod";
@@ -32,7 +32,7 @@ export async function addUser(data: UserFormValues): Promise<ActionResult> {
   }
 
   const { password, ...rest } = validatedFields.data;
-  const hashed = await hash(password, 12);
+  const hashed = await bcrypt.hash(password, 12);
   const userData = {
     ...rest,
     password: hashed,

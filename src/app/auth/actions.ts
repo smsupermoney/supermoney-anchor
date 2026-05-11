@@ -1,7 +1,7 @@
 
 'use server';
 
-import { hash, compare } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getUserByEmail, clearUserAuthToken } from '@/lib/data';
@@ -37,12 +37,12 @@ export async function authenticate(
 
     let passwordsMatch = false;
     if (isBcryptHash) {
-      passwordsMatch = await compare(password, user.password!);
+      passwordsMatch = await bcrypt.compare(password, user.password!);
     } else {
       passwordsMatch = password === user.password;
       if (passwordsMatch) {
         // Transparent migration: re-hash legacy plaintext password
-        const hashed = await hash(password, 12);
+        const hashed = await bcrypt.hash(password, 12);
         await updateDoc(doc(db1, 'users', user.id), { password: hashed });
       }
     }
@@ -127,7 +127,7 @@ export async function resetPassword(input: ResetPasswordInput): Promise<{ messag
         }
 
         const userDoc = querySnapshot.docs[0];
-        const hashed = await hash(newPassword, 12);
+        const hashed = await bcrypt.hash(newPassword, 12);
         await updateDoc(userDoc.ref, { password: hashed });
 
         return { message: 'Password has been reset successfully.' };
