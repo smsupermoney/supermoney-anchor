@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -38,6 +37,7 @@ const formSchema = z.object({
   roleType: z.enum(["Anchor", "SuperMoney User"]),
   userSubRole: z.string().optional(),
   region: z.string().optional(),
+  SmartdashCompanyName: z.string().optional(),
 });
 
 type UserFormValues = z.infer<typeof formSchema>;
@@ -57,6 +57,7 @@ export default function AddUserForm() {
       password: "",
       roleType: "Anchor",
       region: "",
+      SmartdashCompanyName: "",
     },
   });
 
@@ -108,6 +109,20 @@ export default function AddUserForm() {
                     <Input placeholder="e.g., ANC001" {...field} />
                 </FormControl>
                 <FormDescription>A unique identifier for this user (e.g., Anchor ID, Dealer ID).</FormDescription>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+             <FormField
+            control={form.control}
+            name="SmartdashCompanyName"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Smartdash Company Name</FormLabel>
+                <FormControl>
+                    <Input placeholder="Internal company identifier" {...field} />
+                </FormControl>
+                <FormDescription>Will be updated for all users sharing this External ID.</FormDescription>
                 <FormMessage />
                 </FormItem>
             )}
@@ -215,7 +230,6 @@ export default function AddUserForm() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
-            </Alert>
         )}
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>

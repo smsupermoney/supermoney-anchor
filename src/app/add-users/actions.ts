@@ -1,6 +1,8 @@
 
 "use server";
 
+import { hash } from "bcryptjs";
+import { requireAdmin } from "@/lib/auth";
 import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
 import type { User } from "@/types";
@@ -23,26 +25,29 @@ export async function addUsersFromJson(jsonString: string): Promise<ActionResult
     return { error: "The JSON must be an array of user objects and cannot be empty." };
   }
 
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   try {
     const batch = writeBatch(db1);
 
-    usersArray.forEach((user) => {
+    for (const user of usersArray) {
       if (!user.id) {
         throw new Error("Each user object in the JSON must have an 'id' field.");
       }
       const docRef = doc(db1, "users", user.id);
-      
+
       const userData = { ...user };
-      
-      // Ensure fields that are populated on login are not set or are empty
-      if (userData.password === undefined) userData.password = 'password'; // Default password if not set
+
+      const rawPassword = userData.password || 'password';
+      userData.password = await hash(rawPassword, 12);
       userData.lastLoginIp = user.lastLoginIp || '';
       userData.lastLoginTime = user.lastLoginTime || '';
       userData.authToken = user.authToken || '';
       userData.expiryTime = user.expiryTime || 0;
-      
+
       batch.set(docRef, userData);
-    });
+    }
     
     await batch.commit();
 

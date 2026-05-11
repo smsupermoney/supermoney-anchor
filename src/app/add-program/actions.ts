@@ -1,6 +1,6 @@
-
 "use server";
 
+import { requireAdmin } from "@/lib/auth";
 import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc, getDocs } from "firebase/firestore";
 import * as xlsx from 'xlsx';
@@ -11,6 +11,9 @@ type ActionResult = {
 };
 
 export async function addPrograms(formData: FormData): Promise<ActionResult> {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   const file = formData.get('excel-file') as File;
   if (!file) {
     return { error: "No file uploaded." };
@@ -46,12 +49,16 @@ export async function addPrograms(formData: FormData): Promise<ActionResult> {
         }
 
         const docRef = doc(db1, "programs", programId);
-        const programData = {
+        const programData: any = {
           programId: programId,
           lenderName: program.lenderName || '',
           shortName: program.shortName || '',
           lenderType: program.lenderType || '',
         };
+        
+        if (program.SmartdashLender) {
+            programData.SmartdashLender = program.SmartdashLender;
+        }
         
         if (existingProgramIds.has(programId)) {
             batch.update(docRef, programData);

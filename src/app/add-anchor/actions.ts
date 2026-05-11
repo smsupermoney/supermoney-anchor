@@ -1,8 +1,8 @@
-
 "use server";
 
+import { hash } from "bcryptjs";
 import { db1 } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
 import { z } from "zod";
 
 type ActionResult = {
@@ -19,6 +19,7 @@ const formSchema = z.object({
   roleType: z.enum(["Anchor", "SuperMoney User"]),
   userSubRole: z.string().optional(),
   region: z.string().optional(),
+  SmartdashCompanyName: z.string().optional(),
 });
 
 type UserFormValues = z.infer<typeof formSchema>;
@@ -30,8 +31,11 @@ export async function addUser(data: UserFormValues): Promise<ActionResult> {
     return { error: "Invalid data provided. Please check the form." };
   }
 
+  const { password, ...rest } = validatedFields.data;
+  const hashed = await hash(password, 12);
   const userData = {
-    ...validatedFields.data,
+    ...rest,
+    password: hashed,
     lastLoginTime: '',
     lastLoginIp: '',
     authToken: '',
@@ -39,9 +43,26 @@ export async function addUser(data: UserFormValues): Promise<ActionResult> {
   };
 
   try {
+    // 1. Add the new user
     const docRef = await addDoc(collection(db1, "users"), userData);
     console.log("Document written with ID: ", docRef.id);
-    return { message: `User "${userData.userName}" added successfully.` };
+
+    // 2. Propagate SmartdashCompanyName if provided
+    if (userData.SmartdashCompanyName && userData.externalId) {
+        const usersRef = collection(db1, "users");
+        const q = query(usersRef, where("externalId", "==", userData.externalId));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+            const batch = writeBatch(db1);
+            snapshot.forEach((doc) => {
+                batch.update(doc.ref, { SmartdashCompanyName: userData.SmartdashCompanyName });
+            });
+            await batch.commit();
+        }
+    }
+
+    return { message: `User "${userData.userName}" added successfully and company name synced.` };
   } catch (error) {
     console.error("Error writing to Firestore:", error);
     if (error instanceof Error) {

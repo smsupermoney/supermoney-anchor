@@ -67,6 +67,7 @@ export type Program = {
   disbursedInvoicesCount?: number;
   initiatedInvoicesCount?: number;
   psbxEnabled?: boolean;
+  SmartdashLender?: string;
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
@@ -116,6 +117,7 @@ export type User = {
     leadExternalId?: string;
     logoImage? : string;
     region?: string;
+    SmartdashCompanyName?: string;
     originalUser?: {
         id: string;
         userName: string;
@@ -302,4 +304,10 @@ export type PsbxLimitData = {
     sanctiondate?: string;
     psbprogramname?: string;
     lmsstatus?: string;
+};
+
+export type RegionMapping = {
+    id?: string;
+    state: string;
+    region: string;
 };

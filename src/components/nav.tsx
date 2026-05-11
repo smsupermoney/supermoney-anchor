@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe, Map, CalendarClock, Mail } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, PlusCircle, Library, ShieldCheck, Link2, UserPlus, Settings, FileBarChart, HandCoins, Building, CheckSquare, Eye, MapPin, BadgePercent, UserCheck, IndianRupee, FileUp, Globe, Map, CalendarClock, Mail, MapPinned, Building2 } from 'lucide-react';
 import type { UserSubRole } from '@/types';
 
 export const anchorNavigationLinks = [
@@ -17,7 +17,7 @@ export const enterpriseAnchorNavigationLinks = [
 ];
 
 export const adminNavigationLinks = [
-  { href: '/add-program', label: 'Add Program', icon: PlusCircle },
+  { href: '/add-program', label: 'PSBX Program', icon: PlusCircle },
   { href: '/psbx', label: 'PSBX', icon: ShieldCheck },
   { href: '/add-dealer', label: 'Add Dealer', icon: PlusCircle },
   { href: '/add-invoice', label: 'Add Invoice', icon: PlusCircle },
@@ -27,6 +27,9 @@ export const adminNavigationLinks = [
   { href: '/update-gst', label: 'Update Dealer GST', icon: FileUp },
   { href: '/update-region', label: 'Update Dealer Region', icon: Map },
   { href: '/update-email', label: 'Update Dealer Email', icon: Mail },
+  { href: '/region-mapping', label: 'Region Mapping', icon: MapPinned },
+  { href: '/update-smartdash-company', label: 'Smartdash Company', icon: Building2 },
+  { href: '/update-smartdash-lender', label: 'Smartdash Lender', icon: Link2 },
   { href: '/programs', label: 'View Programs', icon: Library },
   { href: '/dealers', label: 'View Dealers', icon: Users },
   { href: '/invoices', label: 'View Invoices', icon: FileText },
@@ -40,7 +43,9 @@ export const adminNavigationLinks = [
 export const superMoneyUserNavigationLinks = adminNavigationLinks.filter(
   link => ![
     '/add-anchor', 
-    '/view-users'
+    '/view-users',
+    '/update-smartdash-company',
+    '/update-smartdash-lender'
   ].includes(link.href)
 );
 
