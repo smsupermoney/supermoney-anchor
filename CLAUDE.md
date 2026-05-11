@@ -18,11 +18,6 @@ npm run genkit:dev   # Genkit dev UI + AI flows
 npm run deploy       # Deploy Cloud Functions (firebase deploy --only functions)
 ```
 
-## Architecture Diagram
-
-The full architecture diagram is in [`docs/architecture.md`](docs/architecture.md) — Mermaid format, renders on GitHub.
-**When making architecture-level changes** (new services, data stores, auth flows, external integrations, new Cloud Functions), update `docs/architecture.md` to keep the diagram current.
-
 ## Two-Firestore Architecture
 
 The app connects to **two separate Firebase projects**, initialized in `src/lib/firebase.ts`:

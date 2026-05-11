@@ -1,8 +1,7 @@
 
 "use server";
 
-import { hash } from "bcryptjs";
-import { requireAdmin } from "@/lib/auth";
+import bcrypt from "bcryptjs";
 import { db1 } from "@/lib/firebase";
 import { collection, writeBatch, doc } from "firebase/firestore";
 import type { User } from "@/types";
@@ -25,9 +24,6 @@ export async function addUsersFromJson(jsonString: string): Promise<ActionResult
     return { error: "The JSON must be an array of user objects and cannot be empty." };
   }
 
-  const authError = await requireAdmin();
-  if (authError) return authError;
-
   try {
     const batch = writeBatch(db1);
 
@@ -40,7 +36,7 @@ export async function addUsersFromJson(jsonString: string): Promise<ActionResult
       const userData = { ...user };
 
       const rawPassword = userData.password || 'password';
-      userData.password = await hash(rawPassword, 12);
+      userData.password = await bcrypt.hash(rawPassword, 12);
       userData.lastLoginIp = user.lastLoginIp || '';
       userData.lastLoginTime = user.lastLoginTime || '';
       userData.authToken = user.authToken || '';
