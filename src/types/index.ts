@@ -136,6 +136,10 @@ export type DealerLimit = {
   availableAmount: number;
   principalOverdue: number;
   principalDPD?: number;
+  interestOutstanding?: number;
+  penalOutstanding?: number;
+  limitLiveDate?: string;
+  limitExpiryDate?: string;
 };
 
 // --- Dealer Onboarding Module Types ---

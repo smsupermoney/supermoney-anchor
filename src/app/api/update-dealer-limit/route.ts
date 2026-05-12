@@ -1,8 +1,7 @@
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db1 } from '@/lib/firebase';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, writeBatch } from 'firebase/firestore';
 
 // Define the schema for the incoming request body
 const updateLimitSchema = z.object({
@@ -12,6 +11,11 @@ const updateLimitSchema = z.object({
   utilisationAmount: z.number().nonnegative('utilisationAmount must be a non-negative number.'),
   availableAmount: z.number().nonnegative('availableAmount must be a non-negative number.'),
   principalDPD: z.number().nonnegative('principalDPD must be a non-negative number.').optional(),
+  interestOutstanding: z.number().nonnegative().optional(),
+  penalOutstanding: z.number().nonnegative().optional(),
+  limitLiveDate: z.string().optional(),
+  limitExpiryDate: z.string().optional(),
+  status: z.enum(['Active', 'Inactive', 'Pending', 'Supply Stopped']).optional(),
 });
 
 export async function POST(request: Request) {
@@ -41,27 +45,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.', details: validated.error.flatten() }, { status: 400 });
   }
 
-  const { dealerId, ...updateData } = validated.data;
+  const { dealerId, status, ...updateData } = validated.data;
 
-  // 3. Update the document in Firestore
+  // 3. Update the documents in Firestore
   try {
+    const batch = writeBatch(db1);
     const dealerLimitRef = doc(db1, 'dealerLimits', dealerId);
     
     // Check if the document exists before trying to update
     const docSnap = await getDoc(dealerLimitRef);
     
     if (docSnap.exists()) {
-        await updateDoc(dealerLimitRef, updateData);
-        return NextResponse.json({ message: `Successfully updated limits for dealer ${dealerId}.` }, { status: 200 });
+        batch.update(dealerLimitRef, updateData);
     } else {
         // If the dealer doesn't exist in dealerLimits, we can create it.
-        await setDoc(dealerLimitRef, updateData);
-        return NextResponse.json({ message: `Successfully created limits for new dealer ${dealerId}.` }, { status: 201 });
+        batch.set(dealerLimitRef, { ...updateData, dealerId });
     }
+
+    // If status is provided, update the dealers collection
+    if (status) {
+        const dealerRef = doc(db1, 'dealers', dealerId);
+        batch.update(dealerRef, { status });
+    }
+
+    await batch.commit();
+    
+    return NextResponse.json({ 
+        message: `Successfully updated ${status ? 'limits and status' : 'limits'} for dealer ${dealerId}.` 
+    }, { status: 200 });
 
   } catch (error) {
     console.error(`Firestore error for dealerId ${dealerId}:`, error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown server error occurred.';
-    return NextResponse.json({ error: 'Failed to update dealer limits.', details: errorMessage }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update dealer data.', details: errorMessage }, { status: 500 });
   }
 }
