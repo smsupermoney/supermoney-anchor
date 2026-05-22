@@ -196,6 +196,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         const dealerData = initialDealers.map(d => ({
             "Dealer ID": d.id,
             "Dealer Name": d.name,
+            "Lender Name": d.lenderName || 'N/A',
             "Status": d.status,
             "Total Limit": d.totalLimit,
             "Amount Disbursed": d.amountDisbursed,
