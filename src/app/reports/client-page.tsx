@@ -214,8 +214,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
             "Used Limit": p.usedLimit,
             "Total Dealers": p.totalDealers,
         }));
-        const programSheet = xlsx.utils.json_to_sheet(programData);
-        xlsx.utils.book_append_sheet(workbook, programSheet, "All Programs");
+        const programSheet = xlsx.utils.book_append_sheet(workbook, programSheet, "All Programs");
 
         // Sheet 5: All Leads
         const leadData = initialLeads.map(l => ({
