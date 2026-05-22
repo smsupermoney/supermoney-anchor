@@ -1,6 +1,6 @@
 re
 # Supermoney Anchor Platform - Supply Chain Finance
-
+test
 This project is a comprehensive, enterprise-grade web application designed to manage the complexities of supply chain financing. Built with a modern technology stack, it serves as a central hub for "Anchors" (large corporations), their "Dealers" (retailers/suppliers), and internal administrative users to manage financing programs, invoices, and a complete dealer onboarding workflow.
 
 The platform is designed to be highly modular and role-driven, providing tailored experiences and functionalities based on user roles and sub-roles.
