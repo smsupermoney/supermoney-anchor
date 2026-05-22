@@ -5,7 +5,7 @@ This project is a comprehensive, enterprise-grade web application designed to ma
 
 The platform is designed to be highly modular and role-driven, providing tailored experiences and functionalities based on user roles and sub-roles.
 
-## Key Features
+## Key Featureste
 
 ### 1. Multi-Faceted Dashboards
 - **Anchor Dashboard**: Provides a high-level overview of credit utilization, overdue amounts, recent invoice activity, and program performance. Includes quick actions and an AI assistant for natural language queries.
