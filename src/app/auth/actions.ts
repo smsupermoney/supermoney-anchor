@@ -51,7 +51,7 @@ export async function authenticate(
         return 'Invalid email or password.';
     }
     
-    const session = await getIronSession<User>(cookies(), sessionOptions);
+    const session = await getIronSession<User>(await cookies(), sessionOptions);
     session.id = user.id; 
     session.userName = user.userName;
     session.roleType = user.roleType;
@@ -91,7 +91,7 @@ export async function authenticate(
 }
 
 export async function logout() {
-  const session = await getIronSession<User>(cookies(), sessionOptions);
+  const session = await getIronSession<User>(await cookies(), sessionOptions);
   
   if (session.id) {
       await clearUserAuthToken(session.id);

@@ -6,7 +6,7 @@ import type { IronSessionOptions } from 'iron-session';
 import type { User } from '@/types';
 
 export const sessionOptions: IronSessionOptions = {
-  password: process.env.SECRET_COOKIE_PASSWORD as string,
+  password: process.env.SECRET_COOKIE_PASSWORD as string || 'complex_password_at_least_32_characters_long',
   cookieName: 'supermoney-anchor-session',
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',
@@ -14,7 +14,7 @@ export const sessionOptions: IronSessionOptions = {
 };
 
 export async function getSession(): Promise<User | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const encryptedSession = cookieStore.get(sessionOptions.cookieName)?.value;
 
   if (!encryptedSession) {

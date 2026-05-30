@@ -8,7 +8,7 @@ import type { User } from '@/types';
 import { redirect } from 'next/navigation';
 
 export async function setImpersonation(anchorData: { externalId: string, leadExternalId?: string, userName: string, logoImage?: string, region?: string }) {
-    const session = await getIronSession<User>(cookies(), sessionOptions);
+    const session = await getIronSession<User>(await cookies(), sessionOptions);
 
     if (!session.id || session.emailAddress !== 'biu@supermoney.in') {
         throw new Error('Unauthorized to perform this action.');
@@ -39,7 +39,7 @@ export async function setImpersonation(anchorData: { externalId: string, leadExt
 }
 
 export async function clearImpersonation() {
-    const session = await getIronSession<User>(cookies(), sessionOptions);
+    const session = await getIronSession<User>(await cookies(), sessionOptions);
 
     if (!session.id || !session.originalUser) {
         redirect(session.id ? '/dashboard' : '/');
