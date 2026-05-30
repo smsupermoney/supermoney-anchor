@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Dealer, InvoiceDocument, Program, PsbxLimitData } from "@/types";
 import { InvoiceConsentDialog } from "./invoice-consent-dialog";
-import { readInvoiceWithExternalApi } from "@/app/add-invoice/ocr-actions";
+import { extractInvoiceData } from "@/ai/flows/extract-invoice-data-flow";
 import { fetchPsbxLimit } from "@/app/retailers/psbx-actions";
 import { db1 } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -149,7 +149,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const handleAIExtraction = async (file: File, index: number) => {
     try {
       const documentDataUri = await fileToDataUri(file);
-      const result = await readInvoiceWithExternalApi(file.name, documentDataUri);
+      const result = await extractInvoiceData({ documentDataUri });
 
       const matchingDealers = dealers.filter(d => d.GST === result.gstOrGstin);
 
