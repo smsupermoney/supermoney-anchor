@@ -28,6 +28,7 @@ import { sendInvoiceEmail } from "@/app/add-invoice/email-actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Dealer, InvoiceDocument, Program, PsbxLimitData } from "@/types";
 import { InvoiceConsentDialog } from "./invoice-consent-dialog";
 import { readInvoiceWithExternalApi } from "@/app/add-invoice/ocr-actions";
@@ -54,6 +55,7 @@ type UploadedFile = {
   customerId?: string;
   psbxData?: PsbxLimitData;
   programId?: string;
+  matchingDealers?: Dealer[];
 };
 
 export default function UploadInvoiceDialog({ children, dealers }: UploadInvoiceDialogProps) {
@@ -97,52 +99,86 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     });
   };
 
+  const checkAndFetchPsbx = async (index: number, dealer: Dealer) => {
+    if (!dealer.programId || !dealer.applicationId) return;
+
+    try {
+      const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
+      const programData = programDoc.data() as Program | undefined;
+
+      // Specifically check for PROG011 or enabled PSBX
+      if (dealer.programId === 'PROG011' || programData?.psbxEnabled) {
+        setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: true } : f));
+        const psbxResult = await fetchPsbxLimit(dealer.applicationId);
+        setUploadedFiles(prev => prev.map((f, i) => 
+          i === index ? { 
+              ...f, 
+              psbxData: psbxResult.data,
+              isLoading: false,
+              error: psbxResult.error ? `PSBX Error: ${psbxResult.error}` : f.error
+          } : f
+        ));
+      } else {
+        setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: false } : f));
+      }
+    } catch (e) {
+      console.error("Error checking program for PSBX:", e);
+      setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: false } : f));
+    }
+  };
+
+  const handleDealerSelection = async (index: number, dealerId: string) => {
+    const dealer = dealers.find(d => d.id === dealerId);
+    if (!dealer) return;
+
+    setUploadedFiles(prev => prev.map((f, i) => 
+      i === index ? { 
+          ...f, 
+          applicationId: dealer.applicationId,
+          customerId: dealer.customerId,
+          availableLimit: dealer.availableLimit,
+          overdueAmount: dealer.overdueAmount,
+          programId: dealer.programId,
+          psbxData: undefined // Reset PSBX data until new check finishes
+      } : f
+    ));
+
+    await checkAndFetchPsbx(index, dealer);
+  };
+
   const handleAIExtraction = async (file: File, index: number) => {
     try {
       const documentDataUri = await fileToDataUri(file);
       const result = await readInvoiceWithExternalApi(file.name, documentDataUri);
 
-      const dealer = dealers.find(d => d.GST === result.gstOrGstin);
-      const overdueAmount = dealer?.overdueAmount;
-      const applicationId = dealer?.applicationId;
-      const customerId = dealer?.customerId;
-      const availableLimit = dealer?.availableLimit;
-      const programId = dealer?.programId;
+      const matchingDealers = dealers.filter(d => d.GST === result.gstOrGstin);
 
       setUploadedFiles(prev => prev.map((f, i) => 
         i === index ? { 
             ...f, 
             extractedData: result, 
-            isLoading: !programId,
-            disburseAmount: result.amount.toString(), 
-            overdueAmount: overdueAmount,
-            availableLimit: availableLimit,
-            applicationId,
-            customerId,
-            programId
+            disburseAmount: result.amount.toString(),
+            matchingDealers: matchingDealers
         } : f
       ));
 
-      if (programId && applicationId) {
-          const programDoc = await getDoc(doc(db1, "programs", programId));
-          const programData = programDoc.data() as Program | undefined;
-
-          // Specifically check for PROG011 or enabled PSBX
-          if (programId === 'PROG011' || programData?.psbxEnabled) {
-              const psbxResult = await fetchPsbxLimit(applicationId);
-              setUploadedFiles(prev => prev.map((f, i) => 
-                i === index ? { 
-                    ...f, 
-                    psbxData: psbxResult.data,
-                    isLoading: false,
-                    error: psbxResult.error ? `PSBX Error: ${psbxResult.error}` : f.error
-                } : f
-              ));
-              return;
-          }
+      if (matchingDealers.length === 1) {
+          const dealer = matchingDealers[0];
+          setUploadedFiles(prev => prev.map((f, i) => 
+            i === index ? { 
+                ...f, 
+                applicationId: dealer.applicationId,
+                customerId: dealer.customerId,
+                availableLimit: dealer.availableLimit,
+                overdueAmount: dealer.overdueAmount,
+                programId: dealer.programId
+            } : f
+          ));
+          await checkAndFetchPsbx(index, dealer);
+      } else {
+          // Multiple dealers or no dealer found
+          setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: false } : f));
       }
-
-      setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: false } : f));
 
     } catch (error: any) {
       console.error("OCR Extraction Error:", error);
@@ -215,6 +251,11 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     if (uploadedFiles.some(f => f.isLoading)) {
       toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the OCR and PSBX check to finish." });
       return;
+    }
+
+    if (uploadedFiles.some(f => f.matchingDealers && f.matchingDealers.length > 1 && !f.applicationId)) {
+        toast({ variant: "destructive", title: "Selection Required", description: "Please select a program for all multi-program dealers." });
+        return;
     }
 
     // --- PSBX BLOCKING RULES ---
@@ -350,6 +391,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                     const invoiceAmount = Number(upFile.disburseAmount || 0);
                     const psbxAvailable = upFile.psbxData?.availablelimit || 0;
                     const insufficientPsbxLimit = isPsbx && invoiceAmount > psbxAvailable;
+                    const hasMultipleMatches = upFile.matchingDealers && upFile.matchingDealers.length > 1;
 
                     return (
                       <Card key={index} className={cn("bg-background", isPsbx && "border-primary/20 bg-primary/5")}>
@@ -379,47 +421,67 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                                             <p><span className="font-medium text-foreground">Due Date:</span> {upFile.extractedData?.dueDate || 'N/A'}</p>
                                         </div>
                                         
-                                        <div className="mt-2">
-                                          <div className="flex justify-between items-center mb-1">
-                                            <Label htmlFor={`disburse-amount-${index}`} className="text-xs font-medium">Disburse Amount</Label>
-                                            <span className="text-[10px] text-muted-foreground">
-                                                {isPsbx ? `PSBX Available: ${formatCurrency(psbxAvailable)}` : `Available Limit: ${formatCurrency(upFile.availableLimit)}`}
-                                            </span>
+                                        {hasMultipleMatches && !upFile.applicationId && (
+                                            <div className="mt-2 space-y-1">
+                                                <Label className="text-[10px] font-bold uppercase text-primary">Select Program</Label>
+                                                <Select onValueChange={(val) => handleDealerSelection(index, val)}>
+                                                    <SelectTrigger className="h-8 text-xs border-primary/30">
+                                                        <SelectValue placeholder="Multiple matches - select one" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {upFile.matchingDealers?.map(d => (
+                                                            <SelectItem key={d.id} value={d.id}>
+                                                                {d.lenderName} ({d.id})
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        )}
+
+                                        {upFile.applicationId && (
+                                          <div className="mt-2">
+                                            <div className="flex justify-between items-center mb-1">
+                                              <Label htmlFor={`disburse-amount-${index}`} className="text-xs font-medium">Disburse Amount</Label>
+                                              <span className="text-[10px] text-muted-foreground">
+                                                  {isPsbx ? `PSBX Available: ${formatCurrency(psbxAvailable)}` : `Available Limit: ${formatCurrency(upFile.availableLimit)}`}
+                                              </span>
+                                            </div>
+                                            <div className="relative">
+                                                <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground"/>
+                                                <Input 
+                                                  id={`disburse-amount-${index}`}
+                                                  type="number"
+                                                  className={cn(
+                                                    "h-8 pl-6 text-xs",
+                                                    (Number(upFile.disburseAmount || 0) > (upFile.availableLimit ?? 0) || insufficientPsbxLimit) && "border-destructive focus-visible:ring-destructive"
+                                                  )}
+                                                  value={upFile.disburseAmount}
+                                                  onChange={(e) => handleDisburseAmountChange(index, e.target.value)}
+                                                  placeholder="Enter amount"
+                                                />
+                                            </div>
+                                            
+                                            {insufficientPsbxLimit && (
+                                              <p className="text-[10px] text-destructive mt-1 font-medium bg-destructive/10 p-1 rounded">
+                                                  repay old dues to get the invoice disbursed
+                                              </p>
+                                            )}
+                                            
+                                            {!isPsbx && Number(upFile.disburseAmount || 0) > (upFile.availableLimit ?? 0) && (
+                                              <p className="text-[10px] text-destructive mt-1 font-medium">Disbursement exceeds available limit.</p>
+                                            )}
                                           </div>
-                                          <div className="relative">
-                                              <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground"/>
-                                              <Input 
-                                                id={`disburse-amount-${index}`}
-                                                type="number"
-                                                className={cn(
-                                                  "h-8 pl-6 text-xs",
-                                                  (Number(upFile.disburseAmount || 0) > (upFile.availableLimit ?? 0) || insufficientPsbxLimit) && "border-destructive focus-visible:ring-destructive"
-                                                )}
-                                                value={upFile.disburseAmount}
-                                                onChange={(e) => handleDisburseAmountChange(index, e.target.value)}
-                                                placeholder="Enter amount"
-                                              />
-                                          </div>
-                                          
-                                          {insufficientPsbxLimit && (
-                                            <p className="text-[10px] text-destructive mt-1 font-medium bg-destructive/10 p-1 rounded">
-                                                repay old dues to get the invoice disbursed
-                                            </p>
-                                          )}
-                                          
-                                          {!isPsbx && Number(upFile.disburseAmount || 0) > (upFile.availableLimit ?? 0) && (
-                                            <p className="text-[10px] text-destructive mt-1 font-medium">Disbursement exceeds available limit.</p>
-                                          )}
-                                        </div>
+                                        )}
                                         
-                                        {!upFile.applicationId && (
+                                        {!upFile.applicationId && (!upFile.matchingDealers || upFile.matchingDealers.length === 0) && (
                                           <div className="mt-2 text-xs flex items-center gap-2 text-destructive font-medium border border-destructive/20 bg-destructive/10 p-2 rounded-md">
                                             <AlertTriangle className="h-4 w-4" />
                                             <span>Dealer Not Found</span>
                                           </div>
                                         )}
 
-                                        {upFile.overdueAmount && upFile.overdueAmount > 0 && (
+                                        {upFile.applicationId && upFile.overdueAmount && upFile.overdueAmount > 0 && (
                                           <div className="mt-2 text-xs flex items-center gap-2 text-destructive font-medium border border-destructive/20 bg-destructive/10 p-2 rounded-md">
                                             <AlertTriangle className="h-4 w-4" />
                                             <span>The Dealer is Overdue, kindly ask him to pay the Dues to Raise an Invoice</span>

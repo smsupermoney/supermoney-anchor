@@ -29,11 +29,11 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
       return { error: "The Excel file is empty or not in the correct format." };
     }
 
-    // Fetch existing dealers to check for duplicates based on anchorId + GST
+    // Fetch existing dealers to check for duplicates based on programId + GST
     const dealersRef = collection(db1, "dealers");
     const existingDealersSnapshot = await getDocs(query(dealersRef));
     const existingDealerKeys = new Set(
-        existingDealersSnapshot.docs.map(doc => `${doc.data().anchorId}-${doc.data().GST}`)
+        existingDealersSnapshot.docs.map(doc => `${doc.data().programId}-${doc.data().GST}`)
     );
     const existingDealerAppIds = new Set(existingDealersSnapshot.docs.map(doc => doc.id));
 
@@ -86,7 +86,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
             continue;
         }
 
-        const compositeKey = `${anchorId}-${gst}`;
+        const compositeKey = `${programId}-${gst}`;
         if (processedCompositeKeys.has(compositeKey)) {
              console.warn(`Skipping a duplicate row found in the Excel file itself: ${compositeKey}`, row);
              skippedEntriesCount++;
@@ -97,7 +97,7 @@ export async function addDealers(formData: FormData): Promise<ActionResult> {
 
         // Even if it's an update, we must check if the new composite key conflicts.
         if (!isUpdate && existingDealerKeys.has(compositeKey)) {
-             console.warn(`Skipping a row because the combination of anchorId and GST already exists in the database: ${compositeKey}`, row);
+             console.warn(`Skipping a row because the combination of programId and GST already exists in the database: ${compositeKey}`, row);
              skippedEntriesCount++;
              continue;
         }
