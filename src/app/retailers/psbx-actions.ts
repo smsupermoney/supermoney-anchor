@@ -3,7 +3,7 @@
 import { PsbxLimitData } from "@/types";
 
 export async function fetchPsbxLimit(applicationId: string): Promise<{ data?: PsbxLimitData; error?: string }> {
-    const url = "https://live.supermoney.in/psbxService/transaction/limit/get";
+    const url = "https://uat.supermoney.in/psbxService/transaction/limit/get";
     
     try {
         const response = await fetch(url, {
