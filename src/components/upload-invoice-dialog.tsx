@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, AlertTriangle, ShieldCheck } from "lucide-react";
+import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, AlertTriangle, ShieldCheck, Building2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,9 +29,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Dealer, InvoiceDocument, Program, PsbxLimitData } from "@/types";
+import type { Dealer, Program, PsbxLimitData } from "@/types";
 import { InvoiceConsentDialog } from "./invoice-consent-dialog";
-import { extractInvoiceData } from "@/ai/flows/extract-invoice-data-flow";
+import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
 import { fetchPsbxLimit } from "@/app/retailers/psbx-actions";
 import { db1 } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -45,7 +45,10 @@ type UploadInvoiceDialogProps = {
 type UploadedFile = {
   file: File;
   preview: string;
-  extractedData?: any;
+  extractedData?: ExtractInvoiceDataOutput;
+  resolvedAnchorName?: string;
+  resolvedDealerName?: string;
+  resolvedDealerGstin?: string;
   disburseAmount?: string;
   isLoading: boolean;
   error?: string;
@@ -65,7 +68,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [consentOpen, setConsentOpen] = useState(false);
   const [limitErrorOpen, setLimitErrorOpen] = useState(false);
   
-  // PSBX Error Dialog States
   const [psbxNpaErrorOpen, setPsbxNpaErrorOpen] = useState(false);
   const [psbxLimitStatusErrorOpen, setPsbxLimitStatusErrorOpen] = useState(false);
   const [psbxStatusErrorOpen, setPsbxStatusErrorOpen] = useState(false);
@@ -78,10 +80,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     setUploadedFiles([]);
     setIsDragging(false);
     setIsSubmitting(false);
-    setLimitErrorOpen(false);
-    setPsbxNpaErrorOpen(false);
-    setPsbxLimitStatusErrorOpen(false);
-    setPsbxStatusErrorOpen(false);
   };
 
   useEffect(() => {
@@ -104,9 +102,8 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
 
     try {
       const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
-      const programData = programDoc.data() as Program | undefined;
+      const programData = programDoc.data() as any;
 
-      // Specifically check for PROG011 or enabled PSBX
       if (dealer.programId === 'PROG011' || programData?.psbxEnabled) {
         setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: true } : f));
         const psbxResult = await fetchPsbxLimit(dealer.applicationId);
@@ -139,7 +136,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           availableLimit: dealer.availableLimit,
           overdueAmount: dealer.overdueAmount,
           programId: dealer.programId,
-          psbxData: undefined // Reset PSBX data until new check finishes
+          psbxData: undefined
       } : f
     ));
 
@@ -151,13 +148,36 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const documentDataUri = await fileToDataUri(file);
       const result = await extractInvoiceData({ documentDataUri });
 
-      const matchingDealers = dealers.filter(d => d.GST === result.gstOrGstin);
+      // Role Resolution Logic
+      let dealerCandidateName = "";
+      let dealerCandidateGstin = "";
+      let anchorCandidateName = "";
+
+      if (result.documentType === 'PURCHASE_ORDER') {
+          dealerCandidateName = result.issuerName || result.buyerName || "";
+          dealerCandidateGstin = result.issuerGstin || result.buyerGstin || "";
+          anchorCandidateName = result.toPartyName || result.supplierName || "";
+      } else {
+          // Default to INVOICE logic
+          dealerCandidateName = result.buyerName || result.shipToName || "";
+          dealerCandidateGstin = result.buyerGstin || "";
+          anchorCandidateName = result.issuerName || result.supplierName || "";
+      }
+
+      // Matching Strategy: GSTIN first, then fallback to normalized fuzzy name match if needed
+      let matchingDealers = dealers.filter(d => 
+        (dealerCandidateGstin && d.GST === dealerCandidateGstin) ||
+        (!dealerCandidateGstin && d.name.toLowerCase().trim() === dealerCandidateName.toLowerCase().trim())
+      );
 
       setUploadedFiles(prev => prev.map((f, i) => 
         i === index ? { 
             ...f, 
-            extractedData: result, 
-            disburseAmount: result.amount.toString(),
+            extractedData: result,
+            resolvedAnchorName: anchorCandidateName,
+            resolvedDealerName: dealerCandidateName,
+            resolvedDealerGstin: dealerCandidateGstin,
+            disburseAmount: (result.totalAmount || 0).toString(),
             matchingDealers: matchingDealers
         } : f
       ));
@@ -176,12 +196,11 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           ));
           await checkAndFetchPsbx(index, dealer);
       } else {
-          // Multiple dealers or no dealer found
           setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: false } : f));
       }
 
     } catch (error: any) {
-      console.error("OCR Extraction Error:", error);
+      console.error("Extraction Error:", error);
       setUploadedFiles(prev => prev.map((f, i) => 
         i === index ? { ...f, isLoading: false, error: error.message || "Failed to read document." } : f
       ));
@@ -242,44 +261,22 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     }
   };
 
-  const handleInvoiceConstent = () => {
-    if (uploadedFiles.length === 0) {
-      toast({ variant: "destructive", title: "No Files Uploaded", description: "Please upload at least one invoice document." });
-      return;
-    }
+  const handleSubmissionCheck = () => {
+    if (uploadedFiles.length === 0) return;
+    if (uploadedFiles.some(f => f.isLoading)) return;
 
-    if (uploadedFiles.some(f => f.isLoading)) {
-      toast({ variant: "destructive", title: "Processing Files", description: "Please wait for the OCR and PSBX check to finish." });
-      return;
-    }
-
-    if (uploadedFiles.some(f => f.matchingDealers && f.matchingDealers.length > 1 && !f.applicationId)) {
-        toast({ variant: "destructive", title: "Selection Required", description: "Please select a program for all multi-program dealers." });
+    if (uploadedFiles.some(f => !f.applicationId)) {
+        toast({ variant: "destructive", title: "Dealer Missing", description: "Please resolve the dealer for all documents." });
         return;
     }
 
-    // --- PSBX BLOCKING RULES ---
+    // PSBX Checks
     for (const file of uploadedFiles) {
         if (file.psbxData) {
             const { lmsnpastatus, lmslimitstatus, lmsstatus } = file.psbxData;
-
-            // Rule 1: NPA Check
-            if (lmsnpastatus && lmsnpastatus !== 'No') {
-                setPsbxNpaErrorOpen(true);
-                return;
-            }
-
-            // Rule 2: Limit Approved Check
-            if (lmslimitstatus && lmslimitstatus !== 'Approved') {
-                setPsbxLimitStatusErrorOpen(true);
-                return;
-            }
-
-            // Rule 3: Active Status Check
-            if (lmsstatus && lmsstatus !== 'Active') {
-                setPsbxStatusErrorOpen(true);
-                return;
-            }
+            if (lmsnpastatus && lmsnpastatus !== 'No') { setPsbxNpaErrorOpen(true); return; }
+            if (lmslimitstatus && lmslimitstatus !== 'Approved') { setPsbxLimitStatusErrorOpen(true); return; }
+            if (lmsstatus && lmsstatus !== 'Active') { setPsbxStatusErrorOpen(true); return; }
         }
     }
 
@@ -299,11 +296,18 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-
     try {
       const emailDataPromises = uploadedFiles.map(async (upFile) => ({
           fileName: upFile.file.name,
-          extractedData: upFile.extractedData,
+          extractedData: {
+              invoiceNumber: upFile.extractedData?.invoiceNumber || upFile.extractedData?.poNumber || "N/A",
+              dealerName: upFile.resolvedDealerName || "N/A",
+              documentType: upFile.extractedData?.documentType || "N/A",
+              amount: upFile.extractedData?.totalAmount || 0,
+              dueDate: upFile.extractedData?.dueDate || upFile.extractedData?.documentDate || "N/A",
+              utrNumber: "",
+              gstOrGstin: upFile.resolvedDealerGstin || ""
+          },
           disburseAmount: upFile.disburseAmount ? Number(upFile.disburseAmount) : undefined,
           error: upFile.error,
           fileContent: await fileToDataUri(upFile.file),
@@ -312,28 +316,16 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       }));
       
       const emailData = await Promise.all(emailDataPromises);
-
       const result = await sendInvoiceEmail(emailData, isConsentRequired);
 
       if (result.error) {
-          toast({
-              variant: "destructive",
-              title: "Failed to Send Email",
-              description: result.error,
-          });
+          toast({ variant: "destructive", title: "Failed", description: result.error });
       } else {
-          toast({
-              title: "Invoices Submitted",
-              description: "The invoice details have been sent successfully.",
-          });
+          toast({ title: "Submitted", description: "Submission initiated successfully." });
           setOpen(false);
       }
     } catch (error) {
-       toast({
-          variant: "destructive",
-          title: "An unexpected error occurred.",
-          description: "Could not process files for submission. Please try again.",
-      });
+       toast({ variant: "destructive", title: "Error", description: "Something went wrong during submission." });
     } finally {
       setIsSubmitting(false);
     }
@@ -350,9 +342,9 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Raise Invoice with OCR</DialogTitle>
+            <DialogTitle>Raise Invoice / PO with OCR</DialogTitle>
             <DialogDescription>
-              Upload invoice documents. Details will be automatically extracted for you to review.
+              Details like Anchor, Dealer, and Amounts are automatically resolved from your documents.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
@@ -375,130 +367,111 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
               />
               <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
                 <UploadCloud className="w-10 h-10" />
-                <p className="font-medium">
-                  {isDragging ? "Drop files here" : "Drag & drop or click to upload"}
-                </p>
-                <p className="text-xs">PDF, PNG, or JPG files accepted.</p>
+                <p className="font-medium">{isDragging ? "Drop files here" : "Drag & drop or click to upload"}</p>
+                <p className="text-xs">Supports Invoice and Purchase Order documents.</p>
               </div>
             </div>
 
             {uploadedFiles.length > 0 && (
               <div className="space-y-3">
                 <h4 className="font-medium text-sm">Review Documents:</h4>
-                <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                   {uploadedFiles.map((upFile, index) => {
+                    const isPo = upFile.extractedData?.documentType === 'PURCHASE_ORDER';
                     const isPsbx = upFile.psbxData !== undefined;
-                    const invoiceAmount = Number(upFile.disburseAmount || 0);
-                    const psbxAvailable = upFile.psbxData?.availablelimit || 0;
-                    const insufficientPsbxLimit = isPsbx && invoiceAmount > psbxAvailable;
-                    const hasMultipleMatches = upFile.matchingDealers && upFile.matchingDealers.length > 1;
+                    const docNumber = isPo ? upFile.extractedData?.poNumber : upFile.extractedData?.invoiceNumber;
+                    const amount = upFile.extractedData?.totalAmount || 0;
+                    const advance = upFile.extractedData?.advanceAmount;
 
                     return (
-                      <Card key={index} className={cn("bg-background", isPsbx && "border-primary/20 bg-primary/5")}>
-                        <CardContent className="p-3">
+                      <Card key={index} className={cn("bg-background border-l-4", isPo ? "border-l-blue-500" : "border-l-primary")}>
+                        <CardContent className="p-4">
                           <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3 flex-grow">
-                                <FileIcon className="w-5 h-5 mt-1 shrink-0 text-muted-foreground" />
-                                <div className="text-sm flex-grow">
+                            <div className="flex items-start gap-4 flex-grow">
+                                <FileIcon className="w-6 h-6 mt-1 shrink-0 text-muted-foreground" />
+                                <div className="text-sm flex-grow space-y-3">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-semibold truncate max-w-48" title={upFile.file.name}>{upFile.file.name}</p>
-                                        {isPsbx && <Badge variant="outline" className="text-[10px] h-4 gap-1 px-1 border-primary/30 text-primary bg-primary/10"><ShieldCheck className="w-2.5 h-2.5"/> PSBX</Badge>}
+                                        <Badge variant="secondary" className="text-[10px] uppercase font-bold">{upFile.extractedData?.documentType?.replace('_', ' ') || 'Document'}</Badge>
+                                        <p className="font-bold text-base">{docNumber || 'No ID detected'}</p>
+                                        {isPsbx && <Badge className="bg-primary/10 text-primary border-primary/20"><ShieldCheck className="w-3 h-3 mr-1"/> PSBX</Badge>}
                                     </div>
                                     
                                     {upFile.isLoading ? (
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                                            <Loader2 className="w-3 h-3 animate-spin"/>
-                                            <span>Processing...</span>
-                                        </div>
-                                    ) : upFile.error ? (
-                                        <p className="text-xs text-destructive mt-1">{upFile.error}</p>
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin"/><span>Analyzing document roles...</span></div>
                                     ) : (
                                       <>
-                                        <div className="grid grid-cols-2 gap-x-4 text-xs text-muted-foreground mt-2">
-                                            <p><span className="font-medium text-foreground">Dealer:</span> {upFile.extractedData?.dealerName || 'N/A'}</p>
-                                            <p><span className="font-medium text-foreground">Inv. Amount:</span> {formatCurrency(upFile.extractedData?.amount)}</p>
-                                            <p><span className="font-medium text-foreground">Type:</span> {upFile.extractedData?.documentType || 'N/A'}</p>
-                                            <p><span className="font-medium text-foreground">Due Date:</span> {upFile.extractedData?.dueDate || 'N/A'}</p>
+                                        <div className="grid grid-cols-2 gap-4 text-xs">
+                                            <div className="space-y-1">
+                                                <Label className="text-[10px] text-muted-foreground flex items-center gap-1"><Building2 className="w-3 h-3"/> Resolved Anchor</Label>
+                                                <p className="font-medium truncate">{upFile.resolvedAnchorName || 'N/A'}</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3"/> Resolved Dealer</Label>
+                                                <p className="font-medium truncate">{upFile.resolvedDealerName || 'N/A'}</p>
+                                            </div>
                                         </div>
-                                        
-                                        {hasMultipleMatches && !upFile.applicationId && (
-                                            <div className="mt-2 space-y-1">
-                                                <Label className="text-[10px] font-bold uppercase text-primary">Select Program</Label>
+
+                                        <div className="grid grid-cols-3 gap-2 text-xs pt-1">
+                                            <div className="bg-secondary/50 p-2 rounded">
+                                                <p className="text-[9px] text-muted-foreground uppercase">{isPo ? 'PO Date' : 'Inv. Date'}</p>
+                                                <p className="font-semibold">{upFile.extractedData?.documentDate || 'N/A'}</p>
+                                            </div>
+                                            <div className="bg-secondary/50 p-2 rounded">
+                                                <p className="text-[9px] text-muted-foreground uppercase">Doc Amount</p>
+                                                <p className="font-semibold">{formatCurrency(amount)}</p>
+                                            </div>
+                                            {advance !== undefined && (
+                                                <div className="bg-blue-50 p-2 rounded border border-blue-100">
+                                                    <p className="text-[9px] text-blue-600 uppercase">Advance/Retention</p>
+                                                    <p className="font-semibold text-blue-700">{formatCurrency(advance)}</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {upFile.matchingDealers && upFile.matchingDealers.length > 1 && !upFile.applicationId && (
+                                            <div className="space-y-1.5 border-t pt-2">
+                                                <Label className="text-[10px] font-bold text-primary">SELECT PROGRAM FOR DEALER</Label>
                                                 <Select onValueChange={(val) => handleDealerSelection(index, val)}>
-                                                    <SelectTrigger className="h-8 text-xs border-primary/30">
-                                                        <SelectValue placeholder="Multiple matches - select one" />
-                                                    </SelectTrigger>
+                                                    <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Multiple programs found - choose one" /></SelectTrigger>
                                                     <SelectContent>
-                                                        {upFile.matchingDealers?.map(d => (
-                                                            <SelectItem key={d.id} value={d.id}>
-                                                                {d.lenderName} ({d.id})
-                                                            </SelectItem>
-                                                        ))}
+                                                        {upFile.matchingDealers.map(d => <SelectItem key={d.id} value={d.id}>{d.lenderName} ({d.id})</SelectItem>)}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
                                         )}
 
-                                        {upFile.applicationId && (
-                                          <div className="mt-2">
-                                            <div className="flex justify-between items-center mb-1">
-                                              <Label htmlFor={`disburse-amount-${index}`} className="text-xs font-medium">Disburse Amount</Label>
-                                              <span className="text-[10px] text-muted-foreground">
-                                                  {isPsbx ? `PSBX Available: ${formatCurrency(psbxAvailable)}` : `Available Limit: ${formatCurrency(upFile.availableLimit)}`}
-                                              </span>
-                                            </div>
-                                            <div className="relative">
-                                                <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground"/>
-                                                <Input 
-                                                  id={`disburse-amount-${index}`}
-                                                  type="number"
-                                                  className={cn(
-                                                    "h-8 pl-6 text-xs",
-                                                    (Number(upFile.disburseAmount || 0) > (upFile.availableLimit ?? 0) || insufficientPsbxLimit) && "border-destructive focus-visible:ring-destructive"
-                                                  )}
-                                                  value={upFile.disburseAmount}
-                                                  onChange={(e) => handleDisburseAmountChange(index, e.target.value)}
-                                                  placeholder="Enter amount"
-                                                />
-                                            </div>
-                                            
-                                            {insufficientPsbxLimit && (
-                                              <p className="text-[10px] text-destructive mt-1 font-medium bg-destructive/10 p-1 rounded">
-                                                  repay old dues to get the invoice disbursed
-                                              </p>
-                                            )}
-                                            
-                                            {!isPsbx && Number(upFile.disburseAmount || 0) > (upFile.availableLimit ?? 0) && (
-                                              <p className="text-[10px] text-destructive mt-1 font-medium">Disbursement exceeds available limit.</p>
-                                            )}
-                                          </div>
-                                        )}
-                                        
                                         {!upFile.applicationId && (!upFile.matchingDealers || upFile.matchingDealers.length === 0) && (
-                                          <div className="mt-2 text-xs flex items-center gap-2 text-destructive font-medium border border-destructive/20 bg-destructive/10 p-2 rounded-md">
-                                            <AlertTriangle className="h-4 w-4" />
-                                            <span>Dealer Not Found</span>
-                                          </div>
+                                            <div className="space-y-2 border-t pt-2">
+                                                <div className="flex items-center gap-2 text-destructive font-bold text-xs"><AlertTriangle className="w-4 h-4" /> <span>Dealer not matched in platform</span></div>
+                                                <Select onValueChange={(val) => handleDealerSelection(index, val)}>
+                                                    <SelectTrigger className="h-8 text-[10px]"><SelectValue placeholder="Manually map to existing dealer" /></SelectTrigger>
+                                                    <SelectContent>{dealers.map(d => <SelectItem key={d.id} value={d.id}>{d.name} ({d.lenderName})</SelectItem>)}</SelectContent>
+                                                </Select>
+                                            </div>
                                         )}
 
-                                        {upFile.applicationId && upFile.overdueAmount && upFile.overdueAmount > 0 && (
-                                          <div className="mt-2 text-xs flex items-center gap-2 text-destructive font-medium border border-destructive/20 bg-destructive/10 p-2 rounded-md">
-                                            <AlertTriangle className="h-4 w-4" />
-                                            <span>The Dealer is Overdue, kindly ask him to pay the Dues to Raise an Invoice</span>
+                                        {upFile.applicationId && (
+                                          <div className="bg-primary/5 p-3 rounded-md space-y-2">
+                                            <div className="flex justify-between items-center text-[10px]">
+                                              <Label className="font-bold text-primary">DISBURSEMENT REQUEST</Label>
+                                              <span className="text-muted-foreground font-medium">Available: {formatCurrency(isPsbx ? upFile.psbxData?.availablelimit : upFile.availableLimit)}</span>
+                                            </div>
+                                            <div className="relative">
+                                                <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary"/>
+                                                <Input 
+                                                  type="number"
+                                                  className="h-9 pl-7 font-bold"
+                                                  value={upFile.disburseAmount}
+                                                  onChange={(e) => handleDisburseAmountChange(index, e.target.value)}
+                                                />
+                                            </div>
                                           </div>
                                         )}
                                       </>
                                     )}
                                 </div>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 shrink-0"
-                              onClick={() => removeFile(index)}
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 -mt-2 -mr-2" onClick={() => removeFile(index)}><X className="w-4 h-4" /></Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -509,86 +482,30 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleInvoiceConstent} disabled={isSubmitting || uploadedFiles.some(f => f.isLoading)}>
-              {isSubmitting || uploadedFiles.some(f => f.isLoading) ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4"/>}
-              {isSubmitting ? 'Submitting...' : 'Submit Invoice'}
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmissionCheck} disabled={isSubmitting || uploadedFiles.some(f => f.isLoading)}>
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Wand2 className="mr-2 h-4 w-4"/>}
+              Submit for Financing
             </Button>
           </DialogFooter>
           <InvoiceConsentDialog
             open={consentOpen}
-            document={uploadedFiles as InvoiceDocument[]}
+            document={uploadedFiles as any}
             onClose={() => setConsentOpen(false)}
-            onVerified={async () => {
-              setConsentOpen(false);
-              await handleSubmit();
-            }}
+            onVerified={async () => { setConsentOpen(false); await handleSubmit(); }}
           />
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={limitErrorOpen} onOpenChange={setLimitErrorOpen}>
-        <AlertDialogContent className="bg-background">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Limit Exceeded</AlertDialogTitle>
-            <AlertDialogDescription>
-              Kindly note the Disbursement request is greater than the Available limit. Click to edit the value or request the borrower to pay the additional amount
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+      {/* Logic Blocking Dialogs */}
       <AlertDialog open={psbxNpaErrorOpen} onOpenChange={setPsbxNpaErrorOpen}>
-        <AlertDialogContent className="bg-background border-destructive/50">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="w-5 h-5"/> Submission Blocked
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-foreground font-medium">
-              invoice can't be uploaded as customer is in npa.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>NPA Block</AlertDialogTitle><AlertDialogDescription>Submission blocked as the customer is currently in NPA.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogAction>Close</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
-
       <AlertDialog open={psbxLimitStatusErrorOpen} onOpenChange={setPsbxLimitStatusErrorOpen}>
-        <AlertDialogContent className="bg-background border-destructive/50">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="w-5 h-5"/> Submission Blocked
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-foreground font-medium">
-              invoice can't be uploaded as customer limit is not approved.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Limit Not Approved</AlertDialogTitle><AlertDialogDescription>Submission blocked as the customer limit is not currently approved in PSBX.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogAction>Close</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
-
       <AlertDialog open={psbxStatusErrorOpen} onOpenChange={setPsbxStatusErrorOpen}>
-        <AlertDialogContent className="bg-background border-destructive/50">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="w-5 h-5"/> Submission Blocked
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-foreground font-medium">
-              PSBX LMS Status is not Active
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>LMS Inactive</AlertDialogTitle><AlertDialogDescription>Submission blocked as the PSBX LMS Status is not Active.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogAction>Close</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
     </>
   );
