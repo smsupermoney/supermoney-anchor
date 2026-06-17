@@ -1,3 +1,4 @@
+
 "use server";
 
 import { db1 } from "@/lib/firebase";
@@ -9,16 +10,12 @@ type ConsentResult = {
     error?: string;
 };
 
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpConfigured = !!(process.env.SMTP_HOST || "smtp-relay.gmail.com");
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
+    host: process.env.SMTP_HOST || "smtp-relay.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: Number(process.env.SMTP_PORT) === 465,
 }) : null;
 
 export async function processConsent(token: string, action: 'Approved' | 'Rejected', ip: string): Promise<ConsentResult> {
@@ -66,12 +63,12 @@ export async function processConsent(token: string, action: 'Approved' | 'Reject
             }
 
             const mailOptions = {
-                from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+                from: `"Supermoney Platform" <noreply@supermoney.in>`,
                 to: ["invoice@supermoney.in", dealerData?.branchEmailId].filter(Boolean) as string[],
                 subject: `JSPL CBoI - Invoice Disbursement Approved: ${consentData.invoiceNumber}`,
                 html: `
-                    <h1></h1>
-                    <p> for Disbursement.</p>
+                    <h1>Invoice Disbursement Approved</h1>
+                    <p>The following invoice has been approved for disbursement via dealer consent.</p>
                     <hr />
                     <ul>
                         <li><strong>Invoice Number:</strong> ${consentData.invoiceNumber}</li>
