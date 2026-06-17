@@ -13,16 +13,12 @@ type ActionResult = {
 };
 
 // Basic validation for environment variables
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT);
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
+    secure: Number(process.env.SMTP_PORT) === 465,
 }) : null;
 
 function generateDealerEmailBody(dealerName: string, anchorName: string): string {
@@ -90,7 +86,7 @@ export async function stopSupplyAction(dealer: { id: string; name: string; email
             // Send email to the dealer
             if (dealer.emailAddress) {
                 const dealerMailOptions = {
-                    from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+                    from: `"Supermoney Platform" <noreply@supermoney.in>`,
                     to: dealer.emailAddress,
                     subject: `Important: Your Supply from ${session.userName} has been stopped`,
                     html: generateDealerEmailBody(dealer.name, session.userName),
@@ -106,7 +102,7 @@ export async function stopSupplyAction(dealer: { id: string; name: string; email
 
             // Send internal notification email
             const internalMailOptions = {
-                from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+                from: `"Supermoney Platform" <noreply@supermoney.in>`,
                 to: "ashwathi@supermoney.in",
                 subject: `ALERT: Stop Supply Confirmed by ${session.userName} for ${dealer.name}`,
                 html: generateInternalNotificationEmailBody(dealer.name, session.userName, dealer.overdueAmount),

@@ -23,16 +23,12 @@ type ActionResult = {
 };
 
 // Basic validation for environment variables
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT);
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
+    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports (STARTTLS)
 }) : null;
 
 const formatCurrency = (amount?: number) => {
@@ -152,7 +148,7 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                     const rejectUrl = `${baseUrl}/consent?token=${token}&action=Rejected`;
 
                     const mailOptions = {
-                        from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+                        from: `"Supermoney Platform" <noreply@supermoney.in>`,
                         to: dealerData.emailAddress || dealerData.branchEmailId,
                         subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} from JSPL for Approval`,
                         html: generateConsentEmailBody(item, approveUrl, rejectUrl),
@@ -180,7 +176,7 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
         }] : [];
 
         const mailOptions = {
-            from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+            from: `"Supermoney Platform" <noreply@supermoney.in>`,
             to: "invoice@supermoney.in",
             subject: "New Invoice Submission",
             html: generateEmailBody([item], isConsent),

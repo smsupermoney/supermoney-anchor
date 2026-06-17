@@ -14,16 +14,12 @@ type ActionResult = {
 };
 
 // Basic validation for environment variables
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT);
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
     secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
 }) : null;
 
 function generateEmailBody(query: string, userName: string, userEmail: string): string {
@@ -58,7 +54,7 @@ export async function sendQueryEmail(data: EmailData): Promise<ActionResult> {
     }
 
     const mailOptions = {
-        from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+        from: `"Supermoney Platform" <noreply@supermoney.in>`,
         to: "ashwathi@supermoney.in, nitin.chorge@supermoney.in",
         subject: `New Query from Anchor Platform User: ${session.userName}`,
         html: generateEmailBody(data.query, session.userName, session.emailAddress),

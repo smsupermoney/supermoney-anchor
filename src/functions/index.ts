@@ -9,8 +9,7 @@ admin.initializeApp();
 const db = admin.firestore();
 db.settings({ databaseId: "live" });
 
-// Nodemailer transporter setup, configured inside the function
-// to use environment variables populated from secrets.
+// Nodemailer transporter setup
 let transporter: nodemailer.Transporter;
 
 // Function to get all active users
@@ -89,19 +88,13 @@ const generateEmailBody = (userName: string, overdueAmount: number, overdueCount
 };
 
 // Main function to be triggered by Cloud Scheduler
-// The .runWith() method configures the function's runtime options, including secrets.
 export const sendDailyReports = functions
-  .runWith({
-    secrets: ["SMTP_USER", "SMTP_PASS"],
-  })
   .https.onRequest(async (req, res) => {
-    // Initialize transporter inside the function to access secrets
+    // Initialize transporter for passwordless SMTP relay
     transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
+        host: process.env.SMTP_HOST || "smtp-relay.gmail.com",
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: Number(process.env.SMTP_PORT) === 465,
     });
 
     try {
@@ -132,7 +125,7 @@ export const sendDailyReports = functions
             
             // Setup email data
             const mailOptions: nodemailer.SendMailOptions = {
-            from: `"Supermoney" <${process.env.SMTP_USER}>`,
+            from: `"Supermoney" <noreply@supermoney.in>`,
             to: user.emailAddress,
             subject: "Supermoney Daily Dashboard Summary & Dealer Report",
             html: generateEmailBody(user.userName, totalOverdueAmount, overdueDealers.length),
