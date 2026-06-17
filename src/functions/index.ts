@@ -125,7 +125,7 @@ export const sendDailyReports = functions
             
             // Setup email data
             const mailOptions: nodemailer.SendMailOptions = {
-            from: `"Supermoney" <noreply@supermoney.in>`,
+            from: `"Supermoney Platform" <noreply@supermoney.in>`,
             to: user.emailAddress,
             subject: "Supermoney Daily Dashboard Summary & Dealer Report",
             html: generateEmailBody(user.userName, totalOverdueAmount, overdueDealers.length),

@@ -10,11 +10,11 @@ type ConsentResult = {
     error?: string;
 };
 
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT);
+const smtpConfigured = !!(process.env.SMTP_HOST || "smtp-relay.gmail.com");
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
+    host: process.env.SMTP_HOST || "smtp-relay.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 587,
     secure: Number(process.env.SMTP_PORT) === 465,
 }) : null;
 

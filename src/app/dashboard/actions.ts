@@ -15,12 +15,12 @@ type ActionResult = {
 };
 
 // Basic validation for environment variables
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT);
+const smtpConfigured = !!(process.env.SMTP_HOST || "smtp-relay.gmail.com");
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
+    host: process.env.SMTP_HOST || "smtp-relay.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: Number(process.env.SMTP_PORT) === 465,
 }) : null;
 
 const formatCurrency = (amount: string) => {
