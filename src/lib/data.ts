@@ -318,9 +318,8 @@ export async function getPrograms(anchorId?: string, region?: string): Promise<{
         const programId = dealer.programId;
         const limit = limitsMap.get(dealer.dealerId);
 
-        // ** LOGIC CHANGE HERE **
-        // Only aggregate limit and usage if the dealer is 'Active'
-        if (programId && programAggregates[programId] && limit && dealer.status === 'Active') {
+        // Aggregate limits and usage for all dealers to maintain accuracy of aggregate lifetime sanction limits
+        if (programId && programAggregates[programId] && limit) {
             programAggregates[programId].totalLimit! += limit.limitAmount;
             programAggregates[programId].usedLimit! += limit.utilisationAmount;
         }

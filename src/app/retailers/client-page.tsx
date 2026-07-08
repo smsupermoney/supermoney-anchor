@@ -135,14 +135,7 @@ export default function DealersClientPage({ initialDealers, isAdmin }: DealersCl
 
   return (
     <>
-      <PageHeader title="Dealers">
-        {isAdmin && (
-            <Button onClick={handleDownload} variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
-                Download Excel
-            </Button>
-        )}
-      </PageHeader>
+      <PageHeader title="Dealers" />
       <Card className="mt-6">
         <CardHeader>
             <CardTitle>All Dealers</CardTitle>

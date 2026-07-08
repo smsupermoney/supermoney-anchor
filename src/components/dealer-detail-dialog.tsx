@@ -123,7 +123,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
           
           try {
               const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
-              const programData = programDoc.data() as Program | undefined;
+              const programData = programDoc.data() as any;
               
               if (dealer.programId === 'PROG011' || programData?.psbxEnabled) {
                   setIsPsbxLoading(true);

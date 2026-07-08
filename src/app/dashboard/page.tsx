@@ -75,10 +75,8 @@ export default async function Dashboard() {
     getUpcomingPayments(anchorId, region)
   ]);
   
-  // Lifetime Sanction Limit only includes Active dealers in the frontend display
-  const lifetimeSanctionLimit = dealers
-    .filter(dealer => dealer.status === 'Active')
-    .reduce((sum, dealer) => sum + dealer.totalLimit, 0);
+  // Lifetime Sanction Limit includes all dealers regardless of status to reflect total platform exposure
+  const lifetimeSanctionLimit = dealers.reduce((sum, dealer) => sum + dealer.totalLimit, 0);
   
   return (
     <DashboardClient 
