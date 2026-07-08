@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -277,9 +275,11 @@ export default function DealersClientPage({ initialDealers, isAdmin }: DealersCl
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.totalLimit ?? 0)}</div>
+                            <div className="truncate max-w-[120px] ml-auto">
+                              {dealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(dealer.totalLimit ?? 0)}
+                            </div>
                           </TooltipTrigger>
-                          <TooltipContent><p>{formatCurrency(dealer.totalLimit ?? 0)}</p></TooltipContent>
+                          <TooltipContent><p>{dealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(dealer.totalLimit ?? 0)}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
@@ -287,9 +287,11 @@ export default function DealersClientPage({ initialDealers, isAdmin }: DealersCl
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.amountDisbursed)}</div>
+                            <div className="truncate max-w-[120px] ml-auto">
+                              {dealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(dealer.amountDisbursed)}
+                            </div>
                           </TooltipTrigger>
-                          <TooltipContent><p>{formatCurrency(dealer.amountDisbursed)}</p></TooltipContent>
+                          <TooltipContent><p>{dealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(dealer.amountDisbursed)}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
@@ -297,9 +299,11 @@ export default function DealersClientPage({ initialDealers, isAdmin }: DealersCl
                        <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="truncate max-w-[120px] ml-auto">{formatCurrency(dealer.availableLimit)}</div>
+                            <div className="truncate max-w-[120px] ml-auto">
+                              {dealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(dealer.availableLimit)}
+                            </div>
                           </TooltipTrigger>
-                          <TooltipContent><p>{formatCurrency(dealer.availableLimit)}</p></TooltipContent>
+                          <TooltipContent><p>{dealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(dealer.availableLimit)}</p></TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>

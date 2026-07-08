@@ -1,4 +1,3 @@
-
 import { unstable_noStore as noStore } from 'next/cache';
 import DashboardClient from './client-page';
 import { getPrograms, getDealers, getMomentumDealerLeads } from '@/lib/data';
@@ -76,8 +75,9 @@ export default async function Dashboard() {
     getUpcomingPayments(anchorId, region)
   ]);
   
+  // Lifetime Sanction Limit only includes Active dealers in the frontend display
   const lifetimeSanctionLimit = dealers
-    .filter(dealer => dealer.status === 'Active' || dealer.status === 'Inactive')
+    .filter(dealer => dealer.status === 'Active')
     .reduce((sum, dealer) => sum + dealer.totalLimit, 0);
   
   return (

@@ -6,7 +6,7 @@ import StatusBadge from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Ban, Loader2, Edit, Save, X, IndianRupee, ShieldCheck, ExternalLink } from "lucide-react";
+import { Ban, Loader2, Edit, Save, X, IndianRupee, ShieldCheck } from "lucide-react";
 import type { Dealer, PsbxLimitData, Program } from "@/types";
 import { stopSupplyAction } from "@/app/dashboard/stop-supply-action";
 import { useToast } from "@/hooks/use-toast";
@@ -125,7 +125,6 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
               const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
               const programData = programDoc.data() as Program | undefined;
               
-              // Enable for PROG011 by default or if toggle is on
               if (dealer.programId === 'PROG011' || programData?.psbxEnabled) {
                   setIsPsbxLoading(true);
                   const psbxResult = await fetchPsbxLimit(dealer.applicationId);
@@ -190,7 +189,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                                     <Input value={editValues.totalLimit} onChange={(e) => handleInputChange('totalLimit', e.target.value)} className="h-8 pl-6" />
                                 </div>
                             ) : (
-                                <p className="font-semibold">{formatCurrency(currentDealer.totalLimit)}</p>
+                                <p className="font-semibold">{currentDealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(currentDealer.totalLimit)}</p>
                             )}
                         </div>
                         <div className="space-y-1">
@@ -201,7 +200,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                                     <Input value={editValues.amountDisbursed} onChange={(e) => handleInputChange('amountDisbursed', e.target.value)} className="h-8 pl-6" />
                                 </div>
                             ) : (
-                                <p className="font-semibold">{formatCurrency(currentDealer.amountDisbursed)}</p>
+                                <p className="font-semibold">{currentDealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(currentDealer.amountDisbursed)}</p>
                             )}
                         </div>
                         <div className="space-y-1">
@@ -227,7 +226,7 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
                         </div>
                          <div className="space-y-1">
                             <Label className="text-muted-foreground">Available Limit</Label>
-                            <p className="font-semibold text-green-600">{formatCurrency(currentDealer.availableLimit)}</p>
+                            <p className="font-semibold text-green-600">{currentDealer.status === 'Inactive' ? formatCurrency(0) : formatCurrency(currentDealer.availableLimit)}</p>
                         </div>
                          <div className="space-y-1">
                             <Label className="text-muted-foreground">Associated Lender</Label>
