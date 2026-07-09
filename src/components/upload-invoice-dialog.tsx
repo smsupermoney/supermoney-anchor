@@ -325,6 +325,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           setOpen(false);
       }
     } catch (error) {
+       console.error("Submission error:", error);
        toast({ variant: "destructive", title: "Error", description: "Something went wrong during submission." });
     } finally {
       setIsSubmitting(false);
