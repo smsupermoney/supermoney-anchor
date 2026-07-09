@@ -1,15 +1,21 @@
-
 "use server";
 
 import nodemailer from "nodemailer";
-import { type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
 import { db1 } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc, setDoc, writeBatch } from "firebase/firestore";
 import crypto from "crypto";
 
 type EmailData = {
     fileName: string;
-    extractedData?: ExtractInvoiceDataOutput;
+    extractedData?: {
+        invoiceNumber: string;
+        dealerName: string;
+        documentType: string;
+        amount: number;
+        dueDate: string;
+        utrNumber: string;
+        gstOrGstin: string;
+    };
     disburseAmount?: number;
     error?: string;
     fileContent?: string; // Base64 data URI
@@ -105,93 +111,103 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
         return { error: "Email service is not configured on the server. Please contact the administrator." };
     }
 
-    for (const item of data) {
-        if (item.applicationId) {
-            const dealerSnap = await getDocs(query(collection(db1, "dealers"), where("applicationId", "==", item.applicationId)));
-            if (!dealerSnap.empty) {
-                const dealerData = dealerSnap.docs[0].data();
-                if (dealerData.anchorId === 'ANC002') {
-                    // 1. Invalidate old pending consents for this invoice
-                    const oldConsentsQuery = query(
-                        collection(db1, "invoiceConsents"), 
-                        where("invoiceNumber", "==", item.extractedData?.invoiceNumber || 'N/A'),
-                        where("status", "==", "Pending")
-                    );
-                    const oldConsentsSnap = await getDocs(oldConsentsQuery);
-                    if (!oldConsentsSnap.empty) {
-                        const batch = writeBatch(db1);
-                        oldConsentsSnap.forEach(doc => batch.update(doc.ref, { status: 'Invalidated' }));
-                        await batch.commit();
+    try {
+        for (const item of data) {
+            if (item.applicationId) {
+                try {
+                    const dealerSnap = await getDocs(query(collection(db1, "dealers"), where("applicationId", "==", item.applicationId)));
+                    if (!dealerSnap.empty) {
+                        const dealerData = dealerSnap.docs[0].data();
+                        if (dealerData.anchorId === 'ANC002') {
+                            // 1. Invalidate old pending consents for this invoice
+                            const oldConsentsQuery = query(
+                                collection(db1, "invoiceConsents"), 
+                                where("invoiceNumber", "==", item.extractedData?.invoiceNumber || 'N/A'),
+                                where("status", "==", "Pending")
+                            );
+                            const oldConsentsSnap = await getDocs(oldConsentsQuery);
+                            if (!oldConsentsSnap.empty) {
+                                const batch = writeBatch(db1);
+                                oldConsentsSnap.forEach(doc => batch.update(doc.ref, { status: 'Invalidated' }));
+                                await batch.commit();
+                            }
+
+                            // 2. Trigger specialized consent workflow
+                            const token = crypto.randomBytes(32).toString('hex');
+                            const expiry = new Date();
+                            expiry.setHours(expiry.getHours() + 48);
+
+                            const consentRef = doc(db1, "invoiceConsents", token);
+                            await setDoc(consentRef, {
+                                invoiceNumber: item.extractedData?.invoiceNumber || 'N/A',
+                                dealerId: item.applicationId,
+                                token: token,
+                                status: 'Pending',
+                                expiryTime: expiry.toISOString(),
+                                createdAt: new Date().toISOString(),
+                                amount: item.extractedData?.amount || 0,
+                                dueDate: item.extractedData?.dueDate || 'N/A',
+                                fileName: item.fileName,
+                                fileContent: item.fileContent // Store for later use in approval mail
+                            });
+
+                            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
+                            const approveUrl = `${baseUrl}/consent?token=${token}&action=Approved`;
+                            const rejectUrl = `${baseUrl}/consent?token=${token}&action=Rejected`;
+
+                            const mailOptions = {
+                                from: `"Supermoney Platform" <noreply@supermoney.in>`,
+                                to: dealerData.emailAddress || dealerData.branchEmailId,
+                                subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} from JSPL for Approval`,
+                                html: generateConsentEmailBody(item, approveUrl, rejectUrl),
+                                attachments: item.fileContent ? [{
+                                    filename: item.fileName,
+                                    path: item.fileContent,
+                                }] : [],
+                            };
+
+                            try {
+                                await transporter.sendMail(mailOptions);
+                            } catch (e) {
+                                console.error("Failed to send consent email:", e);
+                            }
+                            
+                            continue;
+                        }
                     }
-
-                    // 2. Trigger specialized consent workflow
-                    const token = crypto.randomBytes(32).toString('hex');
-                    const expiry = new Date();
-                    expiry.setHours(expiry.getHours() + 48);
-
-                    const consentRef = doc(db1, "invoiceConsents", token);
-                    await setDoc(consentRef, {
-                        invoiceNumber: item.extractedData?.invoiceNumber || 'N/A',
-                        dealerId: item.applicationId,
-                        token: token,
-                        status: 'Pending',
-                        expiryTime: expiry.toISOString(),
-                        createdAt: new Date().toISOString(),
-                        amount: item.extractedData?.amount || 0,
-                        dueDate: item.extractedData?.dueDate || 'N/A',
-                        fileName: item.fileName,
-                        fileContent: item.fileContent // Store for later use in approval mail
-                    });
-
-                    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-                    const approveUrl = `${baseUrl}/consent?token=${token}&action=Approved`;
-                    const rejectUrl = `${baseUrl}/consent?token=${token}&action=Rejected`;
-
-                    const mailOptions = {
-                        from: `"Supermoney Platform" <noreply@supermoney.in>`,
-                        to: dealerData.emailAddress || dealerData.branchEmailId,
-                        subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} from JSPL for Approval`,
-                        html: generateConsentEmailBody(item, approveUrl, rejectUrl),
-                        attachments: item.fileContent ? [{
-                            filename: item.fileName,
-                            path: item.fileContent,
-                        }] : [],
-                    };
-
-                    try {
-                        await transporter.sendMail(mailOptions);
-                    } catch (e) {
-                        console.error("Failed to send consent email:", e);
-                    }
-                    
-                    continue;
+                } catch (dbError) {
+                    console.error("Database query failed during email action:", dbError);
+                    // Continue to default logic if specialized check fails
                 }
             }
-        }
 
-        // Default logic for other anchors
-        const attachments = item.fileContent ? [{
-            filename: item.fileName,
-            path: item.fileContent,
-        }] : [];
+            // Default logic for other anchors
+            const attachments = item.fileContent ? [{
+                filename: item.fileName,
+                path: item.fileContent,
+            }] : [];
 
-        const mailOptions = {
-            from: `"Supermoney Platform" <noreply@supermoney.in>`,
-            to: "invoice@supermoney.in",
-            subject: "New Invoice Submission",
-            html: generateEmailBody([item], isConsent),
-            attachments: attachments,
-        };
+            const mailOptions = {
+                from: `"Supermoney Platform" <noreply@supermoney.in>`,
+                to: "invoice@supermoney.in",
+                subject: "New Invoice Submission",
+                html: generateEmailBody([item], isConsent),
+                attachments: attachments,
+            };
 
-        try {
-            await transporter.sendMail(mailOptions);
-        } catch (error) {
-            console.error("Failed to send email:", error);
-            if (error instanceof Error) {
-                return { error: `Failed to send email: ${error.message}` };
+            try {
+                await transporter.sendMail(mailOptions);
+            } catch (error) {
+                console.error("Failed to send default email:", error);
+                if (error instanceof Error) {
+                    return { error: `Failed to send email: ${error.message}` };
+                }
+                return { error: "An unknown error occurred while sending the email." };
             }
-            return { error: "An unknown error occurred while sending the email." };
         }
+    } catch (loopError) {
+        console.error("Error in email submission loop:", loopError);
+        return { error: "A server error occurred during processing." };
     }
 
     return { message: "Process initiated successfully." };
