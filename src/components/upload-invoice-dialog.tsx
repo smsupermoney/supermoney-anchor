@@ -75,7 +75,13 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConsentRequired, setIsConsentRequired] = useState(false);
   const { toast } = useToast();
-  
+
+  // Temp: prevent 413 errors from nginx (default 1MB body limit).
+  // Base64 encoding inflates file size by ~33%, so 5MB file → ~6.7MB in payload.
+  // TODO: proper fix — upload via API route instead of inline base64 in server action.
+  const MAX_FILE_SIZE_MB = 5;
+  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
   const resetState = () => {
     setUploadedFiles([]);
     setIsDragging(false);
@@ -209,12 +215,28 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
 
   const handleFileChange = (newFiles: FileList | null) => {
     if (newFiles) {
-      const addedFiles = Array.from(newFiles).map(file => ({
+      const fileArray = Array.from(newFiles);
+
+      // Temp: reject oversized files to avoid 413 from nginx
+      const oversized = fileArray.filter(f => f.size > MAX_FILE_SIZE_BYTES);
+      if (oversized.length > 0) {
+        const names = oversized.map(f => `"${f.name}" (${(f.size / 1024 / 1024).toFixed(1)}MB)`).join(", ");
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: `${names} exceeds the ${MAX_FILE_SIZE_MB}MB limit. Please upload smaller files.`,
+        });
+      }
+
+      const validFiles = fileArray.filter(f => f.size <= MAX_FILE_SIZE_BYTES);
+      if (validFiles.length === 0) return;
+
+      const addedFiles = validFiles.map(file => ({
         file,
         preview: URL.createObjectURL(file),
         isLoading: true,
       }));
-      
+
       const currentLength = uploadedFiles.length;
       setUploadedFiles(prev => [...prev, ...addedFiles]);
 
@@ -256,7 +278,22 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileChange(e.dataTransfer.files);
+      const fileArray = Array.from(e.dataTransfer.files);
+      const oversized = fileArray.filter(f => f.size > MAX_FILE_SIZE_BYTES);
+      if (oversized.length > 0) {
+        const names = oversized.map(f => `"${f.name}" (${(f.size / 1024 / 1024).toFixed(1)}MB)`).join(", ");
+        toast({
+          variant: "destructive",
+          title: "File too large",
+          description: `${names} exceeds the ${MAX_FILE_SIZE_MB}MB limit. Please upload smaller files.`,
+        });
+      }
+      const validFiles = fileArray.filter(f => f.size <= MAX_FILE_SIZE_BYTES);
+      if (validFiles.length > 0) {
+        const dt = new DataTransfer();
+        validFiles.forEach(f => dt.items.add(f));
+        handleFileChange(dt.files);
+      }
       e.dataTransfer.clearData();
     }
   };
