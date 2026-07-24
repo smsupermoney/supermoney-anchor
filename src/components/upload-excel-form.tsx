@@ -20,14 +20,26 @@ export default function UploadExcelForm({ action, onSuccess, buttonText = "Uploa
     const [error, setError] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { toast } = useToast();
+
+    // Temp: prevent 413 errors from nginx (default 1MB body limit).
+    // TODO: proper fix — upload via API route or increase nginx client_max_body_size.
+    const MAX_FILE_SIZE_MB = 5;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
     const formRef = useRef<HTMLFormElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                setError(`File "${file.name}" is ${(file.size / 1024 / 1024).toFixed(1)}MB — exceeds the ${MAX_FILE_SIZE_MB}MB limit. Please upload a smaller file.`);
+                setSelectedFile(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+                return;
+            }
             setSelectedFile(file);
-            setError(null); 
+            setError(null);
         }
     };
     
