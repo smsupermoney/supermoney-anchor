@@ -110,7 +110,10 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
       const programData = programDoc.data() as any;
 
-      if (dealer.programId === 'PROG011' || programData?.psbxEnabled) {
+      // New criteria: program is PSBX if SmartdashLender field starts with 'PSBX'
+      const isPsbxProgram = programData?.SmartdashLender?.startsWith('PSBX');
+
+      if (isPsbxProgram) {
         setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: true } : f));
         const psbxResult = await fetchPsbxLimit(dealer.applicationId);
         setUploadedFiles(prev => prev.map((f, i) => 

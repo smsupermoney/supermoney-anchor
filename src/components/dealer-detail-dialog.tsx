@@ -125,7 +125,10 @@ export default function DealerDetailDialog({ dealer, open, onOpenChange }: Deale
               const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
               const programData = programDoc.data() as any;
               
-              if (dealer.programId === 'PROG011' || programData?.psbxEnabled) {
+              // New criteria: program is PSBX if SmartdashLender field starts with 'PSBX'
+              const isPsbxProgram = programData?.SmartdashLender?.startsWith('PSBX');
+              
+              if (isPsbxProgram) {
                   setIsPsbxLoading(true);
                   const psbxResult = await fetchPsbxLimit(dealer.applicationId);
                   if (psbxResult.data) {
