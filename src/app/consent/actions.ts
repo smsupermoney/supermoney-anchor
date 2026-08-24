@@ -1,4 +1,3 @@
-
 "use server";
 
 import { db1 } from "@/lib/firebase";
@@ -65,7 +64,7 @@ export async function processConsent(token: string, action: 'Approved' | 'Reject
             const mailOptions = {
                 from: `"Supermoney Platform" <noreply@supermoney.in>`,
                 to: ["invoice@supermoney.in", dealerData?.branchEmailId].filter(Boolean) as string[],
-                subject: `JSPL CBoI - Invoice Disbursement Approved: ${consentData.invoiceNumber}`,
+                subject: `${anchorName} - Invoice Disbursement Approved: ${consentData.invoiceNumber}`,
                 html: `
                     <h1>Invoice Disbursement Approved</h1>
                     <p>The following invoice has been approved for disbursement via dealer consent.</p>
@@ -75,6 +74,8 @@ export async function processConsent(token: string, action: 'Approved' | 'Reject
                         <li><strong>Dealer Name:</strong> ${dealerData?.dealerName || 'N/A'}</li>
                         <li><strong>Anchor Name:</strong> ${anchorName}</li>
                         <li><strong>Amount:</strong> ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(consentData.amount || 0)}</li>
+                        <li><strong>Disbursement Request Amount:</strong> ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(consentData.disburseAmount || 0)}</li>
+                        ${consentData.selectedAnchorAcc ? `<li><strong>Selected Anchor Account:</strong> ${consentData.selectedAnchorAcc}</li>` : ''}
                         <li><strong>Branch Name:</strong> ${dealerData?.branchName || 'N/A'}</li>
                         <li><strong>Consent Timestamp:</strong> ${new Date().toLocaleString()}</li>
                     </ul>

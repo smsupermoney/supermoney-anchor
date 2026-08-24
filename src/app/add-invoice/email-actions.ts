@@ -17,6 +17,7 @@ type EmailData = {
         gstOrGstin: string;
     };
     disburseAmount?: number;
+    selectedAnchorAcc?: string;
     error?: string;
     fileContent?: string; // Base64 data URI
     applicationId?: string;
@@ -68,8 +69,13 @@ function generateEmailBody(data: EmailData[], isConsent: boolean): string {
                 <tr><td style="width: 30%;"><strong>Customer ID</strong></td><td>${item.customerId || 'Not Found'}</td></tr>
                 <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
                 <tr><td><strong>Invoice Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
-                <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>` + 
-                `${isConsent ? `<tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>` : ''}`;     
+                <tr><td><strong>Disbursement Request Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>`;
+                
+            if (item.selectedAnchorAcc) {
+                html += `<tr><td><strong>Selected Anchor Account</strong></td><td>${item.selectedAnchorAcc}</td></tr>`;
+            }
+
+            html += `${isConsent ? `<tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>` : ''}`;     
         } else if (item.error) {
             html += `<tr><td style="width: 30%;"><strong>Error</strong></td><td style="color: red;">${item.error}</td></tr>`;
         } else {
@@ -92,6 +98,8 @@ function generateConsentEmailBody(item: EmailData, approveUrl: string, rejectUrl
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                 <tr><td style="padding: 8px; color: #666;"><strong>Invoice Number:</strong></td><td style="padding: 8px; font-weight: bold;">${item.extractedData?.invoiceNumber || 'N/A'}</td></tr>
                 <tr><td style="padding: 8px; color: #666;"><strong>Amount:</strong></td><td style="padding: 8px; font-weight: bold;">${formatCurrency(item.extractedData?.amount)}</td></tr>
+                <tr><td style="padding: 8px; color: #666;"><strong>Disbursement Request Amount:</strong></td><td style="padding: 8px; font-weight: bold;">${formatCurrency(item.disburseAmount)}</td></tr>
+                ${item.selectedAnchorAcc ? `<tr><td style="padding: 8px; color: #666;"><strong>Selected Anchor Account:</strong></td><td style="padding: 8px;">${item.selectedAnchorAcc}</td></tr>` : ''}
                 <tr><td style="padding: 8px; color: #666;"><strong>Due Date:</strong></td><td style="padding: 8px;">${item.extractedData?.dueDate || 'N/A'}</td></tr>
             </table>
             <br />
@@ -118,7 +126,20 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                     const dealerSnap = await getDocs(query(collection(db1, "dealers"), where("applicationId", "==", item.applicationId)));
                     if (!dealerSnap.empty) {
                         const dealerData = dealerSnap.docs[0].data();
-                        if (dealerData.anchorId === 'ANC002') {
+                        if (dealerData.anchorId === 'ANC002' || dealerData.anchorId === 'ANC008') {
+                            // Fetch anchor name based on anchorId from dealer record for branding
+                            let anchorName = 'N/A';
+                            const usersRef = collection(db1, 'users');
+                            const anchorQuery = query(
+                                usersRef, 
+                                where('roleType', '==', 'Anchor'), 
+                                where('externalId', '==', dealerData.anchorId)
+                            );
+                            const anchorSnap = await getDocs(anchorQuery);
+                            if (!anchorSnap.empty) {
+                                anchorName = anchorSnap.docs[0].data().userName || 'N/A';
+                            }
+
                             // 1. Invalidate old pending consents for this invoice
                             const oldConsentsQuery = query(
                                 collection(db1, "invoiceConsents"), 
@@ -146,6 +167,8 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                                 expiryTime: expiry.toISOString(),
                                 createdAt: new Date().toISOString(),
                                 amount: item.extractedData?.amount || 0,
+                                disburseAmount: item.disburseAmount || 0,
+                                selectedAnchorAcc: item.selectedAnchorAcc || '',
                                 dueDate: item.extractedData?.dueDate || 'N/A',
                                 fileName: item.fileName,
                                 fileContent: item.fileContent // Store for later use in approval mail
@@ -158,7 +181,7 @@ export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): P
                             const mailOptions = {
                                 from: `"Supermoney Platform" <noreply@supermoney.in>`,
                                 to: dealerData.emailAddress || dealerData.branchEmailId,
-                                subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} from JSPL for Approval`,
+                                subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} from ${anchorName} for Approval`,
                                 html: generateConsentEmailBody(item, approveUrl, rejectUrl),
                                 attachments: item.fileContent ? [{
                                     filename: item.fileName,

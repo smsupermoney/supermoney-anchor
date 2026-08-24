@@ -32,3 +32,34 @@ export async function fetchPsbxLimit(applicationId: string): Promise<{ data?: Ps
         return { error: error instanceof Error ? error.message : "Internal server error connecting to PSBX." };
     }
 }
+
+export async function fetchPsbxTransactionDetail(applicationId: string): Promise<{ data?: any; error?: string }> {
+    const url = "https://live.supermoney.in/psbxService/transaction/detail/get";
+    
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ applicationId: applicationId }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`PSBX API Error (${response.status}): ${errorText}`);
+        }
+
+        const json = await response.json();
+        
+        if (json.code === 200 && json.data) {
+            return { data: json.data };
+        } else {
+            return { error: json.message || "Failed to fetch PSBX details." };
+        }
+
+    } catch (error) {
+        console.error("PSBX Detail Fetch Error:", error);
+        return { error: error instanceof Error ? error.message : "Internal server error connecting to PSBX." };
+    }
+}

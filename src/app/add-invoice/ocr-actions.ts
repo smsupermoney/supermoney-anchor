@@ -10,7 +10,7 @@ export async function readInvoiceWithExternalApi(filename: string, base64Data: s
     // Use user's email as external_id, fallback for admin cases
     const email = session?.emailAddress || "anchor@supermoney.in";
     
-    const url = "https://uat.supermoney.in/gcppython/gcp/call/supermoney/agent/invoice-reader/";
+    const url = "https://live.supermoney.in/gcppython/gcp/call/supermoney/agent/invoice-reader/";
     
     // Remove data URI prefix (e.g., "data:image/png;base64,") if present
     const cleanBase64 = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;

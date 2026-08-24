@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, AlertTriangle, ShieldCheck, Building2, User } from "lucide-react";
+import { UploadCloud, File as FileIcon, X, Loader2, Wand2, IndianRupee, AlertTriangle, ShieldCheck, Building2, User, Landmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,7 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { Dealer, Program, PsbxLimitData } from "@/types";
 import { InvoiceConsentDialog } from "./invoice-consent-dialog";
 import { extractInvoiceData, type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
-import { fetchPsbxLimit } from "@/app/retailers/psbx-actions";
+import { fetchPsbxLimit, fetchPsbxTransactionDetail } from "@/app/retailers/psbx-actions";
 import { db1 } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -50,6 +50,8 @@ type UploadedFile = {
   resolvedDealerName?: string;
   resolvedDealerGstin?: string;
   disburseAmount?: string;
+  selectedAnchorAcc?: string;
+  anchorAccounts?: { anchorAcc: string }[];
   isLoading: boolean;
   error?: string;
   overdueAmount?: number;
@@ -76,9 +78,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const [isConsentRequired, setIsConsentRequired] = useState(false);
   const { toast } = useToast();
 
-  // Temp: prevent 413 errors from nginx (default 1MB body limit).
-  // Base64 encoding inflates file size by ~33%, so 5MB file → ~6.7MB in payload.
-  // TODO: proper fix — upload via API route instead of inline base64 in server action.
   const MAX_FILE_SIZE_MB = 5;
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
@@ -110,16 +109,28 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const programDoc = await getDoc(doc(db1, "programs", dealer.programId));
       const programData = programDoc.data() as any;
 
-      // New criteria: program is PSBX if SmartdashLender field starts with 'PSBX'
-      const isPsbxProgram = programData?.SmartdashLender?.startsWith('PSBX');
+      const isPsbxProgram = programData?.SmartdashLender?.startsWith('PSBX') || dealer.programId === 'PROG011';
 
       if (isPsbxProgram) {
         setUploadedFiles(prev => prev.map((f, i) => i === index ? { ...f, isLoading: true } : f));
+        
+        // Fetch Limit
         const psbxResult = await fetchPsbxLimit(dealer.applicationId);
+        
+        // Specific for PROG011: Fetch anchor accounts
+        let anchorAccounts = [];
+        if (dealer.programId === 'PROG011') {
+            const detailResult = await fetchPsbxTransactionDetail(dealer.applicationId);
+            if (detailResult.data?.lmsmappinganchoraccountno) {
+                anchorAccounts = detailResult.data.lmsmappinganchoraccountno;
+            }
+        }
+
         setUploadedFiles(prev => prev.map((f, i) => 
           i === index ? { 
               ...f, 
               psbxData: psbxResult.data,
+              anchorAccounts: anchorAccounts,
               isLoading: false,
               error: psbxResult.error ? `PSBX Error: ${psbxResult.error}` : f.error
           } : f
@@ -145,7 +156,8 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           availableLimit: dealer.availableLimit,
           overdueAmount: dealer.overdueAmount,
           programId: dealer.programId,
-          psbxData: undefined
+          psbxData: undefined,
+          anchorAccounts: undefined
       } : f
     ));
 
@@ -157,7 +169,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       const documentDataUri = await fileToDataUri(file);
       const result = await extractInvoiceData({ documentDataUri });
 
-      // Role Resolution Logic
       let dealerCandidateName = "";
       let dealerCandidateGstin = "";
       let anchorCandidateName = "";
@@ -167,13 +178,11 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           dealerCandidateGstin = result.issuerGstin || result.buyerGstin || "";
           anchorCandidateName = result.toPartyName || result.supplierName || "";
       } else {
-          // Default to INVOICE logic
           dealerCandidateName = result.buyerName || result.shipToName || "";
           dealerCandidateGstin = result.buyerGstin || "";
           anchorCandidateName = result.issuerName || result.supplierName || "";
       }
 
-      // Matching Strategy: GSTIN first, then fallback to normalized fuzzy name match if needed
       let matchingDealers = dealers.filter(d => 
         (dealerCandidateGstin && d.GST === dealerCandidateGstin) ||
         (!dealerCandidateGstin && d.name.toLowerCase().trim() === dealerCandidateName.toLowerCase().trim())
@@ -219,15 +228,13 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const handleFileChange = (newFiles: FileList | null) => {
     if (newFiles) {
       const fileArray = Array.from(newFiles);
-
-      // Temp: reject oversized files to avoid 413 from nginx
       const oversized = fileArray.filter(f => f.size > MAX_FILE_SIZE_BYTES);
       if (oversized.length > 0) {
         const names = oversized.map(f => `"${f.name}" (${(f.size / 1024 / 1024).toFixed(1)}MB)`).join(", ");
         toast({
           variant: "destructive",
           title: "File too large",
-          description: `${names} exceeds the ${MAX_FILE_SIZE_MB}MB limit. Please upload smaller files.`,
+          description: `${names} exceeds the ${MAX_FILE_SIZE_MB}MB limit.`,
         });
       }
 
@@ -252,6 +259,12 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
   const handleDisburseAmountChange = (index: number, value: string) => {
     setUploadedFiles(prev => prev.map((f, i) => 
         i === index ? { ...f, disburseAmount: value } : f
+    ));
+  };
+
+  const handleAnchorAccChange = (index: number, value: string) => {
+    setUploadedFiles(prev => prev.map((f, i) => 
+        i === index ? { ...f, selectedAnchorAcc: value } : f
     ));
   };
 
@@ -281,22 +294,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const fileArray = Array.from(e.dataTransfer.files);
-      const oversized = fileArray.filter(f => f.size > MAX_FILE_SIZE_BYTES);
-      if (oversized.length > 0) {
-        const names = oversized.map(f => `"${f.name}" (${(f.size / 1024 / 1024).toFixed(1)}MB)`).join(", ");
-        toast({
-          variant: "destructive",
-          title: "File too large",
-          description: `${names} exceeds the ${MAX_FILE_SIZE_MB}MB limit. Please upload smaller files.`,
-        });
-      }
-      const validFiles = fileArray.filter(f => f.size <= MAX_FILE_SIZE_BYTES);
-      if (validFiles.length > 0) {
-        const dt = new DataTransfer();
-        validFiles.forEach(f => dt.items.add(f));
-        handleFileChange(dt.files);
-      }
+      handleFileChange(e.dataTransfer.files);
       e.dataTransfer.clearData();
     }
   };
@@ -307,6 +305,11 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
 
     if (uploadedFiles.some(f => !f.applicationId)) {
         toast({ variant: "destructive", title: "Dealer Missing", description: "Please resolve the dealer for all documents." });
+        return;
+    }
+
+    if (uploadedFiles.some(f => f.programId === 'PROG011' && !f.selectedAnchorAcc)) {
+        toast({ variant: "destructive", title: "Account Missing", description: "Please select an Anchor Account for all documents." });
         return;
     }
 
@@ -349,6 +352,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
               gstOrGstin: upFile.resolvedDealerGstin || ""
           },
           disburseAmount: upFile.disburseAmount ? Number(upFile.disburseAmount) : undefined,
+          selectedAnchorAcc: upFile.selectedAnchorAcc,
           error: upFile.error,
           fileContent: await fileToDataUri(upFile.file),
           applicationId: upFile.applicationId,
@@ -366,7 +370,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
       }
     } catch (error) {
        console.error("Submission error:", error);
-       toast({ variant: "destructive", title: "Error", description: "Something went wrong during submission." });
+       toast({ variant: "destructive", title: "Error", description: "Something went wrong." });
     } finally {
       setIsSubmitting(false);
     }
@@ -385,7 +389,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
           <DialogHeader>
             <DialogTitle>Raise Invoice / PO with OCR</DialogTitle>
             <DialogDescription>
-              Details like Anchor, Dealer, and Amounts are automatically resolved from your documents.
+              Details are automatically resolved from your documents.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
@@ -492,19 +496,39 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
                                         )}
 
                                         {upFile.applicationId && (
-                                          <div className="bg-primary/5 p-3 rounded-md space-y-2">
-                                            <div className="flex justify-between items-center text-[10px]">
-                                              <Label className="font-bold text-primary">DISBURSEMENT REQUEST</Label>
-                                              <span className="text-muted-foreground font-medium">Available: {formatCurrency(isPsbx ? upFile.psbxData?.availablelimit : upFile.availableLimit)}</span>
-                                            </div>
-                                            <div className="relative">
-                                                <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary"/>
-                                                <Input 
-                                                  type="number"
-                                                  className="h-9 pl-7 font-bold"
-                                                  value={upFile.disburseAmount}
-                                                  onChange={(e) => handleDisburseAmountChange(index, e.target.value)}
-                                                />
+                                          <div className="space-y-3">
+                                            {upFile.programId === 'PROG011' && upFile.anchorAccounts && (
+                                                <div className="space-y-1.5 pt-1">
+                                                    <Label className="text-[10px] font-bold text-primary flex items-center gap-1">
+                                                        <Landmark className="w-3 h-3" /> SELECT ANCHOR ACCOUNT
+                                                    </Label>
+                                                    <Select onValueChange={(val) => handleAnchorAccChange(index, val)} value={upFile.selectedAnchorAcc}>
+                                                        <SelectTrigger className="h-8 text-xs">
+                                                            <SelectValue placeholder="Choose an account number" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {upFile.anchorAccounts.map(acc => (
+                                                                <SelectItem key={acc.anchorAcc} value={acc.anchorAcc}>{acc.anchorAcc}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            )}
+
+                                            <div className="bg-primary/5 p-3 rounded-md space-y-2">
+                                                <div className="flex justify-between items-center text-[10px]">
+                                                <Label className="font-bold text-primary">DISBURSEMENT REQUEST</Label>
+                                                <span className="text-muted-foreground font-medium">Available: {formatCurrency(isPsbx ? upFile.psbxData?.availablelimit : upFile.availableLimit)}</span>
+                                                </div>
+                                                <div className="relative">
+                                                    <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary"/>
+                                                    <Input 
+                                                    type="number"
+                                                    className="h-9 pl-7 font-bold"
+                                                    value={upFile.disburseAmount}
+                                                    onChange={(e) => handleDisburseAmountChange(index, e.target.value)}
+                                                    />
+                                                </div>
                                             </div>
                                           </div>
                                         )}
@@ -538,7 +562,6 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
         </DialogContent>
       </Dialog>
 
-      {/* Logic Blocking Dialogs */}
       <AlertDialog open={psbxNpaErrorOpen} onOpenChange={setPsbxNpaErrorOpen}>
         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>NPA Block</AlertDialogTitle><AlertDialogDescription>Submission blocked as the customer is currently in NPA.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogAction>Close</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
       </AlertDialog>
