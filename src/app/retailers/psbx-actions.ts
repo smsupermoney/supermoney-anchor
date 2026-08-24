@@ -34,7 +34,7 @@ export async function fetchPsbxLimit(applicationId: string): Promise<{ data?: Ps
 }
 
 export async function fetchPsbxTransactionDetail(applicationId: string): Promise<{ data?: any; error?: string }> {
-    const url = "https://uat.supermoney.in/psbxService/transaction/detail/get";
+    const url = "https://live.supermoney.in/psbxService/transaction/detail/get";
     
     try {
         const response = await fetch(url, {

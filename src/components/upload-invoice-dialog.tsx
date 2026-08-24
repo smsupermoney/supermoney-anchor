@@ -325,7 +325,7 @@ export default function UploadInvoiceDialog({ children, dealers }: UploadInvoice
 
     const anyConsentRequired = uploadedFiles.some(f => {
         const dealer = dealers.find(d => d.applicationId === f.applicationId);
-        return dealer?.anchorId === "ANC002" || dealer?.anchorId === "ANC008";
+        return dealer?.anchorId === "ANC008";
     });
 
     if (anyConsentRequired) {
