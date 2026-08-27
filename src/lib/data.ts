@@ -1,4 +1,3 @@
-
 import type { User, DealerLead, DealerOnboardingStatus, MomentumDealerLead, DealerLimit } from '@/types';
 import { db1, db2 } from './firebase';
 import { collection, getDocs, query, where, documentId, updateDoc, doc, getDoc, type Timestamp } from 'firebase/firestore';
@@ -6,20 +5,25 @@ import type { Dealer, Invoice, Program } from '@/types';
 
 // --- API FUNCTIONS ---
 
-// Helper to convert Firestore Timestamps to ISO strings
-const processDocumentDates = (data: Record<string, any>): Record<string, any> => {
-    const processedData = { ...data };
-    for (const key in processedData) {
-        if (processedData[key] && typeof processedData[key].toDate === 'function') {
-            // This is a Firestore Timestamp
-            const date = (processedData[key] as Timestamp).toDate();
-            // Check if date is valid before converting
-            if (!isNaN(date.getTime())) {
-                processedData[key] = date.toISOString();
-            } else {
-                processedData[key] = null; // or some other placeholder for invalid dates
-            }
-        }
+// Helper to convert Firestore Timestamps to ISO strings recursively
+const processDocumentDates = (data: any): any => {
+    if (data === null || typeof data !== 'object') {
+        return data;
+    }
+
+    // Check for Firestore Timestamp
+    if (typeof data.toDate === 'function') {
+        const date = (data as Timestamp).toDate();
+        return !isNaN(date.getTime()) ? date.toISOString() : null;
+    }
+
+    if (Array.isArray(data)) {
+        return data.map(processDocumentDates);
+    }
+
+    const processedData: Record<string, any> = {};
+    for (const key in data) {
+        processedData[key] = processDocumentDates(data[key]);
     }
     return processedData;
 };
@@ -28,6 +32,7 @@ const processDocumentDates = (data: Record<string, any>): Record<string, any> =>
 // Functions to fetch data from Firestore
 
 export async function getMomentumDealerLeads(anchorId?: string): Promise<MomentumDealerLead[]> {
+    console.log(`[getMomentumDealerLeads] Fetching for anchorId: ${anchorId}`);
     const fetchLeads = async (collectionName: 'dealers' | 'vendors', category: 'Dealer' | 'Vendor') => {
         try {
             let leadsQuery;
@@ -60,8 +65,8 @@ export async function getMomentumDealerLeads(anchorId?: string): Promise<Momentu
     
     const allLeads = [...dealerLeads, ...vendorLeads];
     
-    // Sort all leads by createdAt date in descending order (newest first)
-    allLeads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Sort all leads by leadDate date in descending order (newest first)
+    allLeads.sort((a, b) => new Date(b.leadDate).getTime() - new Date(a.leadDate).getTime());
 
     return allLeads;
 }
@@ -147,7 +152,8 @@ export async function getInvoices(anchorId?: string, region?: string): Promise<I
           lender: programMap.get(data.programId) || 'Unknown Lender',
           overdueAmount: overdueAmount,
           invoiceImage: data.invoiceImage || '',
-          disbursementSentDate: data.disbursementSentDate || ''
+          disbursementSentDate: data.disbursementSentDate || '',
+          disburseDate: data.disburseDate || '',
       } as Invoice;
     })
     .filter(invoice => {
@@ -212,7 +218,7 @@ export async function getDealers(anchorId?: string, region?: string): Promise<De
         return {
             id: dealerId,
             name: dealerData.dealerName,
-            emailAddress: dealerUser?.emailAddress || '',
+            emailAddress: dealerData.emailAddress || dealerUser?.emailAddress || '',
             phoneNumber: dealerUser?.phoneNumber || '',
             anchorId: dealerData.anchorId,
             programId: dealerData.programId,
@@ -222,12 +228,15 @@ export async function getDealers(anchorId?: string, region?: string): Promise<De
             amountDisbursed: utilisationAmount,
             overdueCount: dealerInvoices.filter(i => (i.overdueAmount ?? 0) > 0).length,
             overdueAmount: limitData?.principalOverdue || 0,
+            principalDPD: limitData?.principalDPD || 0,
             lenderName: programMap.get(dealerData.programId) || 'N/A',
             status: dealerData.status, 
             totalLimit: limitAmount,
             availableLimit: limitAmount - utilisationAmount,
             GST: dealerData?.GST,
-            region: dealerData?.region
+            region: dealerData?.region,
+            branchName: dealerData?.branchName || '',
+            branchEmailId: dealerData?.branchEmailId || '',
         } as Dealer;
     });
 
@@ -242,11 +251,12 @@ export async function getDealerLimits(dealerIds?: string[]): Promise<DealerLimit
 
     const limitsCol = collection(db1, 'dealerLimits');
     const allLimits: DealerLimit[] = [];
-    const chunkSize = 30; // Firestore 'in' query limit
+    
+    // Firestore 'in' query can handle up to 30 items.
+    const CHUNK_SIZE = 30; 
 
-    // Process the dealerIds in chunks
-    for (let i = 0; i < dealerIds.length; i += chunkSize) {
-        const chunk = dealerIds.slice(i, i + chunkSize);
+    for (let i = 0; i < dealerIds.length; i += CHUNK_SIZE) {
+        const chunk = dealerIds.slice(i, i + CHUNK_SIZE);
         if (chunk.length > 0) {
             const q = query(limitsCol, where(documentId(), 'in', chunk));
             const limitsSnapshot = await getDocs(q);
@@ -270,7 +280,7 @@ export async function getPrograms(anchorId?: string, region?: string): Promise<{
     const programMap = new Map(programSnapshot.docs.map(p => [p.id, { id: p.id, ...p.data() } as Program]));
     const limitsMap = new Map(limitsSnapshot.docs.map(l => [l.id, l.data() as DealerLimit]));
     
-    let allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string, region?: string });
+    let allDealers = dealerSnapshot.docs.map(d => d.data() as { dealerId: string, anchorId: string, programId: string, region?: string, status: Dealer['status'] });
     
     // Filter dealers based on anchor and region
     let relevantDealers = allDealers;
@@ -308,6 +318,7 @@ export async function getPrograms(anchorId?: string, region?: string): Promise<{
         const programId = dealer.programId;
         const limit = limitsMap.get(dealer.dealerId);
 
+        // Aggregate limits and usage for all dealers to maintain accuracy of aggregate lifetime sanction limits
         if (programId && programAggregates[programId] && limit) {
             programAggregates[programId].totalLimit! += limit.limitAmount;
             programAggregates[programId].usedLimit! += limit.utilisationAmount;
@@ -344,7 +355,7 @@ export async function getPrograms(anchorId?: string, region?: string): Promise<{
                 prog.disbursedAmount! += invoice.amount;
                 prog.disbursedInvoicesCount!++;
             }
-            if (['Initiated', 'Approved', 'Sent to Lender'].includes(invoice.status)) {
+            if (['Initiated', 'Approved', 'Sent to Lender', 'Consent Approved'].includes(invoice.status)) {
                 prog.pendingInvoicesCount!++;
             }
             if (invoice.status === 'Initiated') {
@@ -401,7 +412,7 @@ export const spokeStatuses = [
     'Limit Live', 'On Hold', 'Queries Raised', 'Relook'
 ] as const;
 
-export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid'];
+export const invoiceStatuses: ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid', 'Consent Approved'] = ['Initiated', 'Approved', 'Sent to Lender', 'Disbursed', 'Rejected', 'Repaid', 'Consent Approved'];
 
 // --- DEALER ONBOARDING STATIC DATA ---
 export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
@@ -412,4 +423,128 @@ export const dealerOnboardingStatuses: DealerOnboardingStatus[] = [
   'Site Visit Done',
   'Business Limit Approved',
   'Dealer Activated'
+];
+
+export const dealerLeads: DealerLead[] = [
+  {
+    id: 'DL001',
+    dealerName: 'Future Gadgets',
+    contactPerson: 'Emmett Brown',
+    contactEmail: 'emmett@futuregadgets.com',
+    contactPhone: '9876543210',
+    businessType: 'Electronics Retailer',
+    location: 'Hill Valley, CA',
+    region: 'West',
+    status: 'Lead Created',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-20',
+    requestedLimit: 500000,
+    comments: [
+        { user: 'Sales Person', comment: 'Initial contact made. Seems interested.', timestamp: '2024-07-20 10:00 AM'}
+    ]
+  },
+  {
+    id: 'DL002',
+    dealerName: 'Cyberdyne Systems',
+    contactPerson: 'Miles Dyson',
+    contactEmail: 'miles.dyson@cyberdyne.com',
+    contactPhone: '9876543211',
+    businessType: 'Tech Manufacturer',
+    location: 'Sunnyvale, CA',
+    region: 'West',
+    status: 'Lead Verified',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-19',
+     requestedLimit: 2500000,
+  },
+   {
+    id: 'DL003',
+    dealerName: 'Kwik-E-Mart',
+    contactPerson: 'Apu Nahasapeemapetilon',
+    contactEmail: 'apu@kwikemart.com',
+    contactPhone: '9876543212',
+    businessType: 'Convenience Store',
+    location: 'Springfield',
+    region: 'Central',
+    status: 'Documents Collected',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-18',
+    documents: [
+        { name: 'GST Certificate', url: '#', status: 'Pending' },
+        { name: 'PAN Card', url: '#', status: 'Pending' },
+    ],
+    requestedLimit: 200000,
+  },
+  {
+    id: 'DL004',
+    dealerName: 'Gekko & Co',
+    contactPerson: 'Gordon Gekko',
+    contactEmail: 'gordon@gekko.com',
+    contactPhone: '9876543213',
+    businessType: 'Financial Services',
+    location: 'New York, NY',
+    region: 'East',
+    status: 'Documents Verified',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-17',
+     documents: [
+        { name: 'GST Certificate', url: '#', status: 'Verified' },
+        { name: 'PAN Card', url: '#', status: 'Verified' },
+        { name: 'Business Registration', url: '#', status: 'Verified' },
+    ],
+    requestedLimit: 10000000,
+  },
+   {
+    id: 'DL005',
+    dealerName: 'Stark Expo',
+    contactPerson: 'Pepper Potts',
+    contactEmail: 'pepper@stark.com',
+    contactPhone: '9876543214',
+    businessType: 'Event Management',
+    location: 'New York, NY',
+    region: 'East',
+    status: 'Site Visit Done',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-16',
+    siteVisitReport: {
+        notes: 'Large scale operation. High potential for business. Premises are well-maintained.',
+        images: ['/placeholder.svg', '/placeholder.svg']
+    },
+    requestedLimit: 5000000,
+    creditCheckScore: 8,
+  },
+  {
+    id: 'DL006',
+    dealerName: 'InGen',
+    contactPerson: 'John Hammond',
+    contactEmail: 'hammond@ingen.com',
+    contactPhone: '9876543215',
+    businessType: 'Biotechnology',
+    location: 'Isla Nublar',
+    region: 'West',
+    status: 'Business Limit Approved',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-15',
+     requestedLimit: 20000000,
+     approvedLimit: 15000000,
+     businessLimit: 15000000,
+     creditCheckScore: 7
+  },
+   {
+    id: 'DL007',
+    dealerName: 'Buy n Large',
+    contactPerson: 'Shelby Forthright',
+    contactEmail: 'ceo@bnl.com',
+    contactPhone: '9876543216',
+    businessType: 'Mega Corporation',
+    location: 'Global',
+    region: 'Global',
+    status: 'Dealer Activated',
+    createdBy: 'Sales Person',
+    createdAt: '2024-07-14',
+    dealerCode: 'BNL-ACTIVE-001',
+    requestedLimit: 100000000,
+    approvedLimit: 100000000,
+    businessLimit: 100000000,
+  }
 ];

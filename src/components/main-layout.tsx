@@ -3,16 +3,17 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset, SidebarTrigger, SidebarSeparator } from '@/components/ui/sidebar';
-import { adminNavigationLinks, superMoneyUserNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from './nav';
+import { adminNavigationLinks, superMoneyUserNavigationLinks, enterpriseAnchorNavigationLinks, dealerOnboardingNavigationLinks } from '@/components/nav';
 import Link from 'next/link';
-import { Crown, LogOut } from 'lucide-react';
+import { Crown, LogOut, UserX } from 'lucide-react';
 import { useMounted } from '@/hooks/use-mounted';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import CompanyLogo from './company-logo';
 import { logout } from '@/app/auth/actions';
 import { useAuth } from '@/context/auth-context';
 import SupermoneyLogo from './supermoney-logo';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { clearImpersonation } from '@/app/select-anchor/actions';
+import { Button } from './ui/button';
 
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -31,8 +32,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const isLoginPage = pathname === '/';
   const isSubscribePage = pathname === '/subscribe';
+  const isSelectAnchorPage = pathname === '/select-anchor';
+  const isConsentPage = pathname === '/consent';
+  const isLegalPage = ['/privacy-policy', '/disclaimer', '/terms-and-conditions', '/api/upcoming-payments'].includes(pathname);
 
-  if (isLoginPage || (isSubscribePage && !user)) {
+
+  if (isLoginPage || isSelectAnchorPage || isConsentPage || (isSubscribePage && !user) || (isLegalPage && !user)) {
     return <>{children}</>;
   }
 
@@ -43,6 +48,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   }
 
   const getVisibleLinks = () => {
+    if (user.originalUser) {
+        // If impersonating, always show anchor links
+        return enterpriseAnchorNavigationLinks;
+    }
     if (user.roleType === 'Admin') {
       return adminNavigationLinks;
     }
@@ -84,24 +93,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <AvatarFallback className="bg-primary text-primary-foreground">{getInitials(user.userName)}</AvatarFallback>
             </Avatar>
             <div className="group-data-[collapsible=icon]:hidden min-w-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="text-sm font-medium leading-none text-sidebar-foreground truncate">{user.userName}</p>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="start">
-                  <p>{user.userName}</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="text-xs leading-none text-sidebar-foreground/70 truncate">
-                    {user.emailAddress}
-                  </p>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="start">
-                  <p>{user.emailAddress}</p>
-                </TooltipContent>
-              </Tooltip>
+              <p className="text-sm font-medium leading-none text-sidebar-foreground truncate">{user.userName}</p>
+              <p className="text-xs leading-none text-sidebar-foreground/70 truncate">
+                {user.emailAddress}
+              </p>
             </div>
           </div>
         </SidebarHeader>
@@ -126,7 +121,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <SidebarSeparator className="my-2" />
 
           <SidebarMenu>
-            {user?.userSubRole === 'Not Subscribed' && (
+            {user?.userSubRole === 'Not Subscribed' && !user.originalUser && (
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={{ children: 'Subscribe to Premium' }} isActive={pathname === '/subscribe'}>
                   <Link href="/subscribe">
@@ -165,6 +160,16 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
+        {user?.originalUser && (
+            <div className="bg-yellow-100 border-b-2 border-yellow-300 text-yellow-900 text-sm text-center p-2 flex items-center justify-center gap-4 sticky top-0 z-20">
+                <p>Viewing as <strong>{user.userName}</strong>.</p>
+                <form action={clearImpersonation}>
+                    <Button variant="ghost" size="sm" className="h-auto p-1 text-yellow-900 hover:bg-yellow-200">
+                        <UserX className="mr-2 h-4 w-4" /> Exit View
+                    </Button>
+                </form>
+            </div>
+        )}
         <div className="flex flex-col flex-1 min-w-0 min-h-screen">
           <header className="sticky top-0 z-10 flex h-14 items-center justify-start gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 md:hidden">
             <SidebarTrigger />
@@ -175,9 +180,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <footer className="mt-auto border-t bg-background px-4 py-3 text-xs text-muted-foreground">
               <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                      <a href="#" className="text-primary hover:underline">Privacy Policy</a>
-                      <a href="#" className="text-primary hover:underline">Disclaimer</a>
-                      <a href="#" className="text-primary hover:underline">Terms and Conditions</a>
+                      <a href="https://www.supermoney.in/PrivacyPolicies.html" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
+                      <Link href="/disclaimer" className="text-primary hover:underline">Disclaimer</Link>
+                      <a href="https://www.supermoney.in/Terms&Conditions.htm" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Terms and Conditions</a>
                   </div>
                   <SupermoneyLogo />
               </div>

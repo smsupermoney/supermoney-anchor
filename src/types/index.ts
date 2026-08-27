@@ -1,7 +1,4 @@
-
 export type UserRole = "Anchor" | "SuperMoney User" | "Admin";
-
-
 
 export type Dealer = {
   id: string; // This is the dealerId (e.g. DLR001)
@@ -23,9 +20,12 @@ export type Dealer = {
   customerId: string;
   GST: string;
   region?: string;
+  principalDPD?: number;
+  branchName?: string;
+  branchEmailId?: string;
 };
 
-export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid';
+export type InvoiceStatus = 'Initiated' | 'Approved' | 'Sent to Lender' | 'Disbursed' | 'Rejected' | 'Repaid' | 'Consent Approved';
 
 export type Invoice = {
   id: string;
@@ -66,6 +66,8 @@ export type Program = {
   pendingInvoicesCount?: number;
   disbursedInvoicesCount?: number;
   initiatedInvoicesCount?: number;
+  psbxEnabled?: boolean;
+  SmartdashLender?: string;
 };
 
 export type LeadStatus = 'Lead Created' | 'Registered' | 'KYC' | 'Credit' | 'Operations' | 'PSD Completed' | 'Dropped';
@@ -115,6 +117,15 @@ export type User = {
     leadExternalId?: string;
     logoImage? : string;
     region?: string;
+    SmartdashCompanyName?: string;
+    originalUser?: {
+        id: string;
+        userName: string;
+        emailAddress: string;
+        roleType: UserRole;
+        externalId: string;
+        leadExternalId?: string;
+    }
 };
 
 export type DealerLimit = {
@@ -124,6 +135,11 @@ export type DealerLimit = {
   utilisationAmount: number;
   availableAmount: number;
   principalOverdue: number;
+  principalDPD?: number;
+  interestOutstanding?: number;
+  penalOutstanding?: number;
+  limitLiveDate?: string;
+  limitExpiryDate?: string;
 };
 
 // --- Dealer Onboarding Module Types ---
@@ -202,7 +218,7 @@ export type MomentumDealerLead = {
   name: string;
   priority?: string;
   product: string;
-  remarks: any[];
+  remarks: any[] | Record<string, any>;
   spoc: string;
   state: string;
   status: string;
@@ -242,3 +258,60 @@ export interface InvoiceDocument {
   applicationId: string;
   customerId: string;
 }
+
+// Data structure for the flattened upcoming payments list shown in the UI
+export type UpcomingPaymentItem = {
+  id: string; // loan document ID
+  dealerId: string;
+  dealerName: string;
+  outstandingAmount: number;
+  dueDate: string;
+  lender: string;
+};
+
+// Data structure for a document in the 'loans' subcollection
+export type UpcomingPaymentLoan = {
+  loanId: string;
+  dueDate: string;
+  outstandingAmount: number;
+  updatedAt: any; // Firestore ServerTimestamp
+};
+
+// Data structure for the parent document in the 'upcomingPayments' collection
+export type UpcomingPayment = {
+  dealerId: string;
+  updatedAt: any; // Firestore ServerTimestamp
+  // The 'loans' are now in a subcollection, not an array here.
+};
+
+export type InvoiceConsent = {
+  id: string;
+  invoiceNumber: string;
+  dealerId: string;
+  token: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  expiryTime: string; // ISO string
+  consentTimestamp?: string;
+  ipAddress?: string;
+};
+
+export type PsbxLimitData = {
+    psbchannelpartneridentifier?: string;
+    sanctionedlimit: number;
+    utilizedlimit: number;
+    pipelinelimit: number;
+    availablelimit: number;
+    psbanchorname?: string;
+    lmslimitstatus?: string;
+    lmsnpastatus?: string;
+    limitexpirydate?: string;
+    sanctiondate?: string;
+    psbprogramname?: string;
+    lmsstatus?: string;
+};
+
+export type RegionMapping = {
+    id?: string;
+    state: string;
+    region: string;
+};

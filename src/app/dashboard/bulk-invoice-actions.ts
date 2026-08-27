@@ -20,16 +20,12 @@ type ExcelInvoice = {
 };
 
 // Basic validation for environment variables
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpConfigured = !!(process.env.SMTP_HOST || "smtp-relay.gmail.com");
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
+    host: process.env.SMTP_HOST || "smtp-relay.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 587,
     secure: Number(process.env.SMTP_PORT) === 465,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
 }) : null;
 
 const formatCurrency = (amount?: number) => {
@@ -117,7 +113,7 @@ export async function sendBulkInvoiceEmail(formData: FormData): Promise<ActionRe
     }
 
     const mailOptions = {
-      from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
+      from: `"Supermoney Platform" <noreply@supermoney.in>`,
       to: "ashwathi@supermoney.in, nitin.chorge@supermoney.in ",
       subject: `Bulk Invoice Submission from ${session.userName} (${file.name})`,
       html: generateEmailBody(dataArray, file.name, session.userName),

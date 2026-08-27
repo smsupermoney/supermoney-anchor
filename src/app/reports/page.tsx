@@ -2,22 +2,24 @@
 import { unstable_noStore as noStore } from 'next/cache';
 import PageHeader from "@/components/page-header";
 import { getSession } from '@/lib/session';
-import { getInvoices, getDealers, getPrograms, getUsers, getDealerLimits } from '@/lib/data';
+import { getInvoices, getDealers, getPrograms, getUsers, getDealerLimits, getMomentumDealerLeads } from '@/lib/data';
 import ReportsClientPage from './client-page';
 
 export default async function ReportsPage() {
   noStore();
   const session = await getSession();
   const anchorId = session?.roleType === 'Admin' ? undefined : session?.externalId;
+  const leadAnchorId = session?.roleType === 'Admin' ? undefined : session?.leadExternalId;
   const region = session?.roleType === 'Admin' ? undefined : session?.region;
   const isAdmin = session?.roleType === 'Admin';
   
   // Fetch all necessary data.
-  const [invoices, dealers, { programs }, users] = await Promise.all([
+  const [invoices, dealers, { programs }, users, leads] = await Promise.all([
     getInvoices(anchorId, region),
     getDealers(anchorId, region),
     getPrograms(anchorId, region),
     isAdmin ? getUsers() : Promise.resolve([]),
+    (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_2) ? getMomentumDealerLeads(leadAnchorId) : Promise.resolve([]),
   ]);
 
   const dealerIds = dealers.map(d => d.id);
@@ -33,6 +35,7 @@ export default async function ReportsPage() {
             initialInvoices={invoices}
             initialDealers={dealers}
             initialPrograms={programs}
+            initialLeads={leads}
             users={users}
             isAdmin={isAdmin}
             totalOverdueAmount={totalOverdueAmount}

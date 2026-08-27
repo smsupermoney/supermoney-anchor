@@ -1,14 +1,13 @@
-
 "use client";
 
 import { useMemo, useState } from 'react';
 import * as xlsx from 'xlsx';
-import { subDays, startOfDay } from 'date-fns';
+import { subDays, startOfDay, format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Legend, Bar, PieChart, Pie, Cell, TooltipProps } from 'recharts';
-import type { Invoice, Dealer, Program, User } from '@/types';
+import type { Invoice, Dealer, Program, User, MomentumDealerLead } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import StatusBadge from '@/components/status-badge';
 import type { NameValue } from 'recharts/types/component/DefaultTooltipContent';
@@ -23,13 +22,47 @@ type ReportsClientPageProps = {
     initialInvoices: Invoice[];
     initialDealers: Dealer[];
     initialPrograms: Program[];
+    initialLeads: MomentumDealerLead[];
     users: User[];
     isAdmin: boolean;
     totalOverdueAmount: number;
 };
 
-export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, users, isAdmin, totalOverdueAmount }: ReportsClientPageProps) {
+export default function ReportsClientPage({ initialInvoices, initialDealers, initialPrograms, initialLeads, users, isAdmin, totalOverdueAmount }: ReportsClientPageProps) {
     const [dateRange, setDateRange] = useState<string>('all');
+
+    const formatDateDash = (dateString?: string) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            return format(date, 'dd-MM-yyyy');
+        } catch (e) {
+            return dateString;
+        }
+    };
+
+    const getRemarksString = (lead: MomentumDealerLead) => {
+        const remarks = lead.remarks;
+        let remarksArray: any[] = [];
+        
+        if (Array.isArray(remarks)) {
+          remarksArray = remarks;
+        } else if (remarks && typeof remarks === 'object') {
+          remarksArray = Object.values(remarks);
+        }
+
+        if (remarksArray.length === 0) return '';
+        
+        return remarksArray
+            .sort((a, b) => {
+                const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                return timeB - timeA;
+            })
+            .map(r => `${r.user || 'System'}: ${r.remark || r.text || r.comment || ''} (${formatDateDash(r.timestamp)})`)
+            .join(" | ");
+    };
 
     const filteredInvoices = useMemo(() => {
         if (dateRange === 'all') {
@@ -162,6 +195,7 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         const dealerData = initialDealers.map(d => ({
             "Dealer ID": d.id,
             "Dealer Name": d.name,
+            "Lender Name": d.lenderName || 'N/A',
             "Status": d.status,
             "Total Limit": d.totalLimit,
             "Amount Disbursed": d.amountDisbursed,
@@ -181,6 +215,21 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
         }));
         const programSheet = xlsx.utils.json_to_sheet(programData);
         xlsx.utils.book_append_sheet(workbook, programSheet, "All Programs");
+
+        // Sheet 5: All Leads
+        const leadData = initialLeads.map(l => ({
+            "leadCategory": l.leadCategory,
+            "createdAt": formatDateDash(l.createdAt),
+            "leadDate": formatDateDash(l.leadDate),
+            "name": l.name,
+            "customerName": l.name,
+            "dealValue": l.dealValue,
+            "status": l.status,
+            "statusUpdatedAt": formatDateDash(l.updatedAt),
+            "remarks": getRemarksString(l),
+        }));
+        const leadSheet = xlsx.utils.json_to_sheet(leadData);
+        xlsx.utils.book_append_sheet(workbook, leadSheet, "All Leads");
 
         xlsx.writeFile(workbook, "full_report.xlsx");
     };
@@ -373,6 +422,22 @@ export default function ReportsClientPage({ initialInvoices, initialDealers, ini
                             </Button>
                              <Button variant="outline" onClick={() => downloadExcel(initialPrograms, 'Programs', 'program_report.xlsx')}>
                                 <Download className="mr-2 h-4 w-4" /> Download Programs
+                            </Button>
+                            <Button variant="outline" onClick={() => {
+                                const data = initialLeads.map(l => ({
+                                    "leadCategory": l.leadCategory,
+                                    "createdAt": formatDateDash(l.createdAt),
+                                    "leadDate": formatDateDash(l.leadDate),
+                                    "name": l.name,
+                                    "customerName": l.name,
+                                    "dealValue": l.dealValue,
+                                    "status": l.status,
+                                    "statusUpdatedAt": formatDateDash(l.updatedAt),
+                                    "remarks": getRemarksString(l),
+                                }));
+                                downloadExcel(data, 'Leads', 'leads_report.xlsx');
+                            }}>
+                                <Download className="mr-2 h-4 w-4" /> Download Leads
                             </Button>
                         </div>
                         <div className="relative w-full overflow-auto border rounded-md max-h-60 mt-4">

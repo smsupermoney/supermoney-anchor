@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { InvoiceStatus, LeadStatus, Retailer, DealerOnboardingStatus, RepaymentStatus } from "@/types";
@@ -25,6 +24,7 @@ const statusColors: Record<Status, string> = {
   'Disbursed': 'bg-green-100 text-green-800 border-green-200',
   'Rejected': 'bg-red-100 text-red-800 border-red-200',
   'Repaid': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  'Consent Approved': 'bg-teal-100 text-teal-800 border-teal-200',
   
   // Lead Status
   'Lead Created': 'bg-blue-100 text-blue-800 border-blue-200',

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -63,6 +62,35 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
   
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', notation: 'compact' }).format(amount * 100000); // Assuming deal value is in lacs
   const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
+
+  const getLatestRemark = (lead: MomentumDealerLead) => {
+    const remarks = lead.remarks;
+    let remarksArray: any[] = [];
+    
+    if (Array.isArray(remarks)) {
+      remarksArray = remarks;
+    } else if (remarks && typeof remarks === 'object') {
+      remarksArray = Object.values(remarks);
+    }
+
+    if (remarksArray.length === 0) {
+      return '';
+    }
+
+    const sortedRemarks = [...remarksArray].sort((a, b) => {
+        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+        return timeB - timeA;
+    });
+
+    const latestRemark = sortedRemarks[0];
+
+    if (typeof latestRemark === 'object' && latestRemark !== null) {
+        return latestRemark.remark || latestRemark.text || latestRemark.comment || '';
+    }
+    
+    return '';
+  };
 
   const handleFilterChange = (filterName: keyof Omit<typeof filters, 'status'>, value: string) => {
     setFilters((prev) => ({ ...prev, [filterName]: value }));
@@ -250,20 +278,23 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                 <TableHead>Lead Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Priority</TableHead>
+                                <TableHead>Remarks</TableHead>
                             </TableRow>
                             </TableHeader>
                             <TableBody>
                             {paginatedLeads.map((lead) => (
                                 <TableRow key={lead.id} onClick={() => router.push(`/leads/${lead.id}`)} className="cursor-pointer">
                                 <TableCell className="font-medium">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <div className="block max-w-[120px] truncate">
-                                                {lead.name}
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>{lead.name}</p></TooltipContent>
-                                    </Tooltip>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Link href={`/leads/${lead.id}`} className="block max-w-[120px] truncate text-primary hover:underline">
+                                                    {lead.name}
+                                                </Link>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>{lead.name}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant={(lead.leadCategory || '') === 'Dealer' ? 'default' : 'secondary'}>
@@ -285,6 +316,18 @@ export default function LeadsClientPage({ initialLeads }: LeadsClientPageProps) 
                                     <StatusBadge status={lead.status as any} />
                                 </TableCell>
                                 <TableCell>{lead.priority || 'N/A'}</TableCell>
+                                <TableCell>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="block max-w-[120px] truncate">
+                                                    {getLatestRemark(lead)}
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>{getLatestRemark(lead)}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </TableCell>
                                 </TableRow>
                             ))}
                             </TableBody>

@@ -25,8 +25,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session);
         setLoading(false);
 
-        if (!session && pathname !== '/') {
-            router.push('/');
+        // If there's no session and the user is not on the login page or consent page, redirect them.
+        const isPublicPage = pathname === '/' || 
+                           pathname === '/consent' || 
+                           pathname.startsWith('/privacy-policy') || 
+                           pathname.startsWith('/terms-and-conditions') || 
+                           pathname.startsWith('/disclaimer');
+        
+        if (!session && !isPublicPage) {
+          router.push('/');
         }
     };
     checkSession();
