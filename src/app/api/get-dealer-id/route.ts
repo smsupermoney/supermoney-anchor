@@ -1,8 +1,7 @@
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db1 } from '@/lib/firebase';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, doc, getDoc } from 'firebase/firestore';
 
 // Define the schema for the incoming request body
 const getDealerIdSchema = z.object({
@@ -73,6 +72,68 @@ export async function POST(request: Request) {
 
     const dealerData = dealerSnapshot.docs[0].data();
     
+    // --- NEW LOGIC: Call External API ---
+
+    // A. Fetch program to get lender name
+    let lenderName = 'N/A';
+    if (dealerData.programId) {
+        const programRef = doc(db1, 'programs', dealerData.programId);
+        const programSnap = await getDoc(programRef);
+        if (programSnap.exists()) {
+            lenderName = programSnap.data().lenderName || 'N/A';
+        }
+    }
+    
+    // B. Construct payload for the external API
+    const externalApiPayload = {
+      invoiceNumber: "INV-GAS-001", // Static value from user's example
+      utrNumber: "UTR999888", // Static value from user's example
+      dealer: dealerData.dealerName, // From fetched dealer data
+      lender: lenderName, // From fetched program data
+      date: new Date().toISOString().split('T')[0], // Using current date as a sensible default
+      amount: 25000, // Static value from user's example
+      status: "Pending", // Static value from user's example
+      customerId: dealerData.customerId, // From fetched dealer data
+      applicationId: dealerData.applicationId, // From fetched dealer data
+      remarks: "Sent via Supermoney Platform API" // Updated remark
+    };
+    
+    // C. Call external API (fire-and-forget)
+    try {
+      const externalApiUrl = 'https://app.supermoney.in/api/invoices/upsert';
+      const apiKey = process.env.DEALER_API_SECRET_KEY;
+
+      if (!apiKey) {
+          console.error('DEALER_API_SECRET_KEY is not set. Cannot call external API.');
+      } else {
+        // We don't await this promise so it doesn't block the primary API response.
+        fetch(externalApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify(externalApiPayload)
+        })
+        .then(async (response) => {
+          if (!response.ok) {
+            const errorBody = await response.text();
+            console.error(`External API Error (${response.status}): ${errorBody}`);
+          } else {
+            console.log('Successfully pushed data to external invoices API.');
+          }
+        })
+        .catch(e => {
+           console.error('Error during external API fetch call:', e);
+        });
+      }
+    } catch (e) {
+      console.error('Error preparing or initiating external API call:', e);
+      // Log the error but do not fail the main request.
+    }
+    
+    // --- END of NEW LOGIC ---
+
     // 5. Return the entire dealer object
     return NextResponse.json(dealerData, { status: 200 });
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -38,11 +37,25 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
     const pageSize = 5;
 
     const sortedRemarks = React.useMemo(() => {
-        if (!lead?.remarks) return [];
-        return lead.remarks.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        const remarks = lead?.remarks;
+        let remarksArray: any[] = [];
+        
+        if (Array.isArray(remarks)) {
+          remarksArray = remarks;
+        } else if (remarks && typeof remarks === 'object') {
+          remarksArray = Object.values(remarks);
+        }
+
+        if (remarksArray.length === 0) return [];
+        
+        return [...remarksArray].sort((a, b) => {
+            const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+            const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+            return timeB - timeA;
+        });
     }, [lead?.remarks]);
 
-    const pageCount = lead?.remarks ? Math.ceil(sortedRemarks.length / pageSize) : 0;
+    const pageCount = sortedRemarks.length > 0 ? Math.ceil(sortedRemarks.length / pageSize) : 0;
     const paginatedRemarks = React.useMemo(() => {
         const start = pageIndex * pageSize;
         const end = start + pageSize;
@@ -145,7 +158,7 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
                                             paginatedRemarks.map((remark, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell className='font-medium'>{remark.user || 'System'}</TableCell>
-                                                    <TableCell className='text-muted-foreground'>{remark.remark}</TableCell>
+                                                    <TableCell className='text-muted-foreground'>{remark.remark || remark.text || remark.comment}</TableCell>
                                                     <TableCell className='text-right'>{formatDate(remark.timestamp)}</TableCell>
                                                 </TableRow>
                                             ))
@@ -188,9 +201,9 @@ export default function LeadDetailClientPage({ initialLead, user }: LeadDetailCl
                     <Card>
                         <CardHeader>
                             <CardTitle>Lead Information</CardTitle>
-                            <CardDescription>
+                            <div>
                                 <Badge variant={lead.leadCategory === 'Dealer' ? 'default' : 'secondary'}>{lead.leadCategory}</Badge>
-                            </CardDescription>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm">
                              <div className="flex justify-between items-center">

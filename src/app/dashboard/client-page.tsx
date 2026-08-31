@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import UploadInvoiceDialog from "@/components/upload-invoice-dialog";
-import type { Invoice, Program, Dealer, MomentumDealerLead } from "@/types";
+import type { Invoice, Program, Dealer, MomentumDealerLead, UpcomingPaymentItem } from "@/types";
 import InvoiceDetailDialog from "@/components/invoice-detail-dialog";
 import Link from "next/link";
 import { subDays, startOfDay, addDays, formatISO, parseISO } from "date-fns";
@@ -30,11 +30,12 @@ type DashboardClientProps = {
   initialInvoices: Invoice[];
   initialDealers: Dealer[];
   momentumLeads: MomentumDealerLead[];
+  upcomingPaymentsData: UpcomingPaymentItem[];
   totalOverdueAmount: number;
   lifetimeSanctionLimit: number;
 };
 
-export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, totalOverdueAmount, lifetimeSanctionLimit }: DashboardClientProps) {
+export default function DashboardClient({ initialPrograms, initialInvoices, initialDealers, momentumLeads, upcomingPaymentsData, totalOverdueAmount, lifetimeSanctionLimit }: DashboardClientProps) {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const { user } = useAuth();
   
@@ -129,13 +130,18 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
 
   const upcomingPayments = useMemo(() => {
     const today = new Date();
-    const upcomingInvoices = initialInvoices.filter(i => new Date(i.dueDate) >= today && i.status !== 'Disbursed' && (i.overdueAmount ?? 0) === 0);
+    today.setHours(0, 0, 0, 0); // Normalize to start of day
+
+    const upcoming = upcomingPaymentsData.filter(p => new Date(p.dueDate) >= today);
 
     const calcTotal = (days: number) => {
         const endDate = addDays(today, days);
-        return upcomingInvoices
-            .filter(i => new Date(i.dueDate) <= endDate)
-            .reduce((sum, i) => sum + i.amount, 0);
+        return upcoming
+            .filter(p => {
+                const dueDate = new Date(p.dueDate);
+                return dueDate <= endDate;
+            })
+            .reduce((sum, p) => sum + p.outstandingAmount, 0);
     };
 
     return {
@@ -143,7 +149,7 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
         next15Days: calcTotal(15),
         next30Days: calcTotal(30),
     };
-  }, [initialInvoices]);
+  }, [upcomingPaymentsData]);
   
   const recentInvoicesPageData = useMemo(() => {
     const start = pageIndex * pageSize;
@@ -250,6 +256,30 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
                       <p className="text-xs text-muted-foreground">Across {overdueDealersCount} dealers</p>
                   </CardContent>
               </Card>
+            </Link>
+            <Link href="/upcoming-payments">
+                <Card className="flex-1 hover:bg-secondary transition-colors">
+                    <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
+                        <CardTitle className="text-sm font-semibold">Upcoming Payments</CardTitle>
+                        <CalendarClock className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0">
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Next 7 Days</span>
+                                <span className="font-medium">{formatCurrency(upcomingPayments.next7Days)}</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Next 15 Days</span>
+                                <span className="font-medium">{formatCurrency(upcomingPayments.next15Days)}</span>
+                            </div>
+                             <div className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">Next 30 Days</span>
+                                <span className="font-medium">{formatCurrency(upcomingPayments.next30Days)}</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </Link>
             <Card className="flex-1">
                 <CardHeader className="flex flex-row items-center justify-between p-3 pb-2">
@@ -572,3 +602,5 @@ export default function DashboardClient({ initialPrograms, initialInvoices, init
     </div>
   );
 }
+
+    

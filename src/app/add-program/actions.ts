@@ -1,4 +1,3 @@
-
 "use server";
 
 import { db1 } from "@/lib/firebase";
@@ -46,12 +45,16 @@ export async function addPrograms(formData: FormData): Promise<ActionResult> {
         }
 
         const docRef = doc(db1, "programs", programId);
-        const programData = {
+        const programData: any = {
           programId: programId,
           lenderName: program.lenderName || '',
           shortName: program.shortName || '',
           lenderType: program.lenderType || '',
         };
+        
+        if (program.SmartdashLender) {
+            programData.SmartdashLender = program.SmartdashLender;
+        }
         
         if (existingProgramIds.has(programId)) {
             batch.update(docRef, programData);

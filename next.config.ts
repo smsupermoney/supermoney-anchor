@@ -1,7 +1,11 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -13,7 +17,6 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co',
-        port: '',
         pathname: '/**',
       },
     ],

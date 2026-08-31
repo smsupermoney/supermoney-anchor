@@ -1,12 +1,23 @@
 "use server";
 
 import nodemailer from "nodemailer";
-import { type ExtractInvoiceDataOutput } from "@/ai/flows/extract-invoice-data-flow";
+import { db1 } from "@/lib/firebase";
+import { collection, query, where, getDocs, doc, setDoc, writeBatch } from "firebase/firestore";
+import crypto from "crypto";
 
 type EmailData = {
     fileName: string;
-    extractedData?: ExtractInvoiceDataOutput;
+    extractedData?: {
+        invoiceNumber: string;
+        dealerName: string;
+        documentType: string;
+        amount: number;
+        dueDate: string;
+        utrNumber: string;
+        gstOrGstin: string;
+    };
     disburseAmount?: number;
+    selectedAnchorAcc?: string;
     error?: string;
     fileContent?: string; // Base64 data URI
     applicationId?: string;
@@ -19,16 +30,12 @@ type ActionResult = {
 };
 
 // Basic validation for environment variables
-const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpConfigured = !!(process.env.SMTP_HOST || "smtp-relay.gmail.com");
 
 const transporter = smtpConfigured ? nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
+    host: process.env.SMTP_HOST || "smtp-relay.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: Number(process.env.SMTP_PORT) === 465, // false for 587 (STARTTLS)
 }) : null;
 
 const formatCurrency = (amount?: number) => {
@@ -62,8 +69,13 @@ function generateEmailBody(data: EmailData[], isConsent: boolean): string {
                 <tr><td style="width: 30%;"><strong>Customer ID</strong></td><td>${item.customerId || 'Not Found'}</td></tr>
                 <tr><td><strong>Document Type</strong></td><td>${item.extractedData.documentType || 'Not Detected'}</td></tr>
                 <tr><td><strong>Invoice Amount</strong></td><td>${formatCurrency(item.extractedData.amount)}</td></tr>
-                <tr><td><strong>Disburse Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>` + 
-                `${isConsent ? `<tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>` : ''}`;     
+                <tr><td><strong>Disbursement Request Amount</strong></td><td>${formatCurrency(item.disburseAmount)}</td></tr>`;
+                
+            if (item.selectedAnchorAcc) {
+                html += `<tr><td><strong>Selected Anchor Account</strong></td><td>${item.selectedAnchorAcc}</td></tr>`;
+            }
+
+            html += `${isConsent ? `<tr><td><strong>Consent Received</strong></td><td>${date}, ${time}</td></tr>` : ''}`;     
         } else if (item.error) {
             html += `<tr><td style="width: 30%;"><strong>Error</strong></td><td style="color: red;">${item.error}</td></tr>`;
         } else {
@@ -76,35 +88,150 @@ function generateEmailBody(data: EmailData[], isConsent: boolean): string {
     return html;
 }
 
+function generateConsentEmailBody(item: EmailData, approveUrl: string, rejectUrl: string): string {
+    return `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
+            <h1 style="color: #333; text-align: center;">Invoice Consent Required</h1>
+            <p>Hello,</p>
+            <p>A new invoice has been submitted - please review the details below and provide your consent for Disbursement.</p>
+            <hr style="border: 0; border-top: 1px solid #eee;" />
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr><td style="padding: 8px; color: #666;"><strong>Invoice Number:</strong></td><td style="padding: 8px; font-weight: bold;">${item.extractedData?.invoiceNumber || 'N/A'}</td></tr>
+                <tr><td style="padding: 8px; color: #666;"><strong>Amount:</strong></td><td style="padding: 8px; font-weight: bold;">${formatCurrency(item.extractedData?.amount)}</td></tr>
+                <tr><td style="padding: 8px; color: #666;"><strong>Disbursement Request Amount:</strong></td><td style="padding: 8px; font-weight: bold;">${formatCurrency(item.disburseAmount)}</td></tr>
+                ${item.selectedAnchorAcc ? `<tr><td style="padding: 8px; color: #666;"><strong>Selected Anchor Account:</strong></td><td style="padding: 8px;">${item.selectedAnchorAcc}</td></tr>` : ''}
+                <tr><td style="padding: 8px; color: #666;"><strong>Due Date:</strong></td><td style="padding: 8px;">${item.extractedData?.dueDate || 'N/A'}</td></tr>
+            </table>
+            <br />
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="${approveUrl}" style="background-color: #2ecc71; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin-right: 10px; font-weight: bold;">Approve</a>
+                <a href="${rejectUrl}" style="background-color: #e74c3c; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Reject</a>
+            </div>
+            <p style="font-size: 12px; color: #999; margin-top: 30px; text-align: center;">This link will expire in 48 hours.</p>
+            <p style="text-align: center;">Thank you,<br /><strong>The Supermoney Team</strong></p>
+        </div>
+    `;
+}
+
 export async function sendInvoiceEmail(data: EmailData[], isConsent: boolean): Promise<ActionResult> {
     if (!smtpConfigured || !transporter) {
         console.error("SMTP environment variables are not configured.");
         return { error: "Email service is not configured on the server. Please contact the administrator." };
     }
 
-    const attachments = data
-        .filter(item => item.fileContent)
-        .map(item => ({
-            filename: item.fileName,
-            path: item.fileContent,
-        }));
-
-    const mailOptions = {
-        from: `"Supermoney Platform" <${process.env.SMTP_USER}>`,
-        to: "invoice@supermoney.in",
-        subject: "New Invoice Submission",
-        html: generateEmailBody(data, isConsent),
-        attachments: attachments,
-    };
-
     try {
-        await transporter.sendMail(mailOptions);
-        return { message: "Email sent successfully." };
-    } catch (error) {
-        console.error("Failed to send email:", error);
-        if (error instanceof Error) {
-            return { error: `Failed to send email: ${error.message}` };
+        for (const item of data) {
+            if (item.applicationId) {
+                try {
+                    const dealerSnap = await getDocs(query(collection(db1, "dealers"), where("applicationId", "==", item.applicationId)));
+                    if (!dealerSnap.empty) {
+                        const dealerData = dealerSnap.docs[0].data();
+                        if (dealerData.anchorId === 'ANC002' || dealerData.anchorId === 'ANC008') {
+                            // Fetch anchor name based on anchorId from dealer record for branding
+                            let anchorName = 'N/A';
+                            const usersRef = collection(db1, 'users');
+                            const anchorQuery = query(
+                                usersRef, 
+                                where('roleType', '==', 'Anchor'), 
+                                where('externalId', '==', dealerData.anchorId)
+                            );
+                            const anchorSnap = await getDocs(anchorQuery);
+                            if (!anchorSnap.empty) {
+                                anchorName = anchorSnap.docs[0].data().userName || 'N/A';
+                            }
+
+                            // 1. Invalidate old pending consents for this invoice
+                            const oldConsentsQuery = query(
+                                collection(db1, "invoiceConsents"), 
+                                where("invoiceNumber", "==", item.extractedData?.invoiceNumber || 'N/A'),
+                                where("status", "==", "Pending")
+                            );
+                            const oldConsentsSnap = await getDocs(oldConsentsQuery);
+                            if (!oldConsentsSnap.empty) {
+                                const batch = writeBatch(db1);
+                                oldConsentsSnap.forEach(doc => batch.update(doc.ref, { status: 'Invalidated' }));
+                                await batch.commit();
+                            }
+
+                            // 2. Trigger specialized consent workflow
+                            const token = crypto.randomBytes(32).toString('hex');
+                            const expiry = new Date();
+                            expiry.setHours(expiry.getHours() + 48);
+
+                            const consentRef = doc(db1, "invoiceConsents", token);
+                            await setDoc(consentRef, {
+                                invoiceNumber: item.extractedData?.invoiceNumber || 'N/A',
+                                dealerId: item.applicationId,
+                                token: token,
+                                status: 'Pending',
+                                expiryTime: expiry.toISOString(),
+                                createdAt: new Date().toISOString(),
+                                amount: item.extractedData?.amount || 0,
+                                disburseAmount: item.disburseAmount || 0,
+                                selectedAnchorAcc: item.selectedAnchorAcc || '',
+                                dueDate: item.extractedData?.dueDate || 'N/A',
+                                fileName: item.fileName,
+                                fileContent: item.fileContent // Store for later use in approval mail
+                            });
+
+                            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
+                            const approveUrl = `${baseUrl}/consent?token=${token}&action=Approved`;
+                            const rejectUrl = `${baseUrl}/consent?token=${token}&action=Rejected`;
+
+                            const mailOptions = {
+                                from: `"Supermoney Platform" <noreply@supermoney.in>`,
+                                to: dealerData.emailAddress || dealerData.branchEmailId,
+                                subject: `Action Required: Invoice ${item.extractedData?.invoiceNumber} from ${anchorName} for Approval`,
+                                html: generateConsentEmailBody(item, approveUrl, rejectUrl),
+                                attachments: item.fileContent ? [{
+                                    filename: item.fileName,
+                                    path: item.fileContent,
+                                }] : [],
+                            };
+
+                            try {
+                                await transporter.sendMail(mailOptions);
+                            } catch (e) {
+                                console.error("Failed to send consent email:", e);
+                            }
+                            
+                            continue;
+                        }
+                    }
+                } catch (dbError) {
+                    console.error("Database query failed during email action:", dbError);
+                    // Continue to default logic if specialized check fails
+                }
+            }
+
+            // Default logic for other anchors
+            const attachments = item.fileContent ? [{
+                filename: item.fileName,
+                path: item.fileContent,
+            }] : [];
+
+            const mailOptions = {
+                from: `"Supermoney Platform" <noreply@supermoney.in>`,
+                to: "invoice@supermoney.in",
+                subject: "New Invoice Submission",
+                html: generateEmailBody([item], isConsent),
+                attachments: attachments,
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+            } catch (error) {
+                console.error("Failed to send default email:", error);
+                if (error instanceof Error) {
+                    return { error: `Failed to send email: ${error.message}` };
+                }
+                return { error: "An unknown error occurred while sending the email." };
+            }
         }
-        return { error: "An unknown error occurred while sending the email." };
+    } catch (loopError) {
+        console.error("Error in email submission loop:", loopError);
+        return { error: "A server error occurred during processing." };
     }
+
+    return { message: "Process initiated successfully." };
 }
